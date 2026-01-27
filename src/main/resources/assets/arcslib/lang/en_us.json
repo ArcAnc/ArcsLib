@@ -1,0 +1,13 @@
+{
+  "itemGroup.arcslib": "Example Mod Tab",
+  "block.arcslib.example_block": "Example Block",
+  "item.arcslib.example_item": "Example Item",
+
+  "arcslib.configuration.title": "Arc'sLib Configs",
+  "arcslib.configuration.section.arcslib.common.toml": "Arc'sLib Configs",
+  "arcslib.configuration.section.arcslib.common.toml.title": "Arc'sLib Configs",
+  "arcslib.configuration.items": "Item List",
+  "arcslib.configuration.logDirtBlock": "Log Dirt Block",
+  "arcslib.configuration.magicNumberIntroduction": "Magic Number Text",
+  "arcslib.configuration.magicNumber": "Magic Number"
+}
