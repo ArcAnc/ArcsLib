@@ -30,6 +30,12 @@ public abstract class ArcBlockRenderer<T extends BlockEntity & ArcAnimatable> im
 	}
 	
 	@Override
+	public ArcModelData getArcModelData()
+	{
+		return this.model;
+	}
+	
+	@Override
 	public ArcModel getArcModel()
 	{
 		return this.model.getModel();
@@ -51,7 +57,7 @@ public abstract class ArcBlockRenderer<T extends BlockEntity & ArcAnimatable> im
 	public void extractRenderState(T blockEntity,
 	                               BlockEntityRenderState renderState,
 	                               float partialTick,
-	                               Vec3 cameraPosition,
+	                               @NotNull Vec3 cameraPosition,
 	                               ModelFeatureRenderer.@Nullable CrumblingOverlay breakProgress)
 	{
 		BlockEntityRenderer.super.extractRenderState(blockEntity, renderState, partialTick, cameraPosition, breakProgress);

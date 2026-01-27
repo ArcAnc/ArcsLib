@@ -24,6 +24,5 @@ public class ArcModel
 	public final Map<UUID, ArcBone> bones = new LinkedHashMap<>();
 	public final Map<UUID, ArcMesh> meshes = new LinkedHashMap<>();
 	public final Multimap<UUID, UUID> boneMeshes = HashMultimap.create();
-	//public final Map<String, ArcTexture> textures = new HashMap<>();
 	public final Map<String, ArcAnimation> animations = new HashMap<>();
 }

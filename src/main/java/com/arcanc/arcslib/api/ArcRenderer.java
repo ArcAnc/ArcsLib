@@ -11,9 +11,17 @@ package com.arcanc.arcslib.api;
 
 
 import com.arcanc.arcslib.content.model.ArcModel;
+import net.minecraft.resources.Identifier;
 
 public interface ArcRenderer<T extends ArcAnimatable>
 {
+	ArcModelData getArcModelData();
+	
+	default Identifier getTextureById(int id)
+	{
+		return getArcModelData().getTextureById(id);
+	}
+	
 	ArcModel getArcModel();
 	
 	T getAnimatable();

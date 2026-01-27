@@ -13,6 +13,7 @@ package com.arcanc.arcslib.content.event;
 import com.arcanc.arcslib.content.block.block_entity.ber.TestBlockEntityRenderer;
 import com.arcanc.arcslib.content.registration.Registration;
 import com.arcanc.arcslib.util.ArcModelCache;
+import com.arcanc.arcslib.util.ArcRenderTypes;
 import com.arcanc.arcslib.util.Database;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.client.event.AddClientReloadListenersEvent;
@@ -25,6 +26,7 @@ public class ClientEvents
 	{
 		modEventBus.addListener(ClientEvents :: registerRenderers);
 		modEventBus.addListener(ClientEvents :: registerReloadListeners);
+		ArcRenderTypes.register(modEventBus);
 	}
 	
 	private static void registerReloadListeners(final @NotNull AddClientReloadListenersEvent event)

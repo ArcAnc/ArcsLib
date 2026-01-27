@@ -163,52 +163,66 @@ public class ArcModelParser
 			ArcBone bone = model.bones.get(entry.getKey());
 			RawMesh raw = rawMeshes.get(entry.getValue());
 			
-			List<Vector3f> pos = new ArrayList<>();
-			List<Vector3f> nor = new ArrayList<>();
-			List<Vector2f> uv = new ArrayList<>();
-			
+			Map<Integer, List<RawFace>> facesByTexture = new HashMap<>();
 			for (RawFace face : raw.faces())
-				triangulate(face, raw.vertices(), pos, nor, uv);
+				facesByTexture.computeIfAbsent(face.texture(), t -> new ArrayList<>()).
+						add(face);
 			
-			int vCount = pos.size();
-			
-			FloatBuffer pBuf = BufferUtils.createFloatBuffer(vCount * 3);
-			FloatBuffer nBuf = BufferUtils.createFloatBuffer(vCount * 3);
-			FloatBuffer uvBuf = BufferUtils.createFloatBuffer(vCount * 2);
-			ByteBuffer bBuf = BufferUtils.createByteBuffer(vCount);
-			FloatBuffer wBuf = BufferUtils.createFloatBuffer(vCount);
-			
-			for (int q = 0; q < vCount; q++)
+			for (Map.Entry<Integer, List<RawFace>> texEntry : facesByTexture.entrySet())
 			{
-				Vector3f p = pos.get(q);
-				Vector3f n = nor.get(q);
-				Vector2f t = uv.get(q);
+				int textureId = texEntry.getKey();
+				List<RawFace> faces = texEntry.getValue();
+				List<Vector3f> pos = new ArrayList<>();
+				List<Vector3f> nor = new ArrayList<>();
+				List<Vector2f> uv = new ArrayList<>();
 				
-				pBuf.put(p.x()).put(p.y()).put(p.z());
-				nBuf.put(n.x()).put(n.y()).put(n.z());
-				uvBuf.put(t.x()).put(t.y());
+				for (RawFace face : faces)
+					triangulate(face, raw.vertices(), pos, nor, uv);
 				
-				bBuf.put((byte) bone.index());
-				wBuf.put(1.0f);
+				int vCount = pos.size();
+				if (vCount == 0)
+					continue;
+				
+				FloatBuffer pBuf = BufferUtils.createFloatBuffer(vCount * 3);
+				FloatBuffer nBuf = BufferUtils.createFloatBuffer(vCount * 3);
+				FloatBuffer uvBuf = BufferUtils.createFloatBuffer(vCount * 2);
+				ByteBuffer bBuf = BufferUtils.createByteBuffer(vCount);
+				FloatBuffer wBuf = BufferUtils.createFloatBuffer(vCount);
+				
+				for (int q = 0; q < vCount; q++)
+				{
+					Vector3f p = pos.get(q);
+					Vector3f n = nor.get(q);
+					Vector2f t = uv.get(q);
+					
+					pBuf.put(p.x()).put(p.y()).put(p.z());
+					nBuf.put(n.x()).put(n.y()).put(n.z());
+					uvBuf.put(t.x()).put(t.y());
+					
+					bBuf.put((byte) bone.index());
+					wBuf.put(1.0f);
+				}
+				
+				pBuf.flip();
+				nBuf.flip();
+				uvBuf.flip();
+				bBuf.flip();
+				wBuf.flip();
+				
+				//TODO: check if I can use new uuid instead of using raw uuid
+				UUID meshUUUID = UUID.randomUUID();
+				
+				ArcMesh mesh = new ArcMesh(
+						meshUUUID,
+						bone.index(),
+						vCount,
+						pBuf, nBuf, uvBuf,
+						bBuf, wBuf,
+						textureId
+				);
+				
+				model.meshes.put(mesh.uuid(), mesh);
 			}
-			
-			pBuf.flip();
-			nBuf.flip();
-			uvBuf.flip();
-			bBuf.flip();
-			wBuf.flip();
-			
-			ArcMesh mesh = new ArcMesh(
-					raw.uuid(),
-					bone.index(),
-					vCount,
-					pBuf, nBuf, uvBuf,
-					bBuf, wBuf,
-					//FIXME: changeTextureID
-					0
-			);
-			
-			model.meshes.put(raw.uuid(), mesh);
 		}
 	}
 	
@@ -221,13 +235,12 @@ public class ArcModelParser
 		
 		for (int q = 0; q < order.length; q += 3)
 		{
-			
 			Vector3f v0 = vertices.get(face.vertexIds()[order[q]]);
 			Vector3f v1 = vertices.get(face.vertexIds()[order[q + 1]]);
 			Vector3f v2 = vertices.get(face.vertexIds()[order[q + 2]]);
 			
 			Vector3f n = v1.sub(v0, new Vector3f()).
-							cross(v2.sub(v0), new Vector3f()).
+							cross(v2.sub(v0, new Vector3f()), new Vector3f()).
 					normalize();
 			
 			for (int w = 0; w < 3; w++)
@@ -417,7 +430,12 @@ public class ArcModelParser
 			for (int q = 0; q < ids.length; q++)
 				uvsArray[q] = uvs.get(ids[q]);
 			
-			result.add(new RawFace(ids, uvsArray));
+			int texture = -1;
+			JsonElement element = face.getValue().getAsJsonObject().get("texture");
+			if (element != null)
+				texture = element.getAsInt();
+			
+			result.add(new RawFace(ids, uvsArray, texture));
 		}
 		
 		return result;
@@ -474,7 +492,12 @@ public class ArcModelParser
 							new Vector2f(u1, v2)
 					};
 			
-			result.add(new RawFace(ids, uvs));
+			int texture = -1;
+			JsonElement element = face.get("texture");
+			if (element != null)
+				texture = element.getAsInt();
+			
+			result.add(new RawFace(ids, uvs, texture));
 		}
 		
 		return result;

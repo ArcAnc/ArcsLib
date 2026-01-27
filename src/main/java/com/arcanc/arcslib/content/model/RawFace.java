@@ -12,6 +12,6 @@ package com.arcanc.arcslib.content.model;
 
 import org.joml.Vector2f;
 
-public record RawFace(String[] vertexIds, Vector2f[] uvs)
+public record RawFace(String[] vertexIds, Vector2f[] uvs, int texture)
 {
 }
