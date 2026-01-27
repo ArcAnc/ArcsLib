@@ -17,6 +17,7 @@ import com.arcanc.arcslib.content.model.ArcModel;
 import com.arcanc.arcslib.util.ArcRenderTypes;
 import com.arcanc.arcslib.util.Database;
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.math.Axis;
 import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.client.renderer.blockentity.state.BlockEntityRenderState;
@@ -44,8 +45,8 @@ public class TestBlockEntityRenderer extends ArcBlockRenderer<TestBlockEntity>
 		ArcModel model = this.getArcModel();
 		
 		poseStack.pushPose();
-		poseStack.translate(0.5f, 0.5f, 0.5f);
-		
+		poseStack.translate(0.5f, 0, 0.5f);
+		//TODO: добавить сдвиг по кости
 		model.meshes.values().forEach(arcMesh ->
 				submitNodeCollector.submitCustomGeometry(poseStack, ArcRenderTypes.trianglesSolid(getTextureById(arcMesh.texture())), (pose, vertexConsumer) ->
 				{

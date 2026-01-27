@@ -36,7 +36,8 @@ public class Registration
 		
 		public static final DeferredBlock<TestBlock> TEST_BLOCK = BLOCKS.register("test_block", () -> new TestBlock(
 				BlockBehaviour.Properties.of().setId(
-						ResourceKey.create(Registries.BLOCK, Database.rl("test_block")))));
+						ResourceKey.create(Registries.BLOCK, Database.rl("test_block"))).
+						noOcclusion()));
 		
 		private static void init (@NotNull final IEventBus bus)
 		{

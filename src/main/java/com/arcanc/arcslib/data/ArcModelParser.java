@@ -422,8 +422,8 @@ public class ArcModelParser
 			{
 				JsonArray uvArray = uvData.getValue().getAsJsonArray();
 				uvs.put(uvData.getKey(), new Vector2f(
-						uvArray.get(0).getAsFloat(),
-						uvArray.get(1).getAsFloat()));
+						uvArray.get(0).getAsFloat() / 16f,
+						uvArray.get(1).getAsFloat() / 16f));
 			}
 			
 			Vector2f[] uvsArray = new Vector2f[ids.length];
