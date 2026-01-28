@@ -10,14 +10,15 @@
 package com.arcanc.arcslib.content.model;
 
 
+import org.joml.Quaternionf;
 import org.joml.Vector3f;
 
 import java.util.*;
 
-public record RawMesh(UUID uuid, Map<String, Vector3f> vertices, List<RawFace> faces)
+public record RawMesh(UUID uuid, Vector3f origin, Quaternionf rotation, Map<String, Vector3f> vertices, List<RawFace> faces)
 {
-	public RawMesh(UUID uuid)
+	public RawMesh(UUID uuid, Vector3f origin, Quaternionf rotation)
 	{
-		this(uuid, new HashMap<>(), new ArrayList<>());
+		this(uuid, origin, rotation, new HashMap<>(), new ArrayList<>());
 	}
 }

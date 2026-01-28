@@ -10,7 +10,7 @@
 package com.arcanc.arcslib.api;
 
 
-import com.arcanc.arcslib.content.model.ArcModel;
+import com.arcanc.arcslib.content.model.baked.ArcBakedModel;
 import net.minecraft.resources.Identifier;
 
 public interface ArcRenderer<T extends ArcAnimatable>
@@ -22,7 +22,7 @@ public interface ArcRenderer<T extends ArcAnimatable>
 		return getArcModelData().getTextureById(id);
 	}
 	
-	ArcModel getArcModel();
+	ArcBakedModel getArcModel();
 	
 	T getAnimatable();
 }

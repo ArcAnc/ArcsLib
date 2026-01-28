@@ -10,12 +10,17 @@
 package com.arcanc.arcslib.content.model;
 
 
+import org.joml.Quaternionf;
+import org.joml.Vector3f;
+
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
 import java.util.UUID;
 
 public record ArcMesh(
 			UUID uuid,
+			Vector3f origin,
+			Quaternionf rotation,
 			int boneIndex,
 			int vertexCount,
 			FloatBuffer positions,

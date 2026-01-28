@@ -19,6 +19,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import com.mojang.datafixers.util.Pair;
 import net.minecraft.util.Mth;
 import org.jetbrains.annotations.NotNull;
 import org.joml.Matrix4f;
@@ -70,7 +71,20 @@ public class ArcModelParser
 			JsonObject object = element.getAsJsonObject();
 			ElementType type = ElementType.getByName(object.get("type").getAsString());
 			UUID uuid = UUID.fromString(object.get("uuid").getAsString());
-			RawMesh mesh = new RawMesh(uuid);
+			JsonArray originElem = object.getAsJsonArray("origin");
+			Vector3f origin = new Vector3f(
+					originElem.get(0).getAsFloat() / 16f,
+					originElem.get(1).getAsFloat() / 16f,
+					originElem.get(2).getAsFloat() / 16f);
+			
+			JsonArray rotationElem = object.getAsJsonArray("rotation");
+			Quaternionf rotation = new Quaternionf();
+			rotation.rotateXYZ(
+					Mth.DEG_TO_RAD * rotationElem.get(0).getAsFloat(),
+					Mth.DEG_TO_RAD * rotationElem.get(1).getAsFloat(),
+					Mth.DEG_TO_RAD * rotationElem.get(2).getAsFloat());
+			
+			RawMesh mesh = new RawMesh(uuid, origin, rotation);
 			Map<String, Vector3f> vertices = type.verticesGetter.getVertices(object);
 			List<RawFace> faces = type.facesGetter.getFaces(object);
 			
@@ -133,7 +147,7 @@ public class ArcModelParser
 		{
 			UUID meshId = UUID.fromString(element.getAsString());
 			if (parent != null && rawMeshes.containsKey(meshId))
-				model.boneMeshes.put(parent.uuid(), meshId);
+				model.boneMeshes.computeIfAbsent(parent.uuid(), id -> Pair.of(meshId, new ArrayList<>()));
 			return;
 		}
 		
@@ -158,16 +172,16 @@ public class ArcModelParser
 	
 	private static void buildMeshes(@NotNull ArcModel model, Map<UUID, RawMesh> rawMeshes)
 	{
-		for (Map.Entry<UUID, UUID> entry : model.boneMeshes.entries())
+		for (Map.Entry<UUID, Pair<UUID, List<UUID>>> entry : model.boneMeshes.entrySet())
 		{
 			ArcBone bone = model.bones.get(entry.getKey());
-			RawMesh raw = rawMeshes.get(entry.getValue());
+			RawMesh raw = rawMeshes.get(entry.getValue().getFirst());
 			
 			Map<Integer, List<RawFace>> facesByTexture = new HashMap<>();
 			for (RawFace face : raw.faces())
 				facesByTexture.computeIfAbsent(face.texture(), t -> new ArrayList<>()).
 						add(face);
-			
+				
 			for (Map.Entry<Integer, List<RawFace>> texEntry : facesByTexture.entrySet())
 			{
 				int textureId = texEntry.getKey();
@@ -178,11 +192,11 @@ public class ArcModelParser
 				
 				for (RawFace face : faces)
 					triangulate(face, raw.vertices(), pos, nor, uv);
-				
+					
 				int vCount = pos.size();
 				if (vCount == 0)
 					continue;
-				
+					
 				FloatBuffer pBuf = BufferUtils.createFloatBuffer(vCount * 3);
 				FloatBuffer nBuf = BufferUtils.createFloatBuffer(vCount * 3);
 				FloatBuffer uvBuf = BufferUtils.createFloatBuffer(vCount * 2);
@@ -214,12 +228,17 @@ public class ArcModelParser
 				
 				ArcMesh mesh = new ArcMesh(
 						meshUUUID,
+						new Vector3f(raw.origin()),
+						new Quaternionf(raw.rotation()),
 						bone.index(),
 						vCount,
 						pBuf, nBuf, uvBuf,
 						bBuf, wBuf,
 						textureId
 				);
+				
+				List<UUID> newUUIDList = entry.getValue().getSecond();
+				newUUIDList.add(mesh.uuid());
 				
 				model.meshes.put(mesh.uuid(), mesh);
 			}
@@ -324,7 +343,7 @@ public class ArcModelParser
 			Matrix4f local = new Matrix4f().
 							translate(bone.pivot()).
 							rotate(bone.baseRotation()).
-					translate(bone.pivot().negate());
+							translate(bone.pivot().negate(new Vector3f()));
 			
 			if (bone.parent() != null)
 				bone.bindPose().set(bone.parent().bindPose()).mul(local);

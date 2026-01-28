@@ -14,6 +14,7 @@ import com.mojang.blaze3d.pipeline.BlendFunction;
 import com.mojang.blaze3d.pipeline.RenderPipeline;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.VertexFormat;
+import com.mojang.blaze3d.vertex.VertexFormatElement;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.client.renderer.rendertype.RenderSetup;
 import net.minecraft.client.renderer.rendertype.RenderType;
@@ -71,7 +72,7 @@ public class ArcRenderTypes
 		}
 	}
 	
-	private static class RenderPipelinesProvider
+	public static class RenderPipelinesProvider
 	{
 		private static final Set<RenderPipeline> PIPELINES = new HashSet<>();
 		
@@ -83,7 +84,7 @@ public class ArcRenderTypes
 				withVertexFormat(DefaultVertexFormat.NEW_ENTITY, VertexFormat.Mode.TRIANGLES).
 				buildSnippet();
 		
-		private static final RenderPipeline TRIANGLES_SOLID = registerPipeline(RenderPipeline.builder(TRIANGLES_SNIPPET).
+		public static final RenderPipeline TRIANGLES_SOLID = registerPipeline(RenderPipeline.builder(TRIANGLES_SNIPPET).
 				withLocation(Database.rl("pipeline/triangles_cutout_no_cull")).
 				withShaderDefine("ALPHA_CUTOUT", 0.1F).
 				withShaderDefine("PER_FACE_LIGHTING").
@@ -91,7 +92,7 @@ public class ArcRenderTypes
 				withCull(false).
 				build());
 		
-		private static final RenderPipeline TRIANGLES_TRANSLUCENT = registerPipeline(RenderPipeline.builder(TRIANGLES_SNIPPET).
+		public static final RenderPipeline TRIANGLES_TRANSLUCENT = registerPipeline(RenderPipeline.builder(TRIANGLES_SNIPPET).
 				withLocation(Database.rl("pipeline/triangles_translucent")).
 				withShaderDefine("ALPHA_CUTOUT", 0.1F).
 				withShaderDefine("PER_FACE_LIGHTING").
@@ -111,6 +112,15 @@ public class ArcRenderTypes
 			PIPELINES.forEach(event :: registerPipeline);
 			PIPELINES.clear();
 		}
+	}
+	
+	public static class VertexFormatProvider
+	{
+		public static final VertexFormat POSITION_TEX_NORMAL = VertexFormat.builder().
+				add("Position", VertexFormatElement.POSITION).
+				add("UV0", VertexFormatElement.UV0).
+				add("Normal", VertexFormatElement.NORMAL).
+				build();
 	}
 	
 	public static void register(@NotNull IEventBus modEventBus)

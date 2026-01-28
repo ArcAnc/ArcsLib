@@ -11,6 +11,7 @@ package com.arcanc.arcslib.api;
 
 
 import com.arcanc.arcslib.content.model.ArcModel;
+import com.arcanc.arcslib.content.model.baked.ArcBakedModel;
 import com.arcanc.arcslib.util.ArcModelCache;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
@@ -48,7 +49,7 @@ public class ArcModelData
 		return this.textures[checkId];
 	}
 	
-	public ArcModel getModel()
+	public ArcBakedModel getModel()
 	{
 		return ArcModelCache.getModels().get(this.modelLocation);
 	}

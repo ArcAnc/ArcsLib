@@ -11,18 +11,14 @@ package com.arcanc.arcslib.content.model;
 
 
 import com.arcanc.arcslib.content.model.animation.ArcAnimation;
-import com.google.common.collect.HashMultimap;
-import com.google.common.collect.Multimap;
+import com.mojang.datafixers.util.Pair;
 
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 public class ArcModel
 {
 	public final Map<UUID, ArcBone> bones = new LinkedHashMap<>();
 	public final Map<UUID, ArcMesh> meshes = new LinkedHashMap<>();
-	public final Multimap<UUID, UUID> boneMeshes = HashMultimap.create();
+	public final Map<UUID, Pair<UUID, List<UUID>>> boneMeshes = new HashMap<>();
 	public final Map<String, ArcAnimation> animations = new HashMap<>();
 }
