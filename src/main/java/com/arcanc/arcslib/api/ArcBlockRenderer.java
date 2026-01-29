@@ -42,10 +42,7 @@ import net.minecraft.util.ARGB;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
-import org.joml.Matrix4f;
-import org.joml.Vector2i;
-import org.joml.Vector3f;
-import org.joml.Vector4f;
+import org.joml.*;
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 
@@ -114,17 +111,18 @@ public abstract class ArcBlockRenderer<T extends BlockEntity & ArcAnimatable> im
 		poseStack.pushPose();
 		poseStack.translate(0.5f, 0, 0.5f);
 		model.bones().forEach(bone ->
-				perBoneRender(poseStack, bone, 255, 255, 255, 255, blockEntityRenderState.lightCoords));
+				perBoneRender(poseStack, blockEntityRenderState, cameraRenderState, bone, 255, 255, 255, 255));
 		poseStack.popPose();
 	}
 	
 	private void perBoneRender(@NonNull PoseStack poseStack,
+	                           @NonNull BlockEntityRenderState blockEntityRenderState,
+	                           @NonNull CameraRenderState cameraRenderState,
 	                           @NonNull ArcBakedBone bone,
 	                           int red,
 	                           int blue,
 	                           int green,
-	                           int alpha,
-	                           int light)
+	                           int alpha)
 	{
 		poseStack.pushPose();
 		poseStack.translate(bone.basePosition().x(), bone.basePosition().y(), bone.basePosition().z());
@@ -132,35 +130,30 @@ public abstract class ArcBlockRenderer<T extends BlockEntity & ArcAnimatable> im
 		RenderTarget framebuffer = Minecraft.getInstance().getMainRenderTarget();
 		GpuTextureView colorAttachment = framebuffer.getColorTextureView();
 		GpuTextureView depthTexture = framebuffer.getDepthTextureView();
+		Matrix4f matrix4fstack = new Matrix4f(RenderSystem.getModelViewMatrix());
+		matrix4fstack.mul(poseStack.last().pose());
 		GpuBufferSlice transforms = RenderSystem.getDynamicUniforms().
-				writeTransform(RenderSystem.getModelViewMatrix(), new Vector4f(red/255f, green/255f, blue/255f, alpha/255f), new Vector3f(), new Matrix4f());
-		
+				writeTransform(matrix4fstack, new Vector4f(red/255f, green/255f, blue/255f, alpha/255f), new Vector3f(), new Matrix4f());
 		try (GpuBuffer.MappedView colorLightOverlayMappedView = RenderSystem.getDevice().
 						createCommandEncoder().
 						mapBuffer(this.colorLightOverlay.currentBuffer(), false, true))
 		{
+			int lightCoords = blockEntityRenderState.lightCoords;
+			int blockLight = (lightCoords >> 4) & 15;
+			int skyLight   = (lightCoords >> 20) & 15;
+			int overlay = OverlayTexture.NO_OVERLAY;
+			int u = overlay & 0xFFFF;
+			int v = (overlay >> 16) & 0xFFFF;
 			Std140Builder.intoBuffer(colorLightOverlayMappedView.data()).
 							putVec4(ARGB.vector4fFromARGB32(ARGB.color(alpha, red, green, blue))).
-							putIVec2(new Vector2i(LightTexture.FULL_BRIGHT)).
-							putIVec2(new Vector2i(0, 10));
+							putIVec2(new Vector2i(blockLight * 16, skyLight * 16)).
+							putIVec2(new Vector2i(u, v));
 		}
 		bone.meshes().forEach(mesh ->
 		{
-			
 			if (mesh.textureId() == - 1)
 				return;
-			BufferBuilder meshBuffer = rebuildMesh(mesh);
-			GpuBuffer meshVbo;
-			try(MeshData meshData = meshBuffer.buildOrThrow())
-			{
-				meshVbo = RenderSystem.getDevice().createBuffer(
-						mesh.uuid() :: toString,
-						GpuBuffer.USAGE_VERTEX,
-						meshData.vertexBuffer());
-			}
-			RenderSystem.AutoStorageIndexBuffer meshIndices = RenderSystem.getSequentialBuffer(VertexFormat.Mode.TRIANGLES);
-			GpuBuffer indices = meshIndices.getBuffer(64);
-			
+
 			Minecraft minecraft = Minecraft.getInstance();
 			TextureManager tm = minecraft.getTextureManager();
 			AbstractTexture texture = tm.getTexture(getTextureById(mesh.textureId()));
@@ -168,10 +161,10 @@ public abstract class ArcBlockRenderer<T extends BlockEntity & ArcAnimatable> im
 			OverlayTexture overlay = minecraft.gameRenderer.overlayTexture();
 			try (RenderPass pass = RenderSystem.getDevice().createCommandEncoder().createRenderPass(mesh.uuid() :: toString, colorAttachment, OptionalInt.empty(), depthTexture, OptionalDouble.empty()))
 			{
-				RenderSystem.bindDefaultUniforms(pass);
 				pass.setPipeline(ArcRenderTypes.RenderPipelinesProvider.TRIANGLES_SOLID);
-				pass.setVertexBuffer(0, meshVbo);
-				pass.setIndexBuffer(indices, meshIndices.type());
+				RenderSystem.bindDefaultUniforms(pass);
+				pass.setVertexBuffer(0, mesh.vbo());
+				pass.setIndexBuffer(mesh.indices(), mesh.indexType());
 				pass.setUniform("ColorLightOverlay", colorLightOverlay.currentBuffer());
 				pass.setUniform("DynamicTransforms", transforms);
 				pass.bindTexture("Sampler0", texture.getTextureView(), texture.getSampler());
@@ -184,30 +177,7 @@ public abstract class ArcBlockRenderer<T extends BlockEntity & ArcAnimatable> im
 		
 		
 		bone.children().forEach(children ->
-				perBoneRender(poseStack, children, red, green, blue, alpha, light));
+				perBoneRender(poseStack, blockEntityRenderState, cameraRenderState, children, red, green, blue, alpha));
 		poseStack.popPose();
-	}
-	
-	private @NonNull BufferBuilder rebuildMesh(@NonNull ArcBakedMesh mesh)
-	{
-		ByteBufferBuilder byteBufferBuilder = ByteBufferBuilder.
-				exactlySized(mesh.vertexesAmount() * ArcRenderTypes.VertexFormatProvider.POSITION_TEX_NORMAL.getVertexSize());
-		BufferBuilder bufferBuilder = new BufferBuilder(byteBufferBuilder, VertexFormat.Mode.TRIANGLES, ArcRenderTypes.VertexFormatProvider.POSITION_TEX_NORMAL);
-		
-		for (int q = 0; q < mesh.vertexesAmount(); q++)
-		{
-			bufferBuilder.addVertex(
-					mesh.positions().get(q * 3),
-					mesh.positions().get(q * 3 + 1),
-					mesh.positions().get(q * 3 + 2)).
-					setUv(
-					mesh.uvs().get(q * 2),
-					mesh.uvs().get(q * 2 + 1)).
-					setNormal(
-					mesh.normals().get(q * 3),
-					mesh.normals().get(q * 3 + 1),
-					mesh.normals().get(q * 3 + 2));
-		}
-		return bufferBuilder;
 	}
 }

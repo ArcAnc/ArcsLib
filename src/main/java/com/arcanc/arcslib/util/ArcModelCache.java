@@ -90,15 +90,8 @@ public class ArcModelCache
 				for (UUID meshUUID : bone2MeshesEntry.getValue().getSecond())
 				{
 					ArcMesh mesh = model.meshes.get(meshUUID);
-					
-					builder.meshes.add(new ArcBakedMesh(
-							meshUUID,
-							mesh.positions(),
-							mesh.uvs(),
-							mesh.normals(),
-							mesh.vertexCount(),
-							mesh.texture()));
-					/*ByteBufferBuilder byteBufferBuilder = ByteBufferBuilder.
+
+					ByteBufferBuilder byteBufferBuilder = ByteBufferBuilder.
 							exactlySized(mesh.vertexCount() * ArcRenderTypes.VertexFormatProvider.POSITION_TEX_NORMAL.getVertexSize());
 					BufferBuilder bufferBuilder = new BufferBuilder(byteBufferBuilder, VertexFormat.Mode.TRIANGLES, ArcRenderTypes.VertexFormatProvider.POSITION_TEX_NORMAL);
 					
@@ -135,9 +128,13 @@ public class ArcModelCache
 								GpuBuffer.USAGE_INDEX,
 								indexBuffer);
 						
-
+						builder.meshes.add(new ArcBakedMesh(
+								meshUUID,
+								buffer,
+								mesh.vertexCount(),
+								gpuIndexBuffer, VertexFormat.IndexType.INT,
+								mesh.texture()));
 					}
-					*/
 				}
 			}
 

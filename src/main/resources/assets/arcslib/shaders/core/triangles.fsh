@@ -7,8 +7,6 @@ uniform sampler2D Sampler0;
 in vec4 vertexColorBack;
 in vec4 vertexColorFront;
 
-in vec4 vertexColor;
-
 in vec4 lightMapColor;
 in vec4 overlayColor;
 in vec2 texCoord0;

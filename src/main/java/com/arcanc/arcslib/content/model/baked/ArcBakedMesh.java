@@ -10,14 +10,11 @@
 package com.arcanc.arcslib.content.model.baked;
 
 
-import java.nio.FloatBuffer;
+import com.mojang.blaze3d.buffers.GpuBuffer;
+import com.mojang.blaze3d.vertex.VertexFormat;
+
 import java.util.UUID;
 
-public record ArcBakedMesh(UUID uuid,
-                           FloatBuffer positions,
-                           FloatBuffer uvs,
-                           FloatBuffer normals,
-                           int vertexesAmount,
-                           int textureId)
+public record ArcBakedMesh(UUID uuid, GpuBuffer vbo, int vertexesAmount, GpuBuffer indices, VertexFormat.IndexType indexType, int textureId)
 {
 }

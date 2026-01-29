@@ -14,7 +14,6 @@ uniform sampler2D Sampler2;
 
 out vec4 vertexColorBack;
 out vec4 vertexColorFront;
-out vec4 vertexColor;
 out vec4 lightMapColor;
 out vec4 overlayColor;
 out vec2 texCoord0;
@@ -32,8 +31,6 @@ void main()
     vec2 light = minecraft_compute_light(Light0_Direction, Light1_Direction, Normal);
     vertexColorBack = minecraft_mix_light_separate(-light, Color);
     vertexColorFront = minecraft_mix_light_separate(light, Color);
-
-    vertexColor = minecraft_mix_light(Light0_Direction, Light1_Direction, Normal, Color);
 
     overlayColor = texelFetch(Sampler1, Overlay, 0);
     lightMapColor = texelFetch(Sampler2, Light / 16, 0);
