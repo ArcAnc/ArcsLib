@@ -19,7 +19,7 @@ public class Database
 {
 	public static final String MOD_ID = "arcslib";
 	public static final String MOD_NAME = "Arc's Lib";
-	private static final Logger LOGGER = LoggerFactory.getLogger(MOD_NAME);
+	public static final Logger LOGGER = LoggerFactory.getLogger(MOD_NAME);
 	
 	public static final Identifier RELOAD_LISTENER_ID = rl("models_reload_listener");
 	
@@ -27,10 +27,5 @@ public class Database
 	public static @NotNull Identifier rl(String name)
 	{
 		return Identifier.fromNamespaceAndPath(MOD_ID, name);
-	}
-	
-	public static Logger getLogger()
-	{
-		return LOGGER;
 	}
 }

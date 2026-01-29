@@ -12,25 +12,21 @@ package com.arcanc.arcslib.util;
 
 import com.mojang.blaze3d.pipeline.BlendFunction;
 import com.mojang.blaze3d.pipeline.RenderPipeline;
+import com.mojang.blaze3d.shaders.UniformType;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.VertexFormat;
 import com.mojang.blaze3d.vertex.VertexFormatElement;
 import net.minecraft.client.renderer.RenderPipelines;
-import net.minecraft.client.renderer.rendertype.RenderSetup;
-import net.minecraft.client.renderer.rendertype.RenderType;
-import net.minecraft.resources.Identifier;
-import net.minecraft.util.Util;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.client.event.RegisterRenderPipelinesEvent;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.HashSet;
 import java.util.Set;
-import java.util.function.Function;
 
 public class ArcRenderTypes
 {
-	public static RenderType trianglesSolid (Identifier texture)
+/*	public static RenderType trianglesSolid (Identifier texture)
 	{
 		return RenderTypeProviders.TRIANGLES_SOLID.apply(texture);
 	}
@@ -71,28 +67,34 @@ public class ArcRenderTypes
 			return RenderType.create("triangles_translucent", setup);
 		}
 	}
-	
+	*/
 	public static class RenderPipelinesProvider
 	{
 		private static final Set<RenderPipeline> PIPELINES = new HashSet<>();
 		
 		private static final RenderPipeline.Snippet TRIANGLES_SNIPPET = RenderPipeline.builder(RenderPipelines.MATRICES_FOG_LIGHT_DIR_SNIPPET).
-				withVertexShader("core/entity").
-				withFragmentShader("core/entity").
+				withVertexShader(Database.rl("core/triangles")).
+				withFragmentShader(Database.rl("core/triangles")).
 				withSampler("Sampler0").
 				withSampler("Sampler2").
-				withVertexFormat(DefaultVertexFormat.NEW_ENTITY, VertexFormat.Mode.TRIANGLES).
+				withUniform("ColorLightValues", UniformType.UNIFORM_BUFFER).
+				withVertexFormat(VertexFormatProvider.POSITION_TEX_NORMAL, VertexFormat.Mode.TRIANGLES).
 				buildSnippet();
 		
-		public static final RenderPipeline TRIANGLES_SOLID = registerPipeline(RenderPipeline.builder(TRIANGLES_SNIPPET).
+		public static final RenderPipeline TRIANGLES_SOLID = registerPipeline(RenderPipeline.builder(RenderPipelines.MATRICES_PROJECTION_SNIPPET).
+				withFragmentShader(Database.rl("core/triangles")).
+				withVertexShader(Database.rl("core/triangles")).
 				withLocation(Database.rl("pipeline/triangles_cutout_no_cull")).
+				withUniform("ColorLightOverlay", UniformType.UNIFORM_BUFFER).
 				withShaderDefine("ALPHA_CUTOUT", 0.1F).
-				withShaderDefine("PER_FACE_LIGHTING").
+				withSampler("Sampler0").
 				withSampler("Sampler1").
+				withSampler("Sampler2").
 				withCull(false).
+				withVertexFormat(VertexFormatProvider.POSITION_TEX_NORMAL, VertexFormat.Mode.TRIANGLES).
 				build());
 		
-		public static final RenderPipeline TRIANGLES_TRANSLUCENT = registerPipeline(RenderPipeline.builder(TRIANGLES_SNIPPET).
+		/*public static final RenderPipeline TRIANGLES_TRANSLUCENT = registerPipeline(RenderPipeline.builder(TRIANGLES_SNIPPET).
 				withLocation(Database.rl("pipeline/triangles_translucent")).
 				withShaderDefine("ALPHA_CUTOUT", 0.1F).
 				withShaderDefine("PER_FACE_LIGHTING").
@@ -100,7 +102,7 @@ public class ArcRenderTypes
 				withBlend(BlendFunction.TRANSLUCENT).
 				withCull(false).
 				build());
-		
+		*/
 		private static RenderPipeline registerPipeline(RenderPipeline pipeline)
 		{
 			PIPELINES.add(pipeline);
@@ -120,6 +122,7 @@ public class ArcRenderTypes
 				add("Position", VertexFormatElement.POSITION).
 				add("UV0", VertexFormatElement.UV0).
 				add("Normal", VertexFormatElement.NORMAL).
+				padding(1).
 				build();
 	}
 	
