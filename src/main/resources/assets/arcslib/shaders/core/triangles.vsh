@@ -33,7 +33,7 @@ void main()
     vertexColorFront = minecraft_mix_light_separate(light, Color);
 
     overlayColor = texelFetch(Sampler1, Overlay, 0);
-    lightMapColor = texelFetch(Sampler2, Light / 16, 0);
+    lightMapColor = texelFetch(Sampler2, Light, 0);
 
     texCoord0 = UV0;
 }

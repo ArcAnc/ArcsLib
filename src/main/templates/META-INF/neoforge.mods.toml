@@ -78,7 +78,9 @@ config="${mod_id}.mixins.json"
     modId="minecraft"
     type="required"
     # This version range declares a minimum of the current minecraft version up to but not including the next major version
-    versionRange="${minecraft_version_range}"
+    # Commented just for testing
+    # versionRange="${minecraft_version_range}"
+    versionRange="[26,)"
     ordering="NONE"
     side="BOTH"
 

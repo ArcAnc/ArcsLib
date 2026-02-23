@@ -10,27 +10,39 @@
 package com.arcanc.arcslib.api;
 
 
-import com.arcanc.arcslib.content.model.ArcModel;
 import com.arcanc.arcslib.content.model.baked.ArcBakedModel;
 import com.arcanc.arcslib.util.ArcModelCache;
+import com.arcanc.arcslib.util.Database;
+import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
+
+import java.util.Map;
 
 public class ArcModelData
 {
 	private final Identifier modelLocation;
-	private final Identifier[] textures;
+	private final Map<String, Identifier> textures;
 	
-	public ArcModelData(Identifier modelLocation, String modelType, Identifier... textures)
+	public ArcModelData(Identifier modelLocation, String modelType, Identifier @NonNull ... textures)
 	{
 		this.modelLocation = generateDefaultModelLocation(modelLocation, modelType);
-		this.textures = textures;
+		this.textures = new Object2ObjectOpenHashMap<>();
+		for (Identifier texture : textures)
+		{
+			String[] textureName = texture.toString().split("/");
+			String name = textureName[textureName.length - 1].substring(0, textureName[textureName.length - 1].length() - 4);
+			Database.LOGGER.warn("Texture name: {}", name);
+			this.textures.put(name, texture);
+		}
 	}
 	
-	private @NotNull Identifier generateDefaultModelLocation(@NotNull Identifier modelLocation, String type)
+	private @NonNull Identifier generateDefaultModelLocation(@NonNull Identifier modelLocation, String type)
 	{
-		return modelLocation.withPrefix("bbmodels/" + type + "/").withSuffix(".bbmodel");
+		return modelLocation.withPrefix("glmodels/" + type + "/").withSuffix(".glb");
 	}
 	
 	public Identifier getModelLocation()
@@ -38,15 +50,9 @@ public class ArcModelData
 		return this.modelLocation;
 	}
 	
-	public Identifier[] getTextures()
+	public Identifier getTextureByName(String name)
 	{
-		return this.textures;
-	}
-	
-	public Identifier getTextureById(int id)
-	{
-		int checkId = Mth.clamp(id, 0, this.textures.length - 1);
-		return this.textures[checkId];
+		return this.textures.getOrDefault(name, TextureManager.INTENTIONAL_MISSING_TEXTURE);
 	}
 	
 	public ArcBakedModel getModel()

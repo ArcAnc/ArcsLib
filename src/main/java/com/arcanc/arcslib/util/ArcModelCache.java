@@ -22,18 +22,19 @@ import com.mojang.blaze3d.buffers.GpuBuffer;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;
 import com.mojang.datafixers.util.Pair;
+import de.javagl.jgltf.model.GltfConstants;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.resources.PreparableReloadListener;
 import net.minecraft.server.packs.resources.ResourceManager;
 import org.jetbrains.annotations.ApiStatus;
+import org.jetbrains.annotations.NotNull;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
 import org.jspecify.annotations.NonNull;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
@@ -58,14 +59,34 @@ public class ArcModelCache
 		return CompletableFuture.allOf(loadModels(backgroundExecutor, sharedState.resourceManager(), models :: put)).
 				thenCompose(preparationBarrier :: wait).
 				thenAcceptAsync(empty ->
-						ArcModelCache.MODELS = bakeModels(models),
+				{
+					if (ArcModelCache.MODELS != null)
+						clearCaches();
+					ArcModelCache.MODELS = bakeModels(models);
+				},
 				gameExecutor);
+	}
+	
+	private static void clearCaches()
+	{
+		MODELS.forEach((identifier, model) ->
+				model.bones().forEach(ArcModelCache :: clearBoneCache));
+		MODELS = null;
+	}
+	
+	private static void clearBoneCache(@NotNull ArcBakedBone bone)
+	{
+		bone.meshes().forEach(mesh ->
+		{
+			mesh.vbo().close();
+			mesh.indices().close();
+		});
+		bone.children().forEach(ArcModelCache :: clearBoneCache);
 	}
 	
 	private static @NonNull Map<Identifier, ArcBakedModel> bakeModels(@NonNull Map<Identifier, ArcModel> rawModels)
 	{
 		Map<Identifier, ArcBakedModel> bakedModelMap = new Object2ObjectOpenHashMap<>();
-		
 		for (Map.Entry<Identifier, ArcModel> rawModel : rawModels.entrySet())
 		{
 			ArcModel model = rawModel.getValue();
@@ -78,7 +99,7 @@ public class ArcModelCache
 								bone.uuid(),
 								bone.name(),
 								new Vector3f(bone.pivot()),
-								new Quaternionf(bone.baseRotation())
+								new Quaternionf(bone.baseRotation()).normalize()
 						)
 				);
 			}
@@ -95,25 +116,33 @@ public class ArcModelCache
 							exactlySized(mesh.vertexCount() * ArcRenderTypes.VertexFormatProvider.POSITION_TEX_NORMAL.getVertexSize());
 					BufferBuilder bufferBuilder = new BufferBuilder(byteBufferBuilder, VertexFormat.Mode.TRIANGLES, ArcRenderTypes.VertexFormatProvider.POSITION_TEX_NORMAL);
 					
-					ByteBuffer indexBuffer = ByteBuffer.allocateDirect(mesh.vertexCount() * Integer.BYTES).
-							order(ByteOrder.nativeOrder());
-
 					for (int q = 0; q < mesh.vertexCount(); q++)
 					{
-								bufferBuilder.addVertex(
-										mesh.positions().get(q * 3),
-										mesh.positions().get(q * 3 + 1),
-										mesh.positions().get(q * 3 + 2)).
+						float x = mesh.positions().get(q * 3);
+						float y = mesh.positions().get(q * 3 + 1);
+						float z = mesh.positions().get(q * 3 + 2);
+						
+						float u = mesh.uvs().get(q * 2);
+						float v = mesh.uvs().get(q * 2 + 1);
+						
+						float nx = mesh.normals().get(q * 3);
+						float ny = mesh.normals().get(q * 3 + 1);
+						float nz = mesh.normals().get(q * 3 + 2);
+						
+						bufferBuilder.
+								addVertex(
+										x,
+										y,
+										z).
 								setUv(
-										mesh.uvs().get(q * 2),
-										mesh.uvs().get(q * 2 + 1)).
+										u,
+										v).
 								setNormal(
-										mesh.normals().get(q * 3),
-										mesh.normals().get(q * 3 + 1),
-										mesh.normals().get(q * 3 + 2));
-						indexBuffer.putInt(q);
+										nx,
+										ny,
+										nz);
 					}
-					indexBuffer.flip();
+					ByteBuffer indexBuffer = mesh.indices();
 					
 					try (MeshData meshData = bufferBuilder.buildOrThrow())
 					{
@@ -127,12 +156,14 @@ public class ArcModelCache
 								() -> meshUUID.toString() + "_indexes",
 								GpuBuffer.USAGE_INDEX,
 								indexBuffer);
-						
+						VertexFormat.IndexType type = mesh.glIndexType() == GltfConstants.GL_UNSIGNED_SHORT ? VertexFormat.IndexType.SHORT : VertexFormat.IndexType.INT;
 						builder.meshes.add(new ArcBakedMesh(
 								meshUUID,
 								buffer,
 								mesh.vertexCount(),
-								gpuIndexBuffer, VertexFormat.IndexType.INT,
+								gpuIndexBuffer,
+								mesh.indicesCount(),
+								type,
 								mesh.texture()));
 					}
 				}
@@ -204,8 +235,8 @@ public class ArcModelCache
 	{
 		return CompletableFuture.supplyAsync(
 				() -> resourceManager.listResources(
-						"bbmodels",
-						fileName -> fileName.toString().endsWith(".bbmodel")),
+						"glmodels",
+						fileName -> fileName.toString().endsWith(".glb")),
 				backgroundExecutor).
 				thenApplyAsync(resources ->
 				{

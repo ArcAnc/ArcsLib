@@ -17,9 +17,9 @@ public interface ArcRenderer<T extends ArcAnimatable>
 {
 	ArcModelData getArcModelData();
 	
-	default Identifier getTextureById(int id)
+	default Identifier getTextureByName(String name)
 	{
-		return getArcModelData().getTextureById(id);
+		return getArcModelData().getTextureByName(name);
 	}
 	
 	ArcBakedModel getArcModel();

@@ -11,7 +11,8 @@ package com.arcanc.arcslib.content.model.animation;
 
 
 import java.util.Map;
+import java.util.UUID;
 
-public record ArcAnimation(String name, float length, Map<Integer, ArcBoneAnimation> boneAnimations)
+public record ArcAnimation(String name, float length, Map<UUID, ArcBoneAnimation> boneAnimations)
 {
 }

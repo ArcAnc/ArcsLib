@@ -11,7 +11,6 @@ package com.arcanc.arcslib.api;
 
 
 import com.arcanc.arcslib.content.model.baked.ArcBakedBone;
-import com.arcanc.arcslib.content.model.baked.ArcBakedMesh;
 import com.arcanc.arcslib.content.model.baked.ArcBakedModel;
 import com.arcanc.arcslib.util.ArcRenderTypes;
 import com.arcanc.arcslib.util.Database;
@@ -24,21 +23,19 @@ import com.mojang.blaze3d.systems.RenderPass;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.textures.FilterMode;
 import com.mojang.blaze3d.textures.GpuTextureView;
-import com.mojang.blaze3d.vertex.*;
+import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.CloudRenderer;
-import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.MappableRingBuffer;
 import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.blockentity.state.BlockEntityRenderState;
 import net.minecraft.client.renderer.feature.ModelFeatureRenderer;
-import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.client.renderer.state.CameraRenderState;
 import net.minecraft.client.renderer.texture.AbstractTexture;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.util.ARGB;
+import net.minecraft.util.LightCoordsUtil;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
@@ -49,7 +46,7 @@ import org.jspecify.annotations.Nullable;
 import java.util.OptionalDouble;
 import java.util.OptionalInt;
 
-public abstract class ArcBlockRenderer<T extends BlockEntity & ArcAnimatable> implements ArcRenderer<T>, BlockEntityRenderer<T, BlockEntityRenderState>
+public abstract class ArcBlockRenderer<T extends BlockEntity & ArcAnimatable> implements ArcRenderer<T>, BlockEntityRenderer<@NonNull T, BlockEntityRenderState>
 {
 	private final ArcModelData model;
 	private T animatable;
@@ -111,18 +108,18 @@ public abstract class ArcBlockRenderer<T extends BlockEntity & ArcAnimatable> im
 		poseStack.pushPose();
 		poseStack.translate(0.5f, 0, 0.5f);
 		model.bones().forEach(bone ->
-				perBoneRender(poseStack, blockEntityRenderState, cameraRenderState, bone, 255, 255, 255, 255));
+				perBoneRender(poseStack, blockEntityRenderState, bone, 255, 255, 255, 255, OverlayTexture.NO_OVERLAY));
 		poseStack.popPose();
 	}
 	
 	private void perBoneRender(@NonNull PoseStack poseStack,
 	                           @NonNull BlockEntityRenderState blockEntityRenderState,
-	                           @NonNull CameraRenderState cameraRenderState,
 	                           @NonNull ArcBakedBone bone,
 	                           int red,
 	                           int blue,
 	                           int green,
-	                           int alpha)
+	                           int alpha,
+	                           int overlay)
 	{
 		poseStack.pushPose();
 		poseStack.translate(bone.basePosition().x(), bone.basePosition().y(), bone.basePosition().z());
@@ -139,26 +136,25 @@ public abstract class ArcBlockRenderer<T extends BlockEntity & ArcAnimatable> im
 						mapBuffer(this.colorLightOverlay.currentBuffer(), false, true))
 		{
 			int lightCoords = blockEntityRenderState.lightCoords;
-			int blockLight = (lightCoords >> 4) & 15;
-			int skyLight   = (lightCoords >> 20) & 15;
-			int overlay = OverlayTexture.NO_OVERLAY;
+			int blockLight = LightCoordsUtil.block(lightCoords);
+			int skyLight   = LightCoordsUtil.sky(lightCoords);
 			int u = overlay & 0xFFFF;
 			int v = (overlay >> 16) & 0xFFFF;
 			Std140Builder.intoBuffer(colorLightOverlayMappedView.data()).
 							putVec4(ARGB.vector4fFromARGB32(ARGB.color(alpha, red, green, blue))).
-							putIVec2(new Vector2i(blockLight * 16, skyLight * 16)).
+							putIVec2(new Vector2i(blockLight, skyLight)).
 							putIVec2(new Vector2i(u, v));
 		}
 		bone.meshes().forEach(mesh ->
 		{
-			if (mesh.textureId() == - 1)
+			if (mesh.textureName().isEmpty())
 				return;
 
 			Minecraft minecraft = Minecraft.getInstance();
 			TextureManager tm = minecraft.getTextureManager();
-			AbstractTexture texture = tm.getTexture(getTextureById(mesh.textureId()));
-			LightTexture lightTexture = minecraft.gameRenderer.lightTexture();
-			OverlayTexture overlay = minecraft.gameRenderer.overlayTexture();
+			AbstractTexture texture = tm.getTexture(getTextureByName(mesh.textureName()));
+			GpuTextureView lightTexture = minecraft.gameRenderer.levelLightmap();
+			OverlayTexture overlayTexture = minecraft.gameRenderer.overlayTexture();
 			try (RenderPass pass = RenderSystem.getDevice().createCommandEncoder().createRenderPass(mesh.uuid() :: toString, colorAttachment, OptionalInt.empty(), depthTexture, OptionalDouble.empty()))
 			{
 				pass.setPipeline(ArcRenderTypes.RenderPipelinesProvider.TRIANGLES_SOLID);
@@ -168,16 +164,16 @@ public abstract class ArcBlockRenderer<T extends BlockEntity & ArcAnimatable> im
 				pass.setUniform("ColorLightOverlay", colorLightOverlay.currentBuffer());
 				pass.setUniform("DynamicTransforms", transforms);
 				pass.bindTexture("Sampler0", texture.getTextureView(), texture.getSampler());
-				pass.bindTexture("Sampler1", overlay.getTextureView(), RenderSystem.getSamplerCache().getClampToEdge(FilterMode.LINEAR));
-				pass.bindTexture("Sampler2", lightTexture.getTextureView(), RenderSystem.getSamplerCache().getClampToEdge(FilterMode.LINEAR));
+				pass.bindTexture("Sampler1", overlayTexture.getTextureView(), RenderSystem.getSamplerCache().getClampToEdge(FilterMode.LINEAR));
+				pass.bindTexture("Sampler2", lightTexture, RenderSystem.getSamplerCache().getClampToEdge(FilterMode.LINEAR));
 				
-				pass.drawIndexed(0, 0, mesh.vertexesAmount(), 1);
+				pass.drawIndexed(0, 0, mesh.indicesCount(), 1);
 			}
 		});
 		
 		
 		bone.children().forEach(children ->
-				perBoneRender(poseStack, blockEntityRenderState, cameraRenderState, children, red, green, blue, alpha));
+				perBoneRender(poseStack, blockEntityRenderState, children, red, green, blue, alpha, overlay));
 		poseStack.popPose();
 	}
 }

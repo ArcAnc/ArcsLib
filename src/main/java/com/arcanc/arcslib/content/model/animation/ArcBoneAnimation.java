@@ -12,7 +12,8 @@ package com.arcanc.arcslib.content.model.animation;
 
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
-public record ArcBoneAnimation(int boneIndex, Map<ArcAnimationChannel, List<ArcKeyframeChannel>> channels)
+public record ArcBoneAnimation(UUID boneUuid, Map<ArcAnimationChannel, List<ArcKeyframeChannel>> channels)
 {
 }

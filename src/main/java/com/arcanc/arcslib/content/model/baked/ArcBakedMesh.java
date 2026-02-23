@@ -15,6 +15,12 @@ import com.mojang.blaze3d.vertex.VertexFormat;
 
 import java.util.UUID;
 
-public record ArcBakedMesh(UUID uuid, GpuBuffer vbo, int vertexesAmount, GpuBuffer indices, VertexFormat.IndexType indexType, int textureId)
+public record ArcBakedMesh(UUID uuid,
+                           GpuBuffer vbo,
+                           int vertexesAmount,
+                           GpuBuffer indices,
+						   int indicesCount,
+                           VertexFormat.IndexType indexType,
+                           String textureName)
 {
 }
