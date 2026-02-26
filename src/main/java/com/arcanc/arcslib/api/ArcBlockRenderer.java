@@ -10,8 +10,13 @@
 package com.arcanc.arcslib.api;
 
 
+import com.arcanc.arcslib.content.animatable.ArcAnimatable;
+import com.arcanc.arcslib.content.animatable.instance.ArcAnimationController;
+import com.arcanc.arcslib.content.model.animation.BoneFrame;
 import com.arcanc.arcslib.content.model.baked.ArcBakedBone;
 import com.arcanc.arcslib.content.model.baked.ArcBakedModel;
+import com.arcanc.arcslib.content.renderer.base.ArcBlockRenderState;
+import com.arcanc.arcslib.content.renderer.base.ArcRenderState;
 import com.arcanc.arcslib.util.ArcRenderTypes;
 import com.arcanc.arcslib.util.Database;
 import com.mojang.blaze3d.buffers.GpuBuffer;
@@ -43,13 +48,14 @@ import org.joml.*;
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 
+import java.util.Collection;
 import java.util.OptionalDouble;
 import java.util.OptionalInt;
 
-public abstract class ArcBlockRenderer<T extends BlockEntity & ArcAnimatable> implements ArcRenderer<T>, BlockEntityRenderer<@NonNull T, BlockEntityRenderState>
+public abstract class ArcBlockRenderer<T extends BlockEntity & ArcAnimatable<T>, RS extends BlockEntityRenderState & ArcBlockRenderState<T>>
+		implements ArcRenderer<RS>, BlockEntityRenderer<@NonNull T, @NonNull RS>
 {
 	private final ArcModelData model;
-	private T animatable;
 	private final MappableRingBuffer colorLightOverlay= new MappableRingBuffer(
 			() -> Database.rl("color_light_overlay").toLanguageKey(),
 			GpuBuffer.USAGE_UNIFORM | GpuBuffer.USAGE_MAP_WRITE,
@@ -76,54 +82,75 @@ public abstract class ArcBlockRenderer<T extends BlockEntity & ArcAnimatable> im
 	}
 	
 	@Override
-	public T getAnimatable()
-	{
-		return this.animatable;
-	}
-	
-	@Override
-	public BlockEntityRenderState createRenderState()
-	{
-		return new BlockEntityRenderState();
-	}
-	
-	@Override
 	public void extractRenderState(T blockEntity,
-	                               BlockEntityRenderState renderState,
+	                               @NonNull RS renderState,
 	                               float partialTick,
 	                               @NonNull Vec3 cameraPosition,
 	                               ModelFeatureRenderer.@Nullable CrumblingOverlay breakProgress)
 	{
-		BlockEntityRenderer.super.extractRenderState(blockEntity, renderState, partialTick, cameraPosition, breakProgress);
-		this.animatable = blockEntity;
+		renderState.extractBlockData(blockEntity, this, breakProgress);
 	}
 	
 	@Override
-	public void submit(BlockEntityRenderState blockEntityRenderState,
+	public void submit(@NonNull RS renderState,
 	                   @NonNull PoseStack poseStack,
 	                   @NonNull SubmitNodeCollector submitNodeCollector,
 	                   @NonNull CameraRenderState cameraRenderState)
 	{
-		ArcBakedModel model = this.getArcModel();
+		renderState.getAnimatable().getAnimationManager().getControllers().
+				forEach((name, controller) -> controller.tick(renderState.getAnimatable(), renderState));
+		
+		preRender(poseStack, renderState, cameraRenderState);
+		actuallyRender(poseStack, renderState, cameraRenderState);
+		postRender(poseStack, renderState, cameraRenderState);
+	}
+	
+	@Override
+	public void preRender(PoseStack poseStack, RS renderState, CameraRenderState cameraRenderState)
+	{
+	}
+	
+	@Override
+	public void actuallyRender(@NonNull PoseStack poseStack, @NonNull RS renderState, CameraRenderState cameraRenderState)
+	{
+		Collection<ArcAnimationController<T>> controllers = renderState.getAnimatable().getAnimationManager().getControllers().values();
 		poseStack.pushPose();
 		poseStack.translate(0.5f, 0, 0.5f);
-		model.bones().forEach(bone ->
-				perBoneRender(poseStack, blockEntityRenderState, bone, 255, 255, 255, 255, OverlayTexture.NO_OVERLAY));
+		renderState.getBakedModel().bones().forEach(bone ->
+				perBoneRender(poseStack, renderState, bone, controllers, 255, 255, 255, 255, OverlayTexture.NO_OVERLAY));
 		poseStack.popPose();
 	}
 	
+	@Override
+	public void postRender(PoseStack poseStack, RS renderState, CameraRenderState cameraRenderState)
+	{
+	}
+	
 	private void perBoneRender(@NonNull PoseStack poseStack,
-	                           @NonNull BlockEntityRenderState blockEntityRenderState,
+	                           @NonNull RS blockEntityRenderState,
 	                           @NonNull ArcBakedBone bone,
+							   Collection<ArcAnimationController<T>> controllers,
 	                           int red,
 	                           int blue,
 	                           int green,
 	                           int alpha,
 	                           int overlay)
 	{
+		BoneFrame frame = mixBone(bone, controllers, blockEntityRenderState);
+		
 		poseStack.pushPose();
-		poseStack.translate(bone.basePosition().x(), bone.basePosition().y(), bone.basePosition().z());
-		poseStack.mulPose(bone.baseRotation());
+		if (frame != null)
+		{
+			poseStack.translate(frame.translation().x(), frame.translation().y(), frame.translation().z());
+			poseStack.mulPose(frame.rotation());
+			poseStack.scale(frame.scale().x(), frame.scale().y(), frame.scale().z());
+		}
+		else
+		{
+			poseStack.translate(bone.basePosition().x(), bone.basePosition().y(), bone.basePosition().z());
+			poseStack.mulPose(bone.baseRotation());
+		}
+
 		RenderTarget framebuffer = Minecraft.getInstance().getMainRenderTarget();
 		GpuTextureView colorAttachment = framebuffer.getColorTextureView();
 		GpuTextureView depthTexture = framebuffer.getDepthTextureView();
@@ -171,9 +198,36 @@ public abstract class ArcBlockRenderer<T extends BlockEntity & ArcAnimatable> im
 			}
 		});
 		
-		
 		bone.children().forEach(children ->
-				perBoneRender(poseStack, blockEntityRenderState, children, red, green, blue, alpha, overlay));
+				perBoneRender(poseStack, blockEntityRenderState, children, controllers, red, green, blue, alpha, overlay));
+		
 		poseStack.popPose();
+	}
+	
+	private @Nullable BoneFrame mixBone(
+			@NonNull ArcBakedBone bone,
+			@NonNull Collection<ArcAnimationController<T>> controllers,
+			ArcRenderState<T> state)
+	{
+		Vector3f translation = new Vector3f(bone.basePosition());
+		Quaternionf rotation = new Quaternionf(bone.baseRotation());
+		Vector3f scale = new Vector3f(1, 1, 1);
+		
+		boolean hasTransform = false;
+		for (ArcAnimationController<T> controller : controllers)
+		{
+			BoneFrame frame = controller.calculateBoneTransformations(bone.name(), state);
+			if (frame == null)
+				continue;
+			translation.add(frame.translation());
+			scale.mul(frame.scale());
+			rotation.mul(frame.rotation());
+			hasTransform = true;
+		}
+		
+		if (!hasTransform)
+			return null;
+		
+		return new BoneFrame(translation, rotation, scale);
 	}
 }

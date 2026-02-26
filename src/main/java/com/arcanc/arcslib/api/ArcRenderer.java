@@ -11,9 +11,12 @@ package com.arcanc.arcslib.api;
 
 
 import com.arcanc.arcslib.content.model.baked.ArcBakedModel;
+import com.arcanc.arcslib.content.renderer.base.ArcRenderState;
+import com.mojang.blaze3d.vertex.PoseStack;
+import net.minecraft.client.renderer.state.CameraRenderState;
 import net.minecraft.resources.Identifier;
 
-public interface ArcRenderer<T extends ArcAnimatable>
+public interface ArcRenderer<RS extends ArcRenderState>
 {
 	ArcModelData getArcModelData();
 	
@@ -24,5 +27,7 @@ public interface ArcRenderer<T extends ArcAnimatable>
 	
 	ArcBakedModel getArcModel();
 	
-	T getAnimatable();
+	void preRender(PoseStack poseStack, RS renderState, CameraRenderState cameraRenderState);
+	void actuallyRender(PoseStack poseStack, RS renderState, CameraRenderState cameraRenderState);
+	void postRender(PoseStack poseStack, RS renderState, CameraRenderState cameraRenderState);
 }

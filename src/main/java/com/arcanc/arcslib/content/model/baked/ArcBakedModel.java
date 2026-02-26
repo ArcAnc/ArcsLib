@@ -10,8 +10,11 @@
 package com.arcanc.arcslib.content.model.baked;
 
 
-import java.util.List;
+import com.arcanc.arcslib.content.model.animation.ArcAnimation;
 
-public record ArcBakedModel(List<ArcBakedBone> bones)
+import java.util.List;
+import java.util.Map;
+
+public record ArcBakedModel(List<ArcBakedBone> bones, Map<String, ArcAnimation> animations)
 {
 }

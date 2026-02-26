@@ -16,13 +16,11 @@ import com.arcanc.arcslib.content.model.ArcModel;
 import com.arcanc.arcslib.content.model.animation.ArcAnimation;
 import com.arcanc.arcslib.content.model.animation.ArcAnimationChannel;
 import com.arcanc.arcslib.content.model.animation.ArcBoneAnimation;
-import com.arcanc.arcslib.content.model.animation.ArcKeyframeChannel;
+import com.arcanc.arcslib.content.model.animation.ArcKeyFrameChannel;
 import com.arcanc.arcslib.util.Database;
 import com.arcanc.arcslib.util.helpers.ParserHelper;
 import com.mojang.datafixers.util.Pair;
-import de.javagl.jgltf.impl.v2.*;
 import de.javagl.jgltf.model.*;
-import de.javagl.jgltf.model.impl.DefaultTextureModel;
 import de.javagl.jgltf.model.io.GltfModelReader;
 import de.javagl.jgltf.model.v2.MaterialModelV2;
 import org.joml.Quaternionf;
@@ -33,9 +31,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
-import java.nio.IntBuffer;
 import java.util.*;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public class ArcModelParser
@@ -175,7 +171,7 @@ public class ArcModelParser
 			AnimationModel animationModel = model.getAnimationModels().get(q);
 			
 			String animationName = animationModel.getName() != null ? animationModel.getName() : "anim_" + q;
-			Map<UUID, ArcBoneAnimation> boneAnimations = new HashMap<>();
+			Map<String, ArcBoneAnimation> boneAnimations = new HashMap<>();
 			float maxTime = 0f;
 			
 			for (AnimationModel.Channel channel : animationModel.getChannels())
@@ -212,42 +208,53 @@ public class ArcModelParser
 				if (outputAccessor == null)
 					continue;
 				ByteBuffer bb = outputAccessor.getAccessorData().createByteBuffer();
-				
-				int componentCount = switch (arcChannel)
+				List<ArcKeyFrameChannel<?>> keyframes = new ArrayList<>();
+				switch (arcChannel)
 				{
-					case ROTATION -> 4;
-					default -> 3;
+					case ROTATION ->
+					{
+						for (int k = 0; k < inputTimes.limit(); k++)
+						{
+							float time = inputTimes.get(k) * 20;
+							Quaternionf value = new Quaternionf(
+									bb.getFloat(k * 16),
+									bb.getFloat(k * 16 + 4),
+									bb.getFloat(k * 16 + 8),
+									bb.getFloat(k * 16 + 12));
+							keyframes.add(new ArcKeyFrameChannel.RotationKeyFrame(time, value));
+						}
+					}
+					case POSITION ->
+					{
+						for (int k = 0; k < inputTimes.limit(); k++)
+						{
+							float time = inputTimes.get(k) * 20;
+							float x = bb.getFloat(k * 12);
+							float y = bb.getFloat(k * 12 + 4);
+							float z = bb.getFloat(k * 12 + 8);
+							
+							x = x - bone.pivot().x();
+							y = y - bone.pivot().y();
+							z = z - bone.pivot().z();
+							Vector3f value = new Vector3f(x, y, z);
+							keyframes.add(new ArcKeyFrameChannel.PositionKeyFrame(time, value));
+						}
+					}
+					case SCALE ->
+					{
+						for (int k = 0; k < inputTimes.limit(); k++)
+						{
+							float time = inputTimes.get(k) * 20;
+							Vector3f value = new Vector3f(bb.getFloat(k * 12), bb.getFloat(k * 12 + 4), bb.getFloat(k * 12 + 8));
+							keyframes.add(new ArcKeyFrameChannel.ScaleKeyFrame(time, value));
+						}
+					}
 				};
 				
-				List<ArcKeyframeChannel> keyframes = new ArrayList<>();
-				for (int k = 0; k < inputTimes.limit(); k++)
-				{
-					float time = inputTimes.get(k);
-					
-					Vector3f value;
-					
-					if (componentCount == 4)
-					{
-						float x = bb.getFloat(k * 16);
-						float y = bb.getFloat(k * 16 + 4);
-						float z = bb.getFloat(k * 16 + 8);
-						float w = bb.getFloat(k * 16 + 12);
-						
-						Quaternionf rotation = new Quaternionf(x, y, z, w);
-						value = rotation.getEulerAnglesXYZ(new Vector3f());
-					}
-					else
-					{
-						value = new Vector3f(bb.getFloat(k * 12), bb.getFloat(k * 12 + 4), bb.getFloat(k * 12 + 8));
-					}
-					
-					keyframes.add(new ArcKeyframeChannel(time, value));
-				}
-				
-				ArcBoneAnimation boneAnimation = boneAnimations.computeIfAbsent(boneUuid, k -> new ArcBoneAnimation(boneUuid, new HashMap<>()));
+				ArcBoneAnimation boneAnimation = boneAnimations.computeIfAbsent(bone.name(), k -> new ArcBoneAnimation(boneUuid, new HashMap<>()));
 				boneAnimation.channels().put(arcChannel, keyframes);
 			}
-			animations.put(animationName, new ArcAnimation(animationName, maxTime, boneAnimations));
+			animations.put(animationName, new ArcAnimation(animationName, maxTime * 20, boneAnimations));
 		}
 		
 		return animations;

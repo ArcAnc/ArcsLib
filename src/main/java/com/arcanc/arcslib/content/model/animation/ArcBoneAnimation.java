@@ -14,6 +14,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-public record ArcBoneAnimation(UUID boneUuid, Map<ArcAnimationChannel, List<ArcKeyframeChannel>> channels)
+public record ArcBoneAnimation(UUID boneUuid, Map<ArcAnimationChannel, List<? extends ArcKeyFrameChannel<?>>> channels)
 {
 }

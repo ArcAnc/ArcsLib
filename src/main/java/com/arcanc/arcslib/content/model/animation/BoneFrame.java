@@ -1,6 +1,6 @@
 /**
  * @author ArcAnc
- * Created at: 27.01.2026
+ * Created at: 25.02.2026
  * Copyright (c) 2026
  * <p>
  * This code is licensed under "Arc's License of Common Sense"
@@ -10,8 +10,13 @@
 package com.arcanc.arcslib.content.model.animation;
 
 
+import org.joml.Quaternionf;
 import org.joml.Vector3f;
 
-public record ArcKeyframeChannel(float time, Vector3f value)
+public record BoneFrame(
+		Vector3f translation,
+		Quaternionf rotation,
+		Vector3f scale)
 {
+
 }

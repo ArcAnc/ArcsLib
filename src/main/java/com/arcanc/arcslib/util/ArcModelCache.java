@@ -18,6 +18,7 @@ import com.arcanc.arcslib.content.model.baked.ArcBakedMesh;
 import com.arcanc.arcslib.content.model.baked.ArcBakedModel;
 import com.arcanc.arcslib.data.ArcModelParser;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.mojang.blaze3d.buffers.GpuBuffer;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;
@@ -171,16 +172,15 @@ public class ArcModelCache
 
 			for (ArcBone bone : model.bones.values())
 			{
-				if (bone.parent() == null)
-				{
+				ArcBone parentBone = bone.parent();
+				if (parentBone == null)
 					continue;
-				}
 				
 				ArcBakedBone.ArcBakedBoneBuilder child =
 						bakedBoneBuilder.get(bone.uuid());
 				
 				ArcBakedBone.ArcBakedBoneBuilder parent =
-						bakedBoneBuilder.get(bone.parent().uuid());
+						bakedBoneBuilder.get(parentBone.uuid());
 				
 				child.parent = parent;
 				parent.children.add(child);
@@ -194,7 +194,8 @@ public class ArcModelCache
 			
 			bakedModelMap.put(
 					rawModel.getKey(),
-					new ArcBakedModel(ImmutableList.copyOf(rootBones))
+					new ArcBakedModel(ImmutableList.copyOf(rootBones),
+									  ImmutableMap.copyOf(model.animations))
 			);
 		}
 		

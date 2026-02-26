@@ -13,10 +13,11 @@ package com.arcanc.arcslib.content.block.block_entity.ber;
 import com.arcanc.arcslib.api.ArcBlockRenderer;
 import com.arcanc.arcslib.api.ArcModelData;
 import com.arcanc.arcslib.content.block.block_entity.TestBlockEntity;
+import com.arcanc.arcslib.content.block.block_entity.ber.renderState.TestBlockEntityRenderState;
 import com.arcanc.arcslib.util.Database;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 
-public class TestBlockEntityRenderer extends ArcBlockRenderer<TestBlockEntity>
+public class TestBlockEntityRenderer extends ArcBlockRenderer<TestBlockEntity, TestBlockEntityRenderState>
 {
 	public TestBlockEntityRenderer(final BlockEntityRendererProvider.Context ctx)
 	{
@@ -25,5 +26,11 @@ public class TestBlockEntityRenderer extends ArcBlockRenderer<TestBlockEntity>
 				Database.rl("textures/block/test_block/torus_texture.png"),
 				Database.rl("textures/block/test_block/pyramid_texture.png"),
 				Database.rl("textures/block/test_block/cube_texture.png")));
+	}
+	
+	@Override
+	public TestBlockEntityRenderState createRenderState()
+	{
+		return new TestBlockEntityRenderState();
 	}
 }

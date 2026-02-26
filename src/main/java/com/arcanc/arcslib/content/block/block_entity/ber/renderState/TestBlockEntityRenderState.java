@@ -10,8 +10,9 @@
 package com.arcanc.arcslib.content.block.block_entity.ber.renderState;
 
 
-import net.minecraft.client.renderer.blockentity.state.BlockEntityRenderState;
+import com.arcanc.arcslib.content.block.block_entity.TestBlockEntity;
+import com.arcanc.arcslib.content.renderer.base.ArcBlockRenderState;
 
-public class TestBlockEntityRenderState extends BlockEntityRenderState
+public class TestBlockEntityRenderState extends ArcBlockRenderState.Impl<TestBlockEntity>
 {
 }

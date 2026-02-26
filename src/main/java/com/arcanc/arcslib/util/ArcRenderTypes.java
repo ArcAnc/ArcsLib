@@ -10,10 +10,8 @@
 package com.arcanc.arcslib.util;
 
 
-import com.mojang.blaze3d.pipeline.BlendFunction;
 import com.mojang.blaze3d.pipeline.RenderPipeline;
 import com.mojang.blaze3d.shaders.UniformType;
-import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.VertexFormat;
 import com.mojang.blaze3d.vertex.VertexFormatElement;
 import net.minecraft.client.renderer.RenderPipelines;
@@ -26,48 +24,6 @@ import java.util.Set;
 
 public class ArcRenderTypes
 {
-/*	public static RenderType trianglesSolid (Identifier texture)
-	{
-		return RenderTypeProviders.TRIANGLES_SOLID.apply(texture);
-	}
-	
-	public static RenderType trianglesTranslucent(Identifier texture)
-	{
-		return RenderTypeProviders.TRIANGLES_TRANSLUCENT.apply(texture);
-	}
-	
-	private static class RenderTypeProviders
-	{
-		public static Function<Identifier, RenderType> TRIANGLES_SOLID = Util.memoize(RenderTypeProviders :: trianglesSolid);
-		public static Function<Identifier, RenderType> TRIANGLES_TRANSLUCENT = Util.memoize(RenderTypeProviders :: trianglesTranslucent);
-		
-		private static @NotNull RenderType trianglesSolid(Identifier loc)
-		{
-			RenderSetup setup = RenderSetup.builder(RenderPipelinesProvider.TRIANGLES_SOLID).
-					withTexture("Sampler0", loc).
-					useLightmap().
-					useOverlay().
-					affectsCrumbling().
-					setOutline(RenderSetup.OutlineProperty.AFFECTS_OUTLINE).
-					createRenderSetup();
-			return RenderType.create("triangles_solid", setup);
-		}
-		
-		private static @NotNull RenderType trianglesTranslucent(Identifier loc)
-		{
-			RenderSetup setup = RenderSetup.builder(RenderPipelinesProvider.TRIANGLES_TRANSLUCENT).
-					withTexture("Sampler0", loc).
-					useLightmap().
-					useOverlay().
-					affectsCrumbling().
-					setOutline(RenderSetup.OutlineProperty.AFFECTS_OUTLINE).
-					sortOnUpload().
-					createRenderSetup();
-
-			return RenderType.create("triangles_translucent", setup);
-		}
-	}
-	*/
 	public static class RenderPipelinesProvider
 	{
 		private static final Set<RenderPipeline> PIPELINES = new HashSet<>();

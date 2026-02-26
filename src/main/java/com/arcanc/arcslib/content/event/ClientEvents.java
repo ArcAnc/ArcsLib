@@ -10,13 +10,17 @@
 package com.arcanc.arcslib.content.event;
 
 
+import com.arcanc.arcslib.content.animatable.ArcAnimatable;
 import com.arcanc.arcslib.content.block.block_entity.ber.TestBlockEntityRenderer;
 import com.arcanc.arcslib.content.registration.Registration;
 import com.arcanc.arcslib.util.ArcModelCache;
 import com.arcanc.arcslib.util.ArcRenderTypes;
 import com.arcanc.arcslib.util.Database;
+import com.arcanc.arcslib.util.helpers.RenderHelper;
+import net.minecraft.world.level.block.entity.BlockEntity;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.client.event.AddClientReloadListenersEvent;
+import net.neoforged.neoforge.client.event.ClientTickEvent;
 import net.neoforged.neoforge.client.event.EntityRenderersEvent;
 import org.jetbrains.annotations.NotNull;
 
@@ -33,7 +37,6 @@ public class ClientEvents
 	{
 		event.addListener(Database.RELOAD_LISTENER_ID, ArcModelCache :: reload);
 	}
-	
 	
 	private static void registerRenderers(final EntityRenderersEvent.@NotNull RegisterRenderers event)
 	{

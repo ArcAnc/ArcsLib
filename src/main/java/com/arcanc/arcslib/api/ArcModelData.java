@@ -12,12 +12,9 @@ package com.arcanc.arcslib.api;
 
 import com.arcanc.arcslib.content.model.baked.ArcBakedModel;
 import com.arcanc.arcslib.util.ArcModelCache;
-import com.arcanc.arcslib.util.Database;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.resources.Identifier;
-import net.minecraft.util.Mth;
 import org.jspecify.annotations.NonNull;
 
 import java.util.Map;
@@ -35,7 +32,6 @@ public class ArcModelData
 		{
 			String[] textureName = texture.toString().split("/");
 			String name = textureName[textureName.length - 1].substring(0, textureName[textureName.length - 1].length() - 4);
-			Database.LOGGER.warn("Texture name: {}", name);
 			this.textures.put(name, texture);
 		}
 	}

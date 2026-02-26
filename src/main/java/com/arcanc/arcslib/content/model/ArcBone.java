@@ -10,7 +10,6 @@
 package com.arcanc.arcslib.content.model;
 
 
-import org.joml.Matrix4f;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
 import org.jspecify.annotations.Nullable;
@@ -28,10 +27,6 @@ public class ArcBone
 	private final List<ArcBone> children;
 	private final Vector3f pivot;
 	private final Quaternionf baseRotation;
-	private final Matrix4f bindPose;
-	private final Matrix4f inverseBindPose;
-	private final Matrix4f animatedPose;
-	
 	
 	public ArcBone(
 			UUID uuid,
@@ -40,10 +35,7 @@ public class ArcBone
 			ArcBone parent,
 			List<ArcBone> children,
 			Vector3f pivot,
-			Quaternionf baseRotation,
-			Matrix4f bindPose,
-			Matrix4f inverseBindPose,
-			Matrix4f animatedPose)
+			Quaternionf baseRotation)
 	{
 		this.uuid = uuid;
 		this.name = name;
@@ -52,14 +44,11 @@ public class ArcBone
 		this.children = children;
 		this.pivot = pivot;
 		this.baseRotation = baseRotation;
-		this.bindPose = bindPose;
-		this.inverseBindPose = inverseBindPose;
-		this.animatedPose = animatedPose;
 	}
 	
 	public ArcBone(UUID uuid, String name, Vector3f pivot, Quaternionf baseRotation)
 	{
-		this(uuid, name, new ArrayList<>(), null, new ArrayList<>(), pivot, baseRotation, new Matrix4f(), new Matrix4f(), new Matrix4f());
+		this(uuid, name, new ArrayList<>(), null, new ArrayList<>(), pivot, baseRotation);
 	}
 	
 	public UUID uuid()
@@ -100,21 +89,6 @@ public class ArcBone
 	public Quaternionf baseRotation()
 	{
 		return this.baseRotation;
-	}
-	
-	public Matrix4f bindPose()
-	{
-		return this.bindPose;
-	}
-	
-	public Matrix4f inverseBindPose()
-	{
-		return this.inverseBindPose;
-	}
-	
-	public Matrix4f animatedPose()
-	{
-		return this.animatedPose;
 	}
 }
 

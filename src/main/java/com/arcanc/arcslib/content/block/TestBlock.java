@@ -12,12 +12,16 @@ package com.arcanc.arcslib.content.block;
 
 import com.arcanc.arcslib.content.block.block_entity.TestBlockEntity;
 import net.minecraft.core.BlockPos;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.EntityBlock;
 import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
-import org.jetbrains.annotations.NotNull;
+import net.minecraft.world.phys.BlockHitResult;
+import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 
 public class TestBlock extends Block implements EntityBlock
@@ -28,13 +32,27 @@ public class TestBlock extends Block implements EntityBlock
 	}
 	
 	@Override
-	public @Nullable BlockEntity newBlockEntity(@NotNull BlockPos blockPos, @NotNull BlockState blockState)
+	protected @NonNull InteractionResult useWithoutItem(@NonNull BlockState state,
+	                                                    @NonNull Level level,
+	                                                    @NonNull BlockPos pos,
+	                                                    @NonNull Player player,
+	                                                    @NonNull BlockHitResult hitResult)
+	{
+		BlockEntity blockEntity = level.getBlockEntity(pos);
+		if (!(blockEntity instanceof TestBlockEntity test))
+			return super.useWithoutItem(state, level, pos, player, hitResult);
+		test.changePlayAnimation();
+		return InteractionResult.SUCCESS;
+	}
+	
+	@Override
+	public @Nullable BlockEntity newBlockEntity(@NonNull BlockPos blockPos, @NonNull BlockState blockState)
 	{
 		return new TestBlockEntity(blockPos, blockState);
 	}
 	
 	@Override
-	protected RenderShape getRenderShape(BlockState state)
+	protected @NonNull RenderShape getRenderShape(@NonNull BlockState state)
 	{
 		return RenderShape.INVISIBLE;
 	}

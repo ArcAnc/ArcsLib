@@ -10,15 +10,67 @@
 package com.arcanc.arcslib.content.block.block_entity;
 
 
-import com.arcanc.arcslib.api.ArcAnimatable;
+import com.arcanc.arcslib.content.animatable.ArcAnimatable;
+import com.arcanc.arcslib.content.animatable.ArcAnimationManager;
+import com.arcanc.arcslib.content.animatable.instance.ArcAnimationController;
+import com.arcanc.arcslib.content.animatable.instance.ControllerState;
+import com.arcanc.arcslib.content.model.animation.ArcRawAnimation;
+import com.arcanc.arcslib.util.Database;
+import com.arcanc.arcslib.util.helpers.ArcLibHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import org.jspecify.annotations.NonNull;
 
-public class TestBlockEntity extends BlockEntity implements ArcAnimatable
+public class TestBlockEntity extends BlockEntity implements ArcAnimatable<TestBlockEntity>
 {
+	private final ArcAnimationManager<TestBlockEntity> animationManager = ArcLibHelper.createManager(this);
+	private final ArcRawAnimation ANIMATION = ArcRawAnimation.begin().
+			thenPlay("animation").
+			thenWait(20).
+			thenLoop("animation").
+			build();
+	private boolean playAnimation = false;
+	
 	public TestBlockEntity(BlockPos pos, BlockState blockState)
 	{
 		super(com.arcanc.arcslib.content.registration.Registration.BETypeReg.TEST_BLOCK_ENTITY.get(), pos, blockState);
+	}
+	
+	public void changePlayAnimation()
+	{
+		this.playAnimation = !playAnimation;
+		this.setChanged();
+	}
+	
+	public boolean isPlayAnimation()
+	{
+		return this.playAnimation;
+	}
+	
+	@Override
+	public ArcAnimationManager<TestBlockEntity> getAnimationManager()
+	{
+		return this.animationManager;
+	}
+	
+	@Override
+	public void registerAnimationControllers(ArcAnimationManager.@NonNull ArcAnimationRegistrar<TestBlockEntity> registrar)
+	{
+		registrar.add(new ArcAnimationController<>(animatableState ->
+		{
+			TestBlockEntity blockEntity = animatableState.animatable();
+			ArcAnimationController<TestBlockEntity> controller = animatableState.controller();
+			if (blockEntity.isPlayAnimation())
+			{
+				controller.play(ANIMATION);
+				return ControllerState.PLAY;
+			}
+			else
+			{
+				controller.stop();
+				return ControllerState.STOP;
+			}
+		}));
 	}
 }
