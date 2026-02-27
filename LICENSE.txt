@@ -1,0 +1,42 @@
+# Arc's License of Common Sense
+
+The purpose of this license is to make my code accessible for educational purposes, as I have benefited greatly from such access myself. However, I do not endorse the unauthorized use, commercial exploitation, or misappropriation of anyone’s creative work.
+
+Accordingly, this custom license has been crafted to clarify the permissible uses and restrictions associated with this code:
+
+### Permissible Actions:
+• You may review the code, draw inspiration, and use portions of it within your own projects.
+• You may fork this repository and make modifications to the code.
+• You are welcome to submit pull requests to this repository.
+• You may create other projects based on this project or its API (if available), including addons, provided that proper credit is given.
+
+### Prohibited Actions:
+• You may not claim ownership of this code or represent it as your own.
+• You may not redistribute this project (either as source code or compiled) without explicit permission from the license holder, ArcAnc.
+• You may not copy substantial sections of this code (e.g., entire classes or complex methods) without attributing credit.
+• You may not commercialize any aspect of this project, including selling the code, compiled projects, or implementing paywalls or donation systems that restrict access to any content in this project. Note that this does not apply to the CurseForge Points system.
+
+### Obligations:
+• If you incorporate any code from this project (excluding API classes), your project must also be open-source, enabling others to benefit from your work.
+• You are required to credit the original author when utilizing portions of the code, as outlined above.
+
+### Use of Resources:
+• You must give appropriate credit to all original artists and creators of resources.
+• You must seek permission before replicating any assets.
+• You may use and adapt art and model assets solely for addon mods to this project. If unsure, please seek clarification.
+
+### Contributing to This Repository:
+• Original contributors retain copyright over the code and resources they submit.
+• The repository owner is granted the rights to use and modify contributed code and resources. These rights are irrevocable.
+• All contributions must be licensed under this license.
+
+### In Summary:
+You are encouraged to explore the code, draw inspiration, and contribute where possible. Be creative and enjoy the process! Should you encounter any issues, please report them, or submit a pull request if you have a solution in mind. Unauthorized use of code or assets, however, is not permitted.
+
+If you have questions regarding this license, please reach out to me on Discord: ArcAnc.
+
+This project is provided “as is,” without any warranties, including but not limited to warranties of merchantability, fitness for a particular purpose, or non-infringement. The authors or copyright holders are not liable for any claims, damages, or other liabilities, whether in contract, tort, or otherwise, arising from or related to this project, its use, or any related projects.
+
+Finally, I reserve the right to revoke the permissions granted under this license from individuals who violate [Wheaton's Law](https://www.wheatonslaw.com).
+
+©2024-2026 ArcAnc
