@@ -12,7 +12,6 @@ package com.arcanc.arcslib.content.model.animation;
 
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
-import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 
 import java.util.List;
@@ -51,7 +50,7 @@ public record ArcAnimation(String name, float length, Map<String, ArcBoneAnimati
 	}
 	
 	@SuppressWarnings("unchecked")
-	private @Nullable Vector3f sampleVectorChannel(@NonNull ArcBoneAnimation boneAnimation, ArcAnimationChannel channel, float time)
+	private @Nullable Vector3f sampleVectorChannel(ArcBoneAnimation boneAnimation, ArcAnimationChannel channel, float time)
 	{
 		if (channel == ArcAnimationChannel.ROTATION)
 			return null;
@@ -91,7 +90,7 @@ public record ArcAnimation(String name, float length, Map<String, ArcBoneAnimati
 	}
 	
 	@SuppressWarnings("unchecked")
-	private @Nullable Quaternionf sampleRotationChannel(@NonNull ArcBoneAnimation boneAnimation, float time)
+	private @Nullable Quaternionf sampleRotationChannel(ArcBoneAnimation boneAnimation, float time)
 	{
 		List<ArcKeyFrameChannel<Quaternionf>> keyframes =
 				(List<ArcKeyFrameChannel<Quaternionf>>) boneAnimation.channels().get(ArcAnimationChannel.ROTATION);

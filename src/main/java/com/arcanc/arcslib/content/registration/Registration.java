@@ -9,16 +9,17 @@
 
 package com.arcanc.arcslib.content.registration;
 
-import com.arcanc.arcslib.content.block.TestBlock;
-import com.arcanc.arcslib.content.block.block_entity.TestBlockEntity;
-import com.arcanc.arcslib.content.item.TestBlockItem;
+import com.arcanc.arcslib.content.registration.block.TestBlock;
+import com.arcanc.arcslib.content.registration.block.block_entity.TestBlockEntity;
+import com.arcanc.arcslib.content.registration.entity.TestEntity;
+import com.arcanc.arcslib.content.registration.item.TestBlockItem;
 import com.arcanc.arcslib.util.Database;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.item.Item;
-import net.minecraft.world.item.Rarity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.neoforged.bus.api.IEventBus;
@@ -74,8 +75,27 @@ public class Registration
 		}
 	}
 	
+	public static class EntityTypeReg
+	{
+		public static final DeferredRegister.Entities ENTITIES = DeferredRegister.createEntities(Database.MOD_ID);
+		
+		public static final DeferredHolder<EntityType<?>, EntityType<TestEntity>> TEST_ENTITY = ENTITIES.registerEntityType("test_entity", TestEntity :: new, MobCategory.MISC,
+				builder ->
+				builder.
+						noLootTable().
+						sized(1, 1).
+						
+						clientTrackingRange(5));
+		
+		private static void init (@NotNull final IEventBus bus)
+		{
+			ENTITIES.register(bus);
+		}
+	}
+	
 	public static void init(@NotNull final IEventBus bus)
 	{
+		EntityTypeReg.init(bus);
 		BlockReg.init(bus);
 		BETypeReg.init(bus);
 		ItemReg.init(bus);

@@ -7,7 +7,7 @@
  * Details can be found in the license file in the root folder of this project
  */
 
-package com.arcanc.arcslib.api;
+package com.arcanc.arcslib.content.renderer;
 
 
 import com.arcanc.arcslib.content.animatable.ArcAnimatable;
@@ -43,9 +43,7 @@ import net.minecraft.util.ARGB;
 import net.minecraft.util.LightCoordsUtil;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.phys.Vec3;
-import org.jetbrains.annotations.NotNull;
 import org.joml.*;
-import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 
 import java.util.Collection;
@@ -53,9 +51,9 @@ import java.util.OptionalDouble;
 import java.util.OptionalInt;
 
 public abstract class ArcBlockRenderer<T extends BlockEntity & ArcAnimatable<T>, RS extends BlockEntityRenderState & ArcBlockRenderState<T>>
-		implements ArcRenderer<RS>, BlockEntityRenderer<@NonNull T, @NonNull RS>
+		implements ArcRenderer<T, RS>, BlockEntityRenderer<T, RS>
 {
-	private final ArcModelData model;
+	private final ArcModelData modelData;
 	private final MappableRingBuffer colorLightOverlay= new MappableRingBuffer(
 			() -> Database.rl("color_light_overlay").toLanguageKey(),
 			GpuBuffer.USAGE_UNIFORM | GpuBuffer.USAGE_MAP_WRITE,
@@ -64,54 +62,55 @@ public abstract class ArcBlockRenderer<T extends BlockEntity & ArcAnimatable<T>,
 					putIVec2().
 					putIVec2().
 					get());
-	public ArcBlockRenderer(@NotNull ArcModelData model)
+	
+	public ArcBlockRenderer(ArcModelData modelData)
 	{
-		this.model = model;
+		this.modelData = modelData;
 	}
 	
 	@Override
 	public ArcModelData getArcModelData()
 	{
-		return this.model;
+		return this.modelData;
 	}
 	
 	@Override
 	public ArcBakedModel getArcModel()
 	{
-		return this.model.getModel();
+		return this.modelData.getModel();
 	}
 	
 	@Override
 	public void extractRenderState(T blockEntity,
-	                               @NonNull RS renderState,
+	                               RS renderState,
 	                               float partialTick,
-	                               @NonNull Vec3 cameraPosition,
+	                               Vec3 cameraPosition,
 	                               ModelFeatureRenderer.@Nullable CrumblingOverlay breakProgress)
 	{
 		renderState.extractBlockData(blockEntity, this, breakProgress);
 	}
 	
 	@Override
-	public void submit(@NonNull RS renderState,
-	                   @NonNull PoseStack poseStack,
-	                   @NonNull SubmitNodeCollector submitNodeCollector,
-	                   @NonNull CameraRenderState cameraRenderState)
+	public void submit(RS renderState,
+	                   PoseStack poseStack,
+	                   SubmitNodeCollector submitNodeCollector,
+	                   CameraRenderState cameraRenderState)
 	{
 		renderState.getAnimatable().getAnimationManager().getControllers().
 				forEach((name, controller) -> controller.tick(renderState.getAnimatable(), renderState));
 		
-		preRender(poseStack, renderState, cameraRenderState);
-		actuallyRender(poseStack, renderState, cameraRenderState);
-		postRender(poseStack, renderState, cameraRenderState);
+		preRender(poseStack, renderState, cameraRenderState, submitNodeCollector);
+		actuallyRender(poseStack, renderState, cameraRenderState, submitNodeCollector);
+		postRender(poseStack, renderState, cameraRenderState, submitNodeCollector);
 	}
 	
 	@Override
-	public void preRender(PoseStack poseStack, RS renderState, CameraRenderState cameraRenderState)
+	public void preRender(PoseStack poseStack, RS renderState, CameraRenderState cameraRenderState, SubmitNodeCollector submitNodeCollector)
 	{
 	}
 	
 	@Override
-	public void actuallyRender(@NonNull PoseStack poseStack, @NonNull RS renderState, CameraRenderState cameraRenderState)
+	public void actuallyRender(PoseStack poseStack, RS renderState, CameraRenderState cameraRenderState, SubmitNodeCollector submitNodeCollector)
 	{
 		Collection<ArcAnimationController<T>> controllers = renderState.getAnimatable().getAnimationManager().getControllers().values();
 		poseStack.pushPose();
@@ -122,14 +121,14 @@ public abstract class ArcBlockRenderer<T extends BlockEntity & ArcAnimatable<T>,
 	}
 	
 	@Override
-	public void postRender(PoseStack poseStack, RS renderState, CameraRenderState cameraRenderState)
+	public void postRender(PoseStack poseStack, RS renderState, CameraRenderState cameraRenderState, SubmitNodeCollector submitNodeCollector)
 	{
 	}
 	
-	private void perBoneRender(@NonNull PoseStack poseStack,
-	                           @NonNull RS blockEntityRenderState,
-	                           @NonNull ArcBakedBone bone,
-							   Collection<ArcAnimationController<T>> controllers,
+	protected void perBoneRender(PoseStack poseStack,
+	                           RS blockEntityRenderState,
+	                           ArcBakedBone bone,
+	                           Collection<ArcAnimationController<T>> controllers,
 	                           int red,
 	                           int blue,
 	                           int green,
@@ -205,8 +204,8 @@ public abstract class ArcBlockRenderer<T extends BlockEntity & ArcAnimatable<T>,
 	}
 	
 	private @Nullable BoneFrame mixBone(
-			@NonNull ArcBakedBone bone,
-			@NonNull Collection<ArcAnimationController<T>> controllers,
+			ArcBakedBone bone,
+			Collection<ArcAnimationController<T>> controllers,
 			ArcRenderState<T> state)
 	{
 		Vector3f translation = new Vector3f(bone.basePosition());

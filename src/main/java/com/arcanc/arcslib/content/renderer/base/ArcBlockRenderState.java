@@ -10,21 +10,21 @@
 package com.arcanc.arcslib.content.renderer.base;
 
 
-import com.arcanc.arcslib.api.ArcBlockRenderer;
 import com.arcanc.arcslib.content.animatable.ArcAnimatable;
 import com.arcanc.arcslib.content.model.baked.ArcBakedModel;
+import com.arcanc.arcslib.content.renderer.ArcBlockRenderer;
 import com.arcanc.arcslib.util.helpers.RenderHelper;
 import net.minecraft.client.renderer.blockentity.state.BlockEntityRenderState;
 import net.minecraft.client.renderer.feature.ModelFeatureRenderer;
 import net.minecraft.world.level.block.entity.BlockEntity;
-import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
 public interface ArcBlockRenderState<T extends BlockEntity & ArcAnimatable<T>> extends ArcRenderState<T>
 {
 	<RS extends BlockEntityRenderState & ArcBlockRenderState<T>> void extractBlockData(
 			T blockEntity,
-			@NonNull ArcBlockRenderer<T, RS> renderer,
-			ModelFeatureRenderer.CrumblingOverlay breakProgress);
+			ArcBlockRenderer<T, RS> renderer,
+			ModelFeatureRenderer.@Nullable CrumblingOverlay breakProgress);
 	
 	class Impl<T extends BlockEntity & ArcAnimatable<T>> extends BlockEntityRenderState implements ArcBlockRenderState<T>
 	{
@@ -38,7 +38,7 @@ public interface ArcBlockRenderState<T extends BlockEntity & ArcAnimatable<T>> e
 			this.partialTicks = RenderHelper.mc().getDeltaTracker().getGameTimeDeltaPartialTick(false);
 		}
 		
-		public <RS extends BlockEntityRenderState & ArcBlockRenderState<T>> void extractBlockData(T blockEntity, @NonNull ArcBlockRenderer<T, RS> renderer, ModelFeatureRenderer.CrumblingOverlay breakProgress)
+		public <RS extends BlockEntityRenderState & ArcBlockRenderState<T>> void extractBlockData(T blockEntity, ArcBlockRenderer<T, RS> renderer, ModelFeatureRenderer.@Nullable CrumblingOverlay breakProgress)
 		{
 			this.extractData();
 			BlockEntityRenderState.extractBase(blockEntity, this, breakProgress);

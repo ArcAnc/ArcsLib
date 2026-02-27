@@ -7,7 +7,7 @@
  * Details can be found in the license file in the root folder of this project
  */
 
-package com.arcanc.arcslib.api;
+package com.arcanc.arcslib.content.renderer;
 
 
 import com.arcanc.arcslib.content.model.baked.ArcBakedModel;
@@ -15,7 +15,6 @@ import com.arcanc.arcslib.util.ArcModelCache;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.resources.Identifier;
-import org.jspecify.annotations.NonNull;
 
 import java.util.Map;
 
@@ -24,7 +23,7 @@ public class ArcModelData
 	private final Identifier modelLocation;
 	private final Map<String, Identifier> textures;
 	
-	public ArcModelData(Identifier modelLocation, String modelType, Identifier @NonNull ... textures)
+	public ArcModelData(Identifier modelLocation, String modelType, Identifier... textures)
 	{
 		this.modelLocation = generateDefaultModelLocation(modelLocation, modelType);
 		this.textures = new Object2ObjectOpenHashMap<>();
@@ -36,7 +35,7 @@ public class ArcModelData
 		}
 	}
 	
-	private @NonNull Identifier generateDefaultModelLocation(@NonNull Identifier modelLocation, String type)
+	private Identifier generateDefaultModelLocation(Identifier modelLocation, String type)
 	{
 		return modelLocation.withPrefix("glmodels/" + type + "/").withSuffix(".glb");
 	}

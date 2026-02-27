@@ -7,7 +7,7 @@
  * Details can be found in the license file in the root folder of this project
  */
 
-package com.arcanc.arcslib.content.block.block_entity;
+package com.arcanc.arcslib.content.registration.block.block_entity;
 
 
 import com.arcanc.arcslib.content.animatable.ArcAnimatable;
@@ -15,7 +15,6 @@ import com.arcanc.arcslib.content.animatable.ArcAnimationManager;
 import com.arcanc.arcslib.content.animatable.instance.ArcAnimationController;
 import com.arcanc.arcslib.content.animatable.instance.ControllerState;
 import com.arcanc.arcslib.content.model.animation.ArcRawAnimation;
-import com.arcanc.arcslib.util.Database;
 import com.arcanc.arcslib.util.helpers.ArcLibHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.block.entity.BlockEntity;

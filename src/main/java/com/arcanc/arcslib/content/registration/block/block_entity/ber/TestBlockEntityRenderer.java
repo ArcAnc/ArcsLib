@@ -7,13 +7,13 @@
  * Details can be found in the license file in the root folder of this project
  */
 
-package com.arcanc.arcslib.content.block.block_entity.ber;
+package com.arcanc.arcslib.content.registration.block.block_entity.ber;
 
 
-import com.arcanc.arcslib.api.ArcBlockRenderer;
-import com.arcanc.arcslib.api.ArcModelData;
-import com.arcanc.arcslib.content.block.block_entity.TestBlockEntity;
-import com.arcanc.arcslib.content.block.block_entity.ber.renderState.TestBlockEntityRenderState;
+import com.arcanc.arcslib.content.renderer.ArcBlockRenderer;
+import com.arcanc.arcslib.content.renderer.ArcModelData;
+import com.arcanc.arcslib.content.registration.block.block_entity.TestBlockEntity;
+import com.arcanc.arcslib.content.registration.block.block_entity.ber.renderState.TestBlockEntityRenderState;
 import com.arcanc.arcslib.util.Database;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 

@@ -11,11 +11,10 @@ package com.arcanc.arcslib.content.event;
 
 
 import net.neoforged.bus.api.IEventBus;
-import org.jetbrains.annotations.NotNull;
 
 public class CommonEvents
 {
-	public static void registerCommonEvents(@NotNull final IEventBus modEventBus)
+	public static void registerCommonEvents(final IEventBus modEventBus)
 	{
 	
 	}

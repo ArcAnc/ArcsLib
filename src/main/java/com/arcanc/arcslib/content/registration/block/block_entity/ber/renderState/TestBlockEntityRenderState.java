@@ -7,10 +7,10 @@
  * Details can be found in the license file in the root folder of this project
  */
 
-package com.arcanc.arcslib.content.block.block_entity.ber.renderState;
+package com.arcanc.arcslib.content.registration.block.block_entity.ber.renderState;
 
 
-import com.arcanc.arcslib.content.block.block_entity.TestBlockEntity;
+import com.arcanc.arcslib.content.registration.block.block_entity.TestBlockEntity;
 import com.arcanc.arcslib.content.renderer.base.ArcBlockRenderState;
 
 public class TestBlockEntityRenderState extends ArcBlockRenderState.Impl<TestBlockEntity>

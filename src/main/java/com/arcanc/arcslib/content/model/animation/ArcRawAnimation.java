@@ -11,7 +11,6 @@ package com.arcanc.arcslib.content.model.animation;
 
 
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
-import org.jspecify.annotations.NonNull;
 
 import java.util.List;
 
@@ -19,12 +18,12 @@ public class ArcRawAnimation
 {
 	private final List<AnimationStage> stages;
 	
-	private ArcRawAnimation(@NonNull Builder builder)
+	private ArcRawAnimation(Builder builder)
 	{
 		this.stages = List.copyOf(builder.stages);
 	}
 	
-	public static @NonNull Builder begin()
+	public static Builder begin()
 	{
 		return new Builder();
 	}

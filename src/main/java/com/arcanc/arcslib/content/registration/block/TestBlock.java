@@ -7,10 +7,10 @@
  * Details can be found in the license file in the root folder of this project
  */
 
-package com.arcanc.arcslib.content.block;
+package com.arcanc.arcslib.content.registration.block;
 
 
-import com.arcanc.arcslib.content.block.block_entity.TestBlockEntity;
+import com.arcanc.arcslib.content.registration.block.block_entity.TestBlockEntity;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;

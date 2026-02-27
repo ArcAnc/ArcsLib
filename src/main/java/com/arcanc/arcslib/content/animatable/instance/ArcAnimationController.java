@@ -22,7 +22,7 @@ public class ArcAnimationController<T extends ArcAnimatable<T>>
 	protected final String name;
 	protected final StateHandler<T> stateHandler;
 	
-	protected ArcRawAnimation currentAnimation;
+	protected @Nullable ArcRawAnimation currentAnimation;
 	
 	private int stageIndex;
 	private float time;
@@ -37,13 +37,11 @@ public class ArcAnimationController<T extends ArcAnimatable<T>>
 	{
 		this.name = name;
 		this.stateHandler = stateHandler;
+		this.state = ControllerState.STOP;
 	}
 	
 	public void play(ArcRawAnimation animation)
 	{
-		if (animation == null)
-			return;
-		
 		this.currentAnimation = animation;
 		if (!this.isPlaying())
 		{

@@ -7,16 +7,18 @@
  * Details can be found in the license file in the root folder of this project
  */
 
-package com.arcanc.arcslib.api;
+package com.arcanc.arcslib.content.renderer;
 
 
+import com.arcanc.arcslib.content.animatable.ArcAnimatable;
 import com.arcanc.arcslib.content.model.baked.ArcBakedModel;
 import com.arcanc.arcslib.content.renderer.base.ArcRenderState;
 import com.mojang.blaze3d.vertex.PoseStack;
+import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.state.CameraRenderState;
 import net.minecraft.resources.Identifier;
 
-public interface ArcRenderer<RS extends ArcRenderState>
+public interface ArcRenderer<T extends ArcAnimatable<T>, RS extends ArcRenderState<T>>
 {
 	ArcModelData getArcModelData();
 	
@@ -27,7 +29,7 @@ public interface ArcRenderer<RS extends ArcRenderState>
 	
 	ArcBakedModel getArcModel();
 	
-	void preRender(PoseStack poseStack, RS renderState, CameraRenderState cameraRenderState);
-	void actuallyRender(PoseStack poseStack, RS renderState, CameraRenderState cameraRenderState);
-	void postRender(PoseStack poseStack, RS renderState, CameraRenderState cameraRenderState);
+	void preRender(PoseStack poseStack, RS renderState, CameraRenderState cameraRenderState, SubmitNodeCollector submitNodeCollector);
+	void actuallyRender(PoseStack poseStack, RS renderState, CameraRenderState cameraRenderState, SubmitNodeCollector submitNodeCollector);
+	void postRender(PoseStack poseStack, RS renderState, CameraRenderState cameraRenderState, SubmitNodeCollector submitNodeCollector);
 }
