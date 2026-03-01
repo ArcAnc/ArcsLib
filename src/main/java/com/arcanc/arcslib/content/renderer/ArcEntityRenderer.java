@@ -17,6 +17,7 @@ import com.arcanc.arcslib.content.model.baked.ArcBakedBone;
 import com.arcanc.arcslib.content.model.baked.ArcBakedModel;
 import com.arcanc.arcslib.content.renderer.base.ArcEntityRenderState;
 import com.arcanc.arcslib.content.renderer.base.ArcRenderState;
+import com.arcanc.arcslib.content.renderer.modelData.ArcModelData;
 import com.arcanc.arcslib.util.ArcRenderTypes;
 import com.arcanc.arcslib.util.Database;
 import com.mojang.blaze3d.buffers.GpuBuffer;
@@ -94,7 +95,7 @@ public abstract class ArcEntityRenderer<T extends Entity & ArcAnimatable<T>, RS 
 	{
 		super.submit(renderState, poseStack, submitNodeCollector, cameraRenderState);
 		renderState.getAnimatable().getAnimationManager().getControllers().
-				forEach((name, controller) -> controller.tick(renderState.getAnimatable(), renderState));
+				forEach((_, controller) -> controller.tick(renderState.getAnimatable(), renderState));
 		
 		preRender(poseStack, renderState, cameraRenderState, submitNodeCollector);
 		actuallyRender(poseStack, renderState, cameraRenderState, submitNodeCollector);

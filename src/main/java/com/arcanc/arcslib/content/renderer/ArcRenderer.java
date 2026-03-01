@@ -13,6 +13,7 @@ package com.arcanc.arcslib.content.renderer;
 import com.arcanc.arcslib.content.animatable.ArcAnimatable;
 import com.arcanc.arcslib.content.model.baked.ArcBakedModel;
 import com.arcanc.arcslib.content.renderer.base.ArcRenderState;
+import com.arcanc.arcslib.content.renderer.modelData.ArcModelData;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.state.CameraRenderState;

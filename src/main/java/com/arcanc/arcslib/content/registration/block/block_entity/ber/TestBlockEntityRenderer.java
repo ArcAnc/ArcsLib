@@ -10,10 +10,10 @@
 package com.arcanc.arcslib.content.registration.block.block_entity.ber;
 
 
-import com.arcanc.arcslib.content.renderer.ArcBlockRenderer;
-import com.arcanc.arcslib.content.renderer.ArcModelData;
 import com.arcanc.arcslib.content.registration.block.block_entity.TestBlockEntity;
 import com.arcanc.arcslib.content.registration.block.block_entity.ber.renderState.TestBlockEntityRenderState;
+import com.arcanc.arcslib.content.renderer.ArcBlockRenderer;
+import com.arcanc.arcslib.content.renderer.modelData.DefaultBlockModelData;
 import com.arcanc.arcslib.util.Database;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 
@@ -21,11 +21,12 @@ public class TestBlockEntityRenderer extends ArcBlockRenderer<TestBlockEntity, T
 {
 	public TestBlockEntityRenderer(final BlockEntityRendererProvider.Context ctx)
 	{
-		super(new ArcModelData(Database.rl("test_block"), "block",
-				Database.rl("textures/block/test_block/tube_texture.png"),
-				Database.rl("textures/block/test_block/torus_texture.png"),
-				Database.rl("textures/block/test_block/pyramid_texture.png"),
-				Database.rl("textures/block/test_block/cube_texture.png")));
+		super(new DefaultBlockModelData.DefaultBlockModelDataBuilder(Database.rl("test_block")).
+				addTexture(Database.rl("tube_texture")).
+				addTexture(Database.rl("torus_texture")).
+				addTexture(Database.rl("pyramid_texture")).
+				addTexture(Database.rl("cube_texture")).
+				build());
 	}
 	
 	@Override

@@ -17,7 +17,6 @@ import com.arcanc.arcslib.content.model.animation.ArcAnimation;
 import com.arcanc.arcslib.content.model.animation.ArcAnimationChannel;
 import com.arcanc.arcslib.content.model.animation.ArcBoneAnimation;
 import com.arcanc.arcslib.content.model.animation.ArcKeyFrameChannel;
-import com.arcanc.arcslib.util.Database;
 import com.arcanc.arcslib.util.helpers.ParserHelper;
 import com.mojang.datafixers.util.Pair;
 import de.javagl.jgltf.model.*;
@@ -25,7 +24,6 @@ import de.javagl.jgltf.model.io.GltfModelReader;
 import de.javagl.jgltf.model.v2.MaterialModelV2;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
-import org.jspecify.annotations.NonNull;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -36,7 +34,7 @@ import java.util.stream.Collectors;
 
 public class ArcModelParser
 {
-	public static @NonNull ArcModel parse(InputStream stream) throws IOException
+	public static ArcModel parse(InputStream stream) throws IOException
 	{
 		GltfModel model = new GltfModelReader().readWithoutReferences(stream);
 		
@@ -57,7 +55,7 @@ public class ArcModelParser
 
 	}
 	
-	private static @NonNull Map<NodeModel, ArcBone> parseBones(@NonNull GltfModel model, Map<UUID, ArcBone> uuidToBone, Map<UUID, ArcMesh> uuidToMesh)
+	private static Map<NodeModel, ArcBone> parseBones(GltfModel model, Map<UUID, ArcBone> uuidToBone, Map<UUID, ArcMesh> uuidToMesh)
 	{
 		List<NodeModel> joints = model.getNodeModels();
 		final Map<NodeModel, ArcBone> nodeToBone = new HashMap<>();
@@ -89,7 +87,7 @@ public class ArcModelParser
 		return nodeToBone;
 	}
 
-	private static void parseBone(@NonNull NodeModel node, Map<NodeModel, ArcBone> nodeToBone, GltfModel model, Map<UUID, ArcMesh> uuidToMesh)
+	private static void parseBone(NodeModel node, Map<NodeModel, ArcBone> nodeToBone, GltfModel model, Map<UUID, ArcMesh> uuidToMesh)
 	{
 		float[] rawTranslation = node.getTranslation();
 		Vector3f pivot = new Vector3f();
@@ -119,7 +117,7 @@ public class ArcModelParser
 		nodeToBone.put(node, bone);
 	}
 	
-	private static @NonNull UUID parseMesh(@NonNull MeshModel mesh, GltfModel model, Map<UUID, ArcMesh> uuidToMesh)
+	private static UUID parseMesh(MeshModel mesh, GltfModel model, Map<UUID, ArcMesh> uuidToMesh)
 	{
 		//Only one primitive per mesh. At least for BBmodel
 		MeshPrimitiveModel primitive = mesh.getMeshPrimitiveModels().getFirst();
@@ -162,7 +160,7 @@ public class ArcModelParser
 		return arcMesh.uuid();
 	}
 	
-	private static @NonNull Map<String, ArcAnimation> parseAnimations(@NonNull GltfModel model, Map<NodeModel, ArcBone> nodeToBone)
+	private static Map<String, ArcAnimation> parseAnimations(GltfModel model, Map<NodeModel, ArcBone> nodeToBone)
 	{
 		Map<String, ArcAnimation> animations = new HashMap<>();
 		

@@ -13,12 +13,15 @@ package com.arcanc.arcslib.content.event;
 import com.arcanc.arcslib.content.registration.Registration;
 import com.arcanc.arcslib.content.registration.block.block_entity.ber.TestBlockEntityRenderer;
 import com.arcanc.arcslib.content.registration.entity.renderer.TestEntityRender;
+import com.arcanc.arcslib.content.registration.item.renderer.TestBlockItemRenderer;
 import com.arcanc.arcslib.util.ArcModelCache;
 import com.arcanc.arcslib.util.ArcRenderTypes;
 import com.arcanc.arcslib.util.Database;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.client.event.AddClientReloadListenersEvent;
 import net.neoforged.neoforge.client.event.EntityRenderersEvent;
+import net.neoforged.neoforge.client.event.RegisterSpecialModelRendererEvent;
+import net.neoforged.neoforge.client.extensions.common.RegisterClientExtensionsEvent;
 
 public class ClientEvents
 {
@@ -26,7 +29,13 @@ public class ClientEvents
 	{
 		modEventBus.addListener(ClientEvents :: registerRenderers);
 		modEventBus.addListener(ClientEvents :: registerReloadListeners);
+		modEventBus.addListener(ClientEvents :: registerClientExtensions);
 		ArcRenderTypes.register(modEventBus);
+	}
+	
+	private static void registerClientExtensions(final RegisterSpecialModelRendererEvent event)
+	{
+		event.register(Database.rl("test_block"), TestBlockItemRenderer.Unbaked.MAP_CODEC);
 	}
 	
 	private static void registerReloadListeners(final AddClientReloadListenersEvent event)

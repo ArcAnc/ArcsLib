@@ -13,7 +13,7 @@ package com.arcanc.arcslib.content.registration.entity.renderer;
 import com.arcanc.arcslib.content.registration.entity.TestEntity;
 import com.arcanc.arcslib.content.registration.entity.renderer.renderState.TestEntityRenderState;
 import com.arcanc.arcslib.content.renderer.ArcEntityRenderer;
-import com.arcanc.arcslib.content.renderer.ArcModelData;
+import com.arcanc.arcslib.content.renderer.modelData.DefaultEntityModelData;
 import com.arcanc.arcslib.util.Database;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 
@@ -21,10 +21,11 @@ public class TestEntityRender extends ArcEntityRenderer<TestEntity, TestEntityRe
 {
 	public TestEntityRender(EntityRendererProvider.Context context)
 	{
-		super(context, new ArcModelData(Database.rl("test_entity"), "entity",
-				Database.rl("textures/entity/test_entity/sphere.png"),
-				Database.rl("textures/entity/test_entity/torus.png"),
-				Database.rl("textures/entity/test_entity/tube.png")));
+		super(context, new DefaultEntityModelData.DefaultEntityModelDataBuilder(Database.rl("test_entity")).
+				addTexture(Database.rl("sphere")).
+				addTexture(Database.rl("torus")).
+				addTexture(Database.rl("tube")).
+				build());
 	}
 	
 	@Override
