@@ -14,6 +14,7 @@ import com.arcanc.arcslib.content.animatable.ArcAnimatable;
 import com.arcanc.arcslib.content.model.baked.ArcBakedModel;
 import com.arcanc.arcslib.content.renderer.ArcItemRenderer;
 import com.arcanc.arcslib.util.helpers.RenderHelper;
+import net.minecraft.client.gui.render.state.GuiItemRenderState;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
@@ -27,8 +28,9 @@ public interface ArcItemRenderState<T extends Item & ArcAnimatable<T>> extends A
 	
 	@ApiStatus.Internal
 	void extractAdditionalData(ItemDisplayContext context, int lightCoords, int overlayCoords, boolean hasFoil, int outlineColor);
+	
 	@ApiStatus.Internal
-	void extractCoordsForGui(int x, int y);
+	void extractGuiItemRenderState(GuiItemRenderState renderState);
 	
 	ItemDisplayContext context();
 	int lightCoords();
@@ -36,8 +38,7 @@ public interface ArcItemRenderState<T extends Item & ArcAnimatable<T>> extends A
 	boolean hasFoil();
 	int outlineColor();
 	
-	int getGuiX();
-	int getGuiY();
+	GuiItemRenderState itemRenderState();
 	
 	class Impl<T extends Item & ArcAnimatable<T>> implements ArcItemRenderState<T>
 	{
@@ -49,9 +50,7 @@ public interface ArcItemRenderState<T extends Item & ArcAnimatable<T>> extends A
 		private int overlayCoords;
 		private boolean hasFoil;
 		private int outlineColor;
-		
-		private int guiX;
-		private int guiY;
+		private GuiItemRenderState guiItemRenderState;
 		
 		@Override
 		public void extractData()
@@ -98,10 +97,9 @@ public interface ArcItemRenderState<T extends Item & ArcAnimatable<T>> extends A
 		}
 		
 		@Override
-		public void extractCoordsForGui(int x, int y)
+		public void extractGuiItemRenderState(GuiItemRenderState renderState)
 		{
-			this.guiX = x;
-			this.guiY = y;
+			this.guiItemRenderState = renderState;
 		}
 		
 		@Override
@@ -135,15 +133,10 @@ public interface ArcItemRenderState<T extends Item & ArcAnimatable<T>> extends A
 		}
 		
 		@Override
-		public int getGuiX()
+		public GuiItemRenderState itemRenderState()
 		{
-			return this.guiX;
+			return this.guiItemRenderState;
 		}
 		
-		@Override
-		public int getGuiY()
-		{
-			return this.guiY;
-		}
 	}
 }

@@ -37,7 +37,6 @@ import net.minecraft.client.renderer.MappableRingBuffer;
 import net.minecraft.client.renderer.Projection;
 import net.minecraft.client.renderer.ProjectionMatrixBuffer;
 import net.minecraft.client.renderer.SubmitNodeCollector;
-import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.client.renderer.special.SpecialModelRenderer;
 import net.minecraft.client.renderer.state.CameraRenderState;
 import net.minecraft.client.renderer.texture.AbstractTexture;
@@ -60,6 +59,8 @@ public abstract class ArcItemRenderer<T extends Item & ArcAnimatable<T>, RS exte
 {
 	private final ArcModelData modelData;
 	private @Nullable MappableRingBuffer colorLightOverlay;
+	private @Nullable Projection guiProjection;
+	private @Nullable ProjectionMatrixBuffer guiProjectionMatrixBuffer;
 	private boolean initialized = false;
 	
 	public ArcItemRenderer(ArcModelData modelData)
@@ -73,6 +74,8 @@ public abstract class ArcItemRenderer<T extends Item & ArcAnimatable<T>, RS exte
 	{
 		if (this.initialized)
 			return;
+		this.guiProjection = new Projection();
+		this.guiProjectionMatrixBuffer = new ProjectionMatrixBuffer("arc_item_gui");
 		this.colorLightOverlay = new MappableRingBuffer(
 				() -> Database.rl("color_light_overlay").toLanguageKey(),
 				GpuBuffer.USAGE_UNIFORM | GpuBuffer.USAGE_MAP_WRITE,
@@ -141,108 +144,17 @@ public abstract class ArcItemRenderer<T extends Item & ArcAnimatable<T>, RS exte
 	public void actuallyRender(PoseStack poseStack, RS renderState, CameraRenderState cameraRenderState, SubmitNodeCollector submitNodeCollector)
 	{
 		Collection<ArcAnimationController<T>> controllers = renderState.getAnimatable().getAnimationManager().getControllers().values();
-		if (renderState.context() != ItemDisplayContext.GUI)
-		{
-			poseStack.pushPose();
-			poseStack.translate(0.5f, 0, 0.5f);
-			poseStack.mulPose(Axis.YP.rotationDegrees(180));
-			renderState.getBakedModel().bones().forEach(bone ->
-					perBoneRender(poseStack, renderState, bone, controllers, 255, 255, 255, 255, renderState.overlayCoords()));
-			poseStack.popPose();
-		}
-		else
-			submitNodeCollector.submitCustomGeometry(poseStack, RenderTypes.debugTriangleFan(), (pose, buffer) ->
-			{
-				//poseStack.pushPose();
-				//poseStack.translate(0.5f, 0, 0.5f);
-				//poseStack.mulPose(Axis.YP.rotationDegrees(180));
-				renderState.getBakedModel().bones().forEach(bone ->
-						perBoneRenderGui(pose, renderState, bone, controllers, 255, 255, 255, 255, renderState.overlayCoords()));
-				//poseStack.popPose();
-			});
-
+		poseStack.pushPose();
+		poseStack.translate(0.5f, 0, 0.5f);
+		poseStack.mulPose(Axis.YP.rotationDegrees(180));
+		renderState.getBakedModel().bones().forEach(bone ->
+				perBoneRender(poseStack, renderState, bone, controllers, 255, 255, 255, 255, renderState.overlayCoords()));
+		poseStack.popPose();
 	}
 	
 	@Override
 	public void postRender(PoseStack poseStack, RS renderState, CameraRenderState cameraRenderState, SubmitNodeCollector submitNodeCollector)
 	{
-	
-	}
-	
-	protected void perBoneRenderGui(PoseStack.Pose pose,
-	                                RS renderState,
-	                                ArcBakedBone bone,
-	                                Collection<ArcAnimationController<T>> controllers,
-	                                int red,
-	                                int blue,
-	                                int green,
-	                                int alpha,
-	                                int overlay)
-	{
-		BoneFrame frame = mixBone(bone, controllers, renderState);
-		
-		PoseStack.Pose newPose = pose.copy();
-		if (frame != null)
-		{
-			newPose.translate(frame.translation().x(), frame.translation().y(), frame.translation().z());
-			newPose.rotate(frame.rotation());
-			newPose.scale(frame.scale().x(), frame.scale().y(), frame.scale().z());
-		}
-		else
-		{
-			newPose.translate(bone.basePosition().x(), bone.basePosition().y(), bone.basePosition().z());
-			newPose.rotate(bone.baseRotation());
-		}
-		Minecraft mc = RenderHelper.mc();
-		RenderTarget renderTarget = mc.getMainRenderTarget();
-		GpuTextureView colorAttachment = renderTarget.getColorTextureView();
-		GpuTextureView depthTexture = renderTarget.getDepthTextureView();
-		Matrix4f matrix4fstack = new Matrix4f(RenderSystem.getModelViewMatrix());
-		matrix4fstack.mul(newPose.pose());
-		GpuBufferSlice transforms = RenderSystem.getDynamicUniforms().
-				writeTransform(matrix4fstack, new Vector4f(red/255f, green/255f, blue/255f, alpha/255f), new Vector3f(), new Matrix4f());
-		
-		try (GpuBuffer.MappedView colorLightOverlayMappedView = RenderSystem.getDevice().
-				createCommandEncoder().
-				mapBuffer(this.colorLightOverlay.currentBuffer(), false, true))
-		{
-			int lightCoords = renderState.lightCoords();
-			int blockLight = LightCoordsUtil.block(lightCoords);
-			int skyLight   = LightCoordsUtil.sky(lightCoords);
-			int u = overlay & 0xFFFF;
-			int v = (overlay >> 16) & 0xFFFF;
-			Std140Builder.intoBuffer(colorLightOverlayMappedView.data()).
-					putVec4(ARGB.vector4fFromARGB32(ARGB.color(alpha, red, green, blue))).
-					putIVec2(new Vector2i(blockLight, skyLight)).
-					putIVec2(new Vector2i(u, v));
-		}
-		bone.meshes().forEach(mesh ->
-		{
-			if (mesh.textureName().isEmpty())
-				return;
-			
-			TextureManager tm = mc.getTextureManager();
-			AbstractTexture texture = tm.getTexture(getTextureByName(mesh.textureName()));
-			GpuTextureView lightTexture = mc.gameRenderer.levelLightmap();
-			OverlayTexture overlayTexture = mc.gameRenderer.overlayTexture();
-			try (RenderPass pass = RenderSystem.getDevice().createCommandEncoder().createRenderPass(mesh.uuid() :: toString, colorAttachment, OptionalInt.empty(), depthTexture, OptionalDouble.empty()))
-			{
-				pass.setPipeline(ArcRenderTypes.RenderPipelinesProvider.TRIANGLES_SOLID);
-				RenderSystem.bindDefaultUniforms(pass);
-				pass.setVertexBuffer(0, mesh.vbo());
-				pass.setUniform("ColorLightOverlay", colorLightOverlay.currentBuffer());
-				pass.setUniform("DynamicTransforms", transforms);
-				pass.bindTexture("Sampler0", texture.getTextureView(), texture.getSampler());
-				pass.bindTexture("Sampler1", overlayTexture.getTextureView(), RenderSystem.getSamplerCache().getClampToEdge(FilterMode.LINEAR));
-				pass.bindTexture("Sampler2", lightTexture, RenderSystem.getSamplerCache().getClampToEdge(FilterMode.LINEAR));
-				
-				pass.setIndexBuffer(mesh.indices(), mesh.indexType());
-				pass.drawIndexed(0, 0, mesh.indicesCount(), 1);
-			}
-		});
-		
-		bone.children().forEach(children ->
-				perBoneRenderGui(newPose, renderState, children, controllers, red, green, blue, alpha, overlay));
 	}
 	
 	protected void perBoneRender(PoseStack poseStack,
@@ -271,8 +183,12 @@ public abstract class ArcItemRenderer<T extends Item & ArcAnimatable<T>, RS exte
 		}
 		Minecraft mc = RenderHelper.mc();
 		RenderTarget renderTarget = mc.getMainRenderTarget();
-		GpuTextureView colorAttachment = renderTarget.getColorTextureView();
-		GpuTextureView depthTexture = renderTarget.getDepthTextureView();
+		GpuTextureView colorAttachment = RenderSystem.outputColorTextureOverride != null
+				? RenderSystem.outputColorTextureOverride
+				: renderTarget.getColorTextureView();
+		GpuTextureView depthTexture = renderTarget.useDepth
+				? (RenderSystem.outputDepthTextureOverride != null ? RenderSystem.outputDepthTextureOverride : renderTarget.getDepthTextureView())
+				: null;
 		Matrix4f matrix4fstack = new Matrix4f(RenderSystem.getModelViewMatrix());
 		matrix4fstack.mul(poseStack.last().pose());
 		GpuBufferSlice transforms = RenderSystem.getDynamicUniforms().

@@ -11,8 +11,5 @@
     "requireAnnotations": true
   },
   "client": [
-    "GuiGraphicsCoordsHack",
-    "SpecialModelWrapperCoordsTransmitter",
-    "TrackingItemStackRenderStateCoordsGetter"
   ]
 }
