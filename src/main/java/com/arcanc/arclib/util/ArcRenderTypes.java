@@ -1,0 +1,89 @@
+/**
+ * @author ArcAnc
+ * Created at: 27.01.2026
+ * Copyright (c) 2026
+ * <p>
+ * This code is licensed under "Arc's License of Common Sense"
+ * Details can be found in the license file in the root folder of this project
+ */
+
+package com.arcanc.arclib.util;
+
+
+import com.mojang.blaze3d.pipeline.RenderPipeline;
+import com.mojang.blaze3d.shaders.UniformType;
+import com.mojang.blaze3d.vertex.VertexFormat;
+import com.mojang.blaze3d.vertex.VertexFormatElement;
+import net.minecraft.client.renderer.RenderPipelines;
+import net.neoforged.bus.api.IEventBus;
+import net.neoforged.neoforge.client.event.RegisterRenderPipelinesEvent;
+import org.jetbrains.annotations.NotNull;
+
+import java.util.HashSet;
+import java.util.Set;
+
+public class ArcRenderTypes
+{
+	public static class RenderPipelinesProvider
+	{
+		private static final Set<RenderPipeline> PIPELINES = new HashSet<>();
+		
+		private static final RenderPipeline.Snippet TRIANGLES_SNIPPET = RenderPipeline.builder(RenderPipelines.MATRICES_FOG_LIGHT_DIR_SNIPPET).
+				withVertexShader(Database.rl("core/triangles")).
+				withFragmentShader(Database.rl("core/triangles")).
+				withSampler("Sampler0").
+				withSampler("Sampler2").
+				withUniform("ColorLightValues", UniformType.UNIFORM_BUFFER).
+				withVertexFormat(VertexFormatProvider.POSITION_TEX_NORMAL, VertexFormat.Mode.TRIANGLES).
+				buildSnippet();
+		
+		public static final RenderPipeline TRIANGLES_SOLID = registerPipeline(RenderPipeline.builder(RenderPipelines.MATRICES_PROJECTION_SNIPPET).
+				withFragmentShader(Database.rl("core/triangles")).
+				withVertexShader(Database.rl("core/triangles")).
+				withLocation(Database.rl("pipeline/triangles_cutout_no_cull")).
+				withUniform("ColorLightOverlay", UniformType.UNIFORM_BUFFER).
+				withShaderDefine("ALPHA_CUTOUT", 0.1F).
+				withSampler("Sampler0").
+				withSampler("Sampler1").
+				withSampler("Sampler2").
+				withCull(false).
+				withVertexFormat(VertexFormatProvider.POSITION_TEX_NORMAL, VertexFormat.Mode.TRIANGLES).
+				build());
+		
+		/*public static final RenderPipeline TRIANGLES_TRANSLUCENT = registerPipeline(RenderPipeline.builder(TRIANGLES_SNIPPET).
+				withLocation(Database.rl("pipeline/triangles_translucent")).
+				withShaderDefine("ALPHA_CUTOUT", 0.1F).
+				withShaderDefine("PER_FACE_LIGHTING").
+				withSampler("Sampler1").
+				withBlend(BlendFunction.TRANSLUCENT).
+				withCull(false).
+				build());
+		*/
+		private static RenderPipeline registerPipeline(RenderPipeline pipeline)
+		{
+			PIPELINES.add(pipeline);
+			return pipeline;
+		}
+		
+		private static void registerCustomPipelines(final @NotNull RegisterRenderPipelinesEvent event)
+		{
+			PIPELINES.forEach(event :: registerPipeline);
+			PIPELINES.clear();
+		}
+	}
+	
+	public static class VertexFormatProvider
+	{
+		public static final VertexFormat POSITION_TEX_NORMAL = VertexFormat.builder().
+				add("Position", VertexFormatElement.POSITION).
+				add("UV0", VertexFormatElement.UV0).
+				add("Normal", VertexFormatElement.NORMAL).
+				padding(1).
+				build();
+	}
+	
+	public static void register(@NotNull IEventBus modEventBus)
+	{
+		modEventBus.addListener(RenderPipelinesProvider :: registerCustomPipelines);
+	}
+}
