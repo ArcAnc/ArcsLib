@@ -5,7 +5,7 @@
 
 
 # ArcLib
-[ArcsLib][download] A mod which allow you animate anything in game. Entities, Block, Items and anything else you want.
+[ArcLib][download] A mod which allow you animate anything in game. Entities, Block, Items and anything else you want.
 
 - [Download][download]
 - [Discord][discord]
