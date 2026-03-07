@@ -16,6 +16,9 @@ uniform ivec2 Overlay;
 uniform sampler2D Sampler1;
 uniform sampler2D Sampler2;
 
+uniform vec3 Light0_Direction;
+uniform vec3 Light1_Direction;
+
 out vec4 vertexColorBack;
 out vec4 vertexColorFront;
 out vec4 lightMapColor;

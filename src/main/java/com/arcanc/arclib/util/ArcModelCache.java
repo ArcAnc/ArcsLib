@@ -22,6 +22,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.mojang.blaze3d.vertex.*;
 import com.mojang.datafixers.util.Pair;
+import de.javagl.jgltf.model.GltfConstants;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.PreparableReloadListener;
@@ -151,9 +152,11 @@ public class ArcModelCache
 						VertexBuffer vertexBuffer = new VertexBuffer(VertexBuffer.Usage.STATIC);
 						vertexBuffer.bind();
 						vertexBuffer.upload(meshData);
-						((VertexBufferAccessor)vertexBuffer).arclib$UploadIndexBuffer(meshData.drawState(), indexBuffer);
+						VertexBufferAccessor accessor = (VertexBufferAccessor)vertexBuffer;
+						accessor.arclib$UploadIndexBuffer(meshData.drawState(), indexBuffer);
+						accessor.setIndexCount(mesh.indicesCount());
+						accessor.setIndexType(mesh.glIndexType() == VertexFormat.IndexType.SHORT.asGLType ? VertexFormat.IndexType.SHORT : VertexFormat.IndexType.INT);
 						VertexBuffer.unbind();
-						
 						builder.meshes.add(new ArcBakedMesh(
 								meshUUID,
 								vertexBuffer,

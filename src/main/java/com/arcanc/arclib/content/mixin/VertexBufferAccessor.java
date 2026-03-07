@@ -13,7 +13,9 @@ package com.arcanc.arclib.content.mixin;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.MeshData;
 import com.mojang.blaze3d.vertex.VertexBuffer;
+import com.mojang.blaze3d.vertex.VertexFormat;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.gen.Accessor;
 import org.spongepowered.asm.mixin.gen.Invoker;
 
 import javax.annotation.Nullable;
@@ -22,6 +24,13 @@ import java.nio.ByteBuffer;
 @Mixin (VertexBuffer.class)
 public interface VertexBufferAccessor
 {
+	
+	@Accessor ("indexCount")
+	void setIndexCount(int index);
+	
+	@Accessor("indexType")
+	void setIndexType(VertexFormat.IndexType type);
+	
 	@Invoker ("uploadIndexBuffer")
 	@Nullable
 	RenderSystem.AutoStorageIndexBuffer arclib$UploadIndexBuffer(MeshData.DrawState drawState, @Nullable ByteBuffer buffer);

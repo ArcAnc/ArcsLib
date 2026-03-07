@@ -119,7 +119,7 @@ public abstract class ArcBlockRenderer<T extends BlockEntity & ArcAnimatable<T>>
 			poseStack.translate(bone.basePosition().x(), bone.basePosition().y(), bone.basePosition().z());
 			poseStack.mulPose(bone.baseRotation());
 		}
-		Matrix4f matrix4fstack = new Matrix4f(RenderSystem.getProjectionMatrix());
+		Matrix4f matrix4fstack = new Matrix4f(RenderSystem.getModelViewMatrix());
 		matrix4fstack.mul(poseStack.last().pose());
 		
 		int blockLight = LightTexture.block(packedLight);
@@ -139,15 +139,13 @@ public abstract class ArcBlockRenderer<T extends BlockEntity & ArcAnimatable<T>>
 			RenderSystem.setShaderTexture(0, getTextureByName(mesh.textureName()));
 			mc.gameRenderer.overlayTexture().setupOverlayColor();
 			mc.gameRenderer.lightTexture().turnOnLightLayer();
-			shaderInstance.getUniform("ModelViewMat").set(RenderSystem.getModelViewMatrix());
-			shaderInstance.getUniform("ProjMat").set(matrix4fstack);
 			shaderInstance.getUniform("ColorModulator").set(colorVector);
 			shaderInstance.getUniform("Color").set(colorVector);
 			shaderInstance.getUniform("Light").set(blockLight, skyLight);
 			shaderInstance.getUniform("Overlay").set(u, v);
 			
 			shaderInstance.apply();
-			mesh.vertexBuffer().draw();
+			mesh.vertexBuffer().drawWithShader(matrix4fstack, RenderSystem.getProjectionMatrix(), shaderInstance);
 			mesh.vertexBuffer().unbind();
 		});
 		

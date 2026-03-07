@@ -117,6 +117,8 @@ dependencies {
             prefer "2.0.3"
         }
     }
+
+    clientAdditionalRuntimeClasspath "de.javagl:jgltf-model:2.0.3"
 }
 
 // This block of code expands all declared replace properties in the specified resource targets.
