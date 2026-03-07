@@ -10,9 +10,9 @@
 package com.arcanc.arclib.content.model.animation;
 
 
+import org.jetbrains.annotations.Nullable;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
-import org.jspecify.annotations.Nullable;
 
 import java.util.List;
 import java.util.Map;

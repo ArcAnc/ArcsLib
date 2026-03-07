@@ -1,3 +1,5 @@
+modLoader="javafml"
+loaderVersion="${loader_version_range}"
 license="${mod_license}"
 issueTrackerURL="https://github.com/ArcAnc/ArcsLib/issues"
 [[mods]]
@@ -31,8 +33,7 @@ config="${mod_id}.mixins.json"
 [[dependencies.${mod_id}]]
     modId="minecraft"
     type="required"
-    # versionRange="${minecraft_version_range}"
-    versionRange="[26,)"
+    versionRange="${minecraft_version_range}"
     ordering="AFTER"
     side="BOTH"
 

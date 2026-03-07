@@ -10,7 +10,7 @@
 package com.arcanc.arclib.util;
 
 
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -20,11 +20,8 @@ public class Database
 	public static final String MOD_NAME = "Arc Lib";
 	public static final Logger LOGGER = LoggerFactory.getLogger(MOD_NAME);
 	
-	public static final Identifier RELOAD_LISTENER_ID = rl("models_reload_listener");
-	
-	
-	public static Identifier rl(String name)
+	public static ResourceLocation rl(String name)
 	{
-		return Identifier.fromNamespaceAndPath(MOD_ID, name);
+		return ResourceLocation.fromNamespaceAndPath(MOD_ID, name);
 	}
 }

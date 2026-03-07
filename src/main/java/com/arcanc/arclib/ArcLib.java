@@ -22,7 +22,7 @@ public class ArcLib
 	private void setupEvents(final IEventBus modEventBus)
 	{
 		CommonEvents.registerCommonEvents(modEventBus);
-		if (FMLLoader.getCurrent().getDist().isClient())
+		if (FMLLoader.getDist().isClient())
 			ClientEvents.registerClientEvents(modEventBus);
 	}
 }

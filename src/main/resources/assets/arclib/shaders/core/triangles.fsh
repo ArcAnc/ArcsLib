@@ -1,8 +1,7 @@
-#version 330
-
-#moj_import <minecraft:dynamictransforms.glsl>
+#version 150
 
 uniform sampler2D Sampler0;
+uniform vec4 ColorModulator;
 
 in vec4 vertexColorBack;
 in vec4 vertexColorFront;

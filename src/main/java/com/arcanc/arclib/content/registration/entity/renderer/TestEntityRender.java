@@ -11,13 +11,14 @@ package com.arcanc.arclib.content.registration.entity.renderer;
 
 
 import com.arcanc.arclib.content.registration.entity.TestEntity;
-import com.arcanc.arclib.content.registration.entity.renderer.renderState.TestEntityRenderState;
 import com.arcanc.arclib.content.renderer.ArcEntityRenderer;
 import com.arcanc.arclib.content.renderer.modelData.DefaultEntityModelData;
 import com.arcanc.arclib.util.Database;
+import com.mojang.blaze3d.vertex.PoseStack;
+import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 
-public class TestEntityRender extends ArcEntityRenderer<TestEntity, TestEntityRenderState>
+public class TestEntityRender extends ArcEntityRenderer<TestEntity>
 {
 	public TestEntityRender(EntityRendererProvider.Context context)
 	{
@@ -29,8 +30,20 @@ public class TestEntityRender extends ArcEntityRenderer<TestEntity, TestEntityRe
 	}
 	
 	@Override
-	public TestEntityRenderState createRenderState()
+	public void preRender(PoseStack poseStack, TestEntity animatable, MultiBufferSource bufferSource, int packedLight, int packedOverlay, float partialTick)
 	{
-		return new TestEntityRenderState();
+	
+	}
+	
+	@Override
+	public void actuallyRender(PoseStack poseStack, TestEntity animatable, MultiBufferSource bufferSource, int packedLight, int packedOverlay, float partialTick)
+	{
+	
+	}
+	
+	@Override
+	public void postRender(PoseStack poseStack, TestEntity animatable, MultiBufferSource bufferSource, int packedLight, int packedOverlay, float partialTick)
+	{
+	
 	}
 }

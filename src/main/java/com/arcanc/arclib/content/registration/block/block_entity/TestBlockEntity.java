@@ -19,7 +19,7 @@ import com.arcanc.arclib.util.helpers.ArcLibHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
-import org.jspecify.annotations.NonNull;
+import org.jetbrains.annotations.NotNull;
 
 public class TestBlockEntity extends BlockEntity implements ArcAnimatable<TestBlockEntity>
 {
@@ -54,7 +54,7 @@ public class TestBlockEntity extends BlockEntity implements ArcAnimatable<TestBl
 	}
 	
 	@Override
-	public void registerAnimationControllers(ArcAnimationManager.@NonNull ArcAnimationRegistrar<TestBlockEntity> registrar)
+	public void registerAnimationControllers(ArcAnimationManager.@NotNull ArcAnimationRegistrar<TestBlockEntity> registrar)
 	{
 		registrar.add(new ArcAnimationController<>(animatableState ->
 		{

@@ -21,8 +21,6 @@ import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
-import org.jspecify.annotations.NonNull;
-import org.jspecify.annotations.Nullable;
 
 public class TestBlock extends Block implements EntityBlock
 {
@@ -32,11 +30,11 @@ public class TestBlock extends Block implements EntityBlock
 	}
 	
 	@Override
-	protected @NonNull InteractionResult useWithoutItem(@NonNull BlockState state,
-	                                                    @NonNull Level level,
-	                                                    @NonNull BlockPos pos,
-	                                                    @NonNull Player player,
-	                                                    @NonNull BlockHitResult hitResult)
+	protected InteractionResult useWithoutItem(BlockState state,
+	                                                    Level level,
+	                                                    BlockPos pos,
+	                                                    Player player,
+	                                                    BlockHitResult hitResult)
 	{
 		BlockEntity blockEntity = level.getBlockEntity(pos);
 		if (!(blockEntity instanceof TestBlockEntity test))
@@ -46,13 +44,13 @@ public class TestBlock extends Block implements EntityBlock
 	}
 	
 	@Override
-	public @Nullable BlockEntity newBlockEntity(@NonNull BlockPos blockPos, @NonNull BlockState blockState)
+	public BlockEntity newBlockEntity(BlockPos blockPos, BlockState blockState)
 	{
 		return new TestBlockEntity(blockPos, blockState);
 	}
 	
 	@Override
-	protected @NonNull RenderShape getRenderShape(@NonNull BlockState state)
+	protected RenderShape getRenderShape(BlockState state)
 	{
 		return RenderShape.INVISIBLE;
 	}

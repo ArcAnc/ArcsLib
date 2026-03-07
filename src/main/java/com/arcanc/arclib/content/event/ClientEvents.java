@@ -13,14 +13,12 @@ package com.arcanc.arclib.content.event;
 import com.arcanc.arclib.content.registration.Registration;
 import com.arcanc.arclib.content.registration.block.block_entity.ber.TestBlockEntityRenderer;
 import com.arcanc.arclib.content.registration.entity.renderer.TestEntityRender;
-import com.arcanc.arclib.content.registration.item.renderer.TestBlockItemRenderer;
 import com.arcanc.arclib.util.ArcModelCache;
 import com.arcanc.arclib.util.ArcRenderTypes;
-import com.arcanc.arclib.util.Database;
 import net.neoforged.bus.api.IEventBus;
-import net.neoforged.neoforge.client.event.AddClientReloadListenersEvent;
 import net.neoforged.neoforge.client.event.EntityRenderersEvent;
-import net.neoforged.neoforge.client.event.RegisterSpecialModelRendererEvent;
+import net.neoforged.neoforge.client.event.RegisterClientReloadListenersEvent;
+import net.neoforged.neoforge.client.extensions.common.RegisterClientExtensionsEvent;
 
 public class ClientEvents
 {
@@ -32,14 +30,14 @@ public class ClientEvents
 		ArcRenderTypes.register(modEventBus);
 	}
 	
-	private static void registerClientExtensions(final RegisterSpecialModelRendererEvent event)
+	private static void registerClientExtensions(final RegisterClientExtensionsEvent event)
 	{
-		event.register(Database.rl("test_block"), TestBlockItemRenderer.Unbaked.MAP_CODEC);
+		event.registerItem(Registration.ItemReg.TEST_ITEM.get().registerExtension(), Registration.ItemReg.TEST_ITEM);
 	}
 	
-	private static void registerReloadListeners(final AddClientReloadListenersEvent event)
+	private static void registerReloadListeners(final RegisterClientReloadListenersEvent event)
 	{
-		event.addListener(Database.RELOAD_LISTENER_ID, ArcModelCache :: reload);
+		event.registerReloadListener(ArcModelCache :: reload);
 	}
 	
 	private static void registerRenderers(final EntityRenderersEvent.RegisterRenderers event)

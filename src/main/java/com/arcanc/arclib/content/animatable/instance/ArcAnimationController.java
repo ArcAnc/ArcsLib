@@ -14,8 +14,8 @@ import com.arcanc.arclib.content.animatable.ArcAnimatable;
 import com.arcanc.arclib.content.model.animation.ArcAnimation;
 import com.arcanc.arclib.content.model.animation.ArcRawAnimation;
 import com.arcanc.arclib.content.model.animation.BoneFrame;
-import com.arcanc.arclib.content.renderer.base.ArcRenderState;
-import org.jspecify.annotations.Nullable;
+import com.arcanc.arclib.content.model.baked.ArcBakedModel;
+import org.jetbrains.annotations.Nullable;
 
 public class ArcAnimationController<T extends ArcAnimatable<T>>
 {
@@ -91,7 +91,7 @@ public class ArcAnimationController<T extends ArcAnimatable<T>>
 		return this.state == ControllerState.STOP;
 	}
 	
-	public @Nullable BoneFrame calculateBoneTransformations(String boneName, ArcRenderState<T> renderState)
+	public @Nullable BoneFrame calculateBoneTransformations(String boneName, ArcBakedModel model)
 	{
 		if (this.state == ControllerState.STOP)
 			return null;
@@ -100,8 +100,7 @@ public class ArcAnimationController<T extends ArcAnimatable<T>>
 		if (stage == null)
 			return null;
 		
-		ArcAnimation animation =
-				renderState.getBakedModel().animations().get(stage.animationName());
+		ArcAnimation animation = model.animations().get(stage.animationName());
 		
 		if (animation == null)
 			return null;
@@ -109,7 +108,7 @@ public class ArcAnimationController<T extends ArcAnimatable<T>>
 		return animation.calculateBoneTransformations(boneName, this.time);
 	}
 	
-	public void tick(T animatable, ArcRenderState<T> renderState)
+	public void tick(T animatable, ArcBakedModel model, float partialTick)
 	{
 		ControllerState newState = this.stateHandler.handle(new AnimatableState<>(animatable, this));
 		if (newState != this.state)
@@ -134,13 +133,13 @@ public class ArcAnimationController<T extends ArcAnimatable<T>>
 		
 		if (stage.isWaiting())
 		{
-			this.time += renderState.getPartialTicks();
+			this.time += partialTick;
 			if (this.time >= stage.waitTicks())
 				nextStage();
 			return;
 		}
 		
-		ArcAnimation animation = renderState.getBakedModel().animations().get(stage.animationName());
+		ArcAnimation animation = model.animations().get(stage.animationName());
 		if (animation == null)
 		{
 			nextStage();
@@ -148,7 +147,7 @@ public class ArcAnimationController<T extends ArcAnimatable<T>>
 		}
 		
 		float length = animation.length();
-		this.time += renderState.getPartialTicks() * stage.speed();
+		this.time += partialTick * stage.speed();
 		switch (stage.animationType())
 		{
 			case PLAY_ONCE ->

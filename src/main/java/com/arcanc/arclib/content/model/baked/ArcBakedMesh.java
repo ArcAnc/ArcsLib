@@ -10,17 +10,13 @@
 package com.arcanc.arclib.content.model.baked;
 
 
-import com.mojang.blaze3d.buffers.GpuBuffer;
-import com.mojang.blaze3d.vertex.VertexFormat;
+import com.mojang.blaze3d.vertex.VertexBuffer;
 
 import java.util.UUID;
 
-public record ArcBakedMesh(UUID uuid,
-                           GpuBuffer vbo,
-                           int vertexesAmount,
-                           GpuBuffer indices,
-						   int indicesCount,
-                           VertexFormat.IndexType indexType,
-                           String textureName)
+public record ArcBakedMesh(
+		UUID uuid,
+		VertexBuffer vertexBuffer,
+		String textureName)
 {
 }

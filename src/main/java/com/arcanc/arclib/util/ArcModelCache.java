@@ -10,6 +10,7 @@
 package com.arcanc.arclib.util;
 
 
+import com.arcanc.arclib.content.mixin.VertexBufferAccessor;
 import com.arcanc.arclib.content.model.ArcBone;
 import com.arcanc.arclib.content.model.ArcMesh;
 import com.arcanc.arclib.content.model.ArcModel;
@@ -19,20 +20,17 @@ import com.arcanc.arclib.content.model.baked.ArcBakedModel;
 import com.arcanc.arclib.data.ArcModelParser;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import com.mojang.blaze3d.buffers.GpuBuffer;
-import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;
 import com.mojang.datafixers.util.Pair;
-import de.javagl.jgltf.model.GltfConstants;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.PreparableReloadListener;
 import net.minecraft.server.packs.resources.ResourceManager;
+import net.minecraft.util.profiling.ProfilerFiller;
 import org.jetbrains.annotations.ApiStatus;
-import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
-import org.jspecify.annotations.NonNull;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -43,26 +41,29 @@ import java.util.function.BiConsumer;
 
 public class ArcModelCache
 {
-	private static Map<Identifier, ArcBakedModel> MODELS;
+	private static @Nullable Map<ResourceLocation, ArcBakedModel> MODELS;
 	
-	public static Map<Identifier, ArcBakedModel> getModels()
+	public static @Nullable Map<ResourceLocation, ArcBakedModel> getModels()
 	{
 		return MODELS;
 	}
 	
 	@ApiStatus.Internal
-	public static @NonNull CompletableFuture<Void> reload(PreparableReloadListener.@NonNull SharedState sharedState,
-	                                                      Executor backgroundExecutor,
-	                                                      PreparableReloadListener.@NonNull PreparationBarrier preparationBarrier,
-	                                                      Executor gameExecutor)
+	public static CompletableFuture<Void> reload(PreparableReloadListener.PreparationBarrier stage,
+	                                             ResourceManager resourceManager,
+	                                             ProfilerFiller preparationsProfiler,
+	                                             ProfilerFiller reloadProfiler,
+	                                             Executor backgroundExecutor,
+	                                             Executor gameExecutor)
+			
+			
 	{
-		Map<Identifier, ArcModel> models = new Object2ObjectOpenHashMap<>();
-		return CompletableFuture.allOf(loadModels(backgroundExecutor, sharedState.resourceManager(), models :: put)).
-				thenCompose(preparationBarrier :: wait).
+		Map<ResourceLocation, ArcModel> models = new Object2ObjectOpenHashMap<>();
+		return CompletableFuture.allOf(loadModels(backgroundExecutor, resourceManager, models :: put)).
+				thenCompose(stage :: wait).
 				thenAcceptAsync(empty ->
 				{
-					if (ArcModelCache.MODELS != null)
-						clearCaches();
+					clearCaches();
 					ArcModelCache.MODELS = bakeModels(models);
 				},
 				gameExecutor);
@@ -70,25 +71,26 @@ public class ArcModelCache
 	
 	private static void clearCaches()
 	{
-		MODELS.forEach((identifier, model) ->
+		if (MODELS == null)
+			return;
+		MODELS.forEach((ResourceLocation, model) ->
 				model.bones().forEach(ArcModelCache :: clearBoneCache));
 		MODELS = null;
 	}
 	
-	private static void clearBoneCache(@NotNull ArcBakedBone bone)
+	private static void clearBoneCache(ArcBakedBone bone)
 	{
 		bone.meshes().forEach(mesh ->
 		{
-			mesh.vbo().close();
-			mesh.indices().close();
+			mesh.vertexBuffer().close();
 		});
 		bone.children().forEach(ArcModelCache :: clearBoneCache);
 	}
 	
-	private static @NonNull Map<Identifier, ArcBakedModel> bakeModels(@NonNull Map<Identifier, ArcModel> rawModels)
+	private static Map<ResourceLocation, ArcBakedModel> bakeModels(Map<ResourceLocation, ArcModel> rawModels)
 	{
-		Map<Identifier, ArcBakedModel> bakedModelMap = new Object2ObjectOpenHashMap<>();
-		for (Map.Entry<Identifier, ArcModel> rawModel : rawModels.entrySet())
+		Map<ResourceLocation, ArcBakedModel> bakedModelMap = new Object2ObjectOpenHashMap<>();
+		for (Map.Entry<ResourceLocation, ArcModel> rawModel : rawModels.entrySet())
 		{
 			ArcModel model = rawModel.getValue();
 			Map<UUID, ArcBakedBone.ArcBakedBoneBuilder> bakedBoneBuilder = new HashMap<>();
@@ -113,8 +115,7 @@ public class ArcModelCache
 				{
 					ArcMesh mesh = model.meshes.get(meshUUID);
 
-					ByteBufferBuilder byteBufferBuilder = ByteBufferBuilder.
-							exactlySized(mesh.vertexCount() * ArcRenderTypes.VertexFormatProvider.POSITION_TEX_NORMAL.getVertexSize());
+					ByteBufferBuilder byteBufferBuilder = new ByteBufferBuilder(mesh.vertexCount() * ArcRenderTypes.VertexFormatProvider.POSITION_TEX_NORMAL.getVertexSize());
 					BufferBuilder bufferBuilder = new BufferBuilder(byteBufferBuilder, VertexFormat.Mode.TRIANGLES, ArcRenderTypes.VertexFormatProvider.POSITION_TEX_NORMAL);
 					
 					for (int q = 0; q < mesh.vertexCount(); q++)
@@ -147,24 +148,15 @@ public class ArcModelCache
 					
 					try (MeshData meshData = bufferBuilder.buildOrThrow())
 					{
-						GpuBuffer buffer = RenderSystem.getDevice().createBuffer(
-								meshUUID :: toString,
-								GpuBuffer.USAGE_VERTEX,
-								meshData.vertexBuffer()
-						);
+						VertexBuffer vertexBuffer = new VertexBuffer(VertexBuffer.Usage.STATIC);
+						vertexBuffer.bind();
+						vertexBuffer.upload(meshData);
+						((VertexBufferAccessor)vertexBuffer).arclib$UploadIndexBuffer(meshData.drawState(), indexBuffer);
+						VertexBuffer.unbind();
 						
-						GpuBuffer gpuIndexBuffer = RenderSystem.getDevice().createBuffer(
-								() -> meshUUID.toString() + "_indexes",
-								GpuBuffer.USAGE_INDEX,
-								indexBuffer);
-						VertexFormat.IndexType type = mesh.glIndexType() == GltfConstants.GL_UNSIGNED_SHORT ? VertexFormat.IndexType.SHORT : VertexFormat.IndexType.INT;
 						builder.meshes.add(new ArcBakedMesh(
 								meshUUID,
-								buffer,
-								mesh.vertexCount(),
-								gpuIndexBuffer,
-								mesh.indicesCount(),
-								type,
+								vertexBuffer,
 								mesh.texture()));
 					}
 				}
@@ -202,8 +194,8 @@ public class ArcModelCache
 		return bakedModelMap;
 	}
 	
-	private static @NonNull ArcBakedBone bakeBone(
-			ArcBakedBone.@NonNull ArcBakedBoneBuilder builder,
+	private static ArcBakedBone bakeBone(
+			ArcBakedBone.ArcBakedBoneBuilder builder,
 			ArcBakedBone bakedParent)
 	{
 		List<ArcBakedBone> bakedChildren = new ArrayList<>();
@@ -230,9 +222,9 @@ public class ArcModelCache
 		);
 	}
 	
-	private static @NonNull CompletableFuture<?> loadModels(Executor backgroundExecutor,
+	private static CompletableFuture<?> loadModels(Executor backgroundExecutor,
 	                                                        ResourceManager resourceManager,
-	                                                        BiConsumer<Identifier, ArcModel> elementConsumer)
+	                                                        BiConsumer<ResourceLocation, ArcModel> elementConsumer)
 	{
 		return CompletableFuture.supplyAsync(
 				() -> resourceManager.listResources(
@@ -241,9 +233,9 @@ public class ArcModelCache
 				backgroundExecutor).
 				thenApplyAsync(resources ->
 				{
-					Map<Identifier, CompletableFuture<ArcModel>> tasks = new Object2ObjectOpenHashMap<>();
+					Map<ResourceLocation, CompletableFuture<ArcModel>> tasks = new Object2ObjectOpenHashMap<>();
 					
-					for (Identifier resource : resources.keySet())
+					for (ResourceLocation resource : resources.keySet())
 					{
 						tasks.put(resource, CompletableFuture.supplyAsync(() ->
 						{
@@ -263,7 +255,7 @@ public class ArcModelCache
 				}, backgroundExecutor).
 				thenAcceptAsync(modelsMap ->
 				{
-					for (Map.Entry<Identifier, CompletableFuture<ArcModel>> entry : modelsMap.entrySet())
+					for (Map.Entry<ResourceLocation, CompletableFuture<ArcModel>> entry : modelsMap.entrySet())
 						elementConsumer.accept(entry.getKey(), entry.getValue().join());
 				}, backgroundExecutor);
 	}

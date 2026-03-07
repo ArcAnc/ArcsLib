@@ -10,7 +10,7 @@
 package com.arcanc.arclib.content.renderer.modelData;
 
 
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
 
 public class DefaultEntityModelData extends ArcModelData
 {
@@ -21,9 +21,9 @@ public class DefaultEntityModelData extends ArcModelData
 	
 	public static class DefaultEntityModelDataBuilder extends Builder
 	{
-		private final Identifier shortModelLocation;
+		private final ResourceLocation shortModelLocation;
 		
-		public DefaultEntityModelDataBuilder(Identifier modelLocation)
+		public DefaultEntityModelDataBuilder(ResourceLocation modelLocation)
 		{
 			super(modelLocation, "entity");
 			this.shortModelLocation = modelLocation;
@@ -31,7 +31,7 @@ public class DefaultEntityModelData extends ArcModelData
 		}
 		
 		@Override
-		public DefaultEntityModelDataBuilder addTexture(Identifier texturePath)
+		public DefaultEntityModelDataBuilder addTexture(ResourceLocation texturePath)
 		{
 			super.addTexture(ArcModelData.generateDefaultTextureLocation(texturePath, this.shortModelLocation.getPath(), this.modelType));
 			return this;

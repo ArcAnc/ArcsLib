@@ -11,59 +11,20 @@ package com.arcanc.arclib.content.renderer;
 
 
 import com.arcanc.arclib.content.animatable.ArcAnimatable;
-import com.arcanc.arclib.content.animatable.instance.ArcAnimationController;
-import com.arcanc.arclib.content.model.animation.BoneFrame;
-import com.arcanc.arclib.content.model.baked.ArcBakedBone;
 import com.arcanc.arclib.content.model.baked.ArcBakedModel;
-import com.arcanc.arclib.content.renderer.base.ArcEntityRenderState;
-import com.arcanc.arclib.content.renderer.base.ArcRenderState;
 import com.arcanc.arclib.content.renderer.modelData.ArcModelData;
-import com.arcanc.arclib.util.ArcRenderTypes;
-import com.arcanc.arclib.util.Database;
-import com.mojang.blaze3d.buffers.GpuBuffer;
-import com.mojang.blaze3d.buffers.GpuBufferSlice;
-import com.mojang.blaze3d.buffers.Std140Builder;
-import com.mojang.blaze3d.buffers.Std140SizeCalculator;
-import com.mojang.blaze3d.pipeline.RenderTarget;
-import com.mojang.blaze3d.systems.RenderPass;
-import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.textures.FilterMode;
-import com.mojang.blaze3d.textures.GpuTextureView;
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.math.Axis;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.MappableRingBuffer;
-import net.minecraft.client.renderer.SubmitNodeCollector;
+import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
-import net.minecraft.client.renderer.entity.state.EntityRenderState;
-import net.minecraft.client.renderer.state.CameraRenderState;
-import net.minecraft.client.renderer.texture.AbstractTexture;
-import net.minecraft.client.renderer.texture.OverlayTexture;
-import net.minecraft.client.renderer.texture.TextureManager;
-import net.minecraft.util.ARGB;
-import net.minecraft.util.LightCoordsUtil;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
-import org.joml.*;
-import org.jspecify.annotations.Nullable;
 
-import java.util.Collection;
-import java.util.OptionalDouble;
-import java.util.OptionalInt;
-
-public abstract class ArcEntityRenderer<T extends Entity & ArcAnimatable<T>, RS extends EntityRenderState & ArcEntityRenderState<T>> extends EntityRenderer<T, RS>
-	implements ArcRenderer<T, RS>
+public abstract class ArcEntityRenderer<T extends Entity & ArcAnimatable<T>> extends EntityRenderer<T>
+	implements ArcRenderer<T>
 {
 	
 	private final ArcModelData modelData;
-	private final MappableRingBuffer colorLightOverlay= new MappableRingBuffer(
-			() -> Database.rl("color_light_overlay").toLanguageKey(),
-			GpuBuffer.USAGE_UNIFORM | GpuBuffer.USAGE_MAP_WRITE,
-			new Std140SizeCalculator().
-					putVec4().
-					putIVec2().
-					putIVec2().
-					get());
 	
 	public ArcEntityRenderer(EntityRendererProvider.Context context, ArcModelData modelData)
 	{
@@ -84,12 +45,18 @@ public abstract class ArcEntityRenderer<T extends Entity & ArcAnimatable<T>, RS 
 	}
 	
 	@Override
-	public void extractRenderState(T entity, RS renderState, float partialTicks)
+	public void render(T p_entity, float entityYaw, float partialTick, PoseStack poseStack, MultiBufferSource bufferSource, int packedLight)
 	{
-		super.extractRenderState(entity, renderState, partialTicks);
-		renderState.extractEntityData(entity, this);
+		super.render(p_entity, entityYaw, partialTick, poseStack, bufferSource, packedLight);
 	}
 	
+	@Override
+	public ResourceLocation getTextureLocation(T entity)
+	{
+		return null;
+	}
+	
+	/*
 	@Override
 	public void submit(RS renderState, PoseStack poseStack, SubmitNodeCollector submitNodeCollector, CameraRenderState cameraRenderState)
 	{
@@ -228,5 +195,5 @@ public abstract class ArcEntityRenderer<T extends Entity & ArcAnimatable<T>, RS 
 			return null;
 		
 		return new BoneFrame(translation, rotation, scale);
-	}
+	}*/
 }

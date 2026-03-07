@@ -11,41 +11,35 @@ package com.arcanc.arclib.content.registration.item.renderer;
 
 
 import com.arcanc.arclib.content.registration.item.TestBlockItem;
-import com.arcanc.arclib.content.registration.item.renderer.renderState.TestBlockItemRenderState;
 import com.arcanc.arclib.content.renderer.ArcItemRenderer;
 import com.arcanc.arclib.content.renderer.modelData.ArcModelData;
-import com.mojang.serialization.MapCodec;
-import net.minecraft.client.renderer.special.SpecialModelRenderer;
-import org.jspecify.annotations.NonNull;
+import com.mojang.blaze3d.vertex.PoseStack;
+import net.minecraft.client.model.geom.EntityModelSet;
+import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.blockentity.BlockEntityRenderDispatcher;
 
-public class TestBlockItemRenderer extends ArcItemRenderer<TestBlockItem, TestBlockItemRenderState>
+public class TestBlockItemRenderer extends ArcItemRenderer<TestBlockItem>
 {
-	public TestBlockItemRenderer(ArcModelData modelData)
+	public TestBlockItemRenderer(ArcModelData modelData, BlockEntityRenderDispatcher blockEntityRenderDispatcher, EntityModelSet entityModelSet)
 	{
-		super(modelData);
+		super(modelData, blockEntityRenderDispatcher, entityModelSet);
 	}
 	
 	@Override
-	protected TestBlockItemRenderState createRenderState()
+	public void preRender(PoseStack poseStack, TestBlockItem animatable, MultiBufferSource bufferSource, int packedLight, int packedOverlay, float partialTick)
 	{
-		return new TestBlockItemRenderState();
+	
 	}
 	
-	public record Unbaked(ArcModelData data) implements SpecialModelRenderer.Unbaked
+	@Override
+	public void actuallyRender(PoseStack poseStack, TestBlockItem animatable, MultiBufferSource bufferSource, int packedLight, int packedOverlay, float partialTick)
 	{
-		public static final MapCodec<Unbaked> MAP_CODEC = ArcModelData.CODEC.
-				xmap(Unbaked :: new, Unbaked :: data);
-		
-		@Override
-		public @NonNull SpecialModelRenderer<?> bake(BakingContext context)
-		{
-			return new TestBlockItemRenderer(this.data);
-		}
-		
-		@Override
-		public @NonNull MapCodec<Unbaked> type()
-		{
-			return MAP_CODEC;
-		}
+	
+	}
+	
+	@Override
+	public void postRender(PoseStack poseStack, TestBlockItem animatable, MultiBufferSource bufferSource, int packedLight, int packedOverlay, float partialTick)
+	{
+	
 	}
 }

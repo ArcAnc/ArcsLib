@@ -13,13 +13,14 @@ package com.arcanc.arclib.util.helpers;
 import de.javagl.jgltf.model.AccessorData;
 import de.javagl.jgltf.model.AccessorModel;
 import de.javagl.jgltf.model.GltfConstants;
-import org.jspecify.annotations.NonNull;
 
-import java.nio.*;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
+import java.nio.FloatBuffer;
 
 public class ParserHelper
 {
-	public static @NonNull FloatBuffer getFloatBuffer(AccessorModel accessor)
+	public static FloatBuffer getFloatBuffer(AccessorModel accessor)
 	{
 		if (accessor == null)
 			return FloatBuffer.allocate(0);

@@ -17,7 +17,7 @@ import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import net.minecraft.client.renderer.texture.TextureManager;
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -27,27 +27,27 @@ public class ArcModelData
 {
 	public static final MapCodec<ArcModelData> CODEC = RecordCodecBuilder.mapCodec(instance ->
 			instance.group(
-					Identifier.CODEC.fieldOf("model_location").forGetter(ArcModelData :: getModelLocation),
+					ResourceLocation.CODEC.fieldOf("model_location").forGetter(ArcModelData :: getModelLocation),
 					Codec.STRING.optionalFieldOf("model_type", "").forGetter(arcModelData -> ""),
-					Identifier.CODEC.listOf().fieldOf("textures").forGetter(arcModelData -> new ArrayList<>(arcModelData.textures.values()))
-			).apply(instance, (identifier, type, identifiers) ->
+					ResourceLocation.CODEC.listOf().fieldOf("textures").forGetter(arcModelData -> new ArrayList<>(arcModelData.textures.values()))
+			).apply(instance, (ResourceLocation, type, ResourceLocations) ->
 			{
-				Builder builder = new Builder(identifier, type);
-				for (Identifier texture : identifiers)
+				Builder builder = new Builder(ResourceLocation, type);
+				for (ResourceLocation texture : ResourceLocations)
 				{
 					builder.addTexture(texture);
 				}
 				return builder.build();
 			}));
 	
-	private final Identifier modelLocation;
-	private final Map<String, Identifier> textures;
+	private final ResourceLocation modelLocation;
+	private final Map<String, ResourceLocation> textures;
 	
 	public ArcModelData(Builder builder)
 	{
 		this.modelLocation = builder.modelLocation;
 		this.textures = new Object2ObjectOpenHashMap<>();
-		for (Identifier texture : builder.textures)
+		for (ResourceLocation texture : builder.textures)
 		{
 			String[] textureName = texture.toString().split("/");
 			String name = textureName[textureName.length - 1].substring(0, textureName[textureName.length - 1].length() - 4);
@@ -55,22 +55,22 @@ public class ArcModelData
 		}
 	}
 	
-	protected static Identifier generateDefaultModelLocation(Identifier modelLocation, String type)
+	protected static ResourceLocation generateDefaultModelLocation(ResourceLocation modelLocation, String type)
 	{
 		return modelLocation.withPrefix("glmodels/" + type + "/").withSuffix(".glb");
 	}
 	
-	protected static Identifier generateDefaultTextureLocation(Identifier textureLocation, String modelLocation, String type)
+	protected static ResourceLocation generateDefaultTextureLocation(ResourceLocation textureLocation, String modelLocation, String type)
 	{
 		return textureLocation.withPrefix("textures/" + type + "/" + modelLocation + "/").withSuffix(".png");
 	}
 	
-	public Identifier getModelLocation()
+	public ResourceLocation getModelLocation()
 	{
 		return this.modelLocation;
 	}
 	
-	public Identifier getTextureByName(String name)
+	public ResourceLocation getTextureByName(String name)
 	{
 		return this.textures.getOrDefault(name, TextureManager.INTENTIONAL_MISSING_TEXTURE);
 	}
@@ -82,18 +82,18 @@ public class ArcModelData
 	
 	public static class Builder
 	{
-		protected Identifier modelLocation;
+		protected ResourceLocation modelLocation;
 		protected String modelType;
-		protected List<Identifier> textures;
+		protected List<ResourceLocation> textures;
 		
-		public Builder(Identifier modelLocation, String modelType)
+		public Builder(ResourceLocation modelLocation, String modelType)
 		{
 			this.modelLocation = modelLocation;
 			this.modelType = modelType;
 			this.textures = new ArrayList<>();
 		}
 		
-		public Builder addTexture(Identifier texturePath)
+		public Builder addTexture(ResourceLocation texturePath)
 		{
 			this.textures.add(texturePath);
 			return this;

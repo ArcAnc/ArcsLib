@@ -1,6 +1,6 @@
 /**
  * @author ArcAnc
- * Created at: 27.02.2026
+ * Created at: 06.03.2026
  * Copyright (c) 2026
  * <p>
  * This code is licensed under "Arc's License of Common Sense"
@@ -10,7 +10,7 @@
 @ParametersAreNonnullByDefault
 @MethodsReturnNonnullByDefault
 @FieldsAreNonnullByDefault
-package com.arcanc.arclib.content.model;
+package com.arcanc.arclib.content.renderer.modelData;
 
 import net.minecraft.FieldsAreNonnullByDefault;
 import net.minecraft.MethodsReturnNonnullByDefault;

@@ -11,56 +11,35 @@ package com.arcanc.arclib.content.renderer;
 
 
 import com.arcanc.arclib.content.animatable.ArcAnimatable;
-import com.arcanc.arclib.content.animatable.instance.ArcAnimationController;
-import com.arcanc.arclib.content.model.animation.BoneFrame;
-import com.arcanc.arclib.content.model.baked.ArcBakedBone;
 import com.arcanc.arclib.content.model.baked.ArcBakedModel;
-import com.arcanc.arclib.content.renderer.base.ArcItemRenderState;
-import com.arcanc.arclib.content.renderer.base.ArcRenderState;
 import com.arcanc.arclib.content.renderer.modelData.ArcModelData;
-import com.arcanc.arclib.util.ArcRenderTypes;
-import com.arcanc.arclib.util.Database;
-import com.arcanc.arclib.util.helpers.RenderHelper;
-import com.mojang.blaze3d.buffers.GpuBuffer;
-import com.mojang.blaze3d.buffers.GpuBufferSlice;
-import com.mojang.blaze3d.buffers.Std140Builder;
-import com.mojang.blaze3d.buffers.Std140SizeCalculator;
-import com.mojang.blaze3d.pipeline.RenderTarget;
-import com.mojang.blaze3d.systems.RenderPass;
-import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.textures.FilterMode;
-import com.mojang.blaze3d.textures.GpuTextureView;
-import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.math.Axis;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.MappableRingBuffer;
-import net.minecraft.client.renderer.Projection;
-import net.minecraft.client.renderer.ProjectionMatrixBuffer;
-import net.minecraft.client.renderer.SubmitNodeCollector;
-import net.minecraft.client.renderer.special.SpecialModelRenderer;
-import net.minecraft.client.renderer.state.CameraRenderState;
-import net.minecraft.client.renderer.texture.AbstractTexture;
-import net.minecraft.client.renderer.texture.OverlayTexture;
-import net.minecraft.client.renderer.texture.TextureManager;
-import net.minecraft.util.ARGB;
-import net.minecraft.util.LightCoordsUtil;
+import net.minecraft.client.model.geom.EntityModelSet;
+import net.minecraft.client.renderer.BlockEntityWithoutLevelRenderer;
+import net.minecraft.client.renderer.blockentity.BlockEntityRenderDispatcher;
 import net.minecraft.world.item.Item;
-import net.minecraft.world.item.ItemDisplayContext;
-import net.minecraft.world.item.ItemStack;
-import org.joml.*;
-import org.jspecify.annotations.Nullable;
 
-import java.util.Collection;
-import java.util.OptionalDouble;
-import java.util.OptionalInt;
-import java.util.function.Consumer;
-
-public abstract class ArcItemRenderer<T extends Item & ArcAnimatable<T>, RS extends ArcItemRenderState<T>> implements SpecialModelRenderer<RS>, ArcRenderer<T, RS>
+public abstract class ArcItemRenderer<T extends Item & ArcAnimatable<T>> extends BlockEntityWithoutLevelRenderer implements ArcRenderer<T>
 {
 	private final ArcModelData modelData;
-	private @Nullable MappableRingBuffer colorLightOverlay;
-	private @Nullable Projection guiProjection;
-	private @Nullable ProjectionMatrixBuffer guiProjectionMatrixBuffer;
+	
+	public ArcItemRenderer(ArcModelData data, BlockEntityRenderDispatcher blockEntityRenderDispatcher, EntityModelSet entityModelSet)
+	{
+		super(blockEntityRenderDispatcher, entityModelSet);
+		this.modelData = data;
+	}
+	
+	@Override
+	public ArcModelData getArcModelData()
+	{
+		return this.modelData;
+	}
+	
+	@Override
+	public ArcBakedModel getArcModel()
+	{
+		return this.modelData.getModel();
+	}
+/*
 	private boolean initialized = false;
 	
 	public ArcItemRenderer(ArcModelData modelData)
@@ -74,16 +53,6 @@ public abstract class ArcItemRenderer<T extends Item & ArcAnimatable<T>, RS exte
 	{
 		if (this.initialized)
 			return;
-		this.guiProjection = new Projection();
-		this.guiProjectionMatrixBuffer = new ProjectionMatrixBuffer("arc_item_gui");
-		this.colorLightOverlay = new MappableRingBuffer(
-				() -> Database.rl("color_light_overlay").toLanguageKey(),
-				GpuBuffer.USAGE_UNIFORM | GpuBuffer.USAGE_MAP_WRITE,
-				new Std140SizeCalculator().
-						putVec4().
-						putIVec2().
-						putIVec2().
-						get());
 	}
 	
 	@Override
@@ -121,18 +90,6 @@ public abstract class ArcItemRenderer<T extends Item & ArcAnimatable<T>, RS exte
 		RS state = createRenderState();
 		state.extractStackData(stack, this);
 		return state;
-	}
-	
-	@Override
-	public ArcModelData getArcModelData()
-	{
-		return this.modelData;
-	}
-	
-	@Override
-	public ArcBakedModel getArcModel()
-	{
-		return this.modelData.getModel();
 	}
 	
 	@Override
@@ -264,5 +221,5 @@ public abstract class ArcItemRenderer<T extends Item & ArcAnimatable<T>, RS exte
 			return null;
 		
 		return new BoneFrame(translation, rotation, scale);
-	}
+	}*/
 }

@@ -29,6 +29,8 @@ import net.neoforged.neoforge.registries.DeferredItem;
 import net.neoforged.neoforge.registries.DeferredRegister;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Set;
+
 public class Registration
 {
 	public static class BlockReg
@@ -36,8 +38,7 @@ public class Registration
 		public static final DeferredRegister.Blocks BLOCKS = DeferredRegister.createBlocks(Database.MOD_ID);
 		
 		public static final DeferredBlock<TestBlock> TEST_BLOCK = BLOCKS.register("test_block", () -> new TestBlock(
-				BlockBehaviour.Properties.of().setId(
-						ResourceKey.create(Registries.BLOCK, Database.rl("test_block"))).
+				BlockBehaviour.Properties.of().
 						noOcclusion()));
 		
 		private static void init (@NotNull final IEventBus bus)
@@ -52,7 +53,7 @@ public class Registration
 				BuiltInRegistries.BLOCK_ENTITY_TYPE, Database.MOD_ID);
 	
 		public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<TestBlockEntity>> TEST_BLOCK_ENTITY = BLOCK_ENTITIES.register("test_block_entity", () ->
-				new BlockEntityType<>(TestBlockEntity :: new, BlockReg.TEST_BLOCK.get()));
+				new BlockEntityType<>(TestBlockEntity :: new, Set.of(BlockReg.TEST_BLOCK.get()), null));
 		
 		private static void init (@NotNull final IEventBus bus)
 		{
@@ -66,8 +67,7 @@ public class Registration
 		
 		public static final DeferredItem<TestBlockItem> TEST_ITEM = ITEMS.register("test_block", identifier -> new TestBlockItem(
 				BlockReg.TEST_BLOCK.get(),
-				new Item.Properties().setId(
-						ResourceKey.create(Registries.ITEM, Database.rl("test_block")))));
+				new Item.Properties()));
 		
 		private static void init (@NotNull final IEventBus bus)
 		{
@@ -77,15 +77,12 @@ public class Registration
 	
 	public static class EntityTypeReg
 	{
-		public static final DeferredRegister.Entities ENTITIES = DeferredRegister.createEntities(Database.MOD_ID);
+		public static final DeferredRegister<EntityType<?>> ENTITIES = DeferredRegister.create(Registries.ENTITY_TYPE, Database.MOD_ID);
 		
-		public static final DeferredHolder<EntityType<?>, EntityType<TestEntity>> TEST_ENTITY = ENTITIES.registerEntityType("test_entity", TestEntity :: new, MobCategory.MISC,
-				builder ->
-				builder.
-						noLootTable().
-						sized(1, 1).
-						
-						clientTrackingRange(5));
+		public static final DeferredHolder<EntityType<?>, EntityType<TestEntity>> TEST_ENTITY = ENTITIES.register("test_entity", key -> EntityType.Builder.of(TestEntity :: new, MobCategory.MISC).
+				sized(1, 1).
+				clientTrackingRange(5).
+				build(key.toString()));
 		
 		private static void init (@NotNull final IEventBus bus)
 		{

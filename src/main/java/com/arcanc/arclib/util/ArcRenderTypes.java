@@ -10,25 +10,53 @@
 package com.arcanc.arclib.util;
 
 
-import com.mojang.blaze3d.pipeline.RenderPipeline;
-import com.mojang.blaze3d.shaders.UniformType;
 import com.mojang.blaze3d.vertex.VertexFormat;
 import com.mojang.blaze3d.vertex.VertexFormatElement;
-import net.minecraft.client.renderer.RenderPipelines;
+import net.minecraft.Util;
+import net.minecraft.client.renderer.RenderStateShard;
+import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.ShaderInstance;
+import net.minecraft.resources.ResourceLocation;
 import net.neoforged.bus.api.IEventBus;
-import net.neoforged.neoforge.client.event.RegisterRenderPipelinesEvent;
-import org.jetbrains.annotations.NotNull;
+import net.neoforged.neoforge.client.event.RegisterShadersEvent;
+import org.jetbrains.annotations.Nullable;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.io.IOException;
+import java.util.function.Function;
 
 public class ArcRenderTypes
 {
-	public static class RenderPipelinesProvider
+	public static class RenderTypeProvider
+	{
+		private static final Function<ResourceLocation, RenderType> TRIANGLES_SOLID = Util.memoize(RenderTypeProvider :: trianglesSolid);
+		
+		public static RenderType trianglesSolid(ResourceLocation location)
+		{
+			RenderType.CompositeState rendertype$compositestate = RenderType.CompositeState.builder().
+							setShaderState(ShadersProvider.StateShard.TRIANGLES).
+							setTextureState(new RenderStateShard.TextureStateShard(location, false, false)).
+							setTransparencyState(RenderStateShard.NO_TRANSPARENCY).
+							setLightmapState(RenderStateShard.NO_LIGHTMAP).
+							setOverlayState(RenderStateShard.NO_OVERLAY).
+							setCullState(RenderStateShard.NO_CULL).
+							createCompositeState(true);
+			return RenderType.create(
+					"triangles_solid",
+					VertexFormatProvider.POSITION_TEX_NORMAL,
+					VertexFormat.Mode.TRIANGLES,
+					1536,
+					false,
+					false,
+					rendertype$compositestate);
+			
+		}
+	}
+	
+/*	public static class RenderPipelinesProvider
 	{
 		private static final Set<RenderPipeline> PIPELINES = new HashSet<>();
 		
-		private static final RenderPipeline.Snippet TRIANGLES_SNIPPET = RenderPipeline.builder(RenderPipelines.MATRICES_FOG_LIGHT_DIR_SNIPPET).
+		/*private static final RenderPipeline.Snippet TRIANGLES_SNIPPET = RenderPipeline.builder(RenderPipelines.MATRICES_FOG_LIGHT_DIR_SNIPPET).
 				withVertexShader(Database.rl("core/triangles")).
 				withFragmentShader(Database.rl("core/triangles")).
 				withSampler("Sampler0").
@@ -58,19 +86,19 @@ public class ArcRenderTypes
 				withBlend(BlendFunction.TRANSLUCENT).
 				withCull(false).
 				build());
-		*/
+		
 		private static RenderPipeline registerPipeline(RenderPipeline pipeline)
 		{
 			PIPELINES.add(pipeline);
 			return pipeline;
 		}
 		
-		private static void registerCustomPipelines(final @NotNull RegisterRenderPipelinesEvent event)
+		private static void registerCustomPipelines(final RegisterRenderPipelinesEvent event)
 		{
 			PIPELINES.forEach(event :: registerPipeline);
 			PIPELINES.clear();
 		}
-	}
+	}*/
 	
 	public static class VertexFormatProvider
 	{
@@ -82,8 +110,41 @@ public class ArcRenderTypes
 				build();
 	}
 	
-	public static void register(@NotNull IEventBus modEventBus)
+	public static class ShadersProvider
 	{
-		modEventBus.addListener(RenderPipelinesProvider :: registerCustomPipelines);
+		public static class StateShard
+		{
+			private static final RenderStateShard.ShaderStateShard TRIANGLES = new RenderStateShard.ShaderStateShard(() -> TRIANGLES_SHADER);
+		}
+		
+		@Nullable
+		public static ShaderInstance TRIANGLES_SHADER;
+		
+		public static @Nullable ShaderInstance trianglesShader()
+		{
+			return TRIANGLES_SHADER;
+		}
+		
+		private static void registerShaders(final RegisterShadersEvent event)
+		{
+			try
+			{
+				event.registerShader(new ShaderInstance(
+								event.getResourceProvider(),
+								Database.rl("triangles"),
+								VertexFormatProvider.POSITION_TEX_NORMAL),
+						shaderInstance -> TRIANGLES_SHADER = shaderInstance);
+			}
+			catch (IOException e)
+			{
+				Database.LOGGER.warn("Failed to register shaders: {}", String.valueOf(e));
+			}
+		}
+	}
+	
+	public static void register(IEventBus modEventBus)
+	{
+		//modEventBus.addListener(RenderPipelinesProvider :: registerCustomPipelines);
+		modEventBus.addListener(ShadersProvider :: registerShaders);
 	}
 }

@@ -11,11 +11,10 @@ package com.arcanc.arclib.util.helpers;
 
 
 import net.minecraft.client.Minecraft;
-import org.jspecify.annotations.NonNull;
 
 public class RenderHelper
 {
-	public static @NonNull Minecraft mc()
+	public static Minecraft mc()
 	{
 		return Minecraft.getInstance();
 	}

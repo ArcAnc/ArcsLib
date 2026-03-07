@@ -16,18 +16,17 @@ import com.arcanc.arclib.content.animatable.instance.InstanceAnimationManager;
 import com.arcanc.arclib.content.animatable.singleton.SingletonAnimationManager;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.block.entity.BlockEntity;
-import org.jspecify.annotations.NonNull;
 
 public class ArcLibHelper
 {
-	public static <T extends ArcAnimatable<T>> @NonNull ArcAnimationManager<T> createManager(@NonNull T animatable)
+	public static <T extends ArcAnimatable<T>> ArcAnimationManager<T> createManager(T animatable)
 	{
 		if (animatable instanceof BlockEntity || animatable instanceof Entity)
 			return createManager(animatable, false);
 		return createManager(animatable, true);
 	}
 	
-	public static <T extends ArcAnimatable<T>> @NonNull ArcAnimationManager<T> createManager(@NonNull T animatable, boolean singleton)
+	public static <T extends ArcAnimatable<T>> ArcAnimationManager<T> createManager(T animatable, boolean singleton)
 	{
 		ArcAnimationManager<T> manager = animatable.getAnimationManager();
 		

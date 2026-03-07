@@ -15,14 +15,12 @@ import com.arcanc.arclib.content.animatable.ArcAnimationManager;
 import com.arcanc.arclib.content.animatable.instance.ArcAnimationController;
 import com.arcanc.arclib.content.animatable.instance.ControllerState;
 import com.arcanc.arclib.content.model.animation.ArcRawAnimation;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.SynchedEntityData;
-import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.storage.ValueInput;
-import net.minecraft.world.level.storage.ValueOutput;
+import org.jetbrains.annotations.NotNull;
 
 public class TestEntity extends Entity implements ArcAnimatable<TestEntity>
 {
@@ -45,19 +43,13 @@ public class TestEntity extends Entity implements ArcAnimatable<TestEntity>
 	}
 	
 	@Override
-	public boolean hurtServer(ServerLevel level, DamageSource source, float damage)
-	{
-		return false;
-	}
-	
-	@Override
-	protected void readAdditionalSaveData(ValueInput input)
+	protected void readAdditionalSaveData(CompoundTag compound)
 	{
 	
 	}
 	
 	@Override
-	protected void addAdditionalSaveData(ValueOutput output)
+	protected void addAdditionalSaveData(CompoundTag compound)
 	{
 	
 	}
@@ -69,7 +61,7 @@ public class TestEntity extends Entity implements ArcAnimatable<TestEntity>
 	}
 	
 	@Override
-	public void registerAnimationControllers(ArcAnimationManager.ArcAnimationRegistrar<TestEntity> registrar)
+	public void registerAnimationControllers(ArcAnimationManager.@NotNull ArcAnimationRegistrar<TestEntity> registrar)
 	{
 		registrar.add(new ArcAnimationController<>(state ->
 		{

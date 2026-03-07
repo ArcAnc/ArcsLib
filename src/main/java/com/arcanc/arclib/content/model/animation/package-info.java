@@ -7,7 +7,12 @@
  * Details can be found in the license file in the root folder of this project
  */
 
-@NullMarked
+@ParametersAreNonnullByDefault
+@MethodsReturnNonnullByDefault
+@FieldsAreNonnullByDefault
 package com.arcanc.arclib.content.model.animation;
 
-import org.jspecify.annotations.NullMarked;
+import net.minecraft.FieldsAreNonnullByDefault;
+import net.minecraft.MethodsReturnNonnullByDefault;
+
+import javax.annotation.ParametersAreNonnullByDefault;

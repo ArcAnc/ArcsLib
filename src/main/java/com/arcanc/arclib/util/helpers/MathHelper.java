@@ -13,11 +13,10 @@ package com.arcanc.arclib.util.helpers;
 import net.minecraft.util.Mth;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
-import org.jspecify.annotations.NonNull;
 
 public class MathHelper
 {
-	public static Quaternionf eulerToQuaternion(@NonNull Vector3f euler)
+	public static Quaternionf eulerToQuaternion(Vector3f euler)
 	{
 		return new Quaternionf().
 				rotateXYZ(Mth.DEG_TO_RAD * euler.x(),
