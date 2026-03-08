@@ -20,10 +20,12 @@ import com.arcanc.arclib.util.ArcRenderTypes;
 import com.arcanc.arclib.util.helpers.RenderHelper;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.VertexBuffer;
 import com.mojang.math.Axis;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.ShaderInstance;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.texture.OverlayTexture;
@@ -133,20 +135,24 @@ public abstract class ArcBlockRenderer<T extends BlockEntity & ArcAnimatable<T>>
 		{
 			if (mesh.textureName().isEmpty())
 				return;
+			
+			RenderSystem.enableDepthTest();
+			RenderSystem.depthMask(true);
 			ShaderInstance shaderInstance = ArcRenderTypes.ShadersProvider.TRIANGLES_SHADER;
 			RenderSystem.setShader(() -> shaderInstance);
 			mesh.vertexBuffer().bind();
 			RenderSystem.setShaderTexture(0, getTextureByName(mesh.textureName()));
 			mc.gameRenderer.overlayTexture().setupOverlayColor();
 			mc.gameRenderer.lightTexture().turnOnLightLayer();
-			shaderInstance.getUniform("ColorModulator").set(colorVector);
 			shaderInstance.getUniform("Color").set(colorVector);
 			shaderInstance.getUniform("Light").set(blockLight, skyLight);
 			shaderInstance.getUniform("Overlay").set(u, v);
 			
 			shaderInstance.apply();
 			mesh.vertexBuffer().drawWithShader(matrix4fstack, RenderSystem.getProjectionMatrix(), shaderInstance);
-			mesh.vertexBuffer().unbind();
+			VertexBuffer.unbind();
+			RenderSystem.depthMask(false);
+			RenderSystem.disableDepthTest();
 		});
 		
 		bone.children().forEach(children ->

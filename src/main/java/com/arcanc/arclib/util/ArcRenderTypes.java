@@ -45,7 +45,7 @@ public class ArcRenderTypes
 					VertexFormatProvider.POSITION_TEX_NORMAL,
 					VertexFormat.Mode.TRIANGLES,
 					1536,
-					false,
+					true,
 					false,
 					rendertype$compositestate);
 			
