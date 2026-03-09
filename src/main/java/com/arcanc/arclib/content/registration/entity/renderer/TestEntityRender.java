@@ -13,6 +13,7 @@ package com.arcanc.arclib.content.registration.entity.renderer;
 import com.arcanc.arclib.content.registration.entity.TestEntity;
 import com.arcanc.arclib.content.renderer.ArcEntityRenderer;
 import com.arcanc.arclib.content.renderer.modelData.DefaultEntityModelData;
+import com.arcanc.arclib.util.ArcRenderTypes;
 import com.arcanc.arclib.util.Database;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 
@@ -24,6 +25,7 @@ public class TestEntityRender extends ArcEntityRenderer<TestEntity>
 				addTexture(Database.rl("sphere")).
 				addTexture(Database.rl("torus")).
 				addTexture(Database.rl("tube")).
-				build());
+				build(),
+				ArcRenderTypes.RenderTypeProvider :: trianglesSolid);
 	}
 }

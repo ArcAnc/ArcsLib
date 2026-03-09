@@ -22,9 +22,14 @@ public class ArcAnimationManager<T extends ArcAnimatable<T>>
 	protected final T animatable;
 	private final Map<String, ArcAnimationController<T>> controllers = new Object2ObjectArrayMap<>();
 	
-	public final Map<String, ArcAnimationController<T>> getControllers()
+	public Map<String, ArcAnimationController<T>> getControllers()
 	{
 		return this.controllers;
+	}
+	
+	public T getAnimatable()
+	{
+		return this.animatable;
 	}
 	
 	public ArcAnimationManager(final T animatable)

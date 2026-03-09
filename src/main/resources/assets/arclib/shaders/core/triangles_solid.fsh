@@ -1,0 +1,22 @@
+#version 150
+
+uniform sampler2D Sampler0;
+uniform vec4 Color;
+
+in vec4 vertexColorBack;
+in vec4 vertexColorFront;
+
+in vec4 lightMapColor;
+in vec4 overlayColor;
+in vec2 texCoord0;
+
+out vec4 fragColor;
+
+void main()
+{
+    vec4 color = texture(Sampler0, texCoord0);
+    color *= (gl_FrontFacing ? vertexColorFront : vertexColorBack) * Color;
+    color.rgb = mix(overlayColor.rgb, color.rgb, overlayColor.a);
+    color *= lightMapColor;
+    fragColor = color;
+}

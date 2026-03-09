@@ -38,7 +38,7 @@ public class TestBlockItem extends BlockItem implements ArcAnimatable<TestBlockI
 	}
 	
 	@Override
-	public ArcAnimationManager<TestBlockItem> getAnimationManager()
+	public @NotNull ArcAnimationManager<TestBlockItem> getAnimationManager()
 	{
 		return this.animationManager;
 	}

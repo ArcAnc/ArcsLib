@@ -10,6 +10,7 @@
 package com.arcanc.arclib.content.event;
 
 
+import com.arcanc.arclib.content.animatable.singleton.AnimationTickHandler;
 import com.arcanc.arclib.content.registration.Registration;
 import com.arcanc.arclib.content.registration.block.block_entity.ber.TestBlockEntityRenderer;
 import com.arcanc.arclib.content.registration.entity.renderer.TestEntityRender;
@@ -28,6 +29,7 @@ public class ClientEvents
 		modEventBus.addListener(ClientEvents :: registerReloadListeners);
 		modEventBus.addListener(ClientEvents :: registerClientExtensions);
 		ArcRenderTypes.register(modEventBus);
+		AnimationTickHandler.register(modEventBus);
 	}
 	
 	private static void registerClientExtensions(final RegisterClientExtensionsEvent event)

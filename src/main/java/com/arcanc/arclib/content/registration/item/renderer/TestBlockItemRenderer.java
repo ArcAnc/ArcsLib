@@ -13,6 +13,7 @@ package com.arcanc.arclib.content.registration.item.renderer;
 import com.arcanc.arclib.content.registration.item.TestBlockItem;
 import com.arcanc.arclib.content.renderer.ArcItemRenderer;
 import com.arcanc.arclib.content.renderer.modelData.ArcModelData;
+import com.arcanc.arclib.util.ArcRenderTypes;
 import net.minecraft.client.model.geom.EntityModelSet;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderDispatcher;
 
@@ -20,6 +21,6 @@ public class TestBlockItemRenderer extends ArcItemRenderer<TestBlockItem>
 {
 	public TestBlockItemRenderer(ArcModelData modelData, BlockEntityRenderDispatcher blockEntityRenderDispatcher, EntityModelSet entityModelSet)
 	{
-		super(modelData, blockEntityRenderDispatcher, entityModelSet);
+		super(modelData, ArcRenderTypes.RenderTypeProvider :: trianglesSolid, blockEntityRenderDispatcher, entityModelSet);
 	}
 }

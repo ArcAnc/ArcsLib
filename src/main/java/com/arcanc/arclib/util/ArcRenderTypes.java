@@ -29,19 +29,61 @@ public class ArcRenderTypes
 	public static class RenderTypeProvider
 	{
 		private static final Function<ResourceLocation, RenderType> TRIANGLES_SOLID = Util.memoize(RenderTypeProvider :: trianglesSolid);
+		private static final Function<ResourceLocation, RenderType> TRIANGLES_CUTOUT = Util.memoize(RenderTypeProvider :: trianglesCutout);
+		private static final Function<ResourceLocation, RenderType> TRIANGLES_TRANSLUCENT = Util.memoize(RenderTypeProvider :: trianglesTranslucent);
 		
 		public static RenderType trianglesSolid(ResourceLocation location)
 		{
 			RenderType.CompositeState rendertype$compositestate = RenderType.CompositeState.builder().
-							setShaderState(ShadersProvider.StateShard.TRIANGLES).
+							setShaderState(ShadersProvider.StateShard.TRIANGLES_SOLID_STATE_SHARD).
 							setTextureState(new RenderStateShard.TextureStateShard(location, false, false)).
 							setTransparencyState(RenderStateShard.NO_TRANSPARENCY).
-							setLightmapState(RenderStateShard.NO_LIGHTMAP).
-							setOverlayState(RenderStateShard.NO_OVERLAY).
+							setLightmapState(RenderStateShard.LIGHTMAP).
+							setOverlayState(RenderStateShard.OVERLAY).
 							setCullState(RenderStateShard.NO_CULL).
 							createCompositeState(true);
 			return RenderType.create(
-					"triangles_solid",
+					Database.rl("triangles_solid").toString(),
+					VertexFormatProvider.POSITION_TEX_NORMAL,
+					VertexFormat.Mode.TRIANGLES,
+					1536,
+					true,
+					false,
+					rendertype$compositestate);
+			
+		}
+		public static RenderType trianglesCutout(ResourceLocation location)
+		{
+			RenderType.CompositeState rendertype$compositestate = RenderType.CompositeState.builder().
+					setShaderState(ShadersProvider.StateShard.TRIANGLES_CUTOUT_STATE_SHARD).
+					setTextureState(new RenderStateShard.TextureStateShard(location, false, false)).
+					setTransparencyState(RenderStateShard.NO_TRANSPARENCY).
+					setLightmapState(RenderStateShard.LIGHTMAP).
+					setOverlayState(RenderStateShard.OVERLAY).
+					setCullState(RenderStateShard.NO_CULL).
+					createCompositeState(true);
+			return RenderType.create(
+					Database.rl("triangles_cutout").toString(),
+					VertexFormatProvider.POSITION_TEX_NORMAL,
+					VertexFormat.Mode.TRIANGLES,
+					1536,
+					true,
+					false,
+					rendertype$compositestate);
+			
+		}
+		public static RenderType trianglesTranslucent(ResourceLocation location)
+		{
+			RenderType.CompositeState rendertype$compositestate = RenderType.CompositeState.builder().
+					setShaderState(ShadersProvider.StateShard.TRIANGLES_TRANSLUCENT_STATE_SHARD).
+					setTextureState(new RenderStateShard.TextureStateShard(location, false, false)).
+					setTransparencyState(RenderStateShard.TRANSLUCENT_TRANSPARENCY).
+					setLightmapState(RenderStateShard.LIGHTMAP).
+					setOverlayState(RenderStateShard.OVERLAY).
+					setCullState(RenderStateShard.NO_CULL).
+					createCompositeState(true);
+			return RenderType.create(
+					Database.rl("triangles_translucent").toString(),
 					VertexFormatProvider.POSITION_TEX_NORMAL,
 					VertexFormat.Mode.TRIANGLES,
 					1536,
@@ -114,15 +156,29 @@ public class ArcRenderTypes
 	{
 		public static class StateShard
 		{
-			private static final RenderStateShard.ShaderStateShard TRIANGLES = new RenderStateShard.ShaderStateShard(() -> TRIANGLES_SHADER);
+			private static final RenderStateShard.ShaderStateShard TRIANGLES_SOLID_STATE_SHARD = new RenderStateShard.ShaderStateShard(() -> ShadersProvider.TRIANGLES_SOLID_SHADER);
+			private static final RenderStateShard.ShaderStateShard TRIANGLES_CUTOUT_STATE_SHARD = new RenderStateShard.ShaderStateShard(() -> ShadersProvider.TRIANGLES_SOLID_SHADER);
+			private static final RenderStateShard.ShaderStateShard TRIANGLES_TRANSLUCENT_STATE_SHARD = new RenderStateShard.ShaderStateShard(() -> ShadersProvider.TRIANGLES_SOLID_SHADER);
 		}
 		
 		@Nullable
-		public static ShaderInstance TRIANGLES_SHADER;
+		public static ShaderInstance TRIANGLES_SOLID_SHADER;
+		@Nullable
+		public static ShaderInstance TRIANGLES_CUTOUT_SHADER;
+		@Nullable
+		public static ShaderInstance TRIANGLES_TRANSLUCENT_SHADER;
 		
-		public static @Nullable ShaderInstance trianglesShader()
+		public static @Nullable ShaderInstance trianglesSolid()
 		{
-			return TRIANGLES_SHADER;
+			return TRIANGLES_SOLID_SHADER;
+		}
+		public static @Nullable ShaderInstance trianglesCutout()
+		{
+			return TRIANGLES_CUTOUT_SHADER;
+		}
+		public static @Nullable ShaderInstance trianglesTranslucent()
+		{
+			return TRIANGLES_TRANSLUCENT_SHADER;
 		}
 		
 		private static void registerShaders(final RegisterShadersEvent event)
@@ -131,9 +187,19 @@ public class ArcRenderTypes
 			{
 				event.registerShader(new ShaderInstance(
 								event.getResourceProvider(),
-								Database.rl("triangles"),
+								Database.rl("triangles_solid"),
 								VertexFormatProvider.POSITION_TEX_NORMAL),
-						shaderInstance -> TRIANGLES_SHADER = shaderInstance);
+						shaderInstance -> TRIANGLES_SOLID_SHADER = shaderInstance);
+				event.registerShader(new ShaderInstance(
+								event.getResourceProvider(),
+								Database.rl("triangles_cutout"),
+								VertexFormatProvider.POSITION_TEX_NORMAL),
+						shaderInstance -> TRIANGLES_CUTOUT_SHADER = shaderInstance);
+				event.registerShader(new ShaderInstance(
+								event.getResourceProvider(),
+								Database.rl("triangles_translucent"),
+								VertexFormatProvider.POSITION_TEX_NORMAL),
+						shaderInstance -> TRIANGLES_TRANSLUCENT_SHADER = shaderInstance);
 			}
 			catch (IOException e)
 			{

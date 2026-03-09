@@ -15,7 +15,10 @@ import com.arcanc.arclib.content.model.baked.ArcBakedModel;
 import com.arcanc.arclib.content.renderer.modelData.ArcModelData;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.resources.ResourceLocation;
+
+import java.util.function.Function;
 
 public interface ArcRenderer<T extends ArcAnimatable<T>>
 {
@@ -27,8 +30,9 @@ public interface ArcRenderer<T extends ArcAnimatable<T>>
 	}
 	
 	ArcBakedModel getArcModel();
+	RenderType getRenderType(ResourceLocation texture);
 	
-	void preRender(PoseStack poseStack, T animatable, MultiBufferSource bufferSource, int packedLight, int packedOverlay, float partialTick);
-	void actuallyRender(PoseStack poseStack, T animatable, MultiBufferSource bufferSource, int packedLight, int packedOverlay, float partialTick);
-	void postRender(PoseStack poseStack, T animatable, MultiBufferSource bufferSource, int packedLight, int packedOverlay, float partialTick);
+	void preRender(PoseStack poseStack, T animatable, Function<ResourceLocation, RenderType> renderType, MultiBufferSource bufferSource, int packedLight, int packedOverlay, float partialTick);
+	void actuallyRender(PoseStack poseStack, T animatable, Function<ResourceLocation, RenderType> renderType, MultiBufferSource bufferSource, int packedLight, int packedOverlay, float partialTick);
+	void postRender(PoseStack poseStack, T animatable, Function<ResourceLocation, RenderType> renderType, MultiBufferSource bufferSource, int packedLight, int packedOverlay, float partialTick);
 }

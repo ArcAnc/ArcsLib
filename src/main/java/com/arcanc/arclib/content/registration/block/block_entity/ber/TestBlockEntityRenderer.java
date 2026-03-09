@@ -13,6 +13,7 @@ package com.arcanc.arclib.content.registration.block.block_entity.ber;
 import com.arcanc.arclib.content.registration.block.block_entity.TestBlockEntity;
 import com.arcanc.arclib.content.renderer.ArcBlockRenderer;
 import com.arcanc.arclib.content.renderer.modelData.DefaultBlockModelData;
+import com.arcanc.arclib.util.ArcRenderTypes;
 import com.arcanc.arclib.util.Database;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 
@@ -25,7 +26,8 @@ public class TestBlockEntityRenderer extends ArcBlockRenderer<TestBlockEntity>
 				addTexture(Database.rl("torus_texture")).
 				addTexture(Database.rl("pyramid_texture")).
 				addTexture(Database.rl("cube_texture")).
-				build());
+				build(),
+				ArcRenderTypes.RenderTypeProvider :: trianglesTranslucent);
 	}
 
 }

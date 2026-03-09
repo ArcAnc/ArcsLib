@@ -24,11 +24,9 @@ import com.mojang.blaze3d.vertex.VertexBuffer;
 import com.mojang.math.Axis;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.geom.EntityModelSet;
-import net.minecraft.client.renderer.BlockEntityWithoutLevelRenderer;
-import net.minecraft.client.renderer.LightTexture;
-import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.ShaderInstance;
+import net.minecraft.client.renderer.*;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderDispatcher;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
@@ -39,15 +37,17 @@ import org.joml.Vector3f;
 import org.joml.Vector4f;
 
 import java.util.Collection;
+import java.util.function.Function;
 
 public abstract class ArcItemRenderer<T extends Item & ArcAnimatable<T>> extends BlockEntityWithoutLevelRenderer implements ArcRenderer<T>
 {
 	private final ArcModelData modelData;
-	
-	public ArcItemRenderer(ArcModelData data, BlockEntityRenderDispatcher blockEntityRenderDispatcher, EntityModelSet entityModelSet)
+	private final Function<ResourceLocation, RenderType> renderType;
+	public ArcItemRenderer(ArcModelData data, Function<ResourceLocation, RenderType> renderType, BlockEntityRenderDispatcher blockEntityRenderDispatcher, EntityModelSet entityModelSet)
 	{
 		super(blockEntityRenderDispatcher, entityModelSet);
 		this.modelData = data;
+		this.renderType = renderType;
 	}
 	
 	@Override
@@ -63,46 +63,52 @@ public abstract class ArcItemRenderer<T extends Item & ArcAnimatable<T>> extends
 	}
 	
 	@Override
+	public RenderType getRenderType(ResourceLocation texture)
+	{
+		return this.renderType.apply(texture);
+	}
+	
+	@Override
 	public void renderByItem(ItemStack stack, ItemDisplayContext displayContext, PoseStack poseStack, MultiBufferSource buffer, int packedLight, int packedOverlay)
 	{
+		@SuppressWarnings("unchecked")
 		T animatable = stack.getItem() instanceof ArcAnimatable ? (T) stack.getItem() : null;
 		if (animatable == null)
 			return;
 		float partialTick = RenderHelper.mc().getTimer().getGameTimeDeltaPartialTick(false);
-		animatable.getAnimationManager().getControllers().
-				forEach(($, controller) -> controller.tick(animatable, this.getArcModel(), partialTick));
 		
-		preRender(poseStack, animatable, buffer, packedLight, packedOverlay, partialTick);
-		actuallyRender(poseStack, animatable, buffer, packedLight, packedOverlay, partialTick);
-		postRender(poseStack, animatable, buffer, packedLight, packedOverlay, partialTick);
+		preRender(poseStack, animatable, this :: getRenderType, buffer, packedLight, packedOverlay, partialTick);
+		actuallyRender(poseStack, animatable, this :: getRenderType, buffer, packedLight, packedOverlay, partialTick);
+		postRender(poseStack, animatable, this :: getRenderType, buffer, packedLight, packedOverlay, partialTick);
 	}
 	
 	@Override
-	public void preRender(PoseStack poseStack, T animatable, MultiBufferSource bufferSource, int packedLight, int packedOverlay, float partialTick)
+	public void preRender(PoseStack poseStack, T animatable, Function<ResourceLocation, RenderType> renderType, MultiBufferSource bufferSource, int packedLight, int packedOverlay, float partialTick)
 	{
 	
 	}
 	
 	@Override
-	public void actuallyRender(PoseStack poseStack, T animatable, MultiBufferSource bufferSource, int packedLight, int packedOverlay, float partialTick)
+	public void actuallyRender(PoseStack poseStack, T animatable, Function<ResourceLocation, RenderType> renderType, MultiBufferSource bufferSource, int packedLight, int packedOverlay, float partialTick)
 	{
 		Collection<ArcAnimationController<T>> controllers = animatable.getAnimationManager().getControllers().values();
 		poseStack.pushPose();
 		poseStack.translate(0.5f, 0, 0.5f);
 		poseStack.mulPose(Axis.YP.rotationDegrees(180));
 		this.getArcModel().bones().forEach(bone ->
-				perBoneRender(poseStack, animatable, bone, controllers, 255, 255, 255, 255, packedLight, packedOverlay, partialTick));
+				perBoneRender(poseStack, animatable, renderType, bone, controllers, 255, 255, 255, 255, packedLight, packedOverlay, partialTick));
 		poseStack.popPose();
 	}
 	
 	@Override
-	public void postRender(PoseStack poseStack, T animatable, MultiBufferSource bufferSource, int packedLight, int packedOverlay, float partialTick)
+	public void postRender(PoseStack poseStack, T animatable, Function<ResourceLocation, RenderType> renderType, MultiBufferSource bufferSource, int packedLight, int packedOverlay, float partialTick)
 	{
 	
 	}
 	
 	protected void perBoneRender(PoseStack poseStack,
 	                             T animatable,
+								 Function<ResourceLocation, RenderType> renderType,
 	                             ArcBakedBone bone,
 	                             Collection<ArcAnimationController<T>> controllers,
 	                             int red,
@@ -114,7 +120,6 @@ public abstract class ArcItemRenderer<T extends Item & ArcAnimatable<T>> extends
 	                             float partialTick)
 	{
 		BoneFrame frame = mixBone(bone, controllers);
-		
 		poseStack.pushPose();
 		if (frame != null)
 		{
@@ -135,34 +140,31 @@ public abstract class ArcItemRenderer<T extends Item & ArcAnimatable<T>> extends
 		int u = packedOverlay & 0xFFFF;
 		int v = (packedOverlay >> 16) & 0xFFFF;
 		Vector4f colorVector = new Vector4f(red/255f, green/255f, blue/255f, alpha/255f);
-		Minecraft mc = RenderHelper.mc();
 		
 		bone.meshes().forEach(mesh ->
 		{
 			if (mesh.textureName().isEmpty())
 				return;
 			
-			RenderSystem.enableDepthTest();
-			RenderSystem.depthMask(true);
-			ShaderInstance shaderInstance = ArcRenderTypes.ShadersProvider.TRIANGLES_SHADER;
-			RenderSystem.setShader(() -> shaderInstance);
-			mesh.vertexBuffer().bind();
-			RenderSystem.setShaderTexture(0, getTextureByName(mesh.textureName()));
-			mc.gameRenderer.overlayTexture().setupOverlayColor();
-			mc.gameRenderer.lightTexture().turnOnLightLayer();
-			shaderInstance.getUniform("Color").set(colorVector);
-			shaderInstance.getUniform("Light").set(blockLight, skyLight);
-			shaderInstance.getUniform("Overlay").set(u, v);
+			ResourceLocation texture = getTextureByName(mesh.textureName());
+			RenderType type = renderType.apply(texture);
+			type.setupRenderState();
 			
+			ShaderInstance shaderInstance = RenderSystem.getShader();
+			if (shaderInstance == null)
+				return;
+			mesh.vertexBuffer().bind();
+			shaderInstance.safeGetUniform("Color").set(colorVector);
+			shaderInstance.safeGetUniform("Light").set(blockLight, skyLight);
+			shaderInstance.safeGetUniform("Overlay").set(u, v);
 			shaderInstance.apply();
 			mesh.vertexBuffer().drawWithShader(matrix4fstack, RenderSystem.getProjectionMatrix(), shaderInstance);
 			VertexBuffer.unbind();
-			RenderSystem.depthMask(false);
-			RenderSystem.disableDepthTest();
+			type.clearRenderState();
 		});
 		
 		bone.children().forEach(children ->
-				perBoneRender(poseStack, animatable, children, controllers, red, green, blue, alpha, packedLight, packedOverlay, partialTick));
+				perBoneRender(poseStack, animatable, renderType, children, controllers, red, green, blue, alpha, packedLight, packedOverlay, partialTick));
 		
 		poseStack.popPose();
 	}
