@@ -25,9 +25,9 @@ public class ClientEvents
 {
 	public static void registerClientEvents(final IEventBus modEventBus)
 	{
-		modEventBus.addListener(ClientEvents :: registerRenderers);
+		//modEventBus.addListener(ClientEvents :: registerRenderers);
 		modEventBus.addListener(ClientEvents :: registerReloadListeners);
-		modEventBus.addListener(ClientEvents :: registerClientExtensions);
+		//modEventBus.addListener(ClientEvents :: registerClientExtensions);
 		ArcRenderTypes.register(modEventBus);
 		AnimationTickHandler.register(modEventBus);
 	}
