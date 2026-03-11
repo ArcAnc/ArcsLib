@@ -18,6 +18,7 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.resources.ResourceLocation;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -75,8 +76,10 @@ public class ArcModelData
 		return this.textures.getOrDefault(name, TextureManager.INTENTIONAL_MISSING_TEXTURE);
 	}
 	
-	public ArcBakedModel getModel()
+	public @Nullable ArcBakedModel getModel()
 	{
+		if (ArcModelCache.getModels() == null)
+			return null;
 		return ArcModelCache.getModels().get(this.modelLocation);
 	}
 	

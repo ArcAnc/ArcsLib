@@ -10,12 +10,14 @@
 package com.arcanc.arclib.content.event;
 
 
+import com.arcanc.arclib.content.animatable.ArcItemAnimatable;
 import com.arcanc.arclib.content.animatable.singleton.AnimationTickHandler;
 import com.arcanc.arclib.content.registration.Registration;
 import com.arcanc.arclib.content.registration.block.block_entity.ber.TestBlockEntityRenderer;
 import com.arcanc.arclib.content.registration.entity.renderer.TestEntityRender;
 import com.arcanc.arclib.util.ArcModelCache;
 import com.arcanc.arclib.util.ArcRenderTypes;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.client.event.EntityRenderersEvent;
 import net.neoforged.neoforge.client.event.RegisterClientReloadListenersEvent;
@@ -27,14 +29,17 @@ public class ClientEvents
 	{
 		//modEventBus.addListener(ClientEvents :: registerRenderers);
 		modEventBus.addListener(ClientEvents :: registerReloadListeners);
-		//modEventBus.addListener(ClientEvents :: registerClientExtensions);
+		modEventBus.addListener(ClientEvents :: registerClientExtensions);
 		ArcRenderTypes.register(modEventBus);
 		AnimationTickHandler.register(modEventBus);
 	}
 	
 	private static void registerClientExtensions(final RegisterClientExtensionsEvent event)
 	{
-		event.registerItem(Registration.ItemReg.TEST_ITEM.get().registerExtension(), Registration.ItemReg.TEST_ITEM);
+		BuiltInRegistries.ITEM.stream().
+				filter(item -> item instanceof ArcItemAnimatable<?>).
+				forEach(item ->
+						event.registerItem(((ArcItemAnimatable<?>) item).registerClientExtension(), item));
 	}
 	
 	private static void registerReloadListeners(final RegisterClientReloadListenersEvent event)

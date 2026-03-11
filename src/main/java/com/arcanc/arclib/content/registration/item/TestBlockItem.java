@@ -12,6 +12,7 @@ package com.arcanc.arclib.content.registration.item;
 
 import com.arcanc.arclib.content.animatable.ArcAnimatable;
 import com.arcanc.arclib.content.animatable.ArcAnimationManager;
+import com.arcanc.arclib.content.animatable.ArcItemAnimatable;
 import com.arcanc.arclib.content.animatable.instance.ArcAnimationController;
 import com.arcanc.arclib.content.animatable.instance.ControllerState;
 import com.arcanc.arclib.content.model.animation.ArcRawAnimation;
@@ -25,7 +26,7 @@ import net.minecraft.world.level.block.Block;
 import net.neoforged.neoforge.client.extensions.common.IClientItemExtensions;
 import org.jetbrains.annotations.NotNull;
 
-public class TestBlockItem extends BlockItem implements ArcAnimatable<TestBlockItem>
+public class TestBlockItem extends BlockItem implements ArcItemAnimatable<TestBlockItem>
 {
 	private final ArcAnimationManager<TestBlockItem> animationManager = ArcLibHelper.createManager(this);
 	private final ArcRawAnimation idle = ArcRawAnimation.begin().
@@ -53,7 +54,8 @@ public class TestBlockItem extends BlockItem implements ArcAnimatable<TestBlockI
 		}));
 	}
 	
-	public IClientItemExtensions registerExtension()
+	@Override
+	public IClientItemExtensions registerClientExtension()
 	{
 		return new IClientItemExtensions()
 		{
