@@ -12,9 +12,6 @@ package com.arcanc.pulselib.content.event;
 
 import com.arcanc.pulselib.content.animatable.PItemAnimatable;
 import com.arcanc.pulselib.content.animatable.singleton.AnimationTickHandler;
-import com.arcanc.pulselib.content.registration.Registration;
-import com.arcanc.pulselib.content.registration.block.block_entity.ber.TestBlockEntityRenderer;
-import com.arcanc.pulselib.content.registration.entity.renderer.TestEntityRender;
 import com.arcanc.pulselib.util.PModelCache;
 import com.arcanc.pulselib.util.PRenderTypes;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -49,7 +46,7 @@ public class ClientEvents
 	
 	private static void registerRenderers(final EntityRenderersEvent.RegisterRenderers event)
 	{
-		event.registerBlockEntityRenderer(Registration.BETypeReg.TEST_BLOCK_ENTITY.get(), TestBlockEntityRenderer :: new);
-		event.registerEntityRenderer(Registration.EntityTypeReg.TEST_ENTITY.get(), TestEntityRender :: new);
+		//event.registerBlockEntityRenderer(Registration.BETypeReg.TEST_BLOCK_ENTITY.get(), TestBlockEntityRenderer :: new);
+		//event.registerEntityRenderer(Registration.EntityTypeReg.TEST_ENTITY.get(), TestEntityRender :: new);
 	}
 }

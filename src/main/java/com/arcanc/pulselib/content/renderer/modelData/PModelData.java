@@ -12,6 +12,7 @@ package com.arcanc.pulselib.content.renderer.modelData;
 
 import com.arcanc.pulselib.content.model.baked.PBakedModel;
 import com.arcanc.pulselib.util.PModelCache;
+import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
@@ -48,11 +49,9 @@ public class PModelData
 	{
 		this.modelLocation = builder.modelLocation;
 		this.textures = new Object2ObjectOpenHashMap<>();
-		for (ResourceLocation texture : builder.textures)
+		for (Pair<String, ResourceLocation> texture : builder.textures)
 		{
-			String[] textureName = texture.toString().split("/");
-			String name = textureName[textureName.length - 1].substring(0, textureName[textureName.length - 1].length() - 4);
-			this.textures.put(name, texture);
+			this.textures.put(texture.getFirst(), texture.getSecond());
 		}
 	}
 	
@@ -87,7 +86,7 @@ public class PModelData
 	{
 		protected ResourceLocation modelLocation;
 		protected String modelType;
-		protected List<ResourceLocation> textures;
+		protected List<Pair<String, ResourceLocation>> textures;
 		
 		public Builder(ResourceLocation modelLocation, String modelType)
 		{
@@ -98,7 +97,12 @@ public class PModelData
 		
 		public Builder addTexture(ResourceLocation texturePath)
 		{
-			this.textures.add(texturePath);
+			return this.addTexture(texturePath.getPath(), texturePath);
+		}
+		
+		public Builder addTexture(String textureName, ResourceLocation textureLocation)
+		{
+			this.textures.add(new Pair<>(textureName, textureLocation));
 			return this;
 		}
 		

@@ -25,9 +25,7 @@ import org.jetbrains.annotations.NotNull;
 public class TestEntity extends Entity implements PAnimatable<TestEntity>
 {
 	private static final PRawAnimation ANIMATION = PRawAnimation.begin().
-			thenPlay("animation").
-			thenWait(20).
-			thenLoop("animation").
+			thenPlay("Animation").
 			build();
 	private final PAnimationManager<TestEntity> animationManager = new PAnimationManager<>(this);
 	

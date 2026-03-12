@@ -17,6 +17,7 @@ import com.arcanc.pulselib.content.model.animation.PAnimation;
 import com.arcanc.pulselib.content.model.animation.PAnimationChannel;
 import com.arcanc.pulselib.content.model.animation.PBoneAnimation;
 import com.arcanc.pulselib.content.model.animation.PKeyFrameChannel;
+import com.arcanc.pulselib.util.Database;
 import com.arcanc.pulselib.util.helpers.ParserHelper;
 import com.mojang.datafixers.util.Pair;
 import de.javagl.jgltf.model.*;
@@ -135,18 +136,27 @@ public class PModelParser
 		ByteBuffer indices = ParserHelper.getByteBuffer(indicesAccessor);
 		int indicesCount = indicesAccessor.getCount();
 		int indicesType = indicesAccessor.getComponentType();
-			
+		
 		String textureName = "";
 		MaterialModel material = primitive.getMaterialModel();
 		if (material instanceof MaterialModelV2 mat)
 		{
+			Database.LOGGER.warn("Mat2");
 			TextureModel texture = mat.getBaseColorTexture();
 			if (texture != null)
 				textureName = texture.getName();
 			if (textureName == null)
 			{
+				Database.LOGGER.warn("Texture null");
 				ImageModel image = texture.getImageModel();
 				textureName = image.getName();
+				if (textureName == null)
+				{
+					Database.LOGGER.warn("Image null");
+					BufferViewModel bufferView = image.getBufferViewModel();
+					textureName = bufferView.getName();
+					textureName = textureName.substring(0, textureName.length() - 4);
+				}
 			}
 		}
 		PMesh pMesh = new PMesh(

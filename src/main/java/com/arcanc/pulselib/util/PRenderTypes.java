@@ -40,7 +40,6 @@ public class PRenderTypes
 							setTransparencyState(RenderStateShard.NO_TRANSPARENCY).
 							setLightmapState(RenderStateShard.LIGHTMAP).
 							setOverlayState(RenderStateShard.OVERLAY).
-							setCullState(RenderStateShard.NO_CULL).
 							createCompositeState(true);
 			return RenderType.create(
 					Database.rl("triangles_solid").toString(),
@@ -60,7 +59,6 @@ public class PRenderTypes
 					setTransparencyState(RenderStateShard.NO_TRANSPARENCY).
 					setLightmapState(RenderStateShard.LIGHTMAP).
 					setOverlayState(RenderStateShard.OVERLAY).
-					setCullState(RenderStateShard.NO_CULL).
 					createCompositeState(true);
 			return RenderType.create(
 					Database.rl("triangles_cutout").toString(),
@@ -80,7 +78,6 @@ public class PRenderTypes
 					setTransparencyState(RenderStateShard.TRANSLUCENT_TRANSPARENCY).
 					setLightmapState(RenderStateShard.LIGHTMAP).
 					setOverlayState(RenderStateShard.OVERLAY).
-					setCullState(RenderStateShard.NO_CULL).
 					createCompositeState(true);
 			return RenderType.create(
 					Database.rl("triangles_translucent").toString(),
