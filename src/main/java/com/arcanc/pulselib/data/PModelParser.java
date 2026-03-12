@@ -143,6 +143,11 @@ public class PModelParser
 			TextureModel texture = mat.getBaseColorTexture();
 			if (texture != null)
 				textureName = texture.getName();
+			if (textureName == null)
+			{
+				ImageModel image = texture.getImageModel();
+				textureName = image.getName();
+			}
 		}
 		PMesh pMesh = new PMesh(
 				UUID.randomUUID(),

@@ -13,8 +13,8 @@ package com.arcanc.pulselib.content.registration.entity.renderer;
 import com.arcanc.pulselib.content.registration.entity.TestEntity;
 import com.arcanc.pulselib.content.renderer.PEntityRenderer;
 import com.arcanc.pulselib.content.renderer.modelData.DefaultEntityModelData;
-import com.arcanc.pulselib.util.PRenderTypes;
 import com.arcanc.pulselib.util.Database;
+import com.arcanc.pulselib.util.PRenderTypes;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 
 public class TestEntityRender extends PEntityRenderer<TestEntity>
