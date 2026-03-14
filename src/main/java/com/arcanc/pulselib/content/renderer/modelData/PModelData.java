@@ -97,7 +97,9 @@ public class PModelData
 		
 		public Builder addTexture(ResourceLocation texturePath)
 		{
-			return this.addTexture(texturePath.getPath(), texturePath);
+			String[] parsedName = texturePath.getPath().split("/");
+			String textureName = parsedName[parsedName.length - 1];
+			return this.addTexture(textureName.contains(".png") ? textureName.substring(0, textureName.length() - 4): textureName, texturePath);
 		}
 		
 		public Builder addTexture(String textureName, ResourceLocation textureLocation)

@@ -90,11 +90,13 @@ public abstract class PItemRenderer<T extends Item & PAnimatable<T>> extends Blo
 	public void actuallyRender(PoseStack poseStack, T animatable, Function<ResourceLocation, RenderType> renderType, MultiBufferSource bufferSource, int packedLight, int packedOverlay, float partialTick)
 	{
 		Collection<PAnimationController<T>> controllers = animatable.getAnimationManager().getControllers().values();
+		PBakedModel model = this.getModel();
+		if (model == null)
+			return;
 		poseStack.pushPose();
 		poseStack.translate(0.5f, 0, 0.5f);
 		poseStack.mulPose(Axis.YP.rotationDegrees(180));
-		this.getModel().bones().forEach(bone ->
-				perBoneRender(poseStack, animatable, renderType, bone, controllers, 255, 255, 255, 255, packedLight, packedOverlay, partialTick));
+		model.bones().forEach(bone -> perBoneRenderer(poseStack, bone, controllers, renderType, -1, packedLight, packedOverlay, partialTick));
 		poseStack.popPose();
 	}
 	
@@ -104,92 +106,8 @@ public abstract class PItemRenderer<T extends Item & PAnimatable<T>> extends Blo
 	
 	}
 	
-	protected void perBoneRender(PoseStack poseStack,
-	                             T animatable,
-								 Function<ResourceLocation, RenderType> renderType,
-	                             PBakedBone bone,
-	                             Collection<PAnimationController<T>> controllers,
-	                             int red,
-	                             int blue,
-	                             int green,
-	                             int alpha,
-	                             int packedLight,
-	                             int packedOverlay,
-	                             float partialTick)
+	protected void perBoneRenderer(PoseStack poseStack, PBakedBone bone, Collection<PAnimationController<T>> controllers, Function<ResourceLocation, RenderType> renderType, int packedColor, int packedLight, int packedOverlay, float partialTick)
 	{
-		BoneFrame frame = mixBone(bone, controllers);
-		poseStack.pushPose();
-		if (frame != null)
-		{
-			poseStack.translate(frame.translation().x(), frame.translation().y(), frame.translation().z());
-			poseStack.mulPose(frame.rotation());
-			poseStack.scale(frame.scale().x(), frame.scale().y(), frame.scale().z());
-		}
-		else
-		{
-			poseStack.translate(bone.basePosition().x(), bone.basePosition().y(), bone.basePosition().z());
-			poseStack.mulPose(bone.baseRotation());
-		}
-		Matrix4f matrix4fstack = new Matrix4f(RenderSystem.getModelViewMatrix());
-		matrix4fstack.mul(poseStack.last().pose());
-		
-		int blockLight = LightTexture.block(packedLight);
-		int skyLight   = LightTexture.sky(packedLight);
-		int u = packedOverlay & 0xFFFF;
-		int v = (packedOverlay >> 16) & 0xFFFF;
-		Vector4f colorVector = new Vector4f(red/255f, green/255f, blue/255f, alpha/255f);
-		
-		bone.meshes().forEach(mesh ->
-		{
-			if (mesh.textureName().isEmpty())
-				return;
-			
-			ResourceLocation texture = getTextureByName(mesh.textureName());
-			RenderType type = renderType.apply(texture);
-			type.setupRenderState();
-			
-			ShaderInstance shaderInstance = RenderSystem.getShader();
-			if (shaderInstance == null)
-				return;
-			mesh.vertexBuffer().bind();
-			shaderInstance.safeGetUniform("Color").set(colorVector);
-			shaderInstance.safeGetUniform("Light").set(blockLight, skyLight);
-			shaderInstance.safeGetUniform("Overlay").set(u, v);
-			shaderInstance.apply();
-			mesh.vertexBuffer().drawWithShader(matrix4fstack, RenderSystem.getProjectionMatrix(), shaderInstance);
-			VertexBuffer.unbind();
-			type.clearRenderState();
-		});
-		
-		bone.children().forEach(children ->
-				perBoneRender(poseStack, animatable, renderType, children, controllers, red, green, blue, alpha, packedLight, packedOverlay, partialTick));
-		
-		poseStack.popPose();
-	}
-	
-	private @Nullable BoneFrame mixBone(
-			PBakedBone bone,
-			Collection<PAnimationController<T>> controllers)
-	{
-		Vector3f translation = new Vector3f(bone.basePosition());
-		Quaternionf rotation = new Quaternionf(bone.baseRotation());
-		Vector3f scale = new Vector3f(1, 1, 1);
-		
-		boolean hasTransform = false;
-		for (PAnimationController<T> controller : controllers)
-		{
-			BoneFrame frame = controller.calculateBoneTransformations(bone.name(), this.getModel());
-			if (frame == null)
-				continue;
-			translation.add(frame.translation());
-			scale.mul(frame.scale());
-			rotation.mul(frame.rotation());
-			hasTransform = true;
-		}
-		
-		if (!hasTransform)
-			return null;
-		
-		return new BoneFrame(translation, rotation, scale);
+		bone.render(poseStack, this.getModelData(), controllers, renderType, packedColor, packedLight, packedOverlay, partialTick);
 	}
 }
