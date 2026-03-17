@@ -11,6 +11,8 @@
     "requireAnnotations": true
   },
   "client": [
+    "RenderTypeAccessor$CompositeRenderTypeAccessor",
+    "RenderTypeAccessor$CompositeStateAccessor",
     "VertexBufferAccessor"
   ]
 }

@@ -25,11 +25,11 @@ public class TestBlockEntity extends BlockEntity implements PAnimatable<TestBloc
 {
 	private final PAnimationManager<TestBlockEntity> animationManager = PLibHelper.createManager(this);
 	private final PRawAnimation ANIMATION = PRawAnimation.begin().
-			thenPlay("animation").
-			thenWait(20).
-			thenLoop("animation").
+			thenPlay("idle").
+			//thenWait(20).
+			//thenLoop("animation").
 			build();
-	private boolean playAnimation = false;
+	private boolean playAnimation = true;
 	
 	public TestBlockEntity(BlockPos pos, BlockState blockState)
 	{

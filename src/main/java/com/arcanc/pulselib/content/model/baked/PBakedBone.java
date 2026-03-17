@@ -14,6 +14,7 @@ import com.arcanc.pulselib.content.animatable.PAnimatable;
 import com.arcanc.pulselib.content.animatable.instance.PAnimationController;
 import com.arcanc.pulselib.content.model.animation.BoneFrame;
 import com.arcanc.pulselib.content.renderer.modelData.PModelData;
+import com.arcanc.pulselib.util.Database;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexBuffer;
@@ -44,16 +45,16 @@ public record PBakedBone(String name,
                          PBakedBone parent,
                          List<PBakedMesh> meshes)
 {
-	public <T extends PAnimatable<T>>void render(PoseStack poseStack,
-	                                          PModelData modelData,
-	                                          Collection<PAnimationController<T>> controllers,
-	                                          Function<ResourceLocation, RenderType> renderType,
-	                                          int color,
-	                                          int packedLight,
-	                                          int packedOverlay,
-	                                          float partialTick)
+	public <T extends PAnimatable<T>>void instantDraw(PoseStack poseStack,
+	                                             PModelData modelData,
+	                                             Collection<PAnimationController<T>> controllers,
+	                                             Function<ResourceLocation, RenderType> renderType,
+	                                             int color,
+	                                             int packedLight,
+	                                             int packedOverlay,
+	                                             float partialTick)
 	{
-		BoneFrame frame = mixBone(this, modelData.getModel(), controllers);
+		BoneFrame frame = mixBone(modelData.getModel(), controllers);
 		poseStack.pushPose();
 		if (frame != null)
 		{
@@ -103,29 +104,28 @@ public record PBakedBone(String name,
 		});
 		
 		this.children().forEach(children ->
-				children.render(poseStack, modelData, controllers, renderType, color, packedLight, packedOverlay, partialTick));
+				children.instantDraw(poseStack, modelData, controllers, renderType, color, packedLight, packedOverlay, partialTick));
 		
 		poseStack.popPose();
 	}
 	
-	private <T extends PAnimatable<T>>@Nullable BoneFrame mixBone(
-			PBakedBone bone,
+	public <T extends PAnimatable<T>>@Nullable BoneFrame mixBone(
 			PBakedModel model,
 			Collection<PAnimationController<T>> controllers)
 	{
-		Vector3f translation = new Vector3f(bone.basePosition());
-		Quaternionf rotation = new Quaternionf(bone.baseRotation());
+		Vector3f translation = new Vector3f(this.basePosition());
+		Quaternionf rotation = new Quaternionf(this.baseRotation());
 		Vector3f scale = new Vector3f(1, 1, 1);
 		
 		boolean hasTransform = false;
 		for (PAnimationController<?> controller : controllers)
 		{
-			BoneFrame frame = controller.calculateBoneTransformations(bone.name(), model);
+			BoneFrame frame = controller.calculateBoneTransformations(this.name(), model);
 			if (frame == null)
 				continue;
 			translation.add(frame.translation());
 			scale.mul(frame.scale());
-			rotation.mul(frame.rotation());
+			rotation.premul(frame.rotation());
 			hasTransform = true;
 		}
 		

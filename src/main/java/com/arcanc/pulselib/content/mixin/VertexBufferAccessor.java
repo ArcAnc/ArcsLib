@@ -24,14 +24,22 @@ import java.nio.ByteBuffer;
 @Mixin (VertexBuffer.class)
 public interface VertexBufferAccessor
 {
-	
 	@Accessor ("indexCount")
 	void pulselib$setIndexCount(int index);
+	
+	@Accessor ("indexCount")
+	int pulselib$getIndexCount();
 	
 	@Accessor("indexType")
 	void pulselib$setIndexType(VertexFormat.IndexType type);
 	
+	@Accessor("indexType")
+	VertexFormat.IndexType pulselib$getIndexType();
+	
 	@Invoker ("uploadIndexBuffer")
 	@Nullable
 	RenderSystem.AutoStorageIndexBuffer pulselib$UploadIndexBuffer(MeshData.DrawState drawState, @Nullable ByteBuffer buffer);
+	
+	@Accessor("mode")
+	VertexFormat.Mode pulselib$getMode();
 }

@@ -17,6 +17,11 @@ import com.arcanc.pulselib.content.model.animation.BoneFrame;
 import com.arcanc.pulselib.content.model.baked.PBakedModel;
 import org.jetbrains.annotations.Nullable;
 
+/**
+ * Part of this code copied from Geckolib: <a href="https://github.com/bernie-g/geckolib/blob/main/common/src/main/java/com/geckolib/animatable/manager/AnimatableManager.java#L24">AnimatableManager</a>
+ * <p>Stop crying, Tslat!</p>
+ * <p>Modified by ArcAnc</p>
+ */
 public class PAnimationController<T extends PAnimatable<T>>
 {
 	protected final String name;
@@ -153,10 +158,7 @@ public class PAnimationController<T extends PAnimatable<T>>
 			case PLAY_ONCE ->
 			{
 				if (this.time >= length)
-				{
 					nextStage();
-				}
-				
 			}
 			case HOLD_LAST_FRAME ->
 			{

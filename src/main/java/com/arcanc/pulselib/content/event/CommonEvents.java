@@ -16,6 +16,11 @@ public class CommonEvents
 {
 	public static void registerCommonEvents(final IEventBus modEventBus)
 	{
-	
+//		modEventBus.addListener(CommonEvents :: registerAttributes);
 	}
-}
+	
+/*	private static void registerAttributes(final EntityAttributeCreationEvent event)
+	{
+		event.put(Registration.EntityTypeReg.TEST_ENTITY.get(), TestEntity.createAttributes().build());
+	}
+*/}

@@ -17,6 +17,11 @@ import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Part of this code copied from Geckolib: <a href="https://github.com/bernie-g/geckolib/blob/1.21.1/common/src/main/java/software/bernie/geckolib/animatable/instance/AnimatableInstanceCache.java">AnimatableInstanceCache</a>
+ * <p>Stop crying, Tslat!</p>
+ * <p>Modified by ArcAnc</p>
+ */
 public class PAnimationManager<T extends PAnimatable<T>>
 {
 	protected final T animatable;

@@ -13,9 +13,6 @@ package com.arcanc.pulselib.content.renderer.modelData;
 import com.arcanc.pulselib.content.model.baked.PBakedModel;
 import com.arcanc.pulselib.util.PModelCache;
 import com.mojang.datafixers.util.Pair;
-import com.mojang.serialization.Codec;
-import com.mojang.serialization.MapCodec;
-import com.mojang.serialization.codecs.RecordCodecBuilder;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.resources.ResourceLocation;
@@ -27,21 +24,6 @@ import java.util.Map;
 
 public class PModelData
 {
-	public static final MapCodec<PModelData> CODEC = RecordCodecBuilder.mapCodec(instance ->
-			instance.group(
-					ResourceLocation.CODEC.fieldOf("model_location").forGetter(PModelData :: getModelLocation),
-					Codec.STRING.optionalFieldOf("model_type", "").forGetter(arcModelData -> ""),
-					ResourceLocation.CODEC.listOf().fieldOf("textures").forGetter(arcModelData -> new ArrayList<>(arcModelData.textures.values()))
-			).apply(instance, (ResourceLocation, type, ResourceLocations) ->
-			{
-				Builder builder = new Builder(ResourceLocation, type);
-				for (ResourceLocation texture : ResourceLocations)
-				{
-					builder.addTexture(texture);
-				}
-				return builder.build();
-			}));
-	
 	private final ResourceLocation modelLocation;
 	private final Map<String, ResourceLocation> textures;
 	

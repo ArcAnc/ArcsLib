@@ -118,6 +118,41 @@ dependencies {
         }
     }
 
+    jarJar(implementation("de.javagl:jgltf-impl-v1")) {
+        version {
+            strictly "[2.0,3.0)"
+            prefer "2.0.3"
+        }
+    }
+
+    jarJar(implementation("de.javagl:jgltf-impl-v2")) {
+        version {
+            strictly "[2.0,3.0)"
+            prefer "2.0.3"
+        }
+    }
+
+    jarJar(implementation("com.fasterxml.jackson.core:jackson-databind")) {
+        version {
+            strictly "[2.10, 2.20)"
+            prefer "2.13.2.1"
+        }
+    }
+
+    jarJar(implementation("com.fasterxml.jackson.core:jackson-annotations")) {
+        version {
+            strictly "[2.10, 2.20)"
+            prefer "2.13.2"
+        }
+    }
+
+    jarJar(implementation("com.fasterxml.jackson.core:jackson-core")) {
+        version {
+            strictly "[2.10, 2.20)"
+            prefer "2.13.2"
+        }
+    }
+
     clientAdditionalRuntimeClasspath "de.javagl:jgltf-model:2.0.3"
 }
 

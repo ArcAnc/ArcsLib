@@ -25,16 +25,16 @@ import java.util.function.Function;
 
 public record PBakedModel(List<PBakedBone> bones, Map<String, PAnimation> animations)
 {
-	public <T extends PAnimatable<T>>void render(PoseStack poseStack,
-	                                          PModelData modelData,
-	                                          Collection<PAnimationController<T>> controllers,
-	                                          Function<ResourceLocation, RenderType> renderType,
-	                                          int color,
-	                                          int packedLight,
-	                                          int packedOverlay,
-	                                          float partialTick)
+	public <T extends PAnimatable<T>>void instantDraw(PoseStack poseStack,
+	                                                  PModelData modelData,
+	                                                  Collection<PAnimationController<T>> controllers,
+	                                                  Function<ResourceLocation, RenderType> renderType,
+	                                                  int color,
+	                                                  int packedLight,
+	                                                  int packedOverlay,
+	                                                  float partialTick)
 	{
-		this.bones.forEach(bone -> bone.render(
+		this.bones.forEach(bone -> bone.instantDraw(
 				poseStack,
 				modelData,
 				controllers,

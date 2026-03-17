@@ -17,7 +17,6 @@ import com.arcanc.pulselib.content.model.animation.PAnimation;
 import com.arcanc.pulselib.content.model.animation.PAnimationChannel;
 import com.arcanc.pulselib.content.model.animation.PBoneAnimation;
 import com.arcanc.pulselib.content.model.animation.PKeyFrameChannel;
-import com.arcanc.pulselib.util.Database;
 import com.arcanc.pulselib.util.helpers.ParserHelper;
 import com.mojang.datafixers.util.Pair;
 import de.javagl.jgltf.model.*;
@@ -97,7 +96,7 @@ public class PModelParser
 		float[] rawRotation = node.getRotation();
 		Quaternionf baseRotation = new Quaternionf();
 		if (rawRotation != null && rawRotation.length == 4)
-			baseRotation.add(rawRotation[0], rawRotation[1], rawRotation[2], rawRotation[3]);
+			baseRotation.set(rawRotation[0], rawRotation[1], rawRotation[2], rawRotation[3]);
 		
 		UUID boneUUID = UUID.randomUUID();
 		String name = node.getName();
@@ -141,18 +140,15 @@ public class PModelParser
 		MaterialModel material = primitive.getMaterialModel();
 		if (material instanceof MaterialModelV2 mat)
 		{
-			Database.LOGGER.warn("Mat2");
 			TextureModel texture = mat.getBaseColorTexture();
 			if (texture != null)
 				textureName = texture.getName();
 			if (textureName == null)
 			{
-				Database.LOGGER.warn("Texture null");
 				ImageModel image = texture.getImageModel();
 				textureName = image.getName();
 				if (textureName == null)
 				{
-					Database.LOGGER.warn("Image null");
 					BufferViewModel bufferView = image.getBufferViewModel();
 					textureName = bufferView.getName();
 					textureName = textureName.substring(0, textureName.length() - 4);
@@ -200,15 +196,15 @@ public class PModelParser
 				
 				UUID boneUuid = bone.uuid();
 				
-				PAnimationChannel arcChannel;
+				PAnimationChannel pChannel;
 				switch (channel.getPath())
 				{
-					case "translation" -> arcChannel = PAnimationChannel.POSITION;
-					case "rotation" -> arcChannel = PAnimationChannel.ROTATION;
-					case "scale" -> arcChannel = PAnimationChannel.SCALE;
-					default -> arcChannel = null;
+					case "translation" -> pChannel = PAnimationChannel.POSITION;
+					case "rotation" -> pChannel = PAnimationChannel.ROTATION;
+					case "scale" -> pChannel = PAnimationChannel.SCALE;
+					default -> pChannel = null;
 				}
-				if (arcChannel == null)
+				if (pChannel == null)
 					continue;
 				
 				AnimationModel.Sampler sampler = channel.getSampler();
@@ -222,7 +218,7 @@ public class PModelParser
 					continue;
 				ByteBuffer bb = outputAccessor.getAccessorData().createByteBuffer();
 				List<PKeyFrameChannel<?>> keyframes = new ArrayList<>();
-				switch (arcChannel)
+				switch (pChannel)
 				{
 					case ROTATION ->
 					{
@@ -265,7 +261,7 @@ public class PModelParser
 				};
 				
 				PBoneAnimation boneAnimation = boneAnimations.computeIfAbsent(bone.name(), k -> new PBoneAnimation(boneUuid, new HashMap<>()));
-				boneAnimation.channels().put(arcChannel, keyframes);
+				boneAnimation.channels().put(pChannel, keyframes);
 			}
 			animations.put(animationName, new PAnimation(animationName, maxTime * 20, boneAnimations));
 		}

@@ -14,6 +14,11 @@ import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 
 import java.util.Map;
 
+/**
+ * Part of this code copied from Geckolib: <a href="https://github.com/bernie-g/geckolib/blob/1.21.1/common/src/main/java/software/bernie/geckolib/animation/EasingType.java">EasingType</a>
+ * <p>Stop crying, Tslat!</p>
+ * <p>Modified by ArcAnc</p>
+ */
 @FunctionalInterface
 public interface PInterpolationType
 {

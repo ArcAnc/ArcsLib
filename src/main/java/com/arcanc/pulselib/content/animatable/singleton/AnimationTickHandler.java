@@ -72,7 +72,7 @@ public class AnimationTickHandler
 		void tick(float partialTick)
 		{
 			for (PAnimationController<T> controller : this.animationManager.getControllers().values())
-					controller.tick(this.animatable, this.renderer.getModel(), partialTick);
+					controller.tick(this.animatable, this.renderer.getModel(animatable), partialTick);
 		}
 	}
 }

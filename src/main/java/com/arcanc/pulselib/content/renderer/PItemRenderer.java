@@ -16,13 +16,14 @@ import com.arcanc.pulselib.content.model.animation.BoneFrame;
 import com.arcanc.pulselib.content.model.baked.PBakedBone;
 import com.arcanc.pulselib.content.model.baked.PBakedModel;
 import com.arcanc.pulselib.content.renderer.modelData.PModelData;
+import com.arcanc.pulselib.util.PRenderTypes;
 import com.arcanc.pulselib.util.helpers.RenderHelper;
-import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.VertexBuffer;
 import com.mojang.math.Axis;
 import net.minecraft.client.model.geom.EntityModelSet;
-import net.minecraft.client.renderer.*;
+import net.minecraft.client.renderer.BlockEntityWithoutLevelRenderer;
+import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderDispatcher;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
@@ -30,9 +31,6 @@ import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Matrix4f;
-import org.joml.Quaternionf;
-import org.joml.Vector3f;
-import org.joml.Vector4f;
 
 import java.util.Collection;
 import java.util.function.Function;
@@ -49,13 +47,13 @@ public abstract class PItemRenderer<T extends Item & PAnimatable<T>> extends Blo
 	}
 	
 	@Override
-	public PModelData getModelData()
+	public PModelData getModelData(T animatable)
 	{
 		return this.modelData;
 	}
 	
 	@Override
-	public @Nullable PBakedModel getModel()
+	public @Nullable PBakedModel getModel(T animatable)
 	{
 		return this.modelData.getModel();
 	}
@@ -75,39 +73,89 @@ public abstract class PItemRenderer<T extends Item & PAnimatable<T>> extends Blo
 			return;
 		float partialTick = RenderHelper.mc().getTimer().getGameTimeDeltaPartialTick(false);
 		
-		preRender(poseStack, animatable, this :: getRenderType, buffer, packedLight, packedOverlay, partialTick);
-		actuallyRender(poseStack, animatable, this :: getRenderType, buffer, packedLight, packedOverlay, partialTick);
-		postRender(poseStack, animatable, this :: getRenderType, buffer, packedLight, packedOverlay, partialTick);
-	}
-	
-	@Override
-	public void preRender(PoseStack poseStack, T animatable, Function<ResourceLocation, RenderType> renderType, MultiBufferSource bufferSource, int packedLight, int packedOverlay, float partialTick)
-	{
-	
-	}
-	
-	@Override
-	public void actuallyRender(PoseStack poseStack, T animatable, Function<ResourceLocation, RenderType> renderType, MultiBufferSource bufferSource, int packedLight, int packedOverlay, float partialTick)
-	{
-		Collection<PAnimationController<T>> controllers = animatable.getAnimationManager().getControllers().values();
-		PBakedModel model = this.getModel();
-		if (model == null)
-			return;
 		poseStack.pushPose();
 		poseStack.translate(0.5f, 0, 0.5f);
 		poseStack.mulPose(Axis.YP.rotationDegrees(180));
-		model.bones().forEach(bone -> perBoneRenderer(poseStack, bone, controllers, renderType, -1, packedLight, packedOverlay, partialTick));
+		preSubmit(poseStack, animatable, this :: getRenderType, buffer, packedLight, packedOverlay, partialTick, displayContext);
+		trueSubmit(poseStack, animatable, this :: getRenderType, buffer, packedLight, packedOverlay, partialTick, displayContext);
+		postSubmit(poseStack, animatable, this :: getRenderType, buffer, packedLight, packedOverlay, partialTick, displayContext);
 		poseStack.popPose();
 	}
 	
 	@Override
-	public void postRender(PoseStack poseStack, T animatable, Function<ResourceLocation, RenderType> renderType, MultiBufferSource bufferSource, int packedLight, int packedOverlay, float partialTick)
+	public void preSubmit(PoseStack poseStack, T animatable, Function<ResourceLocation, RenderType> renderType, MultiBufferSource bufferSource, int packedLight, int packedOverlay, float partialTick, @Nullable Object... additionalData)
+	{
+	}
+	
+	@Override
+	public void trueSubmit(PoseStack poseStack, T animatable, Function<ResourceLocation, RenderType> renderType, MultiBufferSource bufferSource, int packedLight, int packedOverlay, float partialTick, @Nullable Object... additionalData)
+	{
+		Collection<PAnimationController<T>> controllers = animatable.getAnimationManager().getControllers().values();
+		PBakedModel model = this.getModel(animatable);
+		if (model == null)
+			return;
+		ItemDisplayContext context = (ItemDisplayContext)additionalData[0];
+		if (context == ItemDisplayContext.GUI)
+		{
+			model.instantDraw(poseStack, getModelData(animatable),controllers, PRenderTypes.RenderTypeProvider :: trianglesGui, -1, packedLight, packedOverlay, partialTick);
+			return;
+		}
+		model.bones().forEach(bone -> perBoneSubmit(animatable, poseStack, bone, controllers, renderType, -1, packedLight, packedOverlay, partialTick, context));
+	}
+	
+	@Override
+	public void postSubmit(PoseStack poseStack, T animatable, Function<ResourceLocation, RenderType> renderType, MultiBufferSource bufferSource, int packedLight, int packedOverlay, float partialTick, @Nullable Object... additionalData)
 	{
 	
 	}
 	
-	protected void perBoneRenderer(PoseStack poseStack, PBakedBone bone, Collection<PAnimationController<T>> controllers, Function<ResourceLocation, RenderType> renderType, int packedColor, int packedLight, int packedOverlay, float partialTick)
+	protected void perBoneSubmit(T animatable, PoseStack poseStack, PBakedBone bone, Collection<PAnimationController<T>> controllers, Function<ResourceLocation, RenderType> renderType, int packedColor, int packedLight, int packedOverlay, float partialTick, ItemDisplayContext context)
 	{
-		bone.render(poseStack, this.getModelData(), controllers, renderType, packedColor, packedLight, packedOverlay, partialTick);
+		PModelData data = this.getModelData(animatable);
+		BoneFrame frame = bone.mixBone(data.getModel(), controllers);
+		poseStack.pushPose();
+		if (frame != null)
+		{
+			poseStack.translate(frame.translation().x(), frame.translation().y(), frame.translation().z());
+			poseStack.mulPose(frame.rotation());
+			poseStack.scale(frame.scale().x(), frame.scale().y(), frame.scale().z());
+		}
+		else
+		{
+			poseStack.translate(bone.basePosition().x(), bone.basePosition().y(), bone.basePosition().z());
+			poseStack.mulPose(bone.baseRotation());
+		}
+		
+		this.submitBone(animatable, bone, poseStack, data, controllers, renderType, packedColor, packedLight, packedOverlay, partialTick, context);
+		
+		if (!bone.children().isEmpty())
+			bone.children().forEach(child -> perBoneSubmit(animatable, poseStack, child, controllers, renderType, packedColor, packedLight, packedOverlay, partialTick, context));
+		
+		poseStack.popPose();
+	}
+	
+	protected void submitBone(T animatable,
+	                          PBakedBone bone,
+	                          PoseStack poseStack,
+	                          PModelData modelData,
+	                          Collection<PAnimationController<T>> controllers,
+	                          Function<ResourceLocation, RenderType> renderType,
+	                          int color,
+	                          int packedLight,
+	                          int packedOverlay,
+	                          float partialTick,
+	                          ItemDisplayContext context)
+	{
+		Matrix4f matrix4fstack = new Matrix4f(poseStack.last().pose());
+		
+		bone.meshes().forEach(mesh ->
+		{
+			if (mesh.textureName().isEmpty())
+				return;
+			
+			RenderType type = renderType.apply(modelData.getTextureByName(mesh.textureName()));
+			
+			PRenderQueue.submitItem(context, type, mesh.vertexBuffer(), new PRenderQueue.InstanceData(matrix4fstack, color, packedLight, packedOverlay));
+		});
 	}
 }

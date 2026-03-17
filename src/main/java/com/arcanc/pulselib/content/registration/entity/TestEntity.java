@@ -19,37 +19,27 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
+import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.NotNull;
 
-public class TestEntity extends Entity implements PAnimatable<TestEntity>
+public class TestEntity extends Mob implements PAnimatable<TestEntity>
 {
 	private static final PRawAnimation ANIMATION = PRawAnimation.begin().
-			thenPlay("Animation").
+			thenPlay("animation").
 			build();
 	private final PAnimationManager<TestEntity> animationManager = new PAnimationManager<>(this);
 	
-	public TestEntity(EntityType<?> type, Level level)
+	public TestEntity(EntityType<? extends Mob> type, Level level)
 	{
 		super(type, level);
 	}
 	
-	@Override
-	protected void defineSynchedData(SynchedEntityData.Builder entityData)
+	public static AttributeSupplier.Builder createAttributes()
 	{
-	
-	}
-	
-	@Override
-	protected void readAdditionalSaveData(CompoundTag compound)
-	{
-	
-	}
-	
-	@Override
-	protected void addAdditionalSaveData(CompoundTag compound)
-	{
-	
+		return Mob.createMobAttributes().add(Attributes.MAX_HEALTH, 10.0).add(Attributes.MOVEMENT_SPEED, 0.2F);
 	}
 	
 	@Override

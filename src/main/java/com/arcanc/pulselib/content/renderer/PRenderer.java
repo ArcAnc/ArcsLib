@@ -21,19 +21,43 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.function.Function;
 
+/**
+ * Part of this code copied from Geckolib: <a href="https://github.com/bernie-g/geckolib/blob/1.21.1/common/src/main/java/software/bernie/geckolib/renderer/GeoRenderer.java">GeoRenderer</a>
+ * <p>Stop crying, Tslat!</p>
+ * <p>Modified by ArcAnc</p>
+ */
 public interface PRenderer<T extends PAnimatable<T>>
 {
-	PModelData getModelData();
+	PModelData getModelData(T animatable);
 	
-	default ResourceLocation getTextureByName(String name)
-	{
-		return getModelData().getTextureByName(name);
-	}
-	
-	@Nullable PBakedModel getModel();
+	@Nullable PBakedModel getModel(T animatable);
 	RenderType getRenderType(ResourceLocation texture);
 	
-	void preRender(PoseStack poseStack, T animatable, Function<ResourceLocation, RenderType> renderType, MultiBufferSource bufferSource, int packedLight, int packedOverlay, float partialTick);
-	void actuallyRender(PoseStack poseStack, T animatable, Function<ResourceLocation, RenderType> renderType, MultiBufferSource bufferSource, int packedLight, int packedOverlay, float partialTick);
-	void postRender(PoseStack poseStack, T animatable, Function<ResourceLocation, RenderType> renderType, MultiBufferSource bufferSource, int packedLight, int packedOverlay, float partialTick);
+	void preSubmit(PoseStack poseStack,
+	               T animatable,
+	               Function<ResourceLocation, RenderType> renderType,
+	               MultiBufferSource bufferSource,
+	               int packedLight,
+	               int packedOverlay,
+	               float partialTick,
+	               /// This is hack created just to transfer ItemDisplayContext to other methods. Do not touch it, if you don't know, what are you doing
+	               @Nullable Object... additionalData);
+	void trueSubmit(PoseStack poseStack,
+	                T animatable,
+	                Function<ResourceLocation, RenderType> renderType,
+	                MultiBufferSource bufferSource,
+	                int packedLight,
+	                int packedOverlay,
+	                float partialTick,
+	                /// This is hack created just to transfer ItemDisplayContext to other methods. Do not touch it, if you don't know, what are you doing
+	                @Nullable Object... additionalData);
+	void postSubmit(PoseStack poseStack,
+	                T animatable,
+	                Function<ResourceLocation, RenderType> renderType,
+	                MultiBufferSource bufferSource,
+	                int packedLight,
+	                int packedOverlay,
+	                float partialTick,
+	                /// This is hack created just to transfer ItemDisplayContext to other methods. Do not touch it, if you don't know, what are you doing
+	                @Nullable Object... additionalData);
 }

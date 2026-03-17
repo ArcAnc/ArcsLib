@@ -15,6 +15,8 @@ import com.arcanc.pulselib.content.animatable.PAnimationManager;
 import com.arcanc.pulselib.content.animatable.instance.InstanceAnimationManager;
 import com.arcanc.pulselib.content.animatable.instance.PAnimationController;
 import com.arcanc.pulselib.content.animatable.singleton.SingletonAnimationManager;
+import com.arcanc.pulselib.content.model.baked.PBakedModel;
+import com.arcanc.pulselib.content.renderer.PRenderQueue;
 import com.arcanc.pulselib.content.renderer.modelData.PModelData;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.RenderType;
@@ -26,6 +28,11 @@ import org.joml.Vector3f;
 import java.util.Collection;
 import java.util.function.Function;
 
+/**
+ * Part of this code copied from Geckolib: <a href="https://github.com/bernie-g/geckolib/blob/1.21.1/common/src/main/java/software/bernie/geckolib/util/GeckoLibUtil.java">GeckoLibUtil</a>
+ * <p>Stop crying, Tslat!</p>
+ * <p>Modified by ArcAnc</p>
+ */
 public class PLibHelper
 {
 	public static <T extends PAnimatable<T>> PAnimationManager<T> createManager(T animatable)
@@ -45,13 +52,13 @@ public class PLibHelper
 		return singleton ? new SingletonAnimationManager<>(animatable) : new InstanceAnimationManager<>(animatable);
 	}
 	
-	public static <T extends PAnimatable<T>> void renderModeInGui(GuiGraphics guiGraphics,
+	public static <T extends PAnimatable<T>> void renderModelInGui(GuiGraphics guiGraphics,
 	                                   PModelData modelData,
 									   Collection<PAnimationController<T>> controllers,
 									   Function<ResourceLocation, RenderType> renderType,
 	                                   int x, int y,
 									   Vector3f scale,
-	                                   int color,
+	                                   int packedColor,
 	                                   int packedLight,
 	                                   int packedOverlay,
 	                                   float partialTick)
@@ -59,7 +66,9 @@ public class PLibHelper
 		guiGraphics.pose().pushPose();
 		guiGraphics.pose().translate(x, y, 200);
 		guiGraphics.pose().scale(scale.x(), scale.y(), scale.z());
-		modelData.getModel().render(guiGraphics.pose(), modelData, controllers, renderType, color, packedLight, packedOverlay, partialTick);
+		PBakedModel model = modelData.getModel();
+		if (model != null)
+			model.instantDraw(guiGraphics.pose(), modelData, controllers, renderType, packedColor, packedLight, packedOverlay, partialTick);
 		guiGraphics.pose().popPose();
 	}
 }

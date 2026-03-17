@@ -9,7 +9,11 @@
 
 package com.arcanc.pulselib.content.animatable;
 
-
+/**
+ * Part of this code copied from Geckolib: <a href="https://github.com/bernie-g/geckolib/blob/main/common/src/main/java/com/geckolib/animatable/GeoAnimatable.java">GeoAnimatable</a>
+ * <p>Stop crying, Tslat!</p>
+ * <p>Modified by ArcAnc</p>
+ */
 public interface PAnimatable<T extends PAnimatable<T>>
 {
 	PAnimationManager<T> getAnimationManager();
