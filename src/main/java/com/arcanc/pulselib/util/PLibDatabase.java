@@ -14,7 +14,7 @@ import net.minecraft.resources.ResourceLocation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class Database
+public class PLibDatabase
 {
 	public static final String MOD_ID = "pulselib";
 	public static final String MOD_NAME = "Pulse Lib";

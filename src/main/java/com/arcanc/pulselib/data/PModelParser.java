@@ -17,7 +17,7 @@ import com.arcanc.pulselib.content.model.animation.PAnimation;
 import com.arcanc.pulselib.content.model.animation.PAnimationChannel;
 import com.arcanc.pulselib.content.model.animation.PBoneAnimation;
 import com.arcanc.pulselib.content.model.animation.PKeyFrameChannel;
-import com.arcanc.pulselib.util.helpers.ParserHelper;
+import com.arcanc.pulselib.util.helpers.PLibParserHelper;
 import com.mojang.datafixers.util.Pair;
 import de.javagl.jgltf.model.*;
 import de.javagl.jgltf.model.io.GltfModelReader;
@@ -125,19 +125,20 @@ public class PModelParser
 		AccessorModel normalsAccessor = primitive.getAttributes().get("NORMAL");
 		AccessorModel uvsAccessor = primitive.getAttributes().get("TEXCOORD_0");
 		
-		FloatBuffer positions = ParserHelper.getFloatBuffer(positionsAccessor);
-		FloatBuffer normals = ParserHelper.getFloatBuffer(normalsAccessor);
-		FloatBuffer uvs = ParserHelper.getFloatBuffer(uvsAccessor);
+		FloatBuffer positions = PLibParserHelper.getFloatBuffer(positionsAccessor);
+		FloatBuffer normals = PLibParserHelper.getFloatBuffer(normalsAccessor);
+		FloatBuffer uvs = PLibParserHelper.getFloatBuffer(uvsAccessor);
 		
 		int vertexCount = positionsAccessor.getCount();
 		
 		AccessorModel indicesAccessor = primitive.getIndices();
-		ByteBuffer indices = ParserHelper.getByteBuffer(indicesAccessor);
+		ByteBuffer indices = PLibParserHelper.getByteBuffer(indicesAccessor);
 		int indicesCount = indicesAccessor.getCount();
 		int indicesType = indicesAccessor.getComponentType();
 		
 		String textureName = "";
 		MaterialModel material = primitive.getMaterialModel();
+		MaterialModelV2.AlphaMode alpha = MaterialModelV2.AlphaMode.OPAQUE;
 		if (material instanceof MaterialModelV2 mat)
 		{
 			TextureModel texture = mat.getBaseColorTexture();
@@ -154,6 +155,7 @@ public class PModelParser
 					textureName = textureName.substring(0, textureName.length() - 4);
 				}
 			}
+			alpha = mat.getAlphaMode();
 		}
 		PMesh pMesh = new PMesh(
 				UUID.randomUUID(),
@@ -164,6 +166,7 @@ public class PModelParser
 				indicesCount,
 				indices,
 				indicesType,
+				alpha,
 				textureName
 		);
 		
@@ -211,7 +214,7 @@ public class PModelParser
 				if (sampler == null)
 					continue;
 				
-				FloatBuffer inputTimes = ParserHelper.getFloatBuffer(sampler.getInput());
+				FloatBuffer inputTimes = PLibParserHelper.getFloatBuffer(sampler.getInput());
 				maxTime = Math.max(maxTime, inputTimes.limit() > 0 ? inputTimes.get(inputTimes.limit() - 1) : 0L);
 				AccessorModel outputAccessor = sampler.getOutput();
 				if (outputAccessor == null)

@@ -14,7 +14,6 @@ import com.arcanc.pulselib.content.animatable.PAnimatable;
 import com.arcanc.pulselib.content.animatable.instance.PAnimationController;
 import com.arcanc.pulselib.content.model.animation.BoneFrame;
 import com.arcanc.pulselib.content.renderer.modelData.PModelData;
-import com.arcanc.pulselib.util.Database;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexBuffer;
@@ -114,7 +113,7 @@ public record PBakedBone(String name,
 			Collection<PAnimationController<T>> controllers)
 	{
 		Vector3f translation = new Vector3f(this.basePosition());
-		Quaternionf rotation = new Quaternionf(this.baseRotation());
+		Quaternionf rotation = new Quaternionf();
 		Vector3f scale = new Vector3f(1, 1, 1);
 		
 		boolean hasTransform = false;

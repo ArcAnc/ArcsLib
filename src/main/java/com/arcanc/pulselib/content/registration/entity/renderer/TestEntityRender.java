@@ -13,7 +13,7 @@ package com.arcanc.pulselib.content.registration.entity.renderer;
 import com.arcanc.pulselib.content.registration.entity.TestEntity;
 import com.arcanc.pulselib.content.renderer.PEntityRenderer;
 import com.arcanc.pulselib.content.renderer.modelData.DefaultEntityModelData;
-import com.arcanc.pulselib.util.Database;
+import com.arcanc.pulselib.util.PLibDatabase;
 import com.arcanc.pulselib.util.PRenderTypes;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 
@@ -21,10 +21,10 @@ public class TestEntityRender extends PEntityRenderer<TestEntity>
 {
 	public TestEntityRender(EntityRendererProvider.Context context)
 	{
-		super(context, new DefaultEntityModelData.DefaultEntityModelDataBuilder(Database.rl("test_entity")).
-				addTexture(Database.rl("sphere")).
-				addTexture(Database.rl("torus")).
-				addTexture(Database.rl("tube")).
+		super(context, new DefaultEntityModelData.DefaultEntityModelDataBuilder(PLibDatabase.rl("test_entity")).
+				addTexture(PLibDatabase.rl("sphere")).
+				addTexture(PLibDatabase.rl("torus")).
+				addTexture(PLibDatabase.rl("tube")).
 				build(),
 				PRenderTypes.RenderTypeProvider :: trianglesSolid);
 	}

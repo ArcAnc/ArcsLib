@@ -24,9 +24,12 @@ import net.minecraft.world.phys.BlockHitResult;
 
 public class TestBlock extends Block implements EntityBlock
 {
+	//public static final EnumProperty<Direction> HORIZONTAL_FACING = BlockStateProperties.HORIZONTAL_FACING;
+	
 	public TestBlock(Properties props)
 	{
 		super(props);
+//		registerDefaultState(defaultBlockState().setValue(HORIZONTAL_FACING, Direction.NORTH));
 	}
 	
 	@Override
@@ -54,4 +57,30 @@ public class TestBlock extends Block implements EntityBlock
 	{
 		return RenderShape.INVISIBLE;
 	}
+/*
+	@Override
+	public BlockState getStateForPlacement(BlockPlaceContext context)
+	{
+		Direction dir = context.getHorizontalDirection();
+		return super.getStateForPlacement(context).setValue(HORIZONTAL_FACING, dir.getOpposite());
+	}
+	
+	@Override
+	protected BlockState mirror(BlockState state, Mirror mirror)
+	{
+		return state.rotate(mirror.getRotation(state.getValue(HORIZONTAL_FACING)));
+	}
+	
+	@Override
+	protected BlockState rotate(BlockState state, Rotation rotation)
+	{
+		return state.setValue(HORIZONTAL_FACING, Direction.from2DDataValue((state.getValue(HORIZONTAL_FACING).get2DDataValue() + 1) % 4));
+	}
+	
+	@Override
+	protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder)
+	{
+		builder.add(HORIZONTAL_FACING);
+	}
+	*/
 }

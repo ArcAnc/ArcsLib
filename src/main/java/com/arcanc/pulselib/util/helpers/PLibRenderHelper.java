@@ -12,7 +12,7 @@ package com.arcanc.pulselib.util.helpers;
 
 import net.minecraft.client.Minecraft;
 
-public class RenderHelper
+public class PLibRenderHelper
 {
 	public static Minecraft mc()
 	{

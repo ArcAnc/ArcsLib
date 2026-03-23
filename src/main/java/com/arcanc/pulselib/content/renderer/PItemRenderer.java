@@ -17,7 +17,7 @@ import com.arcanc.pulselib.content.model.baked.PBakedBone;
 import com.arcanc.pulselib.content.model.baked.PBakedModel;
 import com.arcanc.pulselib.content.renderer.modelData.PModelData;
 import com.arcanc.pulselib.util.PRenderTypes;
-import com.arcanc.pulselib.util.helpers.RenderHelper;
+import com.arcanc.pulselib.util.helpers.PLibRenderHelper;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
 import net.minecraft.client.model.geom.EntityModelSet;
@@ -71,7 +71,7 @@ public abstract class PItemRenderer<T extends Item & PAnimatable<T>> extends Blo
 		T animatable = stack.getItem() instanceof PAnimatable ? (T) stack.getItem() : null;
 		if (animatable == null)
 			return;
-		float partialTick = RenderHelper.mc().getTimer().getGameTimeDeltaPartialTick(false);
+		float partialTick = PLibRenderHelper.mc().getTimer().getGameTimeDeltaPartialTick(false);
 		
 		poseStack.pushPose();
 		poseStack.translate(0.5f, 0, 0.5f);
@@ -91,7 +91,7 @@ public abstract class PItemRenderer<T extends Item & PAnimatable<T>> extends Blo
 	public void trueSubmit(PoseStack poseStack, T animatable, Function<ResourceLocation, RenderType> renderType, MultiBufferSource bufferSource, int packedLight, int packedOverlay, float partialTick, @Nullable Object... additionalData)
 	{
 		Collection<PAnimationController<T>> controllers = animatable.getAnimationManager().getControllers().values();
-		PBakedModel model = this.getModel(animatable);
+		PBakedModel model = this.getModelData(animatable).getModel();
 		if (model == null)
 			return;
 		ItemDisplayContext context = (ItemDisplayContext)additionalData[0];

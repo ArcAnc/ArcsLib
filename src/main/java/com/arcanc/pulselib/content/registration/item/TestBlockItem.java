@@ -17,9 +17,9 @@ import com.arcanc.pulselib.content.animatable.instance.ControllerState;
 import com.arcanc.pulselib.content.model.animation.PRawAnimation;
 import com.arcanc.pulselib.content.registration.item.renderer.TestBlockItemRenderer;
 import com.arcanc.pulselib.content.renderer.modelData.DefaultItemModelData;
-import com.arcanc.pulselib.util.Database;
+import com.arcanc.pulselib.util.PLibDatabase;
 import com.arcanc.pulselib.util.helpers.PLibHelper;
-import com.arcanc.pulselib.util.helpers.RenderHelper;
+import com.arcanc.pulselib.util.helpers.PLibRenderHelper;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.level.block.Block;
 import net.neoforged.neoforge.client.extensions.common.IClientItemExtensions;
@@ -60,12 +60,12 @@ public class TestBlockItem extends BlockItem implements PItemAnimatable<TestBloc
 		{
 			private final TestBlockItemRenderer renderer = new TestBlockItemRenderer
 					(
-							new DefaultItemModelData.DefaultItemModelDataBuilder(Database.rl("test_block")).
-									addTexture(Database.rl("circle")).
-									addTexture(Database.rl("pyramid")).
+							new DefaultItemModelData.DefaultItemModelDataBuilder(PLibDatabase.rl("test_block")).
+									addTexture(PLibDatabase.rl("circle")).
+									addTexture(PLibDatabase.rl("pyramid")).
 									build(),
-							RenderHelper.mc().getBlockEntityRenderDispatcher(),
-							RenderHelper.mc().getEntityModels()
+							PLibRenderHelper.mc().getBlockEntityRenderDispatcher(),
+							PLibRenderHelper.mc().getEntityModels()
 					);
 			@Override
 			public @NotNull TestBlockItemRenderer getCustomRenderer()

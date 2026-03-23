@@ -3,13 +3,13 @@ package com.arcanc.pulselib;
 import com.arcanc.pulselib.content.event.ClientEvents;
 import com.arcanc.pulselib.content.event.CommonEvents;
 import com.arcanc.pulselib.content.registration.Registration;
-import com.arcanc.pulselib.util.Database;
+import com.arcanc.pulselib.util.PLibDatabase;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.loading.FMLLoader;
 
-@Mod(Database.MOD_ID)
+@Mod(PLibDatabase.MOD_ID)
 public class PLib
 {
     public PLib(IEventBus modEventBus, ModContainer modContainer)

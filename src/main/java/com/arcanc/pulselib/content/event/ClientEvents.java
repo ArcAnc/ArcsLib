@@ -57,9 +57,9 @@ public class ClientEvents
 		PRenderQueue.cleanup();
 	}
 	
-/*	private static void registerRenderers(final EntityRenderersEvent.RegisterRenderers event)
+	/*private static void registerRenderers(final EntityRenderersEvent.RegisterRenderers event)
 	{
-		event.registerBlockEntityRenderer(Registration.BETypeReg.TEST_BLOCK_ENTITY.get(), TestBlockEntityRenderer :: new);
-		event.registerEntityRenderer(Registration.EntityTypeReg.TEST_ENTITY.get(), TestEntityRender :: new);
-	}
-*/}
+		//event.registerBlockEntityRenderer(Registration.BETypeReg.TEST_BLOCK_ENTITY.get(), TestBlockEntityRenderer :: new);
+		//event.registerEntityRenderer(Registration.EntityTypeReg.TEST_ENTITY.get(), TestEntityRender :: new);
+	}*/
+}

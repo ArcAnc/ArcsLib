@@ -13,7 +13,7 @@ import com.arcanc.pulselib.content.registration.block.TestBlock;
 import com.arcanc.pulselib.content.registration.block.block_entity.TestBlockEntity;
 import com.arcanc.pulselib.content.registration.entity.TestEntity;
 import com.arcanc.pulselib.content.registration.item.TestBlockItem;
-import com.arcanc.pulselib.util.Database;
+import com.arcanc.pulselib.util.PLibDatabase;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.entity.EntityType;
@@ -34,7 +34,7 @@ public class Registration
 {
 	public static class BlockReg
 	{
-		public static final DeferredRegister.Blocks BLOCKS = DeferredRegister.createBlocks(Database.MOD_ID);
+		public static final DeferredRegister.Blocks BLOCKS = DeferredRegister.createBlocks(PLibDatabase.MOD_ID);
 		
 		public static final DeferredBlock<TestBlock> TEST_BLOCK = BLOCKS.register("test_block", () -> new TestBlock(
 				BlockBehaviour.Properties.of().
@@ -49,7 +49,7 @@ public class Registration
 	public static class BETypeReg
 	{
 		public static final DeferredRegister<BlockEntityType<?>> BLOCK_ENTITIES = DeferredRegister.create(
-				BuiltInRegistries.BLOCK_ENTITY_TYPE, Database.MOD_ID);
+				BuiltInRegistries.BLOCK_ENTITY_TYPE, PLibDatabase.MOD_ID);
 	
 		public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<TestBlockEntity>> TEST_BLOCK_ENTITY = BLOCK_ENTITIES.register("test_block_entity", () ->
 				new BlockEntityType<>(TestBlockEntity :: new, Set.of(BlockReg.TEST_BLOCK.get()), null));
@@ -62,7 +62,7 @@ public class Registration
 	
 	public static class ItemReg
 	{
-		public static final DeferredRegister.Items ITEMS = DeferredRegister.createItems(Database.MOD_ID);
+		public static final DeferredRegister.Items ITEMS = DeferredRegister.createItems(PLibDatabase.MOD_ID);
 		
 		public static final DeferredItem<TestBlockItem> TEST_ITEM = ITEMS.register("test_block", identifier -> new TestBlockItem(
 				BlockReg.TEST_BLOCK.get(),
@@ -76,7 +76,7 @@ public class Registration
 	
 	public static class EntityTypeReg
 	{
-		public static final DeferredRegister<EntityType<?>> ENTITIES = DeferredRegister.create(Registries.ENTITY_TYPE, Database.MOD_ID);
+		public static final DeferredRegister<EntityType<?>> ENTITIES = DeferredRegister.create(Registries.ENTITY_TYPE, PLibDatabase.MOD_ID);
 		
 		public static final DeferredHolder<EntityType<?>, EntityType<TestEntity>> TEST_ENTITY = ENTITIES.register("test_entity", key -> EntityType.Builder.of(TestEntity :: new, MobCategory.MISC).
 				sized(1, 1).

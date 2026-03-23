@@ -18,7 +18,7 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
 
-public class ParserHelper
+public class PLibParserHelper
 {
 	public static FloatBuffer getFloatBuffer(AccessorModel accessor)
 	{

@@ -46,7 +46,7 @@ public class PRenderTypes
 							setOverlayState(RenderStateShard.OVERLAY).
 							createCompositeState(true);
 			return RenderType.create(
-					Database.rl("triangles_solid").toString(),
+					PLibDatabase.rl("triangles_solid").toString(),
 					VertexFormatProvider.POSITION_TEX_NORMAL,
 					VertexFormat.Mode.TRIANGLES,
 					1536,
@@ -54,7 +54,6 @@ public class PRenderTypes
 					false,
 					rendertype$compositestate);
 		}
-		
 		
 		private static RenderType createTrianglesCutout(ResourceLocation location)
 		{
@@ -66,7 +65,7 @@ public class PRenderTypes
 					setOverlayState(RenderStateShard.OVERLAY).
 					createCompositeState(true);
 			return RenderType.create(
-					Database.rl("triangles_cutout").toString(),
+					PLibDatabase.rl("triangles_cutout").toString(),
 					VertexFormatProvider.POSITION_TEX_NORMAL,
 					VertexFormat.Mode.TRIANGLES,
 					1536,
@@ -83,9 +82,10 @@ public class PRenderTypes
 					setTransparencyState(RenderStateShard.TRANSLUCENT_TRANSPARENCY).
 					setLightmapState(RenderStateShard.LIGHTMAP).
 					setOverlayState(RenderStateShard.OVERLAY).
+					setCullState(RenderStateShard.CULL).
 					createCompositeState(true);
 			return RenderType.create(
-					Database.rl("triangles_translucent").toString(),
+					PLibDatabase.rl("triangles_translucent").toString(),
 					VertexFormatProvider.POSITION_TEX_NORMAL,
 					VertexFormat.Mode.TRIANGLES,
 					1536,
@@ -104,7 +104,7 @@ public class PRenderTypes
 					setOverlayState(RenderStateShard.OVERLAY).
 					createCompositeState(true);
 			return RenderType.create(
-					Database.rl("triangles_gui").toString(),
+					PLibDatabase.rl("triangles_gui").toString(),
 					VertexFormatProvider.POSITION_TEX_NORMAL,
 					VertexFormat.Mode.TRIANGLES,
 					1536,
@@ -186,28 +186,28 @@ public class PRenderTypes
 			{
 				event.registerShader(new ShaderInstance(
 								event.getResourceProvider(),
-								Database.rl("triangles_solid"),
+								PLibDatabase.rl("triangles_solid"),
 								VertexFormatProvider.POSITION_TEX_NORMAL),
 						shaderInstance -> TRIANGLES_SOLID_SHADER = shaderInstance);
 				event.registerShader(new ShaderInstance(
 								event.getResourceProvider(),
-								Database.rl("triangles_cutout"),
+								PLibDatabase.rl("triangles_cutout"),
 								VertexFormatProvider.POSITION_TEX_NORMAL),
 						shaderInstance -> TRIANGLES_CUTOUT_SHADER = shaderInstance);
 				event.registerShader(new ShaderInstance(
 								event.getResourceProvider(),
-								Database.rl("triangles_translucent"),
+								PLibDatabase.rl("triangles_translucent"),
 								VertexFormatProvider.POSITION_TEX_NORMAL),
 						shaderInstance -> TRIANGLES_TRANSLUCENT_SHADER = shaderInstance);
 				event.registerShader(new ShaderInstance(
 								event.getResourceProvider(),
-								Database.rl("triangles_gui"),
+								PLibDatabase.rl("triangles_gui"),
 								VertexFormatProvider.POSITION_TEX_NORMAL),
 						shaderInstance -> TRIANGLES_GUI_SHADER = shaderInstance);
 			}
 			catch (IOException e)
 			{
-				Database.LOGGER.warn("Failed to register shaders: {}", String.valueOf(e));
+				PLibDatabase.LOGGER.warn("Failed to register shaders: {}", String.valueOf(e));
 			}
 		}
 	}

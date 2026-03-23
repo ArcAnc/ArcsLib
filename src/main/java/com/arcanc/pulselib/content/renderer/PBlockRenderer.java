@@ -68,7 +68,7 @@ public abstract class PBlockRenderer<T extends BlockEntity & PAnimatable<T>>
 	public void render(T animatable, float partialTick, PoseStack poseStack, MultiBufferSource bufferSource, int packedLight, int packedOverlay)
 	{
 		animatable.getAnimationManager().getControllers().
-				forEach(($, controller) -> controller.tick(animatable, this.getModel(animatable), partialTick));
+				forEach(($, controller) -> controller.tick(animatable, this.getModelData(animatable).getModel(), partialTick));
 		
 		poseStack.pushPose();
 		poseStack.translate(0.5f, 0, 0.5f);
@@ -89,7 +89,7 @@ public abstract class PBlockRenderer<T extends BlockEntity & PAnimatable<T>>
 	public void trueSubmit(PoseStack poseStack, T animatable, Function<ResourceLocation, RenderType> renderType, MultiBufferSource bufferSource, int packedLight, int packedOverlay, float partialTick, @Nullable Object... additionalData)
 	{
 		Collection<PAnimationController<T>> controllers = animatable.getAnimationManager().getControllers().values();
-		PBakedModel model = this.getModel(animatable);
+		PBakedModel model = this.getModelData(animatable).getModel();
 		if (model == null)
 			return;
 		model.bones().forEach(bone -> perBoneSubmit(animatable, poseStack, bone, controllers, renderType, -1, packedLight, packedOverlay, partialTick));
@@ -129,7 +129,7 @@ public abstract class PBlockRenderer<T extends BlockEntity & PAnimatable<T>>
 	private void tryRotateToRealRotation(PoseStack poseStack, Direction facing)
 	{
 		if (facing.getAxis().isHorizontal())
-			poseStack.mulPose(Axis.YP.rotationDegrees(180 + facing.toYRot()));
+			poseStack.mulPose(Axis.YP.rotationDegrees(facing.toYRot()));
 		else
 			poseStack.mulPose(Axis.XP.rotationDegrees(90 * facing.getNormal().getY()));
 	}
@@ -137,14 +137,17 @@ public abstract class PBlockRenderer<T extends BlockEntity & PAnimatable<T>>
 	private Direction getAnimatableFacing(T animatable)
 	{
 		BlockState blockState = animatable.getBlockState();
+		Direction dir = Direction.NORTH;
 		
 		if (blockState.hasProperty(BlockStateProperties.HORIZONTAL_FACING))
-			return blockState.getValue(BlockStateProperties.HORIZONTAL_FACING);
+			dir = blockState.getValue(BlockStateProperties.HORIZONTAL_FACING);
 		
 		if (blockState.hasProperty(BlockStateProperties.FACING))
-			return blockState.getValue(BlockStateProperties.FACING);
+			dir = blockState.getValue(BlockStateProperties.FACING);
 		
-		return Direction.NORTH;
+		if (dir.getAxis() ==  Direction.Axis.Z)
+			dir = dir.getOpposite();
+		return dir;
 	}
 	
 	protected void submitBone(T animatable,

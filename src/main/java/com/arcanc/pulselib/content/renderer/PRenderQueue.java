@@ -11,7 +11,7 @@ package com.arcanc.pulselib.content.renderer;
 
 
 import com.arcanc.pulselib.content.mixin.VertexBufferAccessor;
-import com.arcanc.pulselib.util.helpers.RenderHelper;
+import com.arcanc.pulselib.util.helpers.PLibRenderHelper;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.VertexBuffer;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
@@ -111,7 +111,7 @@ public class PRenderQueue
 					((VertexBufferAccessor)vb).pulselib$getMode(),
 					modelView,
 					projection,
-					RenderHelper.mc().getWindow()
+					PLibRenderHelper.mc().getWindow()
 			);
 			shader.apply();
 			

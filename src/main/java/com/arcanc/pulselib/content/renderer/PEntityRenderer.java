@@ -23,6 +23,7 @@ import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.LivingEntityRenderer;
+import net.minecraft.client.renderer.entity.MobRenderer;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.core.Direction;
 import net.minecraft.resources.ResourceLocation;
@@ -73,16 +74,14 @@ public abstract class PEntityRenderer<T extends Entity & PAnimatable<T>> extends
 		super.render(entity, entityYaw, partialTick, poseStack, bufferSource, packedLight);
 		
 		entity.getAnimationManager().getControllers().
-				forEach(($, controller) -> controller.tick(entity, this.getModel(entity), partialTick));
-		
+				forEach(($, controller) -> controller.tick(entity, this.getModelData(entity).getModel(), partialTick));
+		int packedOverlay = entity instanceof LivingEntity living ? LivingEntityRenderer.getOverlayCoords(living, 0.0f) : OverlayTexture.NO_OVERLAY;
+		preSubmit(poseStack, entity, this :: getRenderType, bufferSource, packedLight, packedOverlay, partialTick);
 		poseStack.pushPose();
 		poseStack.mulPose(Axis.YP.rotationDegrees(180));
-		if (entity instanceof LivingEntity living)
-			applyPositioning(living, poseStack, partialTick);
-		preSubmit(poseStack, entity, this :: getRenderType, bufferSource, packedLight, OverlayTexture.NO_OVERLAY, partialTick);
-		trueSubmit(poseStack, entity, this :: getRenderType, bufferSource, packedLight, OverlayTexture.NO_OVERLAY, partialTick);
-		postSubmit(poseStack, entity, this :: getRenderType, bufferSource, packedLight, OverlayTexture.NO_OVERLAY, partialTick);
+		trueSubmit(poseStack, entity, this :: getRenderType, bufferSource, packedLight, packedOverlay, partialTick);
 		poseStack.popPose();
+		postSubmit(poseStack, entity, this :: getRenderType, bufferSource, packedLight, packedOverlay, partialTick);
 	}
 	
 	@Override
@@ -101,10 +100,14 @@ public abstract class PEntityRenderer<T extends Entity & PAnimatable<T>> extends
 	public void trueSubmit(PoseStack poseStack, T animatable, Function<ResourceLocation, RenderType> renderType, MultiBufferSource bufferSource, int packedLight, int packedOverlay, float partialTick, @Nullable Object... additionalData)
 	{
 		Collection<PAnimationController<T>> controllers = animatable.getAnimationManager().getControllers().values();
-		PBakedModel model = this.getModel(animatable);
+		PBakedModel model = this.getModelData(animatable).getModel();
 		if (model == null)
 			return;
-		model.bones().forEach(bone -> perBoneSubmit(animatable, poseStack, bone, controllers, renderType, -1, packedLight, packedOverlay, partialTick));
+		HeadRotation headRotation = null;
+		if (animatable instanceof LivingEntity livingEntity)
+			headRotation = applyPositioning(livingEntity, poseStack, partialTick);
+		for (PBakedBone bone : model.bones())
+			perBoneSubmit(animatable, poseStack, bone, controllers, renderType, -1, packedLight, packedOverlay, partialTick, headRotation);
 	}
 	
 	@Override
@@ -113,7 +116,7 @@ public abstract class PEntityRenderer<T extends Entity & PAnimatable<T>> extends
 	
 	}
 	
-	protected void perBoneSubmit(T animatable, PoseStack poseStack, PBakedBone bone, Collection<PAnimationController<T>> controllers, Function<ResourceLocation, RenderType> renderType, int packedColor, int packedLight, int packedOverlay, float partialTick)
+	protected void perBoneSubmit(T animatable, PoseStack poseStack, PBakedBone bone, Collection<PAnimationController<T>> controllers, Function<ResourceLocation, RenderType> renderType, int packedColor, int packedLight, int packedOverlay, float partialTick, @Nullable HeadRotation headRotation)
 	{
 		PModelData data = this.getModelData(animatable);
 		BoneFrame frame = bone.mixBone(data.getModel(), controllers);
@@ -129,11 +132,15 @@ public abstract class PEntityRenderer<T extends Entity & PAnimatable<T>> extends
 			poseStack.translate(bone.basePosition().x(), bone.basePosition().y(), bone.basePosition().z());
 			poseStack.mulPose(bone.baseRotation());
 		}
-		
+		if (bone.name().equals("head") && headRotation != null)
+		{
+			poseStack.mulPose(Axis.YN.rotationDegrees(headRotation.headYaw()));
+			poseStack.mulPose(Axis.XN.rotationDegrees(headRotation.headPitch()));
+		}
 		this.submitBone(animatable, bone, poseStack, data, controllers, renderType, packedColor, packedLight, packedOverlay, partialTick);
 		
 		if (!bone.children().isEmpty())
-			bone.children().forEach(child -> perBoneSubmit(animatable, poseStack, child, controllers, renderType, packedColor, packedLight, packedOverlay, partialTick));
+			bone.children().forEach(child -> perBoneSubmit(animatable, poseStack, child, controllers, renderType, packedColor, packedLight, packedOverlay, partialTick, headRotation));
 		
 		poseStack.popPose();
 	}
@@ -162,59 +169,52 @@ public abstract class PEntityRenderer<T extends Entity & PAnimatable<T>> extends
 		});
 	}
 	
-	protected void applyPositioning(LivingEntity entity, PoseStack poseStack, float partialTick)
+	protected HeadRotation applyPositioning(LivingEntity entity, PoseStack poseStack, float partialTick)
 	{
 		/// Vanilla copy paste
 		boolean shouldSit = entity.isPassenger() && (entity.getVehicle() != null && entity.getVehicle().shouldRiderSit());
-		float f = Mth.rotLerp(partialTick, entity.yBodyRotO, entity.yBodyRot);
-		float f1 = Mth.rotLerp(partialTick, entity.yHeadRotO, entity.yHeadRot);
-		float f2 = f1 - f;
+		float bodyRot = Mth.rotLerp(partialTick, entity.yBodyRotO, entity.yBodyRot);
+		float headRot = Mth.rotLerp(partialTick, entity.yHeadRotO, entity.yHeadRot);
+		float diffAngle = headRot - bodyRot;
 		if (shouldSit && entity.getVehicle() instanceof LivingEntity livingentity)
 		{
-			f = Mth.rotLerp(partialTick, livingentity.yBodyRotO, livingentity.yBodyRot);
-			f2 = f1 - f;
-			float f7 = Mth.wrapDegrees(f2);
-			if (f7 < -85.0F)
-				f7 = -85.0F;
+			bodyRot = Mth.rotLerp(partialTick, livingentity.yBodyRotO, livingentity.yBodyRot);
+			diffAngle = headRot - bodyRot;
+			float clampedAngle = Mth.clamp(Mth.wrapDegrees(diffAngle), -85f, 85f);
 			
-			if (f7 >= 85.0F)
-				f7 = 85.0F;
+			bodyRot = headRot - clampedAngle;
+			if (clampedAngle * clampedAngle > 2500f)
+				bodyRot += clampedAngle * 0.2f;
 			
-			f = f1 - f7;
-			if (f7 * f7 > 2500.0F)
-				f += f7 * 0.2F;
-			
-			f2 = f1 - f;
+			diffAngle = headRot - bodyRot;
 		}
 		
-		float f6 = Mth.lerp(partialTick, entity.xRotO, entity.getXRot());
 		if (LivingEntityRenderer.isEntityUpsideDown(entity))
-		{
-			f6 *= -1.0F;
-			f2 *= -1.0F;
-		}
-		
-		f2 = Mth.wrapDegrees(f2);
+			diffAngle *= -1.0F;
+			
+		diffAngle = Mth.wrapDegrees(diffAngle);
 		if (entity.hasPose(Pose.SLEEPING))
 		{
 			Direction direction = entity.getBedOrientation();
 			if (direction != null)
 			{
 				float f3 = entity.getEyeHeight(Pose.STANDING) - 0.1F;
-				poseStack.translate((float)(-direction.getStepX()) * f3, 0.0F, (float)(-direction.getStepZ()) * f3);
+				poseStack.translate(-direction.getStepX() * f3, 0.0F, -direction.getStepZ() * f3);
 			}
 		}
 		
-		float f8 = entity.getScale();
-		poseStack.scale(f8, f8, f8);
-		float f9 = entity.tickCount + partialTick;
-		this.setupRotations(entity, poseStack, f9, f, partialTick, f8);
+		float entityScale = entity.getScale();
+		poseStack.scale(entityScale, entityScale, entityScale);
+		float age = entity.tickCount + partialTick;
+		this.setupRotations(entity, poseStack, age, bodyRot, partialTick, entityScale);
+		float headPitch = Mth.lerp(partialTick, entity.xRotO, entity.getXRot());
+		return new HeadRotation(diffAngle, headPitch);
 	}
 	
 	protected void setupRotations(LivingEntity entity, PoseStack poseStack, float bob, float yBodyRot, float partialTick, float scale)
 	{
 		if (entity.isFullyFrozen())
-			yBodyRot += (float)(Math.cos((double)entity.tickCount * 3.25) * Math.PI * 0.4F);
+			yBodyRot += (float) (Math.cos(entity.tickCount * 3.25f) * Math.PI * 0.4F);
 		
 		if (!entity.hasPose(Pose.SLEEPING))
 			poseStack.mulPose(Axis.YN.rotationDegrees(yBodyRot));
@@ -231,7 +231,7 @@ public abstract class PEntityRenderer<T extends Entity & PAnimatable<T>> extends
 		else if (entity.isAutoSpinAttack())
 		{
 			poseStack.mulPose(Axis.XP.rotationDegrees(-90.0F - entity.getXRot()));
-			poseStack.mulPose(Axis.YP.rotationDegrees(((float)entity.tickCount + partialTick) * -75.0F));
+			poseStack.mulPose(Axis.YP.rotationDegrees((entity.tickCount + partialTick) * -75.0F));
 		}
 		else if (entity.hasPose(Pose.SLEEPING))
 		{
@@ -257,5 +257,9 @@ public abstract class PEntityRenderer<T extends Entity & PAnimatable<T>> extends
 			case EAST -> 180.0F;
 			default -> 0.0F;
 		};
+	}
+	
+	protected record HeadRotation(float headYaw, float headPitch)
+	{
 	}
 }
