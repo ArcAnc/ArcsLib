@@ -44,7 +44,7 @@ public class PModelData
 	
 	protected static ResourceLocation generateDefaultTextureLocation(ResourceLocation textureLocation, String modelLocation, String type)
 	{
-		return textureLocation.withPrefix("textures/" + type + "/" + modelLocation + "/").withSuffix(".png");
+		return textureLocation.withPrefix(type + "/" + modelLocation + "/");
 	}
 	
 	public ResourceLocation getModelLocation()
@@ -54,6 +54,13 @@ public class PModelData
 	
 	public ResourceLocation getTextureByName(String name)
 	{
+		if (this.textures.get(name) == null)
+		{
+			String modelPath = this.modelLocation.getPath().substring(0, this.modelLocation.getPath().length() - 4);
+			String[] divided = modelPath.split("/");
+			ResourceLocation texturePath = this.modelLocation.withPath(divided[1] + "/" + divided[2] + "/" + name);
+			this.textures.put(name, texturePath);
+		}
 		return this.textures.getOrDefault(name, TextureManager.INTENTIONAL_MISSING_TEXTURE);
 	}
 	

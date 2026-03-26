@@ -17,6 +17,7 @@ import com.arcanc.pulselib.content.model.baked.PBakedBone;
 import com.arcanc.pulselib.content.model.baked.PBakedModel;
 import com.arcanc.pulselib.content.renderer.modelData.PModelData;
 import com.arcanc.pulselib.util.PRenderTypes;
+import com.arcanc.pulselib.util.PTextureCache;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
 import net.minecraft.client.renderer.MultiBufferSource;
@@ -67,8 +68,11 @@ public abstract class PBlockRenderer<T extends BlockEntity & PAnimatable<T>>
 	@Override
 	public void render(T animatable, float partialTick, PoseStack poseStack, MultiBufferSource bufferSource, int packedLight, int packedOverlay)
 	{
+		PBakedModel model = this.getModelData(animatable).getModel();
+		if (model == null)
+			return;
 		animatable.getAnimationManager().getControllers().
-				forEach(($, controller) -> controller.tick(animatable, this.getModelData(animatable).getModel(), partialTick));
+				forEach(($, controller) -> controller.tick(animatable, model, partialTick));
 		
 		poseStack.pushPose();
 		poseStack.translate(0.5f, 0, 0.5f);
@@ -168,7 +172,7 @@ public abstract class PBlockRenderer<T extends BlockEntity & PAnimatable<T>>
 			if (mesh.textureName().isEmpty())
 				return;
 			
-			RenderType type = renderType.apply(modelData.getTextureByName(mesh.textureName()));
+			RenderType type = renderType.apply(PTextureCache.ATLAS_LOCATION);
 			
 			PRenderTypes.getTransparencyState(type).ifPresent(transparency ->
 			{

@@ -10,9 +10,8 @@
 package com.arcanc.pulselib.util.helpers;
 
 
-import de.javagl.jgltf.model.AccessorData;
-import de.javagl.jgltf.model.AccessorModel;
-import de.javagl.jgltf.model.GltfConstants;
+import de.javagl.jgltf.model.*;
+import de.javagl.jgltf.model.v2.MaterialModelV2;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -69,5 +68,30 @@ public class PLibParserHelper
 		buffer.limit(expectedSize);
 		
 		return buffer;
+	}
+	
+	public static String extractTextureName(MaterialModel material)
+	{
+		if (!(material instanceof MaterialModelV2 mat))
+			return "";
+		
+		TextureModel texture = mat.getBaseColorTexture();
+		if (texture == null)
+			return "";
+		
+		String name = texture.getName();
+		if (name == null && texture.getImageModel() != null)
+			name = texture.getImageModel().getName();
+		
+		if (name == null &&
+				texture.getImageModel() != null &&
+				texture.getImageModel().getBufferViewModel() != null)
+			name = texture.getImageModel().getBufferViewModel().getName();
+		
+		if (name == null)
+			return "default_texture";
+		
+		int lastDot = name.lastIndexOf('.');
+		return (lastDot > 0) ? name.substring(0, lastDot) : name;
 	}
 }

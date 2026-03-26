@@ -42,6 +42,7 @@ public class PRenderTypes
 							setShaderState(ShadersProvider.StateShard.TRIANGLES_SOLID_STATE_SHARD).
 							setTextureState(new RenderStateShard.TextureStateShard(location, false, false)).
 							setTransparencyState(RenderStateShard.NO_TRANSPARENCY).
+							setCullState(RenderStateShard.NO_CULL).
 							setLightmapState(RenderStateShard.LIGHTMAP).
 							setOverlayState(RenderStateShard.OVERLAY).
 							createCompositeState(true);
@@ -61,6 +62,7 @@ public class PRenderTypes
 					setShaderState(ShadersProvider.StateShard.TRIANGLES_CUTOUT_STATE_SHARD).
 					setTextureState(new RenderStateShard.TextureStateShard(location, false, false)).
 					setTransparencyState(RenderStateShard.NO_TRANSPARENCY).
+					setCullState(RenderStateShard.NO_CULL).
 					setLightmapState(RenderStateShard.LIGHTMAP).
 					setOverlayState(RenderStateShard.OVERLAY).
 					createCompositeState(true);
@@ -80,9 +82,9 @@ public class PRenderTypes
 					setShaderState(ShadersProvider.StateShard.TRIANGLES_TRANSLUCENT_STATE_SHARD).
 					setTextureState(new RenderStateShard.TextureStateShard(location, false, false)).
 					setTransparencyState(RenderStateShard.TRANSLUCENT_TRANSPARENCY).
+					setCullState(RenderStateShard.NO_CULL).
 					setLightmapState(RenderStateShard.LIGHTMAP).
 					setOverlayState(RenderStateShard.OVERLAY).
-					setCullState(RenderStateShard.CULL).
 					createCompositeState(true);
 			return RenderType.create(
 					PLibDatabase.rl("triangles_translucent").toString(),

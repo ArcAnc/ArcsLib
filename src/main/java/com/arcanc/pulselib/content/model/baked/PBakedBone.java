@@ -14,6 +14,7 @@ import com.arcanc.pulselib.content.animatable.PAnimatable;
 import com.arcanc.pulselib.content.animatable.instance.PAnimationController;
 import com.arcanc.pulselib.content.model.animation.BoneFrame;
 import com.arcanc.pulselib.content.renderer.modelData.PModelData;
+import com.arcanc.pulselib.util.PTextureCache;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexBuffer;
@@ -41,7 +42,7 @@ public record PBakedBone(String name,
                          Vector3f basePosition,
                          Quaternionf baseRotation,
                          List<PBakedBone> children,
-                         PBakedBone parent,
+                         @Nullable PBakedBone parent,
                          List<PBakedMesh> meshes)
 {
 	public <T extends PAnimatable<T>>void instantDraw(PoseStack poseStack,
@@ -85,8 +86,7 @@ public record PBakedBone(String name,
 			if (mesh.textureName().isEmpty())
 				return;
 			
-			ResourceLocation texture = modelData.getTextureByName(mesh.textureName());
-			RenderType type = renderType.apply(texture);
+			RenderType type = renderType.apply(PTextureCache.ATLAS_LOCATION);
 			type.setupRenderState();
 			
 			ShaderInstance shaderInstance = RenderSystem.getShader();

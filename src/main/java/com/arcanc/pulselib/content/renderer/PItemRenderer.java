@@ -17,6 +17,7 @@ import com.arcanc.pulselib.content.model.baked.PBakedBone;
 import com.arcanc.pulselib.content.model.baked.PBakedModel;
 import com.arcanc.pulselib.content.renderer.modelData.PModelData;
 import com.arcanc.pulselib.util.PRenderTypes;
+import com.arcanc.pulselib.util.PTextureCache;
 import com.arcanc.pulselib.util.helpers.PLibRenderHelper;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
@@ -153,7 +154,7 @@ public abstract class PItemRenderer<T extends Item & PAnimatable<T>> extends Blo
 			if (mesh.textureName().isEmpty())
 				return;
 			
-			RenderType type = renderType.apply(modelData.getTextureByName(mesh.textureName()));
+			RenderType type = renderType.apply(PTextureCache.ATLAS_LOCATION);
 			
 			PRenderQueue.submitItem(context, type, mesh.vertexBuffer(), new PRenderQueue.InstanceData(matrix4fstack, color, packedLight, packedOverlay));
 		});

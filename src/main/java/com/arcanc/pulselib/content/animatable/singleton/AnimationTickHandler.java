@@ -13,6 +13,7 @@ package com.arcanc.pulselib.content.animatable.singleton;
 import com.arcanc.pulselib.content.animatable.PAnimatable;
 import com.arcanc.pulselib.content.animatable.PAnimationManager;
 import com.arcanc.pulselib.content.animatable.instance.PAnimationController;
+import com.arcanc.pulselib.content.model.baked.PBakedModel;
 import com.arcanc.pulselib.content.renderer.PRenderer;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import net.minecraft.core.registries.Registries;
@@ -72,7 +73,12 @@ public class AnimationTickHandler
 		void tick(float partialTick)
 		{
 			for (PAnimationController<T> controller : this.animationManager.getControllers().values())
-					controller.tick(this.animatable, this.renderer.getModelData(animatable).getModel(), partialTick);
+			{
+				PBakedModel model = this.renderer.getModelData(animatable).getModel();
+				if (model == null)
+					continue;
+				controller.tick(this.animatable, model, partialTick);
+			}
 		}
 	}
 }

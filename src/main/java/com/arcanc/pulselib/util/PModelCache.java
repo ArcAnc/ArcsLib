@@ -14,6 +14,7 @@ import com.arcanc.pulselib.content.mixin.VertexBufferAccessor;
 import com.arcanc.pulselib.content.model.PBone;
 import com.arcanc.pulselib.content.model.PMesh;
 import com.arcanc.pulselib.content.model.PModel;
+import com.arcanc.pulselib.content.model.baked.AtlasBufferBuilder;
 import com.arcanc.pulselib.content.model.baked.PBakedBone;
 import com.arcanc.pulselib.content.model.baked.PBakedMesh;
 import com.arcanc.pulselib.content.model.baked.PBakedModel;
@@ -23,6 +24,7 @@ import com.google.common.collect.ImmutableMap;
 import com.mojang.blaze3d.vertex.*;
 import com.mojang.datafixers.util.Pair;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
+import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.PreparableReloadListener;
 import net.minecraft.server.packs.resources.ResourceManager;
@@ -93,6 +95,8 @@ public class PModelCache
 		for (Map.Entry<ResourceLocation, PModel> rawModel : rawModels.entrySet())
 		{
 			PModel model = rawModel.getValue();
+			ResourceLocation modelPath = rawModel.getKey();
+			String[] divided = modelPath.getPath().substring(0, modelPath.getPath().length() - 4).split("/");
 			Map<UUID, PBakedBone.PBakedBoneBuilder> bakedBoneBuilder = new HashMap<>();
 			for (PBone bone : model.bones.values())
 			{
@@ -114,9 +118,16 @@ public class PModelCache
 				for (UUID meshUUID : bone2MeshesEntry.getValue().getSecond())
 				{
 					PMesh mesh = model.meshes.get(meshUUID);
+					ResourceLocation loc = modelPath.withPath(divided[1] + "/" + divided[2] + "/" + mesh.texture());
+					TextureAtlasSprite sprite = PTextureCache.getTextureAtlas().getSprite(loc);
 
 					ByteBufferBuilder byteBufferBuilder = new ByteBufferBuilder(mesh.vertexCount() * PRenderTypes.VertexFormatProvider.POSITION_TEX_NORMAL.getVertexSize());
-					BufferBuilder bufferBuilder = new BufferBuilder(byteBufferBuilder, VertexFormat.Mode.TRIANGLES, PRenderTypes.VertexFormatProvider.POSITION_TEX_NORMAL);
+
+					BufferBuilder bufferBuilder;
+					if (sprite.contents().name().getPath().equals("missingno"))
+						bufferBuilder = new BufferBuilder(byteBufferBuilder, VertexFormat.Mode.TRIANGLES, PRenderTypes.VertexFormatProvider.POSITION_TEX_NORMAL);
+					else
+						bufferBuilder = new AtlasBufferBuilder(byteBufferBuilder, VertexFormat.Mode.TRIANGLES, PRenderTypes.VertexFormatProvider.POSITION_TEX_NORMAL, sprite);
 					
 					for (int q = 0; q < mesh.vertexCount(); q++)
 					{

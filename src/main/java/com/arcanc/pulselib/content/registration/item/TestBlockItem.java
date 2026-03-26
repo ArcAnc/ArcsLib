@@ -60,10 +60,6 @@ public class TestBlockItem extends BlockItem implements PItemAnimatable<TestBloc
 		{
 			private final TestBlockItemRenderer renderer = new TestBlockItemRenderer
 					(
-							new DefaultItemModelData.DefaultItemModelDataBuilder(PLibDatabase.rl("test_block")).
-									addTexture(PLibDatabase.rl("circle")).
-									addTexture(PLibDatabase.rl("pyramid")).
-									build(),
 							PLibRenderHelper.mc().getBlockEntityRenderDispatcher(),
 							PLibRenderHelper.mc().getEntityModels()
 					);

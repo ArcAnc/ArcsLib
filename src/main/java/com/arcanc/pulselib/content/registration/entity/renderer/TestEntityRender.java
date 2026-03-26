@@ -16,15 +16,17 @@ import com.arcanc.pulselib.content.renderer.modelData.DefaultEntityModelData;
 import com.arcanc.pulselib.util.PLibDatabase;
 import com.arcanc.pulselib.util.PRenderTypes;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
+import net.minecraft.resources.ResourceLocation;
 
 public class TestEntityRender extends PEntityRenderer<TestEntity>
 {
+	public static final ResourceLocation SPHERE = PLibDatabase.rl("entity/test_entity/sphere");
+	public static final ResourceLocation TORUS = PLibDatabase.rl("entity/test_entity/torus");
+	public static final ResourceLocation TUBE = PLibDatabase.rl("entity/test_entity/tube");
+	
 	public TestEntityRender(EntityRendererProvider.Context context)
 	{
 		super(context, new DefaultEntityModelData.DefaultEntityModelDataBuilder(PLibDatabase.rl("test_entity")).
-				addTexture(PLibDatabase.rl("sphere")).
-				addTexture(PLibDatabase.rl("torus")).
-				addTexture(PLibDatabase.rl("tube")).
 				build(),
 				PRenderTypes.RenderTypeProvider :: trianglesSolid);
 	}

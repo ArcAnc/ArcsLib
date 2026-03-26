@@ -12,8 +12,8 @@ package com.arcanc.pulselib.content.registration.block.block_entity;
 
 import com.arcanc.pulselib.content.animatable.PAnimatable;
 import com.arcanc.pulselib.content.animatable.PAnimationManager;
-import com.arcanc.pulselib.content.animatable.instance.PAnimationController;
 import com.arcanc.pulselib.content.animatable.instance.ControllerState;
+import com.arcanc.pulselib.content.animatable.instance.PAnimationController;
 import com.arcanc.pulselib.content.model.animation.PRawAnimation;
 import com.arcanc.pulselib.util.helpers.PLibHelper;
 import net.minecraft.core.BlockPos;
@@ -25,9 +25,7 @@ public class TestBlockEntity extends BlockEntity implements PAnimatable<TestBloc
 {
 	private final PAnimationManager<TestBlockEntity> animationManager = PLibHelper.createManager(this);
 	private final PRawAnimation ANIMATION = PRawAnimation.begin().
-			thenPlay("idle").
-			//thenWait(20).
-			//thenLoop("animation").
+			thenLoop("animation").
 			build();
 	private boolean playAnimation = true;
 	

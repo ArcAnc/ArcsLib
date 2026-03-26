@@ -21,6 +21,7 @@ import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.ShaderInstance;
 import net.minecraft.util.FastColor;
 import net.minecraft.world.item.ItemDisplayContext;
+import org.jetbrains.annotations.Nullable;
 import org.joml.Matrix4f;
 import org.lwjgl.opengl.*;
 import org.lwjgl.system.MemoryUtil;
@@ -176,7 +177,10 @@ public class PRenderQueue
 	private static void disableInstanceAttributes()
 	{
 		for (int q = 4; q <= 10; q++)
+		{
 			GL20.glDisableVertexAttribArray(q);
+			GL33.glVertexAttribDivisor(q,0);
+		}
 	}
 	
 	public static class RenderStage
@@ -191,6 +195,12 @@ public class PRenderQueue
 		public RenderStage(String name)
 		{
 			this.name = name;
+		}
+		
+		@Override
+		public int hashCode()
+		{
+			return this.name.hashCode();
 		}
 		
 		@Override
@@ -220,7 +230,7 @@ public class PRenderQueue
 		private final List<InstanceData> list = new ObjectArrayList<>();
 		private int instanceVBO = -1;
 		
-		private ByteBuffer buffer;
+		private @Nullable ByteBuffer buffer;
 		private int capacity;
 		
 		private static final int STRIDE = 16 * 4 + 4 * 4 + 2 * 4 + 2 * 4;
@@ -305,7 +315,7 @@ public class PRenderQueue
 			
 			if(this.buffer != null)
 			{
-				MemoryUtil.memFree(buffer);
+				MemoryUtil.memFree(this.buffer);
 				this.buffer = null;
 			}
 		}

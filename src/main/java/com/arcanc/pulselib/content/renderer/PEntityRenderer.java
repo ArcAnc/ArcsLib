@@ -16,6 +16,7 @@ import com.arcanc.pulselib.content.model.animation.BoneFrame;
 import com.arcanc.pulselib.content.model.baked.PBakedBone;
 import com.arcanc.pulselib.content.model.baked.PBakedModel;
 import com.arcanc.pulselib.content.renderer.modelData.PModelData;
+import com.arcanc.pulselib.util.PTextureCache;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
 import net.minecraft.client.renderer.MultiBufferSource;
@@ -23,7 +24,6 @@ import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.LivingEntityRenderer;
-import net.minecraft.client.renderer.entity.MobRenderer;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.core.Direction;
 import net.minecraft.resources.ResourceLocation;
@@ -72,9 +72,11 @@ public abstract class PEntityRenderer<T extends Entity & PAnimatable<T>> extends
 	public void render(T entity, float entityYaw, float partialTick, PoseStack poseStack, MultiBufferSource bufferSource, int packedLight)
 	{
 		super.render(entity, entityYaw, partialTick, poseStack, bufferSource, packedLight);
-		
+		PBakedModel model = this.getModelData(entity).getModel();
+		if (model == null)
+			return;
 		entity.getAnimationManager().getControllers().
-				forEach(($, controller) -> controller.tick(entity, this.getModelData(entity).getModel(), partialTick));
+				forEach(($, controller) -> controller.tick(entity, model, partialTick));
 		int packedOverlay = entity instanceof LivingEntity living ? LivingEntityRenderer.getOverlayCoords(living, 0.0f) : OverlayTexture.NO_OVERLAY;
 		preSubmit(poseStack, entity, this :: getRenderType, bufferSource, packedLight, packedOverlay, partialTick);
 		poseStack.pushPose();
@@ -163,7 +165,7 @@ public abstract class PEntityRenderer<T extends Entity & PAnimatable<T>> extends
 			if (mesh.textureName().isEmpty())
 				return;
 			
-			RenderType type = renderType.apply(modelData.getTextureByName(mesh.textureName()));
+			RenderType type = renderType.apply(PTextureCache.ATLAS_LOCATION);
 			
 			PRenderQueue.submitEntityMesh(type, mesh.vertexBuffer(), new PRenderQueue.InstanceData(matrix4fstack, color, packedLight, packedOverlay));
 		});

@@ -92,7 +92,7 @@ public class PModelParser
 		float[] rawTranslation = node.getTranslation();
 		Vector3f pivot = new Vector3f();
 		if (rawTranslation != null && rawTranslation.length == 3)
-			pivot.add(rawTranslation[0], rawTranslation[1], rawTranslation[2]);
+			pivot.set(rawTranslation[0], rawTranslation[1], rawTranslation[2]);
 		float[] rawRotation = node.getRotation();
 		Quaternionf baseRotation = new Quaternionf();
 		if (rawRotation != null && rawRotation.length == 4)
@@ -136,27 +136,11 @@ public class PModelParser
 		int indicesCount = indicesAccessor.getCount();
 		int indicesType = indicesAccessor.getComponentType();
 		
-		String textureName = "";
 		MaterialModel material = primitive.getMaterialModel();
+		String textureName = PLibParserHelper.extractTextureName(material);
 		MaterialModelV2.AlphaMode alpha = MaterialModelV2.AlphaMode.OPAQUE;
 		if (material instanceof MaterialModelV2 mat)
-		{
-			TextureModel texture = mat.getBaseColorTexture();
-			if (texture != null)
-				textureName = texture.getName();
-			if (textureName == null)
-			{
-				ImageModel image = texture.getImageModel();
-				textureName = image.getName();
-				if (textureName == null)
-				{
-					BufferViewModel bufferView = image.getBufferViewModel();
-					textureName = bufferView.getName();
-					textureName = textureName.substring(0, textureName.length() - 4);
-				}
-			}
 			alpha = mat.getAlphaMode();
-		}
 		PMesh pMesh = new PMesh(
 				UUID.randomUUID(),
 				vertexCount,

@@ -12,15 +12,22 @@ package com.arcanc.pulselib.content.registration.item.renderer;
 
 import com.arcanc.pulselib.content.registration.item.TestBlockItem;
 import com.arcanc.pulselib.content.renderer.PItemRenderer;
-import com.arcanc.pulselib.content.renderer.modelData.PModelData;
+import com.arcanc.pulselib.content.renderer.modelData.DefaultItemModelData;
+import com.arcanc.pulselib.util.PLibDatabase;
 import com.arcanc.pulselib.util.PRenderTypes;
 import net.minecraft.client.model.geom.EntityModelSet;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderDispatcher;
+import net.minecraft.resources.ResourceLocation;
 
 public class TestBlockItemRenderer extends PItemRenderer<TestBlockItem>
 {
-	public TestBlockItemRenderer(PModelData modelData, BlockEntityRenderDispatcher blockEntityRenderDispatcher, EntityModelSet entityModelSet)
+	public static final ResourceLocation CIRCLE = PLibDatabase.rl("item/test_block/circle");
+	public static final ResourceLocation PYRAMID = PLibDatabase.rl("item/test_block/pyramid");
+	
+	public TestBlockItemRenderer(BlockEntityRenderDispatcher blockEntityRenderDispatcher, EntityModelSet entityModelSet)
 	{
-		super(modelData, PRenderTypes.RenderTypeProvider :: trianglesSolid, blockEntityRenderDispatcher, entityModelSet);
+		super(new DefaultItemModelData.DefaultItemModelDataBuilder(PLibDatabase.rl("test_block")).
+				build(),
+				PRenderTypes.RenderTypeProvider :: trianglesSolid, blockEntityRenderDispatcher, entityModelSet);
 	}
 }

@@ -16,17 +16,19 @@ import com.arcanc.pulselib.content.renderer.modelData.DefaultBlockModelData;
 import com.arcanc.pulselib.util.PLibDatabase;
 import com.arcanc.pulselib.util.PRenderTypes;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
+import net.minecraft.resources.ResourceLocation;
 
 public class TestBlockEntityRenderer extends PBlockRenderer<TestBlockEntity>
 {
+	public static final ResourceLocation TUBE = PLibDatabase.rl("block/test_block/tube_texture");
+	public static final ResourceLocation TORUS = PLibDatabase.rl("block/test_block/torus_texture");
+	public static final ResourceLocation PYRAMID = PLibDatabase.rl("block/test_block/pyramid_texture");
+	public static final ResourceLocation CUBE = PLibDatabase.rl("block/test_block/cube_texture");
+	
 	public TestBlockEntityRenderer(final BlockEntityRendererProvider.Context ctx)
 	{
 		super(new DefaultBlockModelData.DefaultBlockModelDataBuilder(PLibDatabase.rl("test_block")).
-						addTexture(PLibDatabase.rl("tube_texture")).
-						addTexture(PLibDatabase.rl("torus_texture")).
-						addTexture(PLibDatabase.rl("pyramid_texture")).
-						addTexture(PLibDatabase.rl("cube_texture")).
 						build(),
-				PRenderTypes.RenderTypeProvider :: trianglesSolid);
+				PRenderTypes.RenderTypeProvider :: trianglesTranslucent);
 	}
 }
