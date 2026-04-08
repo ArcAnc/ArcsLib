@@ -1,0 +1,56 @@
+/**
+ * @author ArcAnc
+ * Created at: 28.02.2026
+ * Copyright (c) 2026
+ * <p>
+ * This code is licensed under "Arc's License of Common Sense"
+ * Details can be found in the license file in the root folder of this project
+ */
+
+package com.arcanc.pulselib.content.registration.item.renderer;
+
+
+import com.arcanc.pulselib.content.registration.item.TestBlockItem;
+import com.arcanc.pulselib.content.registration.item.renderer.renderState.TestBlockItemRenderState;
+import com.arcanc.pulselib.content.renderer.PItemRenderer;
+import com.arcanc.pulselib.content.renderer.modelData.PModelData;
+import com.arcanc.pulselib.util.PLibDatabase;
+import com.arcanc.pulselib.util.PRenderTypes;
+import com.mojang.serialization.MapCodec;
+import net.minecraft.client.renderer.special.SpecialModelRenderer;
+import net.minecraft.resources.Identifier;
+
+public class TestBlockItemRenderer extends PItemRenderer<TestBlockItem, TestBlockItemRenderState>
+{
+	public static final Identifier CIRCLE = PLibDatabase.rl("item/test_block/circle");
+	public static final Identifier PYRAMID = PLibDatabase.rl("item/test_block/pyramid");
+	
+	public TestBlockItemRenderer(PModelData modelData)
+	{
+		super(modelData, PRenderTypes.RenderTypeProvider :: trianglesSolid);
+	}
+	
+	@Override
+	protected TestBlockItemRenderState createRenderState()
+	{
+		return new TestBlockItemRenderState();
+	}
+	
+	public record Unbaked(PModelData data) implements SpecialModelRenderer.Unbaked<TestBlockItemRenderState>
+	{
+		public static final MapCodec<Unbaked> MAP_CODEC = PModelData.CODEC.
+				xmap(Unbaked :: new, Unbaked :: data);
+		
+		@Override
+		public TestBlockItemRenderer bake(BakingContext context)
+		{
+			return new TestBlockItemRenderer(this.data);
+		}
+		
+		@Override
+		public MapCodec<Unbaked> type()
+		{
+			return MAP_CODEC;
+		}
+	}
+}

@@ -1,0 +1,197 @@
+/**
+ * @author ArcAnc
+ * Created at: 27.01.2026
+ * Copyright (c) 2026
+ * <p>
+ * This code is licensed under "Arc's License of Common Sense"
+ * Details can be found in the license file in the root folder of this project
+ */
+
+package com.arcanc.pulselib.util;
+
+
+import com.mojang.blaze3d.pipeline.BlendFunction;
+import com.mojang.blaze3d.pipeline.ColorTargetState;
+import com.mojang.blaze3d.pipeline.DepthStencilState;
+import com.mojang.blaze3d.pipeline.RenderPipeline;
+import com.mojang.blaze3d.shaders.UniformType;
+import com.mojang.blaze3d.vertex.VertexFormat;
+import com.mojang.blaze3d.vertex.VertexFormatElement;
+import net.minecraft.client.renderer.RenderPipelines;
+import net.minecraft.client.renderer.rendertype.RenderSetup;
+import net.minecraft.client.renderer.rendertype.RenderType;
+import net.minecraft.resources.Identifier;
+import net.minecraft.util.Util;
+import net.neoforged.bus.api.IEventBus;
+import net.neoforged.neoforge.client.event.RegisterRenderPipelinesEvent;
+import org.jetbrains.annotations.ApiStatus;
+
+import java.util.HashSet;
+import java.util.Set;
+import java.util.function.Function;
+
+public class PRenderTypes
+{
+	public static class RenderPipelinesProvider
+	{
+		private static final Set<RenderPipeline> PIPELINES = new HashSet<>();
+		
+		private static final RenderPipeline.Snippet TRIANGLES_SNIPPET = RenderPipeline.builder(RenderPipelines.MATRICES_PROJECTION_SNIPPET).
+				withVertexShader(PLibDatabase.rl("core/triangles")).
+				withFragmentShader(PLibDatabase.rl("core/triangles")).
+				withSampler("Sampler0").
+				withSampler("Sampler2").
+				withUniform("Lighting", UniformType.UNIFORM_BUFFER).
+				withUniform("InstanceData", UniformType.UNIFORM_BUFFER).
+				withVertexFormat(VertexFormatProvider.POSITION_TEX_NORMAL, VertexFormat.Mode.TRIANGLES).
+				withDepthStencilState(DepthStencilState.DEFAULT).
+				buildSnippet();
+		
+		public static final RenderPipeline TRIANGLES_SOLID = registerPipeline(RenderPipeline.builder(TRIANGLES_SNIPPET).
+				withLocation(PLibDatabase.rl("pipeline/triangles_solid_no_cull")).
+				withSampler("Sampler1").
+				withCull(false).
+				build());
+		
+		public static final RenderPipeline TRIANGLES_CUTOUT = registerPipeline(RenderPipeline.builder(TRIANGLES_SNIPPET).
+				withLocation(PLibDatabase.rl("pipeline/triangles_cutout_no_cull")).
+				withSampler("Sampler1").
+				withShaderDefine("ALPHA_CUTOUT", 0.1F).
+				withCull(false).
+				build());
+		
+		public static final RenderPipeline TRIANGLES_TRANSLUCENT = registerPipeline(RenderPipeline.builder(TRIANGLES_SNIPPET).
+				withLocation(PLibDatabase.rl("pipeline/triangles_translucent_no_cull")).
+				withSampler("Sampler1").
+				withShaderDefine("ALPHA_CUTOUT", 0.1F).
+				withCull(false).
+				withColorTargetState(new ColorTargetState(BlendFunction.TRANSLUCENT)).
+				build());
+		
+		public static final RenderPipeline TRIANGLES_GUI = registerPipeline(RenderPipeline.builder(RenderPipelines.MATRICES_PROJECTION_SNIPPET).
+				withVertexShader(PLibDatabase.rl("core/triangles_gui")).
+				withFragmentShader(PLibDatabase.rl("core/triangles_gui")).
+				withLocation(PLibDatabase.rl("pipeline/triangles_gui")).
+				withUniform("ColorOverlay", UniformType.UNIFORM_BUFFER).
+				withSampler("Sampler0").
+				withSampler("Sampler1").
+				withSampler("Sampler2").
+				withShaderDefine("ALPHA_CUTOUT", 0.1F).
+				withCull(false).
+				withColorTargetState(new ColorTargetState(BlendFunction.TRANSLUCENT)).
+				withDepthStencilState(DepthStencilState.DEFAULT).
+				withVertexFormat(VertexFormatProvider.POSITION_TEX_NORMAL, VertexFormat.Mode.TRIANGLES).
+				build());
+		
+		private static RenderPipeline registerPipeline(RenderPipeline pipeline)
+		{
+			PIPELINES.add(pipeline);
+			return pipeline;
+		}
+		
+		private static void registerCustomPipelines(final RegisterRenderPipelinesEvent event)
+		{
+			PIPELINES.forEach(event :: registerPipeline);
+			PIPELINES.clear();
+		}
+	}
+	
+	public static class VertexFormatProvider
+	{
+		public static final VertexFormat POSITION_TEX_NORMAL = VertexFormat.builder().
+				add("Position", VertexFormatElement.POSITION).
+				add("UV0", VertexFormatElement.UV0).
+				add("Normal", VertexFormatElement.NORMAL).
+				padding(1).
+				build();
+	}
+	
+	public static class RenderTypeProvider
+	{
+		private static final Function<Identifier, RenderType> TRIANGLES_SOLID = Util.memoize(RenderTypeProvider :: createTrianglesSolid);
+		private static final Function<Identifier, RenderType> TRIANGLES_CUTOUT = Util.memoize(RenderTypeProvider :: createTrianglesCutout);
+		private static final Function<Identifier, RenderType> TRIANGLES_TRANSLUCENT = Util.memoize(RenderTypeProvider :: createTrianglesTranslucent);
+		private static final Function<Identifier, RenderType> TRIANGLES_GUI = Util.memoize(RenderTypeProvider :: createTrianglesGui);
+		
+		private static RenderType createTrianglesSolid(Identifier texture)
+		{
+			RenderSetup setup = RenderSetup.builder(RenderPipelinesProvider.TRIANGLES_SOLID).
+					withTexture("Sampler0", texture).
+					useLightmap().
+					useOverlay().
+					affectsCrumbling().
+					setOutline(RenderSetup.OutlineProperty.AFFECTS_OUTLINE).
+					createRenderSetup();
+			
+			return RenderType.create(PLibDatabase.rl("triangles_solid").toString(), setup);
+		}
+		
+		private static RenderType createTrianglesCutout(Identifier texture)
+		{
+			RenderSetup setup = RenderSetup.builder(RenderPipelinesProvider.TRIANGLES_CUTOUT).
+					withTexture("Sampler0", texture).
+					useLightmap().
+					useOverlay().
+					affectsCrumbling().
+					setOutline(RenderSetup.OutlineProperty.AFFECTS_OUTLINE).
+					createRenderSetup();
+			
+			return RenderType.create(PLibDatabase.rl("triangles_cutout").toString(), setup);
+		}
+		
+		private static RenderType createTrianglesTranslucent(Identifier texture)
+		{
+			RenderSetup setup = RenderSetup.builder(RenderPipelinesProvider.TRIANGLES_TRANSLUCENT).
+					withTexture("Sampler0", texture).
+					useLightmap().
+					useOverlay().
+					affectsCrumbling().
+					setOutline(RenderSetup.OutlineProperty.AFFECTS_OUTLINE).
+					createRenderSetup();
+			
+			return RenderType.create(PLibDatabase.rl("triangles_translucent").toString(), setup);
+		}
+		
+		private static RenderType createTrianglesGui(Identifier texture)
+		{
+			RenderSetup setup = RenderSetup.builder(RenderPipelinesProvider.TRIANGLES_GUI).
+					withTexture("Sampler0", texture).
+					useLightmap().
+					useOverlay().
+					createRenderSetup();
+			
+			return RenderType.create(PLibDatabase.rl("triangles_gui").toString(), setup);
+		}
+		
+		public static RenderType trianglesSolid(Identifier texture)
+		{
+			return TRIANGLES_SOLID.apply(texture);
+		}
+		
+		public static RenderType trianglesCutout(Identifier texture)
+		{
+			return TRIANGLES_CUTOUT.apply(texture);
+		}
+		
+		public static RenderType trianglesTranslucent(Identifier texture)
+		{
+			return TRIANGLES_TRANSLUCENT.apply(texture);
+		}
+		
+		public static RenderType trianglesGui(Identifier texture)
+		{
+			return TRIANGLES_GUI.apply(texture);
+		}
+	}
+	
+	public static void register(IEventBus modEventBus)
+	{
+		modEventBus.addListener(RenderPipelinesProvider :: registerCustomPipelines);
+	}
+	
+	@ApiStatus.Internal
+	public static boolean isTransparent(RenderType renderType)
+	{
+		return renderType.pipeline().getColorTargetState().blendFunction().isPresent();
+	}
+}
