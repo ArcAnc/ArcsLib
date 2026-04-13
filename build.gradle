@@ -1,3 +1,5 @@
+import net.darkhax.curseforgegradle.Constants;
+
 plugins {
     id 'java-library'
     id 'maven-publish'

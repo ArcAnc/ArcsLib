@@ -10,9 +10,10 @@
 package com.arcanc.pulselib.content.animatable;
 
 
-import com.arcanc.pulselib.content.model.animation.PAnimation;
-import com.arcanc.pulselib.content.model.animation.PRawAnimation;
 import com.arcanc.pulselib.content.model.animation.BoneFrame;
+import com.arcanc.pulselib.content.model.animation.PAnimation;
+import com.arcanc.pulselib.content.model.animation.PAnimationType;
+import com.arcanc.pulselib.content.model.animation.PRawAnimation;
 import com.arcanc.pulselib.content.model.baked.PBakedModel;
 import net.minecraft.util.Mth;
 import org.jetbrains.annotations.Nullable;
@@ -48,13 +49,19 @@ public class PAnimationController<T extends PAnimatable<T>>
 	
 	public void play(PRawAnimation animation)
 	{
-		this.currentAnimation = animation;
-		if (!this.isPlaying())
+		if (this.currentAnimation == animation)
 		{
-			this.stageIndex = 0;
-			this.prevTime = 0;
-			this.time = 0;
+			PRawAnimation.AnimationStage stage = getCurrentStage();
+			if (stage != null && stage.animationType() == PAnimationType.HOLD_LAST_FRAME)
+				if (this.state == ControllerState.PAUSE)
+					return;
+			if (this.state == ControllerState.PLAY)
+				return;
 		}
+		
+		this.currentAnimation = animation;
+		this.stageIndex = 0;
+		this.time = 0;
 		this.state = ControllerState.PLAY;
 	}
 	
