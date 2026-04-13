@@ -203,9 +203,9 @@ modrinth {
     token = modrinthToken
     projectId = "73TaZXLZ"
     versionNumber = mod_version
-    versionName = "${mod_name} ${mod_version}"
+    versionName = "${mod_name} ${minecraft_version} ${mod_version}"
     uploadFile = tasks.jar.getArchiveFile()
-    additionalFiles = [ tasks.sourcesJar.getArchiveFile() ]
+    additionalFileDsl.sourcesJar(tasks.sourcesJar.getArchiveFile())
     changelog = project.file("changelog.md").text
     gameVersions = ["26.1", "26.1.1", "26.1.2"]
     loaders = ["neoforge"]
@@ -222,7 +222,7 @@ tasks.register("publishCurseForge", net.darkhax.curseforgegradle.TaskPublishCurs
     def mainFile = upload("1484554", tasks.jar.archiveFile)
     mainFile.changelog = file('changelog.md')
     mainFile.changelogType = Constants.CHANGELOG_MARKDOWN;
-    mainFile.displayName = "${mod_name} ${mod_version}"
+    mainFile.displayName = "${mod_name}-${minecraft_version}-${mod_version}"
     mainFile.releaseType = "release"
     mainFile.addGameVersion("26.1")
     mainFile.addGameVersion("26.1.1")
@@ -234,6 +234,7 @@ tasks.register("publishCurseForge", net.darkhax.curseforgegradle.TaskPublishCurs
 
     def sourcesFile = mainFile.withAdditionalFile(sourcesJar)
     sourcesFile.changelog = file('changelog.md')
+    sourcesFile.displayName = "${mod_name}-${minecraft_version}-${mod_version}-sources"
 }
 
 tasks.register("publishMods") {
