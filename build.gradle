@@ -207,7 +207,7 @@ publishing {
 modrinth {
     token = modrinthToken
     projectId = "73TaZXLZ"
-    versionNumber = mod_version
+    versionNumber = "${minecraft_version}-${mod_version}"
     versionName = "${mod_name}-${minecraft_version}-${mod_version}"
     uploadFile = tasks.jar.getArchiveFile()
     additionalFileDsl.sourcesJar(tasks.sourcesJar.getArchiveFile())
