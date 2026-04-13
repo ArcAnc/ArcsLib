@@ -185,15 +185,15 @@ public class PModelParser
 				
 				UUID boneUuid = bone.uuid();
 				
-				PAnimationChannel arcChannel;
+				PAnimationChannel pChannel;
 				switch (channel.getPath())
 				{
-					case "translation" -> arcChannel = PAnimationChannel.POSITION;
-					case "rotation" -> arcChannel = PAnimationChannel.ROTATION;
-					case "scale" -> arcChannel = PAnimationChannel.SCALE;
-					default -> arcChannel = null;
+					case "translation" -> pChannel = PAnimationChannel.POSITION;
+					case "rotation" -> pChannel = PAnimationChannel.ROTATION;
+					case "scale" -> pChannel = PAnimationChannel.SCALE;
+					default -> pChannel = null;
 				}
-				if (arcChannel == null)
+				if (pChannel == null)
 					continue;
 				
 				AnimationModel.Sampler sampler = channel.getSampler();
@@ -207,7 +207,7 @@ public class PModelParser
 					continue;
 				ByteBuffer bb = outputAccessor.getAccessorData().createByteBuffer();
 				List<PKeyFrameChannel<?>> keyframes = new ArrayList<>();
-				switch (arcChannel)
+				switch (pChannel)
 				{
 					case ROTATION ->
 					{
@@ -250,11 +250,60 @@ public class PModelParser
 				};
 				
 				PBoneAnimation boneAnimation = boneAnimations.computeIfAbsent(bone.name(), k -> new PBoneAnimation(boneUuid, new HashMap<>()));
-				boneAnimation.channels().put(arcChannel, keyframes);
+				if (pChannel == PAnimationChannel.ROTATION)
+					if (trackContainsBaseRotation(keyframes, bone.baseRotation()))
+						cleanBaseRot(keyframes, bone.baseRotation());
+				boneAnimation.channels().put(pChannel, keyframes);
 			}
 			animations.put(animationName, new PAnimation(animationName, maxTime * 20, boneAnimations));
 		}
 		
 		return animations;
+	}
+	
+	static void cleanBaseRot(List<PKeyFrameChannel<?>> frames, Quaternionf baseRotation)
+	{
+		if (frames.isEmpty())
+			return;
+		
+		Quaternionf baseRotInv = new Quaternionf(baseRotation).invert();
+		
+		for (PKeyFrameChannel<?> frame : frames)
+		{
+			Quaternionf q = (Quaternionf) frame.value();
+			Quaternionf clean = q.mul(baseRotInv, new Quaternionf());
+			q.set(clean);
+		}
+	}
+	
+	static boolean trackContainsBaseRotation(
+			List<PKeyFrameChannel<?>> frames,
+			Quaternionf baseRot)
+	{
+		if (frames.isEmpty())
+			return false;
+		
+		int nearBase = 0;
+		int nearIdentity = 0;
+		
+		Quaternionf identity = new Quaternionf();
+		
+		for (PKeyFrameChannel<?> frame : frames)
+		{
+			Quaternionf q = (Quaternionf) frame.value();
+			if (nearlyEqual(q, baseRot, 0.001f))
+				nearBase++;
+			
+			if (nearlyEqual(q, identity, 0.001f))
+				nearIdentity++;
+		}
+		
+		return nearBase > nearIdentity;
+	}
+	
+	static boolean nearlyEqual(Quaternionf a, Quaternionf b, float eps)
+	{
+		float dot = Math.abs(a.dot(b));
+		return 1.0f - dot < eps;
 	}
 }

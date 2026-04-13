@@ -99,7 +99,7 @@ public abstract class PItemRenderer<T extends Item & PAnimatable<T>, RS extends 
 	@Override
 	public @Nullable PBakedModel getModel(RS renderState)
 	{
-		return this.modelData.getModel();
+		return getModelData(renderState).getModel();
 	}
 	
 	@Override
