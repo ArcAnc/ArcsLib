@@ -11,7 +11,7 @@ package com.arcanc.pulselib.content.model.baked;
 
 
 import com.arcanc.pulselib.content.animatable.PAnimatable;
-import com.arcanc.pulselib.content.animatable.instance.PAnimationController;
+import com.arcanc.pulselib.content.animatable.PAnimationController;
 import com.arcanc.pulselib.content.model.animation.BoneFrame;
 import com.arcanc.pulselib.content.renderer.modelData.PModelData;
 import com.arcanc.pulselib.util.PTextureCache;
@@ -54,7 +54,7 @@ public record PBakedBone(String name,
 	                                             int packedOverlay,
 	                                             float partialTick)
 	{
-		BoneFrame frame = mixBone(modelData.getModel(), controllers);
+		BoneFrame frame = mixBone(modelData.getModel(), controllers, partialTick);
 		poseStack.pushPose();
 		if (frame != null)
 		{
@@ -110,16 +110,16 @@ public record PBakedBone(String name,
 	
 	public <T extends PAnimatable<T>>@Nullable BoneFrame mixBone(
 			PBakedModel model,
-			Collection<PAnimationController<T>> controllers)
+			Collection<PAnimationController<T>> controllers, float partialTick)
 	{
 		Vector3f translation = new Vector3f(this.basePosition());
-		Quaternionf rotation = new Quaternionf();
+		Quaternionf rotation = new Quaternionf(this.baseRotation());
 		Vector3f scale = new Vector3f(1, 1, 1);
 		
 		boolean hasTransform = false;
 		for (PAnimationController<?> controller : controllers)
 		{
-			BoneFrame frame = controller.calculateBoneTransformations(this.name(), model);
+			BoneFrame frame = controller.calculateBoneTransformations(this.name(), model, partialTick);
 			if (frame == null)
 				continue;
 			translation.add(frame.translation());

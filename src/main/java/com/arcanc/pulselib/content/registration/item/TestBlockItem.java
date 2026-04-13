@@ -10,14 +10,13 @@
 package com.arcanc.pulselib.content.registration.item;
 
 
+import com.arcanc.pulselib.content.animatable.AnimManagerKey;
+import com.arcanc.pulselib.content.animatable.ControllerState;
 import com.arcanc.pulselib.content.animatable.PAnimationManager;
 import com.arcanc.pulselib.content.animatable.PItemAnimatable;
-import com.arcanc.pulselib.content.animatable.instance.PAnimationController;
-import com.arcanc.pulselib.content.animatable.instance.ControllerState;
+import com.arcanc.pulselib.content.animatable.singleton.SingletonAnimationManager;
 import com.arcanc.pulselib.content.model.animation.PRawAnimation;
 import com.arcanc.pulselib.content.registration.item.renderer.TestBlockItemRenderer;
-import com.arcanc.pulselib.content.renderer.modelData.DefaultItemModelData;
-import com.arcanc.pulselib.util.PLibDatabase;
 import com.arcanc.pulselib.util.helpers.PLibHelper;
 import com.arcanc.pulselib.util.helpers.PLibRenderHelper;
 import net.minecraft.world.item.BlockItem;
@@ -38,19 +37,19 @@ public class TestBlockItem extends BlockItem implements PItemAnimatable<TestBloc
 	}
 	
 	@Override
-	public @NotNull PAnimationManager<TestBlockItem> getAnimationManager()
+	public @NotNull PAnimationManager<TestBlockItem> getAnimationManager(AnimManagerKey key)
 	{
-		return this.animationManager;
+		return SingletonAnimationManager.getManager(key, this);
 	}
 	
 	@Override
 	public void registerAnimationControllers(PAnimationManager.@NotNull PAnimationRegistrar<TestBlockItem> registrar)
 	{
-		registrar.add(new PAnimationController<>(state ->
+		registrar.add(() -> state ->
 		{
 			state.controller().play(this.idle);
 			return ControllerState.PLAY;
-		}));
+		});
 	}
 	
 	@Override

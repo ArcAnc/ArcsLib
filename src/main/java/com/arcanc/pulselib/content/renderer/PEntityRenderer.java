@@ -10,8 +10,11 @@
 package com.arcanc.pulselib.content.renderer;
 
 
+import com.arcanc.pulselib.content.animatable.AnimManagerKey;
 import com.arcanc.pulselib.content.animatable.PAnimatable;
-import com.arcanc.pulselib.content.animatable.instance.PAnimationController;
+import com.arcanc.pulselib.content.animatable.PAnimationController;
+import com.arcanc.pulselib.content.animatable.PAnimationManager;
+import com.arcanc.pulselib.content.animatable.instance.InstanceAnimationManager;
 import com.arcanc.pulselib.content.model.animation.BoneFrame;
 import com.arcanc.pulselib.content.model.baked.PBakedBone;
 import com.arcanc.pulselib.content.model.baked.PBakedModel;
@@ -59,7 +62,7 @@ public abstract class PEntityRenderer<T extends Entity & PAnimatable<T>> extends
 	@Override
 	public @Nullable PBakedModel getModel(T animatable)
 	{
-		return this.modelData.getModel();
+		return getModelData(animatable).getModel();
 	}
 	
 	@Override
@@ -72,11 +75,7 @@ public abstract class PEntityRenderer<T extends Entity & PAnimatable<T>> extends
 	public void render(T entity, float entityYaw, float partialTick, PoseStack poseStack, MultiBufferSource bufferSource, int packedLight)
 	{
 		super.render(entity, entityYaw, partialTick, poseStack, bufferSource, packedLight);
-		PBakedModel model = this.getModelData(entity).getModel();
-		if (model == null)
-			return;
-		entity.getAnimationManager().getControllers().
-				forEach(($, controller) -> controller.tick(entity, model, partialTick));
+		
 		int packedOverlay = entity instanceof LivingEntity living ? LivingEntityRenderer.getOverlayCoords(living, 0.0f) : OverlayTexture.NO_OVERLAY;
 		preSubmit(poseStack, entity, this :: getRenderType, bufferSource, packedLight, packedOverlay, partialTick);
 		poseStack.pushPose();
@@ -101,10 +100,15 @@ public abstract class PEntityRenderer<T extends Entity & PAnimatable<T>> extends
 	@Override
 	public void trueSubmit(PoseStack poseStack, T animatable, Function<ResourceLocation, RenderType> renderType, MultiBufferSource bufferSource, int packedLight, int packedOverlay, float partialTick, @Nullable Object... additionalData)
 	{
-		Collection<PAnimationController<T>> controllers = animatable.getAnimationManager().getControllers().values();
 		PBakedModel model = this.getModelData(animatable).getModel();
 		if (model == null)
 			return;
+		
+		PAnimationManager<T> manager = animatable.getAnimationManager(AnimManagerKey.of(animatable));
+		manager.bindModel(model);
+		InstanceAnimationManager.addManager(manager);
+		
+		Collection<PAnimationController<T>> controllers = manager.getControllers().values();
 		HeadRotation headRotation = null;
 		if (animatable instanceof LivingEntity livingEntity)
 			headRotation = applyPositioning(livingEntity, poseStack, partialTick);
@@ -121,7 +125,7 @@ public abstract class PEntityRenderer<T extends Entity & PAnimatable<T>> extends
 	protected void perBoneSubmit(T animatable, PoseStack poseStack, PBakedBone bone, Collection<PAnimationController<T>> controllers, Function<ResourceLocation, RenderType> renderType, int packedColor, int packedLight, int packedOverlay, float partialTick, @Nullable HeadRotation headRotation)
 	{
 		PModelData data = this.getModelData(animatable);
-		BoneFrame frame = bone.mixBone(data.getModel(), controllers);
+		BoneFrame frame = bone.mixBone(data.getModel(), controllers, partialTick);
 		poseStack.pushPose();
 		if (frame != null)
 		{

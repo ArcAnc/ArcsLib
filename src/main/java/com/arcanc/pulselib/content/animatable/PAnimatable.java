@@ -16,7 +16,7 @@ package com.arcanc.pulselib.content.animatable;
  */
 public interface PAnimatable<T extends PAnimatable<T>>
 {
-	PAnimationManager<T> getAnimationManager();
+	PAnimationManager<T> getAnimationManager(AnimManagerKey key);
 	
 	void registerAnimationControllers(PAnimationManager.PAnimationRegistrar<T> registrar);
 }

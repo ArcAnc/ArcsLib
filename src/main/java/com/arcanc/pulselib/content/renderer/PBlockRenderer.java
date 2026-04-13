@@ -10,8 +10,11 @@
 package com.arcanc.pulselib.content.renderer;
 
 
+import com.arcanc.pulselib.content.animatable.AnimManagerKey;
 import com.arcanc.pulselib.content.animatable.PAnimatable;
-import com.arcanc.pulselib.content.animatable.instance.PAnimationController;
+import com.arcanc.pulselib.content.animatable.PAnimationController;
+import com.arcanc.pulselib.content.animatable.PAnimationManager;
+import com.arcanc.pulselib.content.animatable.instance.InstanceAnimationManager;
 import com.arcanc.pulselib.content.model.animation.BoneFrame;
 import com.arcanc.pulselib.content.model.baked.PBakedBone;
 import com.arcanc.pulselib.content.model.baked.PBakedModel;
@@ -56,7 +59,7 @@ public abstract class PBlockRenderer<T extends BlockEntity & PAnimatable<T>>
 	@Override
 	public @Nullable PBakedModel getModel(T animatable)
 	{
-		return this.modelData.getModel();
+		return getModelData(animatable).getModel();
 	}
 	
 	@Override
@@ -68,12 +71,6 @@ public abstract class PBlockRenderer<T extends BlockEntity & PAnimatable<T>>
 	@Override
 	public void render(T animatable, float partialTick, PoseStack poseStack, MultiBufferSource bufferSource, int packedLight, int packedOverlay)
 	{
-		PBakedModel model = this.getModelData(animatable).getModel();
-		if (model == null)
-			return;
-		animatable.getAnimationManager().getControllers().
-				forEach(($, controller) -> controller.tick(animatable, model, partialTick));
-		
 		poseStack.pushPose();
 		poseStack.translate(0.5f, 0, 0.5f);
 		tryRotateToRealRotation(poseStack, getAnimatableFacing(animatable));
@@ -92,10 +89,14 @@ public abstract class PBlockRenderer<T extends BlockEntity & PAnimatable<T>>
 	@Override
 	public void trueSubmit(PoseStack poseStack, T animatable, Function<ResourceLocation, RenderType> renderType, MultiBufferSource bufferSource, int packedLight, int packedOverlay, float partialTick, @Nullable Object... additionalData)
 	{
-		Collection<PAnimationController<T>> controllers = animatable.getAnimationManager().getControllers().values();
 		PBakedModel model = this.getModelData(animatable).getModel();
 		if (model == null)
 			return;
+		PAnimationManager<T> manager = animatable.getAnimationManager(AnimManagerKey.of(animatable));
+		manager.bindModel(model);
+		Collection<PAnimationController<T>> controllers = manager.getControllers().values();
+		InstanceAnimationManager.addManager(manager);
+
 		model.bones().forEach(bone -> perBoneSubmit(animatable, poseStack, bone, controllers, renderType, -1, packedLight, packedOverlay, partialTick));
 	}
 	
@@ -108,7 +109,7 @@ public abstract class PBlockRenderer<T extends BlockEntity & PAnimatable<T>>
 	protected void perBoneSubmit(T animatable, PoseStack poseStack, PBakedBone bone, Collection<PAnimationController<T>> controllers, Function<ResourceLocation, RenderType> renderType, int packedColor, int packedLight, int packedOverlay, float partialTick)
 	{
 		PModelData data = this.getModelData(animatable);
-		BoneFrame frame = bone.mixBone(data.getModel(), controllers);
+		BoneFrame frame = bone.mixBone(data.getModel(), controllers, partialTick);
 		poseStack.pushPose();
 		if (frame != null)
 		{

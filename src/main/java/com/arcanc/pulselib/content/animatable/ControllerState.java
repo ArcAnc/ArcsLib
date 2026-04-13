@@ -7,7 +7,7 @@
  * Details can be found in the license file in the root folder of this project
  */
 
-package com.arcanc.pulselib.content.animatable.instance;
+package com.arcanc.pulselib.content.animatable;
 
 public enum ControllerState
 {

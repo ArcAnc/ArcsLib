@@ -62,8 +62,8 @@ public interface PInterpolationType
 	
 	static double bezier(double value, double strength)
 	{
-		value = Math.max(0.0d, Math.min(1.0d, value));
-		strength = Math.max(0.0d, Math.min(1.0d, strength));
+		value = Math.clamp(value, 0.0d, 1.0d);
+		strength = Math.clamp(strength, 0.0d, 1.0d);
 		
 		double u = 1.0d - value;
 		

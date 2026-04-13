@@ -11,7 +11,9 @@ package com.arcanc.pulselib.content.event;
 
 
 import com.arcanc.pulselib.content.animatable.PItemAnimatable;
-import com.arcanc.pulselib.content.animatable.singleton.AnimationTickHandler;
+import com.arcanc.pulselib.content.animatable.PLibAnimationTicker;
+import com.arcanc.pulselib.content.animatable.instance.InstanceAnimationManager;
+import com.arcanc.pulselib.content.animatable.singleton.SingletonAnimationManager;
 import com.arcanc.pulselib.content.model.textures.atlas.RuntimeLoader;
 import com.arcanc.pulselib.content.renderer.PRenderQueue;
 import com.arcanc.pulselib.content.renderer.PRenderStagesHandler;
@@ -40,7 +42,7 @@ public class ClientEvents
 		modEventBus.addListener(ClientEvents :: registerClientExtensions);
 		NeoForge.EVENT_BUS.addListener(ClientEvents :: playerDisconnected);
 		PRenderTypes.register(modEventBus);
-		AnimationTickHandler.register(modEventBus);
+		PLibAnimationTicker.register(modEventBus);
 		PRenderStagesHandler.register(modEventBus);
 		PTextureCache.register(modEventBus);
 	}
@@ -63,6 +65,8 @@ public class ClientEvents
 		if (!event.getLevel().isClientSide())
 			return;
 		PRenderQueue.cleanup();
+		InstanceAnimationManager.cleanUp();
+		SingletonAnimationManager.cleanUp();
 	}
 	
 	private static void registerSpriteSources(final RegisterSpriteSourceTypesEvent event)
@@ -72,11 +76,11 @@ public class ClientEvents
 	
 	/*private static void registerRenderers(final EntityRenderersEvent.RegisterRenderers event)
 	{
-		//event.registerBlockEntityRenderer(Registration.BETypeReg.TEST_BLOCK_ENTITY.get(), TestBlockEntityRenderer :: new);
-		//event.registerEntityRenderer(Registration.EntityTypeReg.TEST_ENTITY.get(), TestEntityRender :: new);
-	}*/
+		event.registerBlockEntityRenderer(Registration.BETypeReg.TEST_BLOCK_ENTITY.get(), TestBlockEntityRenderer :: new);
+		event.registerEntityRenderer(Registration.EntityTypeReg.TEST_ENTITY.get(), TestEntityRender :: new);
+	}
 	
-	/*private static void registerCustomTextures(final CustomEvents.PLibRegisterTextureEvent event)
+	private static void registerCustomTextures(final CustomEvents.PLibRegisterTextureEvent event)
 	{
 		event.addTextureLocation(TestBlockEntityRenderer.CUBE).
 				addTextureLocation(TestBlockEntityRenderer.TORUS).

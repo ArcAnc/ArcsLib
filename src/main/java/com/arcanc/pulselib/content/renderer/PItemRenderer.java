@@ -10,8 +10,10 @@
 package com.arcanc.pulselib.content.renderer;
 
 
+import com.arcanc.pulselib.content.animatable.AnimManagerKey;
 import com.arcanc.pulselib.content.animatable.PAnimatable;
-import com.arcanc.pulselib.content.animatable.instance.PAnimationController;
+import com.arcanc.pulselib.content.animatable.PAnimationController;
+import com.arcanc.pulselib.content.animatable.PAnimationManager;
 import com.arcanc.pulselib.content.model.animation.BoneFrame;
 import com.arcanc.pulselib.content.model.baked.PBakedBone;
 import com.arcanc.pulselib.content.model.baked.PBakedModel;
@@ -56,7 +58,7 @@ public abstract class PItemRenderer<T extends Item & PAnimatable<T>> extends Blo
 	@Override
 	public @Nullable PBakedModel getModel(T animatable)
 	{
-		return this.modelData.getModel();
+		return getModelData(animatable).getModel();
 	}
 	
 	@Override
@@ -72,13 +74,13 @@ public abstract class PItemRenderer<T extends Item & PAnimatable<T>> extends Blo
 		T animatable = stack.getItem() instanceof PAnimatable ? (T) stack.getItem() : null;
 		if (animatable == null)
 			return;
-		float partialTick = PLibRenderHelper.mc().getTimer().getGameTimeDeltaPartialTick(false);
+		float partialTick = PLibRenderHelper.mc().isPaused() ? 0f : PLibRenderHelper.mc().getTimer().getGameTimeDeltaPartialTick(false);
 		
 		poseStack.pushPose();
 		poseStack.translate(0.5f, 0, 0.5f);
 		poseStack.mulPose(Axis.YP.rotationDegrees(180));
 		preSubmit(poseStack, animatable, this :: getRenderType, buffer, packedLight, packedOverlay, partialTick, displayContext);
-		trueSubmit(poseStack, animatable, this :: getRenderType, buffer, packedLight, packedOverlay, partialTick, displayContext);
+		trueSubmit(poseStack, animatable, this :: getRenderType, buffer, packedLight, packedOverlay, partialTick, displayContext, stack);
 		postSubmit(poseStack, animatable, this :: getRenderType, buffer, packedLight, packedOverlay, partialTick, displayContext);
 		poseStack.popPose();
 	}
@@ -91,10 +93,16 @@ public abstract class PItemRenderer<T extends Item & PAnimatable<T>> extends Blo
 	@Override
 	public void trueSubmit(PoseStack poseStack, T animatable, Function<ResourceLocation, RenderType> renderType, MultiBufferSource bufferSource, int packedLight, int packedOverlay, float partialTick, @Nullable Object... additionalData)
 	{
-		Collection<PAnimationController<T>> controllers = animatable.getAnimationManager().getControllers().values();
 		PBakedModel model = this.getModelData(animatable).getModel();
 		if (model == null)
 			return;
+		
+		ItemStack stack = (ItemStack) additionalData[1];
+		
+		PAnimationManager<T> manager = animatable.getAnimationManager(AnimManagerKey.of(stack));
+		manager.bindModel(model);
+		
+		Collection<PAnimationController<T>> controllers = manager.getControllers().values();
 		ItemDisplayContext context = (ItemDisplayContext)additionalData[0];
 		if (context == ItemDisplayContext.GUI)
 		{
@@ -113,7 +121,7 @@ public abstract class PItemRenderer<T extends Item & PAnimatable<T>> extends Blo
 	protected void perBoneSubmit(T animatable, PoseStack poseStack, PBakedBone bone, Collection<PAnimationController<T>> controllers, Function<ResourceLocation, RenderType> renderType, int packedColor, int packedLight, int packedOverlay, float partialTick, ItemDisplayContext context)
 	{
 		PModelData data = this.getModelData(animatable);
-		BoneFrame frame = bone.mixBone(data.getModel(), controllers);
+		BoneFrame frame = bone.mixBone(data.getModel(), controllers, partialTick);
 		poseStack.pushPose();
 		if (frame != null)
 		{

@@ -3,6 +3,9 @@ plugins {
     id 'maven-publish'
     id 'net.neoforged.moddev' version '2.0.140'
     id 'idea'
+
+    id 'com.modrinth.minotaur' version '2.+'
+    id "net.darkhax.curseforgegradle" version "1.1.28"
 }
 
 tasks.named('wrapper', Wrapper).configure {
@@ -16,6 +19,8 @@ tasks.named('wrapper', Wrapper).configure {
 
 version = mod_version
 group = mod_group_id
+def modrinthToken = project.findProperty("modrinthToken")
+def curseforgeToken = project.findProperty("curseforgeToken")
 
 repositories {
     mavenCentral()
@@ -195,6 +200,47 @@ publishing {
             url "file://${project.projectDir}/repo"
         }
     }
+}
+
+modrinth {
+    token = modrinthToken
+    projectId = "73TaZXLZ"
+    versionNumber = mod_version
+    versionName = "${mod_name}-${minecraft_version}-${mod_version}"
+    uploadFile = tasks.jar.getArchiveFile()
+    additionalFileDsl.sourcesJar(tasks.sourcesJar.getArchiveFile())
+    changelog = project.file("changelog.md").text
+    gameVersions = ["1.21.1"]
+    loaders = ["neoforge"]
+}
+
+tasks.register("publishCurseForge", net.darkhax.curseforgegradle.TaskPublishCurseForge) {
+    apiToken = curseforgeToken
+
+    dependsOn tasks.jar
+    dependsOn tasks.sourcesJar
+
+    disableVersionDetection()
+
+    def mainFile = upload("1484554", tasks.jar.archiveFile)
+    mainFile.changelog = file('changelog.md')
+    mainFile.changelogType = Constants.CHANGELOG_MARKDOWN;
+    mainFile.displayName = "${mod_name}-${minecraft_version}-${mod_version}"
+    mainFile.releaseType = "release"
+    mainFile.addGameVersion("1.21.1")
+    mainFile.addModLoader("NeoForge")
+    mainFile.addEnvironment("Client")
+    mainFile.addEnvironment("Server")
+    mainFile.addJavaVersion("Java 21")
+
+    def sourcesFile = mainFile.withAdditionalFile(sourcesJar)
+    sourcesFile.changelog = file('changelog.md')
+    sourcesFile.displayName = "${mod_name}-${minecraft_version}-${mod_version}-sources"
+}
+
+tasks.register("publishMods") {
+    dependsOn "modrinth"
+    dependsOn "publishCurseForge"
 }
 
 tasks.withType(JavaCompile).configureEach {

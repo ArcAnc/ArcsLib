@@ -10,10 +10,7 @@
 package com.arcanc.pulselib.content.registration.block.block_entity;
 
 
-import com.arcanc.pulselib.content.animatable.PAnimatable;
-import com.arcanc.pulselib.content.animatable.PAnimationManager;
-import com.arcanc.pulselib.content.animatable.instance.ControllerState;
-import com.arcanc.pulselib.content.animatable.instance.PAnimationController;
+import com.arcanc.pulselib.content.animatable.*;
 import com.arcanc.pulselib.content.model.animation.PRawAnimation;
 import com.arcanc.pulselib.util.helpers.PLibHelper;
 import net.minecraft.core.BlockPos;
@@ -46,7 +43,7 @@ public class TestBlockEntity extends BlockEntity implements PAnimatable<TestBloc
 	}
 	
 	@Override
-	public PAnimationManager<TestBlockEntity> getAnimationManager()
+	public PAnimationManager<TestBlockEntity> getAnimationManager(AnimManagerKey key)
 	{
 		return this.animationManager;
 	}
@@ -54,7 +51,7 @@ public class TestBlockEntity extends BlockEntity implements PAnimatable<TestBloc
 	@Override
 	public void registerAnimationControllers(PAnimationManager.@NotNull PAnimationRegistrar<TestBlockEntity> registrar)
 	{
-		registrar.add(new PAnimationController<>(animatableState ->
+		registrar.add(() -> animatableState ->
 		{
 			TestBlockEntity blockEntity = animatableState.animatable();
 			PAnimationController<TestBlockEntity> controller = animatableState.controller();
@@ -68,6 +65,6 @@ public class TestBlockEntity extends BlockEntity implements PAnimatable<TestBloc
 				controller.stop();
 				return ControllerState.STOP;
 			}
-		}));
+		});
 	}
 }

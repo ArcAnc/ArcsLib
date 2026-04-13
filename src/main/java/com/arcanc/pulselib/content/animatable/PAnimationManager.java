@@ -10,12 +10,13 @@
 package com.arcanc.pulselib.content.animatable;
 
 
-import com.arcanc.pulselib.content.animatable.instance.PAnimationController;
+import com.arcanc.pulselib.content.model.baked.PBakedModel;
 import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 
 import java.util.List;
 import java.util.Map;
+import java.util.function.Supplier;
 
 /**
  * Part of this code copied from Geckolib: <a href="https://github.com/bernie-g/geckolib/blob/1.21.1/common/src/main/java/software/bernie/geckolib/animatable/instance/AnimatableInstanceCache.java">AnimatableInstanceCache</a>
@@ -24,8 +25,12 @@ import java.util.Map;
  */
 public class PAnimationManager<T extends PAnimatable<T>>
 {
+	protected static final long THRESHOLD_TIME = 5_000;
+	
 	protected final T animatable;
-	private final Map<String, PAnimationController<T>> controllers = new Object2ObjectArrayMap<>();
+	protected PBakedModel model;
+	protected final Map<String, Supplier<PAnimationController.StateHandler<T>>> factories = new Object2ObjectArrayMap<>();
+	protected final Map<String, PAnimationController<T>> controllers = new Object2ObjectArrayMap<>();
 	
 	public Map<String, PAnimationController<T>> getControllers()
 	{
@@ -45,21 +50,37 @@ public class PAnimationManager<T extends PAnimatable<T>>
 		
 		this.animatable.registerAnimationControllers(registrar);
 		
-		registrar.controllers.forEach(controller -> this.controllers.put(controller.name(), controller));
+		registrar.entries.forEach(entry -> this.factories.put(entry.name(), entry.factory()));
 	}
 	
-	public record PAnimationRegistrar<T extends PAnimatable<T>>(List<PAnimationController<T>> controllers)
+	public void bindModel(PBakedModel model)
 	{
-		public PAnimationRegistrar<T> add(PAnimationController<T> controllers)
+		if (model != this.model)
+			this.model = model;
+	}
+	
+	public void tick()
+	{
+		for (PAnimationController<T> controller : this.controllers.values())
+			controller.tick(this.animatable, 1, this.model);
+	}
+	
+	public record PAnimationRegistrar<T extends PAnimatable<T>>(List<Entry<T>> entries)
+	{
+		public PAnimationRegistrar<T> add(Supplier<PAnimationController.StateHandler<T>> factory)
 		{
-			this.controllers.add(controllers);
+			return add("default", factory);
+		}
+		
+		public PAnimationRegistrar<T> add(String name, Supplier<PAnimationController.StateHandler<T>> factory)
+		{
+			this.entries.add(new Entry<>(name, factory));
 			return this;
 		}
 		
-		public PAnimationRegistrar<T> remove(PAnimationController<T> controller)
+		public record Entry<T extends PAnimatable<T>>(String name, Supplier<PAnimationController.StateHandler<T>> factory)
 		{
-			this.controllers.remove(controller);
-			return this;
+		
 		}
 	}
 }

@@ -10,13 +10,13 @@
 package com.arcanc.pulselib.util.helpers;
 
 
+import com.arcanc.pulselib.content.animatable.AnimManagerKey;
 import com.arcanc.pulselib.content.animatable.PAnimatable;
 import com.arcanc.pulselib.content.animatable.PAnimationManager;
 import com.arcanc.pulselib.content.animatable.instance.InstanceAnimationManager;
-import com.arcanc.pulselib.content.animatable.instance.PAnimationController;
+import com.arcanc.pulselib.content.animatable.PAnimationController;
 import com.arcanc.pulselib.content.animatable.singleton.SingletonAnimationManager;
 import com.arcanc.pulselib.content.model.baked.PBakedModel;
-import com.arcanc.pulselib.content.renderer.PRenderQueue;
 import com.arcanc.pulselib.content.renderer.modelData.PModelData;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.RenderType;
@@ -44,7 +44,8 @@ public class PLibHelper
 	
 	public static <T extends PAnimatable<T>> PAnimationManager<T> createManager(T animatable, boolean singleton)
 	{
-		PAnimationManager<T> manager = animatable.getAnimationManager();
+		AnimManagerKey key = AnimManagerKey.ofObject(animatable);
+		PAnimationManager<T> manager = animatable.getAnimationManager(key);
 		
 		if (manager != null)
 			return manager;

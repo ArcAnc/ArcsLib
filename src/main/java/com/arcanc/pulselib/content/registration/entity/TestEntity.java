@@ -10,14 +10,12 @@
 package com.arcanc.pulselib.content.registration.entity;
 
 
+import com.arcanc.pulselib.content.animatable.AnimManagerKey;
+import com.arcanc.pulselib.content.animatable.ControllerState;
 import com.arcanc.pulselib.content.animatable.PAnimatable;
 import com.arcanc.pulselib.content.animatable.PAnimationManager;
-import com.arcanc.pulselib.content.animatable.instance.PAnimationController;
-import com.arcanc.pulselib.content.animatable.instance.ControllerState;
 import com.arcanc.pulselib.content.model.animation.PRawAnimation;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.syncher.SynchedEntityData;
-import net.minecraft.world.entity.Entity;
+import com.arcanc.pulselib.util.helpers.PLibHelper;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
@@ -30,7 +28,7 @@ public class TestEntity extends Mob implements PAnimatable<TestEntity>
 	private static final PRawAnimation ANIMATION = PRawAnimation.begin().
 			thenPlay("animation").
 			build();
-	private final PAnimationManager<TestEntity> animationManager = new PAnimationManager<>(this);
+	private final PAnimationManager<TestEntity> animationManager = PLibHelper.createManager(this);
 	
 	public TestEntity(EntityType<? extends Mob> type, Level level)
 	{
@@ -43,7 +41,7 @@ public class TestEntity extends Mob implements PAnimatable<TestEntity>
 	}
 	
 	@Override
-	public PAnimationManager<TestEntity> getAnimationManager()
+	public PAnimationManager<TestEntity> getAnimationManager(AnimManagerKey key)
 	{
 		return this.animationManager;
 	}
@@ -51,10 +49,10 @@ public class TestEntity extends Mob implements PAnimatable<TestEntity>
 	@Override
 	public void registerAnimationControllers(PAnimationManager.@NotNull PAnimationRegistrar<TestEntity> registrar)
 	{
-		registrar.add(new PAnimationController<>(state ->
+		registrar.add(() -> state ->
 		{
 			state.controller().play(ANIMATION);
 			return ControllerState.PLAY;
-		}));
+		});
 	}
 }

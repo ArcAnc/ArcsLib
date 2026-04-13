@@ -7,15 +7,14 @@
  * Details can be found in the license file in the root folder of this project
  */
 
-package com.arcanc.pulselib.content.animatable.instance;
+package com.arcanc.pulselib.content.animatable;
 
 
-import com.arcanc.pulselib.content.animatable.PAnimatable;
 import com.arcanc.pulselib.content.model.animation.PAnimation;
-import com.arcanc.pulselib.content.model.animation.PAnimationType;
 import com.arcanc.pulselib.content.model.animation.PRawAnimation;
 import com.arcanc.pulselib.content.model.animation.BoneFrame;
 import com.arcanc.pulselib.content.model.baked.PBakedModel;
+import net.minecraft.util.Mth;
 import org.jetbrains.annotations.Nullable;
 
 /**
@@ -32,6 +31,7 @@ public class PAnimationController<T extends PAnimatable<T>>
 	
 	private int stageIndex;
 	private float time;
+	private float prevTime;
 	private ControllerState state;
 	
 	public PAnimationController(StateHandler<T> stateHandler)
@@ -48,19 +48,13 @@ public class PAnimationController<T extends PAnimatable<T>>
 	
 	public void play(PRawAnimation animation)
 	{
-		if (this.currentAnimation == animation)
-		{
-			PRawAnimation.AnimationStage stage = getCurrentStage();
-			if (stage != null && stage.animationType() == PAnimationType.HOLD_LAST_FRAME)
-				if (this.state == ControllerState.PAUSE)
-					return;
-			if (this.state == ControllerState.PLAY)
-				return;
-		}
-		
 		this.currentAnimation = animation;
-		this.stageIndex = 0;
-		this.time = 0;
+		if (!this.isPlaying())
+		{
+			this.stageIndex = 0;
+			this.prevTime = 0;
+			this.time = 0;
+		}
 		this.state = ControllerState.PLAY;
 	}
 	
@@ -80,6 +74,7 @@ public class PAnimationController<T extends PAnimatable<T>>
 	{
 		this.currentAnimation = null;
 		this.stageIndex = 0;
+		this.prevTime = 0;
 		this.time = 0;
 		this.state = ControllerState.STOP;
 	}
@@ -104,7 +99,7 @@ public class PAnimationController<T extends PAnimatable<T>>
 		return this.state == ControllerState.STOP;
 	}
 	
-	public @Nullable BoneFrame calculateBoneTransformations(String boneName, PBakedModel model)
+	public @Nullable BoneFrame calculateBoneTransformations(String boneName, PBakedModel model, float partialTick)
 	{
 		if (this.state == ControllerState.STOP)
 			return null;
@@ -118,10 +113,10 @@ public class PAnimationController<T extends PAnimatable<T>>
 		if (animation == null)
 			return null;
 		
-		return animation.calculateBoneTransformations(boneName, this.time);
+		return animation.calculateBoneTransformations(boneName, this.getInterpolatedTime(partialTick), stage.interpolationType());
 	}
 	
-	public void tick(T animatable, PBakedModel model, float partialTick)
+	public void tick(T animatable, float tickCount, PBakedModel model)
 	{
 		ControllerState newState = this.stateHandler.handle(new AnimatableState<>(animatable, this));
 		if (newState != this.state)
@@ -146,9 +141,15 @@ public class PAnimationController<T extends PAnimatable<T>>
 		
 		if (stage.isWaiting())
 		{
-			this.time += partialTick;
+			this.prevTime = this.time;
+			this.time += tickCount;
 			if (this.time >= stage.waitTicks())
 				nextStage();
+			return;
+		}
+		if (model == null)
+		{
+			nextStage();
 			return;
 		}
 		
@@ -160,7 +161,8 @@ public class PAnimationController<T extends PAnimatable<T>>
 		}
 		
 		float length = animation.length();
-		this.time += partialTick * stage.speed();
+		this.prevTime = this.time;
+		this.time += tickCount * stage.speed();
 		switch (stage.animationType())
 		{
 			case PLAY_ONCE ->
@@ -187,6 +189,7 @@ public class PAnimationController<T extends PAnimatable<T>>
 	private void nextStage()
 	{
 		this.stageIndex++;
+		this.prevTime = 0;
 		this.time = 0;
 		
 		if (this.currentAnimation == null)
@@ -197,6 +200,13 @@ public class PAnimationController<T extends PAnimatable<T>>
 		
 		if (this.stageIndex >= this.currentAnimation.getStages().size())
 			this.state = ControllerState.STOP;
+	}
+	
+	public float getInterpolatedTime(float partialTick)
+	{
+		if  (this.time < this.prevTime)
+			return Mth.lerp(partialTick, this.prevTime, this.prevTime + this.time);
+		return Mth.lerp(partialTick, this.prevTime, this.time);
 	}
 	
 	public float getTime()
