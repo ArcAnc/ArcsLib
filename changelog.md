@@ -1,4 +1,2 @@
-* First 26.1 release
-* Animations no longer bound to fps, now they bound to world tick
-* Minor internal optimizations and reworks
-* Now animations respect custom easing types
+* AnimationManager now respect HOLD_ON_LAST_FRAME animation type. Again
+* Fixed problem with objects with non zero base rotation angle
