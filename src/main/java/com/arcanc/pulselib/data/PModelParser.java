@@ -212,11 +212,18 @@ public class PModelParser
 						for (int k = 0; k < inputTimes.limit(); k++)
 						{
 							float time = inputTimes.get(k) * 20;
+							
+							float x = bb.getFloat(k * 16);
+							float y = bb.getFloat(k * 16 + 4);
+							float z = bb.getFloat(k * 16 + 8);
+							float w = bb.getFloat(k * 16 + 12);
+							
 							Quaternionf value = new Quaternionf(
-									bb.getFloat(k * 16),
-									bb.getFloat(k * 16 + 4),
-									bb.getFloat(k * 16 + 8),
-									bb.getFloat(k * 16 + 12));
+								x,
+								y,
+								z,
+								w);
+								
 							keyframes.add(new PKeyFrameChannel.RotationKeyFrame(time, value));
 						}
 					}
@@ -248,11 +255,60 @@ public class PModelParser
 				};
 				
 				PBoneAnimation boneAnimation = boneAnimations.computeIfAbsent(bone.name(), k -> new PBoneAnimation(boneUuid, new HashMap<>()));
+				if (pChannel == PAnimationChannel.ROTATION)
+					if (trackContainsBaseRotation(keyframes, bone.baseRotation()))
+						cleanBaseRot(keyframes, bone.baseRotation());
 				boneAnimation.channels().put(pChannel, keyframes);
 			}
 			animations.put(animationName, new PAnimation(animationName, maxTime * 20, boneAnimations));
 		}
 		
 		return animations;
+	}
+	
+	static void cleanBaseRot(List<PKeyFrameChannel<?>> frames, Quaternionf baseRotation)
+	{
+		if (frames.isEmpty())
+			return;
+		
+		Quaternionf baseRotInv = new Quaternionf(baseRotation).invert();
+		
+		for (PKeyFrameChannel<?> frame : frames)
+		{
+			Quaternionf q = (Quaternionf) frame.value();
+			Quaternionf clean = q.mul(baseRotInv, new Quaternionf());
+			q.set(clean);
+		}
+	}
+	
+	static boolean trackContainsBaseRotation(
+			List<PKeyFrameChannel<?>> frames,
+			Quaternionf baseRot)
+	{
+		if (frames.isEmpty())
+			return false;
+		
+		int nearBase = 0;
+		int nearIdentity = 0;
+		
+		Quaternionf identity = new Quaternionf();
+		
+		for (PKeyFrameChannel<?> frame : frames)
+		{
+			Quaternionf q = (Quaternionf) frame.value();
+			if (nearlyEqual(q, baseRot, 0.001f))
+				nearBase++;
+			
+			if (nearlyEqual(q, identity, 0.001f))
+				nearIdentity++;
+		}
+		
+		return nearBase > nearIdentity;
+	}
+	
+	static boolean nearlyEqual(Quaternionf a, Quaternionf b, float eps)
+	{
+		float dot = Math.abs(a.dot(b));
+		return 1.0f - dot < eps;
 	}
 }

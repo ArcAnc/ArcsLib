@@ -96,7 +96,7 @@ public abstract class PBlockRenderer<T extends BlockEntity & PAnimatable<T>>
 		manager.bindModel(model);
 		Collection<PAnimationController<T>> controllers = manager.getControllers().values();
 		InstanceAnimationManager.addManager(manager);
-
+		
 		model.bones().forEach(bone -> perBoneSubmit(animatable, poseStack, bone, controllers, renderType, -1, packedLight, packedOverlay, partialTick));
 	}
 	
