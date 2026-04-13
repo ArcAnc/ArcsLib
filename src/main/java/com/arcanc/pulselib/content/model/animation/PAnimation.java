@@ -19,20 +19,20 @@ import java.util.Map;
 
 public record PAnimation(String name, float length, Map<String, PBoneAnimation> boneAnimations)
 {
-	public @Nullable BoneFrame calculateBoneTransformations(String boneName, float time)
+	public @Nullable BoneFrame calculateBoneTransformations(String boneName, float time, PInterpolationType interpolationType)
 	{
 		PBoneAnimation boneAnimation = this.boneAnimations.get(boneName);
 		if (boneAnimation == null)
 			return null;
 		
 		Vector3f translation =
-				sampleVectorChannel(boneAnimation, PAnimationChannel.POSITION, time);
+				sampleVectorChannel(boneAnimation, PAnimationChannel.POSITION, time, interpolationType);
 		
 		Vector3f scale =
-				sampleVectorChannel(boneAnimation, PAnimationChannel.SCALE, time);
+				sampleVectorChannel(boneAnimation, PAnimationChannel.SCALE, time, interpolationType);
 		
 		Quaternionf rotation =
-				sampleRotationChannel(boneAnimation, time);
+				sampleRotationChannel(boneAnimation, time, interpolationType);
 		
 		if (translation == null && rotation == null && scale == null)
 			return null;
@@ -50,7 +50,7 @@ public record PAnimation(String name, float length, Map<String, PBoneAnimation> 
 	}
 	
 	@SuppressWarnings("unchecked")
-	private @Nullable Vector3f sampleVectorChannel(PBoneAnimation boneAnimation, PAnimationChannel channel, float time)
+	private @Nullable Vector3f sampleVectorChannel(PBoneAnimation boneAnimation, PAnimationChannel channel, float time, PInterpolationType interpolationType)
 	{
 		if (channel == PAnimationChannel.ROTATION)
 			return null;
@@ -84,13 +84,13 @@ public record PAnimation(String name, float length, Map<String, PBoneAnimation> 
 		if (next == null)
 			return new Vector3f(previous.value());
 		
-		float alpha = (time - previous.time()) / (next.time() - previous.time());
+		float alpha = transformAlpha(previous, next, time, interpolationType);
 		
 		return new Vector3f(previous.value()).lerp(next.value(), alpha);
 	}
 	
 	@SuppressWarnings("unchecked")
-	private @Nullable Quaternionf sampleRotationChannel(PBoneAnimation boneAnimation, float time)
+	private @Nullable Quaternionf sampleRotationChannel(PBoneAnimation boneAnimation, float time, PInterpolationType interpolationType)
 	{
 		List<PKeyFrameChannel<Quaternionf>> keyframes =
 				(List<PKeyFrameChannel<Quaternionf>>) boneAnimation.channels().get(PAnimationChannel.ROTATION);
@@ -122,13 +122,26 @@ public record PAnimation(String name, float length, Map<String, PBoneAnimation> 
 		if (next == null)
 			return previous.value();
 		
-		float alpha =
-				(time - previous.time()) /
-						(next.time() - previous.time());
+		float alpha = transformAlpha(previous, next, time, interpolationType);
 		
 		Quaternionf q1 = new Quaternionf(previous.value());
 		Quaternionf q2 = new Quaternionf(next.value());
 		
 		return q1.slerp(q2, alpha);
+	}
+
+	private static <T> float transformAlpha(PKeyFrameChannel<T> previous,
+	                                        PKeyFrameChannel<T> next,
+	                                        float time,
+	                                        PInterpolationType interpolationType)
+	{
+		float duration = next.time() - previous.time();
+		if (duration <= 0.0f)
+			return 0.0f;
+		
+		float rawAlpha = (time - previous.time()) / duration;
+		rawAlpha = Math.clamp(rawAlpha, 0.0f, 1.0f);
+		
+		return (float) interpolationType.buildTransformer(rawAlpha);
 	}
 }

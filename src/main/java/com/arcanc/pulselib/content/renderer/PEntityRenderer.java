@@ -38,14 +38,15 @@ import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
-import net.minecraft.util.context.ContextKey;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Pose;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.component.ResolvableProfile;
 import net.minecraft.world.level.block.AbstractSkullBlock;
+import net.minecraft.world.level.block.SkullBlock;
 import org.joml.Matrix4f;
 import org.jspecify.annotations.Nullable;
 
@@ -57,11 +58,6 @@ public abstract class PEntityRenderer<T extends Entity & PAnimatable<T>, RS exte
 {
 	private final PModelData modelData;
 	private final Function<Identifier, RenderType> renderType;
-	
-	protected static final Identifier HEAD_Y = PLibDatabase.rl("head_y");
-	protected static final Identifier HEAD_X = PLibDatabase.rl("head_x");
-	protected static final ContextKey<Float> HEAD_Y_KEY = new ContextKey<>(HEAD_Y);
-	protected static final ContextKey<Float> HEAD_X_KEY = new ContextKey<>(HEAD_X);
 	
 	public PEntityRenderer(EntityRendererProvider.Context context, PModelData modelData, Function<Identifier, RenderType> renderType)
 	{
@@ -93,8 +89,8 @@ public abstract class PEntityRenderer<T extends Entity & PAnimatable<T>, RS exte
 	{
 		super.extractRenderState(entity, renderState, partialTick);
 		renderState.extractEntityData(entity, this);
-		if (entity instanceof LivingEntity living && renderState instanceof LivingEntityRenderState renderStateLiving)
-			extractLivingRenderData(living, renderStateLiving, partialTick);
+		if (renderState.getAnimatable() instanceof LivingEntity living && renderState instanceof PEntityRenderState.LivingImpl<?> livingEntityRenderState)
+			extractLivingRenderData(living, livingEntityRenderState, partialTick);
 	}
 	
 	@Override
@@ -129,14 +125,13 @@ public abstract class PEntityRenderer<T extends Entity & PAnimatable<T>, RS exte
 		
 		Collection<PAnimationController<T>> controllers = manager.getControllers().values();
 		int packedOverlay;
-		if (renderState instanceof LivingEntityRenderState renderStateLiving)
+		
+		if (renderState instanceof LivingEntityRenderState livingEntityRenderState)
 		{
-			packedOverlay = LivingEntityRenderer.getOverlayCoords(renderStateLiving, 0.0f);
-			float scale = renderStateLiving.scale;
+			packedOverlay = LivingEntityRenderer.getOverlayCoords(livingEntityRenderState, 0.0f);
+			float scale = livingEntityRenderState.scale;
 			poseStack.scale(scale, scale, scale);
-			setupRotations(renderStateLiving, poseStack, renderStateLiving.bodyRot, renderStateLiving.scale);
-			poseStack.scale(-1.0F, -1.0F, 1.0F);
-			poseStack.translate(0.0F, -1.501F, 0.0F);
+			setupRotations(livingEntityRenderState, poseStack, livingEntityRenderState.bodyRot, scale);
 		}
 		else
 		{
@@ -170,10 +165,10 @@ public abstract class PEntityRenderer<T extends Entity & PAnimatable<T>, RS exte
 			poseStack.translate(bone.basePosition().x(), bone.basePosition().y(), bone.basePosition().z());
 			poseStack.mulPose(bone.baseRotation());
 		}
-		if (bone.name().equals("head") && renderState instanceof LivingEntityRenderState renderStateLiving)
+		if (bone.name().equals("head") && renderState instanceof PEntityRenderState.LivingImpl<?> livingEntityRenderState)
 		{
-			poseStack.mulPose(Axis.YN.rotationDegrees(renderStateLiving.getRenderData(HEAD_Y_KEY)));
-			poseStack.mulPose(Axis.XN.rotationDegrees(renderStateLiving.getRenderData(HEAD_X_KEY)));
+			poseStack.mulPose(Axis.YN.rotationDegrees(livingEntityRenderState.getHeadYRot()));
+			poseStack.mulPose(Axis.XN.rotationDegrees(livingEntityRenderState.getHeadXRot()));
 		}
 		this.submitBone(renderState, bone, poseStack, data, controllers, renderType, packedColor, packedLight, packedOverlay, partialTick);
 		
@@ -207,39 +202,40 @@ public abstract class PEntityRenderer<T extends Entity & PAnimatable<T>, RS exte
 		});
 	}
 	
-	protected void setupRotations(LivingEntityRenderState rs, PoseStack poseStack, float yBodyRot, float scale)
+	protected void setupRotations(LivingEntityRenderState renderState, PoseStack poseStack, float yBodyRot, float scale)
 	{
-		if (rs.isFullyFrozen)
-			yBodyRot += (float)(Math.cos(Mth.floor(rs.ageInTicks) * 3.25F) * Math.PI * 0.4F);
+		if (renderState.isFullyFrozen)
+			yBodyRot += (float)(Math.cos(Mth.floor(renderState.ageInTicks) * 3.25F) * Math.PI * 0.4F);
 		
-		if (!rs.hasPose(Pose.SLEEPING))
+		if (!renderState.hasPose(Pose.SLEEPING))
 			poseStack.mulPose(Axis.YN.rotationDegrees(yBodyRot));
 		
-		if (rs.deathTime > 0)
+		float deathTime = renderState.deathTime;
+		if (deathTime > 0)
 		{
-			float f = (rs.deathTime - 1.0F) / 20.0F * 1.6F;
+			float f = (deathTime - 1.0F) / 20.0F * 1.6F;
 			f = Mth.sqrt(f);
 			if (f > 1.0F)
 				f = 1.0F;
 			
 			poseStack.mulPose(Axis.ZP.rotationDegrees(f * 90));
 		}
-		else if (rs.isAutoSpinAttack)
+		else if (renderState.isAutoSpinAttack)
 		{
-			poseStack.mulPose(Axis.XP.rotationDegrees(-90.0F - rs.xRot));
-			poseStack.mulPose(Axis.YP.rotationDegrees(rs.ageInTicks * -75.0F));
+			poseStack.mulPose(Axis.XP.rotationDegrees(-90.0F - renderState.xRot));
+			poseStack.mulPose(Axis.YP.rotationDegrees(renderState.ageInTicks * -75.0F));
 		}
-		else if (rs.hasPose(Pose.SLEEPING))
+		else if (renderState.hasPose(Pose.SLEEPING))
 		{
-			Direction direction = rs.bedOrientation;
+			Direction direction = renderState.bedOrientation;
 			float f1 = direction != null ? sleepDirectionToRotation(direction) : yBodyRot;
 			poseStack.mulPose(Axis.YP.rotationDegrees(f1));
 			poseStack.mulPose(Axis.ZP.rotationDegrees(90));
 			poseStack.mulPose(Axis.YP.rotationDegrees(270.0F));
 		}
-		else if (rs.isUpsideDown)
+		else if (renderState.isUpsideDown)
 		{
-			poseStack.translate(0.0F, (rs.boundingBoxHeight + 0.1F) / scale, 0.0F);
+			poseStack.translate(0.0F, (renderState.boundingBoxHeight + 0.1F) / scale, 0.0F);
 			poseStack.mulPose(Axis.ZP.rotationDegrees(180.0F));
 		}
 	}
@@ -255,41 +251,48 @@ public abstract class PEntityRenderer<T extends Entity & PAnimatable<T>, RS exte
 		};
 	}
 	
-	protected void extractLivingRenderData(LivingEntity entity, LivingEntityRenderState state, float partialTick)
+	protected void extractLivingRenderData(LivingEntity entity, PEntityRenderState.LivingImpl<?> state, float partialTick)
 	{
 		// Vanilla md copy/paste
-		float headRot = Mth.rotLerp(partialTick, entity.yHeadRotO, entity.yHeadRot);
-		state.setRenderData(HEAD_Y_KEY, headRot);
-		float headX = Mth.lerp(partialTick, entity.xRotO, entity.getXRot());
-		state.setRenderData(HEAD_X_KEY, headX);
-		state.bodyRot = solveBodyRot(entity, headRot, partialTick);
-		state.yRot = Mth.wrapDegrees(headRot - state.bodyRot);
+		float headYRot = Mth.rotLerp(partialTick, entity.yHeadRotO, entity.yHeadRot);
+		float headXRot = Mth.lerp(partialTick, entity.xRotO, entity.getXRot());
+		state.bodyRot = solveBodyRot(entity, headYRot, partialTick);
+		state.yRot = Mth.wrapDegrees(headYRot - state.bodyRot);
+		state.extractHeadData(state.yRot, headXRot);
 		state.xRot = entity.getXRot(partialTick);
 		state.isUpsideDown = this.isEntityUpsideDown(entity);
+		
 		if (state.isUpsideDown)
 		{
-			state.xRot *= -1.0F;
-			state.yRot *= -1.0F;
+			state.yRot *= -1f;
+			state.xRot *= -1f;
 		}
+		
+		float walkAnimationPos = 0.0f;
+		float walkAnimationSpeed = 0.0f;
 		
 		if (!entity.isPassenger() && entity.isAlive())
 		{
-			state.walkAnimationPos = entity.walkAnimation.position(partialTick);
-			state.walkAnimationSpeed = entity.walkAnimation.speed(partialTick);
-		} else {
-			state.walkAnimationPos = 0.0F;
-			state.walkAnimationSpeed = 0.0F;
+			walkAnimationPos = entity.walkAnimation.position(partialTick);
+			walkAnimationSpeed = entity.walkAnimation.speed(partialTick);
 		}
 		
+		state.walkAnimationPos = walkAnimationPos;
+		state.walkAnimationSpeed = walkAnimationSpeed;
+		
+		float wornHeadAnimationPos = walkAnimationPos;
+		
 		if (entity.getVehicle() instanceof LivingEntity vehicle)
-			state.wornHeadAnimationPos = vehicle.walkAnimation.position(partialTick);
-		else
-			state.wornHeadAnimationPos = state.walkAnimationPos;
+			wornHeadAnimationPos = vehicle.walkAnimation.position(partialTick);
+		
+		state.wornHeadAnimationPos = wornHeadAnimationPos;
 		
 		state.scale = entity.getScale();
 		state.ageScale = entity.getAgeScale();
 		state.pose = entity.getPose();
+		
 		state.bedOrientation = entity.getBedOrientation();
+		
 		if (state.bedOrientation != null)
 			state.eyeHeight = entity.getEyeHeight(Pose.STANDING);
 		
@@ -300,16 +303,18 @@ public abstract class PEntityRenderer<T extends Entity & PAnimatable<T>, RS exte
 		state.ticksSinceKineticHitFeedback = entity.getTicksSinceLastKineticHitFeedback(partialTick);
 		state.hasRedOverlay = entity.hurtTime > 0 || entity.deathTime > 0;
 		ItemStack headItem = entity.getItemBySlot(EquipmentSlot.HEAD);
+		
+		SkullBlock.Type wornHeadType = null;
+		ResolvableProfile wornHeadProfile = null;
+		
 		if (headItem.getItem() instanceof BlockItem blockItem && blockItem.getBlock() instanceof AbstractSkullBlock skullBlock)
 		{
-			state.wornHeadType = skullBlock.getType();
-			state.wornHeadProfile = headItem.get(DataComponents.PROFILE);
+			wornHeadType = skullBlock.getType();
+			wornHeadProfile = headItem.get(DataComponents.PROFILE);
 			state.headItem.clear();
 		}
 		else
 		{
-			state.wornHeadType = null;
-			state.wornHeadProfile = null;
 			// TODO: add hat rendering
 			/*if (!HumanoidArmorLayer.shouldRender(headItem, EquipmentSlot.HEAD))
 				this.itemModelResolver.updateForLiving(state.headItem, headItem, ItemDisplayContext.HEAD, entity);
@@ -317,7 +322,10 @@ public abstract class PEntityRenderer<T extends Entity & PAnimatable<T>, RS exte
 			state.headItem.clear();
 		}
 		
-		state.deathTime = entity.deathTime > 0 ? entity.deathTime + partialTick : 0.0F;
+		state.wornHeadType = wornHeadType;
+		state.wornHeadProfile = wornHeadProfile;
+		
+		state.deathTime = entity.deathTime > 0 ? entity.deathTime + partialTick : 0.0f;
 		Minecraft minecraft = Minecraft.getInstance();
 		state.isInvisibleToPlayer = state.isInvisible && entity.isInvisibleTo(minecraft.player);
 	}

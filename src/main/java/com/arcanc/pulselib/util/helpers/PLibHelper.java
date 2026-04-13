@@ -15,8 +15,12 @@ import com.arcanc.pulselib.content.animatable.PAnimatable;
 import com.arcanc.pulselib.content.animatable.PAnimationManager;
 import com.arcanc.pulselib.content.animatable.instance.InstanceAnimationManager;
 import com.arcanc.pulselib.content.animatable.singleton.SingletonAnimationManager;
+import com.arcanc.pulselib.content.renderer.base.PEntityRenderState;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.block.entity.BlockEntity;
+
+import java.util.function.Supplier;
 
 public class PLibHelper
 {
@@ -36,5 +40,25 @@ public class PLibHelper
 			return manager;
 		
 		return singleton ? SingletonAnimationManager.getManager(key, animatable) : new InstanceAnimationManager<>(animatable);
+	}
+	
+	public static <T extends LivingEntity & PAnimatable<T>, RS extends PEntityRenderState<T>> RS livingRenderState(Supplier<RS> factory)
+	{
+		return factory.get();
+	}
+
+	public static <T extends LivingEntity & PAnimatable<T>> PEntityRenderState.LivingImpl<T> livingRenderState()
+	{
+		return livingRenderState(PEntityRenderState.LivingImpl::new);
+	}
+	
+	public static <T extends Entity & PAnimatable<T>, RS extends PEntityRenderState<T>> RS entityRenderState(Supplier<RS> factory)
+	{
+		return factory.get();
+	}
+
+	public static <T extends Entity & PAnimatable<T>> PEntityRenderState.Impl<T> entityRenderState()
+	{
+		return entityRenderState(PEntityRenderState.Impl::new);
 	}
 }

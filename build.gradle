@@ -1,8 +1,13 @@
+import net.darkhax.curseforgegradle.Constants;
+
 plugins {
     id 'java-library'
     id 'maven-publish'
     id 'net.neoforged.moddev' version '2.0.141'
     id 'idea'
+
+    id 'com.modrinth.minotaur' version '2.+'
+    id "net.darkhax.curseforgegradle" version "1.2.30"
 }
 
 tasks.named('wrapper', Wrapper).configure {
@@ -16,6 +21,8 @@ tasks.named('wrapper', Wrapper).configure {
 
 version = mod_version
 group = mod_group_id
+def modrinthToken = project.findProperty("modrinthToken")
+def curseforgeToken = project.findProperty("curseforgeToken")
 
 repositories {
     mavenCentral()
@@ -25,7 +32,10 @@ base {
     archivesName = "${mod_id}-${minecraft_version}"
 }
 
-java.toolchain.languageVersion = JavaLanguageVersion.of(25)
+java {
+    toolchain.languageVersion = JavaLanguageVersion.of(25)
+    withSourcesJar()
+}
 
 neoForge {
     // Specify the version of NeoForge to use.
@@ -187,6 +197,48 @@ publishing {
             url "file://${project.projectDir}/repo"
         }
     }
+}
+
+modrinth {
+    token = modrinthToken
+    projectId = "73TaZXLZ"
+    versionNumber = mod_version
+    versionName = "${mod_name} ${mod_version}"
+    uploadFile = tasks.jar.getArchiveFile()
+    additionalFiles = [ tasks.sourcesJar.getArchiveFile() ]
+    changelog = project.file("changelog.md").text
+    gameVersions = ["26.1", "26.1.1", "26.1.2"]
+    loaders = ["neoforge"]
+}
+
+tasks.register("publishCurseForge", net.darkhax.curseforgegradle.TaskPublishCurseForge) {
+    apiToken = curseforgeToken
+
+    dependsOn tasks.jar
+    dependsOn tasks.sourcesJar
+
+    disableVersionDetection()
+
+    def mainFile = upload("1484554", tasks.jar.archiveFile)
+    mainFile.changelog = file('changelog.md')
+    mainFile.changelogType = Constants.CHANGELOG_MARKDOWN;
+    mainFile.displayName = "${mod_name} ${mod_version}"
+    mainFile.releaseType = "release"
+    mainFile.addGameVersion("26.1")
+    mainFile.addGameVersion("26.1.1")
+    mainFile.addGameVersion("26.1.2")
+    mainFile.addModLoader("NeoForge")
+    mainFile.addEnvironment("Client")
+    mainFile.addEnvironment("Server")
+    mainFile.addJavaVersion("Java 25")
+
+    def sourcesFile = mainFile.withAdditionalFile(sourcesJar)
+    sourcesFile.changelog = file('changelog.md')
+}
+
+tasks.register("publishMods") {
+    dependsOn "modrinth"
+    dependsOn "publishCurseForge"
 }
 
 tasks.withType(JavaCompile).configureEach {

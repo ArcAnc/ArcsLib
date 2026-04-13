@@ -177,7 +177,7 @@ public class PBakedBone
 			float partialTick)
 	{
 		Vector3f translation = new Vector3f(this.basePosition());
-		Quaternionf rotation = new Quaternionf();
+		Quaternionf rotation = new Quaternionf(this.baseRotation());
 		Vector3f scale = new Vector3f(1, 1, 1);
 		
 		boolean hasTransform = false;

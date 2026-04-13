@@ -53,7 +53,7 @@ public class TestBlockEntity extends BlockEntity implements PAnimatable<TestBloc
 	@Override
 	public void registerAnimationControllers(PAnimationManager.@NonNull PAnimationRegistrar<TestBlockEntity> registrar)
 	{
-		registrar.add(() -> new PAnimationController<>(animatableState ->
+		registrar.add(() -> animatableState ->
 		{
 			TestBlockEntity blockEntity = animatableState.animatable();
 			PAnimationController<TestBlockEntity> controller = animatableState.controller();
@@ -67,6 +67,6 @@ public class TestBlockEntity extends BlockEntity implements PAnimatable<TestBloc
 				controller.stop();
 				return ControllerState.STOP;
 			}
-		}));
+		});
 	}
 }

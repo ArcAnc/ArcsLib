@@ -10,14 +10,15 @@
 package com.arcanc.pulselib.content.registration.item;
 
 
-import com.arcanc.pulselib.content.animatable.*;
+import com.arcanc.pulselib.content.animatable.AnimManagerKey;
+import com.arcanc.pulselib.content.animatable.ControllerState;
+import com.arcanc.pulselib.content.animatable.PAnimatable;
+import com.arcanc.pulselib.content.animatable.PAnimationManager;
 import com.arcanc.pulselib.content.animatable.singleton.SingletonAnimationManager;
 import com.arcanc.pulselib.content.model.animation.PRawAnimation;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.level.block.Block;
 import org.jspecify.annotations.NonNull;
-
-import java.util.UUID;
 
 public class TestBlockItem extends BlockItem implements PAnimatable<TestBlockItem>
 {
@@ -39,10 +40,10 @@ public class TestBlockItem extends BlockItem implements PAnimatable<TestBlockIte
 	@Override
 	public void registerAnimationControllers(PAnimationManager.@NonNull PAnimationRegistrar<TestBlockItem> registrar)
 	{
-		registrar.add(() -> new PAnimationController<>(state ->
+		registrar.add(() -> state ->
 		{
 			state.controller().play(this.idle);
 			return ControllerState.PLAY;
-		}));
+		});
 	}
 }

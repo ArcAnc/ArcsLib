@@ -108,7 +108,7 @@ public class PAnimationController<T extends PAnimatable<T>>
 		if (animation == null)
 			return null;
 		
-		return animation.calculateBoneTransformations(boneName, this.getInterpolatedTime(partialTick));
+		return animation.calculateBoneTransformations(boneName, this.getInterpolatedTime(partialTick), stage.interpolationType());
 	}
 	
 	public void tick(T animatable, float tickCount, PBakedModel model)

@@ -14,10 +14,6 @@ import com.arcanc.pulselib.content.animatable.PLibAnimationTicker;
 import com.arcanc.pulselib.content.animatable.instance.InstanceAnimationManager;
 import com.arcanc.pulselib.content.animatable.singleton.SingletonAnimationManager;
 import com.arcanc.pulselib.content.model.textures.atlas.RuntimeLoader;
-import com.arcanc.pulselib.content.registration.Registration;
-import com.arcanc.pulselib.content.registration.block.block_entity.ber.TestBlockEntityRenderer;
-import com.arcanc.pulselib.content.registration.entity.renderer.TestEntityRender;
-import com.arcanc.pulselib.content.registration.item.renderer.TestBlockItemRenderer;
 import com.arcanc.pulselib.content.renderer.PRenderQueue;
 import com.arcanc.pulselib.content.renderer.PRenderStagesHandler;
 import com.arcanc.pulselib.util.PLibDatabase;
@@ -27,8 +23,6 @@ import com.arcanc.pulselib.util.PTextureCache;
 import net.neoforged.bus.api.EventPriority;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.client.event.AddClientReloadListenersEvent;
-import net.neoforged.neoforge.client.event.EntityRenderersEvent;
-import net.neoforged.neoforge.client.event.RegisterSpecialModelRendererEvent;
 import net.neoforged.neoforge.client.event.RegisterSpriteSourcesEvent;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.level.LevelEvent;
@@ -37,22 +31,17 @@ public class ClientEvents
 {
 	public static void registerClientEvents(final IEventBus modEventBus)
 	{
-		modEventBus.addListener(ClientEvents :: registerRenderers);
-		modEventBus.addListener(ClientEvents :: registerCustomTextures);
+		//modEventBus.addListener(ClientEvents :: registerRenderers);
+		//modEventBus.addListener(ClientEvents :: registerCustomTextures);
+		//modEventBus.addListener(ClientEvents :: registerClientExtensions);
 		
 		modEventBus.addListener(EventPriority.HIGHEST, ClientEvents :: registerSpriteSources);
 		modEventBus.addListener(ClientEvents :: registerReloadListeners);
-		modEventBus.addListener(ClientEvents :: registerClientExtensions);
 		NeoForge.EVENT_BUS.addListener(ClientEvents :: playerDisconnected);
 		PRenderTypes.register(modEventBus);
 		PLibAnimationTicker.register(modEventBus);
 		PRenderStagesHandler.register(modEventBus);
 		PTextureCache.register(modEventBus);
-	}
-	
-	private static void registerClientExtensions(final RegisterSpecialModelRendererEvent event)
-	{
-		event.register(PLibDatabase.rl("test_block"), TestBlockItemRenderer.Unbaked.MAP_CODEC);
 	}
 	
 	private static void registerReloadListeners(final AddClientReloadListenersEvent event)
@@ -74,6 +63,11 @@ public class ClientEvents
 		event.register(PLibDatabase.rl("runtime_loader"), RuntimeLoader.CODEC);
 	}
 	
+	/*private static void registerClientExtensions(final RegisterSpecialModelRendererEvent event)
+	{
+		event.register(PLibDatabase.rl("test_block"), TestBlockItemRenderer.Unbaked.MAP_CODEC);
+	}
+	
 	private static void registerRenderers(final EntityRenderersEvent.RegisterRenderers event)
 	{
 		event.registerBlockEntityRenderer(Registration.BETypeReg.TEST_BLOCK_ENTITY.get(), TestBlockEntityRenderer :: new);
@@ -91,5 +85,5 @@ public class ClientEvents
 				addTextureLocation(TestEntityRender.TORUS);
 		event.addTextureLocation(TestBlockItemRenderer.PYRAMID).
 				addTextureLocation(TestBlockItemRenderer.CIRCLE);
-	}
+	}*/
 }

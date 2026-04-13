@@ -14,8 +14,6 @@ import com.arcanc.pulselib.content.registration.block.block_entity.TestBlockEnti
 import com.arcanc.pulselib.content.registration.entity.TestEntity;
 import com.arcanc.pulselib.content.registration.item.TestBlockItem;
 import com.arcanc.pulselib.util.PLibDatabase;
-import com.arcanc.pulselib.util.helpers.PLibCodecs;
-import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
@@ -30,8 +28,6 @@ import net.neoforged.neoforge.registries.DeferredHolder;
 import net.neoforged.neoforge.registries.DeferredItem;
 import net.neoforged.neoforge.registries.DeferredRegister;
 import org.jetbrains.annotations.NotNull;
-
-import java.util.UUID;
 
 public class Registration
 {
@@ -99,9 +95,9 @@ public class Registration
 	
 	public static void init(@NotNull final IEventBus bus)
 	{
-		EntityTypeReg.init(bus);
+		/*EntityTypeReg.init(bus);
 		BlockReg.init(bus);
 		BETypeReg.init(bus);
-		ItemReg.init(bus);
+		ItemReg.init(bus);*/
 	}
 }

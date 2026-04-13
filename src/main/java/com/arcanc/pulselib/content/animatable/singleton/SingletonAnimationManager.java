@@ -12,6 +12,7 @@ package com.arcanc.pulselib.content.animatable.singleton;
 
 import com.arcanc.pulselib.content.animatable.AnimManagerKey;
 import com.arcanc.pulselib.content.animatable.PAnimatable;
+import com.arcanc.pulselib.content.animatable.PAnimationController;
 import com.arcanc.pulselib.content.animatable.PAnimationManager;
 import com.arcanc.pulselib.util.PLibDatabase;
 import com.arcanc.pulselib.util.helpers.PLibRenderHelper;
@@ -47,7 +48,7 @@ public class SingletonAnimationManager<T extends PAnimatable<T>> extends PAnimat
 			if (container == null)
 			{
 				SingletonAnimationManager<T> man = new SingletonAnimationManager<>(animatable);
-				man.factories.forEach((name, supplier) -> man.controllers.put(name, supplier.get()));
+				man.factories.forEach((name, supplier) -> man.controllers.put(name, new PAnimationController<>(name, supplier.get())));
 				return new AnimationManagerContainer<>(Util.getEpochMillis(), man);
 			}
 			container.lastUsedTick = Util.getEpochMillis();

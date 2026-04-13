@@ -29,7 +29,7 @@ public class PAnimationManager<T extends PAnimatable<T>>
 	protected static final long THRESHOLD_TIME = 5_000;
 	
 	protected final T animatable;
-	protected final Map<String, Supplier<PAnimationController<T>>> factories = new Object2ObjectArrayMap<>();
+	protected final Map<String, Supplier<PAnimationController.StateHandler<T>>> factories = new Object2ObjectArrayMap<>();
 	protected final Map<String, PAnimationController<T>> controllers = new Object2ObjectArrayMap<>();
 	
 	public final Map<String, PAnimationController<T>> getControllers()
@@ -64,18 +64,18 @@ public class PAnimationManager<T extends PAnimatable<T>>
 
 	public record PAnimationRegistrar<T extends PAnimatable<T>>(List<Entry<T>> entries)
 	{
-		public PAnimationRegistrar<T> add(Supplier<PAnimationController<T>> factory)
+		public PAnimationRegistrar<T> add(Supplier<PAnimationController.StateHandler<T>> factory)
 		{
 			return add("default", factory);
 		}
 		
-		public PAnimationRegistrar<T> add(String name, Supplier<PAnimationController<T>> factory)
+		public PAnimationRegistrar<T> add(String name, Supplier<PAnimationController.StateHandler<T>> factory)
 		{
 			this.entries.add(new Entry<>(name, factory));
 			return this;
 		}
 		
-		public record Entry<T extends PAnimatable<T>>(String name,Supplier<PAnimationController<T>> factory)
+		public record Entry<T extends PAnimatable<T>>(String name, Supplier<PAnimationController.StateHandler<T>> factory)
 		{
 		
 		}

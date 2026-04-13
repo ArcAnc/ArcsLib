@@ -96,7 +96,7 @@ public class PModelParser
 		float[] rawRotation = node.getRotation();
 		Quaternionf baseRotation = new Quaternionf();
 		if (rawRotation != null && rawRotation.length == 4)
-			baseRotation.add(rawRotation[0], rawRotation[1], rawRotation[2], rawRotation[3]);
+			baseRotation.set(rawRotation[0], rawRotation[1], rawRotation[2], rawRotation[3]);
 		
 		UUID boneUUID = UUID.randomUUID();
 		String name = node.getName();
