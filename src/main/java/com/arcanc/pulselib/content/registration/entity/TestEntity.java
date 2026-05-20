@@ -15,7 +15,10 @@ import com.arcanc.pulselib.content.animatable.ControllerState;
 import com.arcanc.pulselib.content.animatable.PAnimatable;
 import com.arcanc.pulselib.content.animatable.PAnimationManager;
 import com.arcanc.pulselib.content.model.animation.PRawAnimation;
+import com.arcanc.pulselib.util.PLibDatabase;
 import com.arcanc.pulselib.util.helpers.PLibHelper;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.PathfinderMob;
@@ -25,6 +28,7 @@ import net.minecraft.world.entity.ai.goal.FloatGoal;
 import net.minecraft.world.entity.ai.goal.LookAtPlayerGoal;
 import net.minecraft.world.entity.ai.goal.RandomLookAroundGoal;
 import net.minecraft.world.entity.ai.goal.WaterAvoidingRandomStrollGoal;
+import net.minecraft.world.entity.animal.equine.AbstractHorse;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import org.jspecify.annotations.NonNull;
@@ -44,6 +48,8 @@ public class TestEntity extends PathfinderMob implements PAnimatable<TestEntity>
 	
 	private final PAnimationManager<TestEntity> animationManager = PLibHelper.createManager(this);
 	
+	public boolean showArmor = false;
+	
 	public TestEntity(EntityType<? extends PathfinderMob> type, Level level)
 	{
 		super(type, level);
@@ -61,6 +67,13 @@ public class TestEntity extends PathfinderMob implements PAnimatable<TestEntity>
 		this.goalSelector.addGoal(7, new WaterAvoidingRandomStrollGoal(this, 1.0));
 		this.goalSelector.addGoal(8, new LookAtPlayerGoal(this, Player.class, 8.0F));
 		this.goalSelector.addGoal(8, new RandomLookAroundGoal(this));
+	}
+	
+	@Override
+	protected InteractionResult mobInteract(Player player, InteractionHand hand)
+	{
+		this.showArmor = !this.showArmor;
+		return InteractionResult.SUCCESS;
 	}
 	
 	@Override

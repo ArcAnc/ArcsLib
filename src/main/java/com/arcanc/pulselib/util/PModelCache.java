@@ -121,7 +121,13 @@ public class PModelCache
 				for (UUID meshUUID : bone2MeshesEntry.getValue().getSecond())
 				{
 					PMesh mesh = model.meshes.get(meshUUID);
-					Identifier loc = modelPath.withPath(divided[1] + "/" + divided[2] + "/" + mesh.texture());
+					Identifier loc = modelPath.withPath(divided[1] + "/" + divided[2] + "/");
+					
+					if (divided.length > 3 )
+						for (int q = 3; q < divided.length; q ++)
+							loc = loc.withSuffix(divided[q] + "/");
+					
+					loc = loc.withSuffix(mesh.texture());
 					TextureAtlasSprite sprite = PTextureCache.getTextureAtlas().getSprite(loc);
 					
 					ByteBufferBuilder byteBufferBuilder = ByteBufferBuilder.

@@ -84,7 +84,6 @@ public class Registration
 				builder.
 						noLootTable().
 						sized(1, 1).
-						
 						clientTrackingRange(5));
 		
 		private static void init (@NotNull final IEventBus bus)
