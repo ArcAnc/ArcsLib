@@ -63,7 +63,7 @@ public abstract class PEntityRenderer<T extends Entity & PAnimatable<T>, RS exte
 	private final PModelData modelData;
 	private final Function<Identifier, RenderType> renderType;
 	private final Map<String, List<PEntityRenderLayer<T, RS>>> renderLayers = new Object2ObjectOpenHashMap<>();
-	
+
 	public PEntityRenderer(EntityRendererProvider.Context context, PModelData modelData, Function<Identifier, RenderType> renderType)
 	{
 		super(context);
@@ -154,8 +154,13 @@ public abstract class PEntityRenderer<T extends Entity & PAnimatable<T>, RS exte
 			packedOverlay = OverlayTexture.NO_OVERLAY;
 		}
 		
+		Map<String, Matrix4f> entityBonePoses = new Object2ObjectOpenHashMap<>();
+		List<DeferredLayerSubmit> deferredLayers = new ArrayList<>();
 		for (PBakedBone bone : model.bones())
-			perBoneSubmit(renderState, poseStack, bone, controllers, this.getModelData(renderState), renderType, -1, renderState.lightCoords, packedOverlay, renderState.partialTick(), submitNodeCollector, cameraRenderState, null);
+			perBoneSubmit(renderState, poseStack, bone, controllers, this.getModelData(renderState), renderType, -1, renderState.lightCoords, packedOverlay, renderState.partialTick(), submitNodeCollector, cameraRenderState, null, entityBonePoses, null, deferredLayers);
+
+		for (DeferredLayerSubmit deferredLayer : deferredLayers)
+			submitDeferredLayer(renderState, poseStack, submitNodeCollector, cameraRenderState, controllers, renderState.partialTick(), entityBonePoses, deferredLayer);
 	}
 	
 	@Override
@@ -178,8 +183,49 @@ public abstract class PEntityRenderer<T extends Entity & PAnimatable<T>, RS exte
 	                             CameraRenderState cameraRenderState,
 	                             @Nullable PEntityRenderLayer<T, RS> renderLayer)
 	{
+		perBoneSubmit(renderState, poseStack, bone, controllers, data, renderType, packedColor, packedLight, packedOverlay, partialTick, submitNodeCollector, cameraRenderState, renderLayer, null, null, null);
+	}
+	
+	protected void perBoneSubmit(RS renderState,
+	                             PoseStack poseStack,
+	                             PBakedBone bone,
+	                             Collection<PAnimationController<T>> controllers,
+	                             PModelData data,
+	                             Function<Identifier, RenderType> renderType,
+	                             int packedColor,
+	                             int packedLight,
+	                             int packedOverlay,
+	                             float partialTick,
+	                             SubmitNodeCollector submitNodeCollector,
+	                             CameraRenderState cameraRenderState,
+	                             @Nullable PEntityRenderLayer<T, RS> renderLayer,
+	                             @Nullable Map<String, Matrix4f> entityBonePoses,
+	                             @Nullable Matrix4f layerTransform)
+	{
+		perBoneSubmit(renderState, poseStack, bone, controllers, data, renderType, packedColor, packedLight, packedOverlay, partialTick, submitNodeCollector, cameraRenderState, renderLayer, entityBonePoses, layerTransform, null);
+	}
+
+	private void perBoneSubmit(RS renderState,
+	                           PoseStack poseStack,
+	                           PBakedBone bone,
+	                           Collection<PAnimationController<T>> controllers,
+	                           PModelData data,
+	                           Function<Identifier, RenderType> renderType,
+	                           int packedColor,
+	                           int packedLight,
+	                           int packedOverlay,
+	                           float partialTick,
+	                           SubmitNodeCollector submitNodeCollector,
+	                           CameraRenderState cameraRenderState,
+	                           @Nullable PEntityRenderLayer<T, RS> renderLayer,
+	                           @Nullable Map<String, Matrix4f> entityBonePoses,
+	                           @Nullable Matrix4f layerTransform,
+	                           @Nullable List<DeferredLayerSubmit> deferredLayers)
+	{
 		BoneFrame frame = bone.mixBone(data.getModel(), controllers, partialTick);
 		poseStack.pushPose();
+		if (renderLayer != null && entityBonePoses != null)
+			applyBoundLayerBonePose(poseStack, bone, renderLayer, entityBonePoses, layerTransform);
 		if (frame != null)
 		{
 			poseStack.translate(frame.translation().x(), frame.translation().y(), frame.translation().z());
@@ -196,6 +242,8 @@ public abstract class PEntityRenderer<T extends Entity & PAnimatable<T>, RS exte
 			poseStack.mulPose(Axis.YN.rotationDegrees(livingEntityRenderState.getHeadYRot()));
 			poseStack.mulPose(Axis.XN.rotationDegrees(livingEntityRenderState.getHeadXRot()));
 		}
+		if (renderLayer == null && entityBonePoses != null)
+			entityBonePoses.put(bone.name(), new Matrix4f(poseStack.last().pose()));
 		if (renderLayer == null)
 		{
 			this.submitBone(renderState, bone, poseStack, data, controllers, renderType, packedColor, packedLight, packedOverlay, partialTick);
@@ -210,7 +258,11 @@ public abstract class PEntityRenderer<T extends Entity & PAnimatable<T>, RS exte
 						poseStack.mulPose(layer.rotation());
 						Vector3f scale = layer.scale();
 						poseStack.scale(scale.x(), scale.y(), scale.z());
-						layer.submit(this, renderState, poseStack, submitNodeCollector, cameraRenderState, controllers, packedColor, packedLight, packedOverlay, partialTick);
+						Matrix4f attachmentTransform = getLayerTransform(bone.name(), poseStack, entityBonePoses);
+						if (deferredLayers != null)
+							deferredLayers.add(new DeferredLayerSubmit(layer, new Matrix4f(poseStack.last().pose()), attachmentTransform, packedColor, packedLight, packedOverlay));
+						else
+							layer.submit(this, renderState, poseStack, submitNodeCollector, cameraRenderState, controllers, packedColor, packedLight, packedOverlay, partialTick, entityBonePoses, attachmentTransform);
 						poseStack.popPose();
 					}
 		}
@@ -218,9 +270,65 @@ public abstract class PEntityRenderer<T extends Entity & PAnimatable<T>, RS exte
 			this.submitBone(renderState, bone, poseStack, data, controllers, renderType, packedColor, packedLight, packedOverlay, partialTick, renderLayer);
 		
 		if (!bone.children().isEmpty())
-			bone.children().forEach(child -> perBoneSubmit(renderState, poseStack, child, controllers, data, renderType, packedColor, packedLight, packedOverlay, partialTick, submitNodeCollector, cameraRenderState, renderLayer));
+			bone.children().forEach(child -> perBoneSubmit(renderState, poseStack, child, controllers, data, renderType, packedColor, packedLight, packedOverlay, partialTick, submitNodeCollector, cameraRenderState, renderLayer, entityBonePoses, layerTransform, deferredLayers));
 		
 		poseStack.popPose();
+	}
+
+	private void submitDeferredLayer(RS renderState,
+	                                 PoseStack poseStack,
+	                                 SubmitNodeCollector submitNodeCollector,
+	                                 CameraRenderState cameraRenderState,
+	                                 Collection<PAnimationController<T>> controllers,
+	                                 float partialTick,
+	                                 Map<String, Matrix4f> entityBonePoses,
+	                                 DeferredLayerSubmit deferredLayer)
+	{
+		poseStack.pushPose();
+		poseStack.last().pose().set(deferredLayer.attachmentPose);
+		deferredLayer.layer.submit(
+				this,
+				renderState,
+				poseStack,
+				submitNodeCollector,
+				cameraRenderState,
+				controllers,
+				deferredLayer.packedColor,
+				deferredLayer.packedLight,
+				deferredLayer.packedOverlay,
+				partialTick,
+				entityBonePoses,
+				deferredLayer.layerTransform);
+		poseStack.popPose();
+	}
+
+	private Matrix4f getLayerTransform(String anchorBoneName, PoseStack poseStack, @Nullable Map<String, Matrix4f> entityBonePoses)
+	{
+		if (entityBonePoses == null)
+			return new Matrix4f();
+		Matrix4f anchorPose = entityBonePoses.get(anchorBoneName);
+		if (anchorPose == null)
+			return new Matrix4f();
+		return new Matrix4f(anchorPose).invert().mul(poseStack.last().pose());
+	}
+
+	private void applyBoundLayerBonePose(PoseStack poseStack,
+	                                     PBakedBone bone,
+	                                     PEntityRenderLayer<T, RS> renderLayer,
+	                                     Map<String, Matrix4f> entityBonePoses,
+	                                     @Nullable Matrix4f layerTransform)
+	{
+		String entityBoneName = renderLayer.getBoundEntityBone(bone.name());
+		if (entityBoneName == null)
+			return;
+		Matrix4f entityBonePose = entityBonePoses.get(entityBoneName);
+		if (entityBonePose == null)
+			return;
+		Matrix4f pose = poseStack.last().pose();
+		pose.set(entityBonePose);
+		pose.translate(-bone.basePosition().x(), -bone.basePosition().y(), -bone.basePosition().z());
+		if (layerTransform != null)
+			pose.mul(layerTransform);
 	}
 	
 	protected void submitBone(RS renderState,
@@ -417,5 +525,30 @@ public abstract class PEntityRenderer<T extends Entity & PAnimatable<T>, RS exte
 	protected static boolean isUpsideDownName(String name)
 	{
 		return "Dinnerbone".equals(name) || "Grumm".equals(name);
+	}
+	
+	private final class DeferredLayerSubmit
+	{
+		private final PEntityRenderLayer<T, RS> layer;
+		private final Matrix4f attachmentPose;
+		private final Matrix4f layerTransform;
+		private final int packedColor;
+		private final int packedLight;
+		private final int packedOverlay;
+		
+		private DeferredLayerSubmit(PEntityRenderLayer<T, RS> layer,
+		                            Matrix4f attachmentPose,
+		                            Matrix4f layerTransform,
+		                            int packedColor,
+		                            int packedLight,
+		                            int packedOverlay)
+		{
+			this.layer = layer;
+			this.attachmentPose = attachmentPose;
+			this.layerTransform = layerTransform;
+			this.packedColor = packedColor;
+			this.packedLight = packedLight;
+			this.packedOverlay = packedOverlay;
+		}
 	}
 }

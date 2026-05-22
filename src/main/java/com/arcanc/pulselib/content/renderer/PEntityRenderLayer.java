@@ -24,17 +24,20 @@ import net.minecraft.client.renderer.rendertype.RenderType;
 import net.minecraft.client.renderer.state.level.CameraRenderState;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.Entity;
+import org.joml.Matrix4f;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
 import org.jspecify.annotations.Nullable;
 
 import java.util.Collection;
+import java.util.Map;
 import java.util.function.Function;
 
 public abstract class PEntityRenderLayer<T extends Entity & PAnimatable<T>, RS extends EntityRenderState & PEntityRenderState<T>>
 {
 	private final PModelData modelData;
 	private final Function<Identifier, RenderType> renderType;
+	private final Map<String, String> boneBindings = new java.util.HashMap<>();
 	
 	public PEntityRenderLayer(PModelData modelData, Function<Identifier, RenderType> renderType)
 	{
@@ -55,6 +58,29 @@ public abstract class PEntityRenderLayer<T extends Entity & PAnimatable<T>, RS e
 	public RenderType getRenderType(Identifier texture)
 	{
 		return this.renderType.apply(texture);
+	}
+
+	public PEntityRenderLayer<T, RS> bindBone(String layerBoneName, String entityBoneName)
+	{
+		this.boneBindings.put(layerBoneName, entityBoneName);
+		return this;
+	}
+
+	public PEntityRenderLayer<T, RS> bindMatchingBone(String boneName)
+	{
+		return bindBone(boneName, boneName);
+	}
+
+	public PEntityRenderLayer<T, RS> bindMatchingBones(String... boneNames)
+	{
+		for (String boneName : boneNames)
+			bindMatchingBone(boneName);
+		return this;
+	}
+
+	public @Nullable String getBoundEntityBone(String layerBoneName)
+	{
+		return this.boneBindings.get(layerBoneName);
 	}
 	
 	public boolean shouldRender(RS renderState)
@@ -88,12 +114,29 @@ public abstract class PEntityRenderLayer<T extends Entity & PAnimatable<T>, RS e
 	                   int packedOverlay,
 	                   float partialTick)
 	{
+		submit(renderer, renderState, poseStack, submitNodeCollector, cameraRenderState, controllers, packedColor, packedLight, packedOverlay, partialTick, null, null);
+	}
+
+	public void submit(PEntityRenderer<T, RS> renderer,
+	                   RS renderState,
+	                   PoseStack poseStack,
+	                   SubmitNodeCollector submitNodeCollector,
+	                   CameraRenderState cameraRenderState,
+	                   Collection<PAnimationController<T>> controllers,
+	                   int packedColor,
+	                   int packedLight,
+	                   int packedOverlay,
+	                   float partialTick,
+	                   @Nullable Map<String, Matrix4f> entityBonePoses,
+	                   @Nullable Matrix4f layerTransform)
+	{
 		PBakedModel model = getModel(renderState);
-		if (model == null || !shouldRender(renderState))
+		if (model == null)
 			return;
 		
 		PModelData data = getModelData(renderState);
 		for (PBakedBone bone : model.bones())
+		{
 			renderer.perBoneSubmit(
 					renderState,
 					poseStack,
@@ -107,7 +150,10 @@ public abstract class PEntityRenderLayer<T extends Entity & PAnimatable<T>, RS e
 					partialTick,
 					submitNodeCollector,
 					cameraRenderState,
-					this);
+					this,
+					entityBonePoses,
+					layerTransform);
+		}
 	}
 	
 	public Vector3f offset()

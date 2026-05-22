@@ -26,18 +26,17 @@ public class TestEntityRender extends PEntityRenderer<TestEntity, PEntityRenderS
 	public static final Identifier SPHERE = PLibDatabase.rl("entity/test_entity/sphere");
 	public static final Identifier TORUS = PLibDatabase.rl("entity/test_entity/torus");
 	public static final Identifier ZERO = PLibDatabase.rl("entity/test_entity/0");
-//	public static final Identifier HELM = PLibDatabase.rl("entity/test_entity/helm/0");
-//	public static final Identifier CHEST = PLibDatabase.rl("entity/test_entity/armor_chest/0");
-//	public static final Identifier LEFT_HAND = PLibDatabase.rl("entity/test_entity/left_hand/0");
+	public static final Identifier ARMOR = PLibDatabase.rl("entity/test_entity/armor/0");
 	
 	public TestEntityRender(EntityRendererProvider.Context context)
 	{
 		super(context, new DefaultEntityModelData.DefaultEntityModelDataBuilder(PLibDatabase.rl("test_entity")).
 				build(), PRenderTypes.RenderTypeProvider :: trianglesSolid);
 		
-//		addRenderLayer("body", new PChestTestArmor());
-//		addRenderLayer("head", new PHelmTestArmor());
-//		addRenderLayer("hand_left", new PLeftHandTestArmor());
+		addRenderLayer("body", new PTestArmor().
+				bindBone("armor_chest", "body").
+				bindBone("armor_helm", "head").
+				bindBone("armor_left_hand", "hand_left"));
 	}
 	
 	@Override
