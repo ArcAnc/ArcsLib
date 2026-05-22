@@ -94,8 +94,8 @@ public class Registration
 	
 	public static void init(@NotNull final IEventBus bus)
 	{
-		EntityTypeReg.init(bus);
-		/*BlockReg.init(bus);
+		/*EntityTypeReg.init(bus);
+		BlockReg.init(bus);
 		BETypeReg.init(bus);
 		ItemReg.init(bus);*/
 	}

@@ -38,6 +38,9 @@ public abstract class PEntityRenderLayer<T extends Entity & PAnimatable<T>, RS e
 	private final PModelData modelData;
 	private final Function<Identifier, RenderType> renderType;
 	private final Map<String, String> boneBindings = new java.util.HashMap<>();
+	private final Vector3f offset = new Vector3f();
+	private final Quaternionf rotation = new Quaternionf();
+	private final Vector3f scale = new Vector3f(1, 1, 1);
 	
 	public PEntityRenderLayer(PModelData modelData, Function<Identifier, RenderType> renderType)
 	{
@@ -156,18 +159,33 @@ public abstract class PEntityRenderLayer<T extends Entity & PAnimatable<T>, RS e
 		}
 	}
 	
+	public void setOffset(Vector3f offset)
+	{
+		this.offset.set(offset);
+	}
+	
 	public Vector3f offset()
 	{
-		return new Vector3f();
+		return this.offset;
+	}
+	
+	public void setRotation(Quaternionf rotation)
+	{
+		this.rotation.set(rotation);
 	}
 	
 	public Quaternionf rotation()
 	{
-		return new Quaternionf();
+		return this.rotation;
+	}
+	
+	public void setScale(Vector3f scale)
+	{
+		this.scale.set(scale);
 	}
 	
 	public Vector3f scale()
 	{
-		return new Vector3f(1, 1, 1);
+		return this.scale;
 	}
 }
