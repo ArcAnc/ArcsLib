@@ -74,21 +74,23 @@ public class ClientEvents
 		event.register(PLibDatabase.rl("runtime_loader"), RuntimeLoader.TYPE);
 	}
 	
-/*	private static void registerRenderers(final EntityRenderersEvent.RegisterRenderers event)
+	/*private static void registerRenderers(final EntityRenderersEvent.RegisterRenderers event)
 	{
 		event.registerBlockEntityRenderer(Registration.BETypeReg.TEST_BLOCK_ENTITY.get(), TestBlockEntityRenderer :: new);
 		event.registerEntityRenderer(Registration.EntityTypeReg.TEST_ENTITY.get(), TestEntityRender :: new);
-	}
+	}*/
 	
-	private static void registerCustomTextures(final CustomEvents.PLibRegisterTextureEvent event)
+	/*private static void registerCustomTextures(final CustomEvents.PLibRegisterTextureEvent event)
 	{
+		event.addTextureLocation(TestEntityRender.SPHERE).
+				addTextureLocation(TestEntityRender.TUBE).
+				addTextureLocation(TestEntityRender.TORUS).
+				addTextureLocation(TestEntityRender.ZERO).
+				addTextureLocation(TestEntityRender.ARMOR);
 		event.addTextureLocation(TestBlockEntityRenderer.CUBE).
 				addTextureLocation(TestBlockEntityRenderer.TORUS).
 				addTextureLocation(TestBlockEntityRenderer.TUBE).
 				addTextureLocation(TestBlockEntityRenderer.PYRAMID);
-		event.addTextureLocation(TestEntityRender.SPHERE).
-				addTextureLocation(TestEntityRender.TUBE).
-				addTextureLocation(TestEntityRender.TORUS);
 		event.addTextureLocation(TestBlockItemRenderer.PYRAMID).
 				addTextureLocation(TestBlockItemRenderer.CIRCLE);
 	}*/

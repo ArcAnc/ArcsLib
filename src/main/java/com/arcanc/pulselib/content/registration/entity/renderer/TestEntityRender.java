@@ -23,11 +23,18 @@ public class TestEntityRender extends PEntityRenderer<TestEntity>
 	public static final ResourceLocation SPHERE = PLibDatabase.rl("entity/test_entity/sphere");
 	public static final ResourceLocation TORUS = PLibDatabase.rl("entity/test_entity/torus");
 	public static final ResourceLocation TUBE = PLibDatabase.rl("entity/test_entity/tube");
+	public static final ResourceLocation ZERO = PLibDatabase.rl("entity/test_entity/0");
+	public static final ResourceLocation ARMOR = PLibDatabase.rl("entity/test_entity/armor/0");
 	
 	public TestEntityRender(EntityRendererProvider.Context context)
 	{
 		super(context, new DefaultEntityModelData.DefaultEntityModelDataBuilder(PLibDatabase.rl("test_entity")).
 				build(),
 				PRenderTypes.RenderTypeProvider :: trianglesSolid);
+		
+		addRenderLayer("body", new PTestArmor().
+				bindBone("armor_chest", "body").
+				bindBone("armor_helm", "head").
+				bindBone("armor_left_hand", "hand_left"));
 	}
 }
