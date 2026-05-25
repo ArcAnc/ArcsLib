@@ -15,6 +15,7 @@ import com.arcanc.pulselib.content.registration.entity.TestEntity;
 import com.arcanc.pulselib.content.renderer.PEntityRenderLayer;
 import com.arcanc.pulselib.content.renderer.base.PEntityRenderState;
 import com.arcanc.pulselib.content.renderer.modelData.DefaultEntityLayerModelData;
+import com.arcanc.pulselib.data.PGeckoModelLoader;
 import com.arcanc.pulselib.util.PLibDatabase;
 import com.arcanc.pulselib.util.PRenderTypes;
 
@@ -23,7 +24,8 @@ public class PTestArmor extends PEntityRenderLayer<TestEntity, PEntityRenderStat
 	public PTestArmor()
 	{
 		super(new DefaultEntityLayerModelData.
-						DefaultEntityLayerModelDataBuilder(Registration.EntityTypeReg.TEST_ENTITY.getId(), PLibDatabase.rl("armor")).
+						DefaultEntityLayerModelDataBuilder(Registration.EntityTypeReg.TEST_ENTITY.getId(),
+						PLibDatabase.rl("armor")).
 							build(),
 				PRenderTypes.RenderTypeProvider :: trianglesSolid);
 	}

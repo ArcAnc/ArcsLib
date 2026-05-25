@@ -17,8 +17,21 @@ import org.jspecify.annotations.Nullable;
 import java.util.List;
 import java.util.Map;
 
-public record PAnimation(String name, float length, Map<String, PBoneAnimation> boneAnimations)
+public record PAnimation(String name,
+                         float length,
+                         Map<String, PBoneAnimation> boneAnimations,
+                         List<PAnimationEvent> events)
 {
+	public PAnimation(String name, float length, Map<String, PBoneAnimation> boneAnimations)
+	{
+		this(name, length, boneAnimations, List.of());
+	}
+	
+	public PAnimation
+	{
+		events = List.copyOf(events);
+	}
+	
 	public @Nullable BoneFrame calculateBoneTransformations(String boneName, float time, PInterpolationType interpolationType)
 	{
 		PBoneAnimation boneAnimation = this.boneAnimations.get(boneName);
@@ -47,6 +60,16 @@ public record PAnimation(String name, float length, Map<String, PBoneAnimation> 
 			rotation = new Quaternionf();
 		
 		return new BoneFrame(translation, rotation, scale);
+	}
+	
+	public List<PAnimationEvent> eventsBetween(float from, float to)
+	{
+		if (this.events.isEmpty() || to < from)
+			return List.of();
+		
+		return this.events.stream().
+				filter(event -> (event.time() > from || (from == 0f && event.time() == 0f)) && event.time() <= to).
+				toList();
 	}
 	
 	@SuppressWarnings("unchecked")

@@ -159,16 +159,20 @@ public class PAnimationController<T extends PAnimatable<T>>
 		
 		float length = animation.length();
 		this.prevTime = this.time;
-		this.time += tickCount * stage.speed();
+		float nextTime = this.time + tickCount * stage.speed();
 		switch (stage.animationType())
 		{
 			case PLAY_ONCE ->
 			{
+				this.time = nextTime;
+				fireEvents(animatable, animation, this.prevTime, Math.min(this.time, length));
 				if (this.time >= length)
 					nextStage();
 			}
 			case HOLD_LAST_FRAME ->
 			{
+				this.time = nextTime;
+				fireEvents(animatable, animation, this.prevTime, Math.min(this.time, length));
 				if (this.time >= length)
 				{
 					this.time = length;
@@ -178,9 +182,29 @@ public class PAnimationController<T extends PAnimatable<T>>
 			case CYCLE ->
 			{
 				if (length > 0)
-					this.time %= length;
+				{
+					if (nextTime >= length)
+					{
+						fireEvents(animatable, animation, this.prevTime, length);
+						this.time = nextTime % length;
+						fireEvents(animatable, animation, 0f, this.time);
+					}
+					else
+					{
+						this.time = nextTime;
+						fireEvents(animatable, animation, this.prevTime, this.time);
+					}
+				}
+				else
+					this.time = nextTime;
 			}
 		}
+	}
+	
+	private void fireEvents(T animatable, PAnimation animation, float from, float to)
+	{
+		animation.eventsBetween(from, to).
+				forEach(event -> PAnimationEventDispatcher.dispatch(animatable, event));
 	}
 	
 	private void nextStage()

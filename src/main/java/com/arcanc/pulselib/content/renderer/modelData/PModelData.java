@@ -11,7 +11,7 @@ package com.arcanc.pulselib.content.renderer.modelData;
 
 
 import com.arcanc.pulselib.content.model.baked.PBakedModel;
-import com.arcanc.pulselib.util.PLibDatabase;
+import com.arcanc.pulselib.data.PGltfModelLoader;
 import com.arcanc.pulselib.util.PModelCache;
 import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.Codec;
@@ -28,14 +28,17 @@ import java.util.Map;
 
 public class PModelData
 {
+	public static final Identifier DEFAULT_MODEL_FORMAT = PGltfModelLoader.INSTANCE.id();
+	
 	public static final MapCodec<PModelData> CODEC = RecordCodecBuilder.mapCodec(instance ->
 			instance.group(
 					Identifier.CODEC.fieldOf("model_location").forGetter(PModelData :: getModelLocation),
-					Codec.STRING.optionalFieldOf("model_type", "").forGetter(pModelData -> ""),
+					Codec.STRING.optionalFieldOf("model_type", "").forGetter(PModelData :: getModelType),
+					Identifier.CODEC.optionalFieldOf("model_format", DEFAULT_MODEL_FORMAT).forGetter(PModelData :: getModelFormat),
 					Identifier.CODEC.listOf().fieldOf("textures").forGetter(arcModelData -> new ArrayList<>(arcModelData.textures.values()))
-			).apply(instance, (identifier, type, identifiers) ->
+			).apply(instance, (identifier, type, format, identifiers) ->
 			{
-				Builder builder = new Builder(identifier, type);
+				Builder builder = new Builder(identifier, type, format);
 				for (Identifier texture : identifiers)
 				{
 					builder.addTexture(texture);
@@ -44,11 +47,15 @@ public class PModelData
 			}));
 	
 	private final Identifier modelLocation;
+	private final String modelType;
+	private final Identifier modelFormat;
 	private final Map<String, Identifier> textures;
 	
 	public PModelData(Builder builder)
 	{
 		this.modelLocation = builder.modelLocation;
+		this.modelType = builder.modelType;
+		this.modelFormat = builder.modelFormat;
 		this.textures = new Object2ObjectOpenHashMap<>();
 		for (Pair<String, Identifier> texture : builder.textures)
 			this.textures.put(texture.getFirst(), texture.getSecond());
@@ -56,12 +63,26 @@ public class PModelData
 	
 	protected static Identifier generateDefaultModelLocation(Identifier modelLocation, String type)
 	{
-		return modelLocation.withPrefix("glmodels/" + type + "/").withSuffix(".glb");
+		return generateDefaultModelLocation(modelLocation, type, DEFAULT_MODEL_FORMAT);
+	}
+	
+	protected static Identifier generateDefaultModelLocation(Identifier modelLocation, String type, Identifier modelFormat)
+	{
+		return PModelCache.getModelLoader(modelFormat).
+				map(loader -> loader.defaultModelLocation(modelLocation, type)).
+				orElseGet(() -> PGltfModelLoader.INSTANCE.defaultModelLocation(modelLocation, type));
 	}
 	
 	protected static Identifier generateDefaultTextureLocation(Identifier textureLocation, String modelLocation, String type)
 	{
-		return textureLocation.withPrefix(type + "/" + modelLocation + "/");
+		return generateDefaultTextureLocation(textureLocation, Identifier.withDefaultNamespace(modelLocation), type, DEFAULT_MODEL_FORMAT);
+	}
+	
+	protected static Identifier generateDefaultTextureLocation(Identifier textureLocation, Identifier modelLocation, String type, Identifier modelFormat)
+	{
+		return PModelCache.getModelLoader(modelFormat).
+				map(loader -> loader.defaultTextureLocation(textureLocation, modelLocation, type)).
+				orElseGet(() -> PGltfModelLoader.INSTANCE.defaultTextureLocation(textureLocation, modelLocation, type));
 	}
 	
 	public Identifier getModelLocation()
@@ -69,13 +90,21 @@ public class PModelData
 		return this.modelLocation;
 	}
 	
+	public String getModelType()
+	{
+		return this.modelType;
+	}
+	
+	public Identifier getModelFormat()
+	{
+		return this.modelFormat;
+	}
+	
 	public Identifier getTextureByName(String name)
 	{
 		if (this.textures.get(name) == null)
 		{
-			String modelPath = this.modelLocation.getPath().substring(0, this.modelLocation.getPath().length() - 4);
-			String[] divided = modelPath.split("/");
-			Identifier texturePath = this.modelLocation.withPath(divided[1] + "/" + divided[2] + "/" + name);
+			Identifier texturePath = PModelCache.resolveTextureLocation(this.modelLocation, name);
 			this.textures.put(name, texturePath);
 		}
 		return this.textures.getOrDefault(name, TextureManager.INTENTIONAL_MISSING_TEXTURE);
@@ -92,12 +121,19 @@ public class PModelData
 	{
 		protected Identifier modelLocation;
 		protected String modelType;
+		protected Identifier modelFormat;
 		protected List<Pair<String, Identifier>> textures;
 		
 		public Builder(Identifier modelLocation, String modelType)
 		{
-			this.modelLocation = modelLocation;
+			this(modelLocation, modelType, DEFAULT_MODEL_FORMAT);
+		}
+		
+		public Builder(Identifier modelLocation, String modelType, Identifier modelFormat)
+		{
 			this.modelType = modelType;
+			this.modelFormat = modelFormat;
+			this.modelLocation = normalizeModelLocation(modelLocation, modelType, modelFormat);
 			this.textures = new ArrayList<>();
 		}
 		
@@ -117,6 +153,17 @@ public class PModelData
 		public PModelData build()
 		{
 			return new PModelData(this);
+		}
+		
+		private static Identifier normalizeModelLocation(Identifier modelLocation, String modelType, Identifier modelFormat)
+		{
+			if (modelType.isEmpty())
+				return modelLocation;
+			
+			if (PModelCache.getModelLoaders().stream().anyMatch(loader -> loader.supports(modelLocation)))
+				return modelLocation;
+			
+			return PModelData.generateDefaultModelLocation(modelLocation, modelType, modelFormat);
 		}
 	}
 }

@@ -32,7 +32,7 @@ import java.nio.FloatBuffer;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class PModelParser
+public class PGltfModelParser
 {
 	public static PModel parse(InputStream stream) throws IOException
 	{
