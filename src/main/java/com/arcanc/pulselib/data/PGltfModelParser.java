@@ -57,11 +57,15 @@ public class PGltfModelParser
 	
 	private static Map<NodeModel, PBone> parseBones(GltfModel model, Map<UUID, PBone> uuidToBone, Map<UUID, PMesh> uuidToMesh)
 	{
-		List<NodeModel> joints = model.getNodeModels();
+		List<NodeModel> nodes = model.getNodeModels();
 		final Map<NodeModel, PBone> nodeToBone = new HashMap<>();
 
-		if (joints == null || joints.isEmpty())
+		if (nodes == null || nodes.isEmpty())
 			return nodeToBone;
+		
+		List<NodeModel> joints = nodes.stream().
+				filter(node -> !isBlockbenchLocatorMarker(node)).
+				toList();
 		
 		for (NodeModel node : joints)
 			parseBone(node, nodeToBone, model, uuidToMesh);
@@ -78,7 +82,11 @@ public class PGltfModelParser
 			List<NodeModel> children = node.getChildren();
 			if (children != null && !children.isEmpty())
 				for (NodeModel child : children)
-					bone.children().add(nodeToBone.get(child));
+				{
+					PBone childBone = nodeToBone.get(child);
+					if (childBone != null)
+						bone.children().add(childBone);
+				}
 		}
 		
 		nodeToBone.forEach((nodeModel, pBone) ->
@@ -115,6 +123,28 @@ public class PGltfModelParser
 				bone.meshUUIDS().add(parseMesh(meshModel, model, uuidToMesh));
 		
 		nodeToBone.put(node, bone);
+	}
+	
+	private static boolean isBlockbenchLocatorMarker(NodeModel node)
+	{
+		NodeModel parent = node.getParent();
+		if (parent == null)
+			return false;
+		
+		String nodeName = node.getName();
+		if (nodeName == null || !nodeName.equals(parent.getName()))
+			return false;
+		
+		List<MeshModel> meshes = node.getMeshModels();
+		if (meshes != null && !meshes.isEmpty())
+			return false;
+		
+		List<NodeModel> children = node.getChildren();
+		if (children != null && !children.isEmpty())
+			return false;
+		
+		float[] scale = node.getScale();
+		return scale != null && scale.length == 3 && scale[0] < 0.1f && scale[1] < 0.1f && scale[2] < 0.1f;
 	}
 	
 	private static UUID parseMesh(MeshModel mesh, GltfModel model, Map<UUID, PMesh> uuidToMesh)

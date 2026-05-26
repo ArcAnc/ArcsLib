@@ -15,7 +15,6 @@ import com.arcanc.pulselib.content.registration.entity.TestEntity;
 import com.arcanc.pulselib.content.renderer.PEntityRenderLayer;
 import com.arcanc.pulselib.content.renderer.base.PEntityRenderState;
 import com.arcanc.pulselib.content.renderer.modelData.DefaultEntityLayerModelData;
-import com.arcanc.pulselib.data.PGeckoModelLoader;
 import com.arcanc.pulselib.util.PLibDatabase;
 import com.arcanc.pulselib.util.PRenderTypes;
 

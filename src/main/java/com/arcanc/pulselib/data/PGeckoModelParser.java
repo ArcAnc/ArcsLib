@@ -173,7 +173,8 @@ public class PGeckoModelParser
 				stringValue(member(boneNode, "parent"), ""),
 				vector3f(member(boneNode, "pivot"), new Vector3f()),
 				vector3f(member(boneNode, "rotation"), new Vector3f()),
-				member(boneNode, "cubes"));
+				member(boneNode, "cubes"),
+				member(boneNode, "locators"));
 	}
 	
 	private static void createBone(PModel model,
@@ -203,6 +204,48 @@ public class PGeckoModelParser
 					bone.meshUUIDS().add(mesh.uuid());
 					model.meshes.put(mesh.uuid(), mesh);
 				}
+		
+		addLocatorBones(bonesByName, links, rawBone);
+	}
+	
+	private static void addLocatorBones(Map<String, PBone> bonesByName,
+	                                    List<BoneLink> links,
+	                                    RawBone parentBone)
+	{
+		JsonElement locatorsNode = parentBone.locators();
+		if (!isObject(locatorsNode))
+			return;
+		
+		for (Map.Entry<String, JsonElement> entry : locatorsNode.getAsJsonObject().entrySet())
+		{
+			String name = entry.getKey();
+			if (name.isBlank() || bonesByName.containsKey(name))
+				continue;
+			
+			LocatorTransform transform = locatorTransform(entry.getValue());
+			PBone locator = new PBone(UUID.randomUUID(), name, transform.position(), transform.rotation());
+			bonesByName.put(name, locator);
+			links.add(new BoneLink(name, parentBone.name()));
+		}
+	}
+	
+	private static LocatorTransform locatorTransform(JsonElement node)
+	{
+		if (isArray(node))
+			return new LocatorTransform(scale(vector3f(node, new Vector3f())), new Quaternionf());
+		
+		if (!isObject(node))
+			return new LocatorTransform(new Vector3f(), new Quaternionf());
+		
+		JsonElement offset = member(node, "offset");
+		if (isMissing(offset))
+			offset = member(node, "position");
+		if (isMissing(offset))
+			offset = member(node, "pivot");
+		
+		return new LocatorTransform(
+				scale(vector3f(offset, new Vector3f())),
+				eulerDegreesToQuaternion(vector3f(member(node, "rotation"), new Vector3f())));
 	}
 	
 	private static PMesh parseCubeMesh(JsonElement cubeNode, Vector3f pivot, String textureName, TextureSize textureSize)
@@ -533,7 +576,11 @@ public class PGeckoModelParser
 	{
 	}
 	
-	private record RawBone(String name, String parentName, Vector3f absolutePivot, Vector3f rotation, JsonElement cubes)
+	private record RawBone(String name, String parentName, Vector3f absolutePivot, Vector3f rotation, JsonElement cubes, JsonElement locators)
+	{
+	}
+	
+	private record LocatorTransform(Vector3f position, Quaternionf rotation)
 	{
 	}
 	

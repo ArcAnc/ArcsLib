@@ -18,6 +18,9 @@ import com.arcanc.pulselib.content.model.baked.PBakedModel;
 import net.minecraft.util.Mth;
 import org.jspecify.annotations.Nullable;
 
+import java.util.Collection;
+import java.util.List;
+
 public class PAnimationController<T extends PAnimatable<T>>
 {
 	protected final String name;
@@ -120,6 +123,11 @@ public class PAnimationController<T extends PAnimatable<T>>
 	
 	public void tick(T animatable, float tickCount, PBakedModel model)
 	{
+		tick(animatable, tickCount, model, List.of(this));
+	}
+	
+	public void tick(T animatable, float tickCount, PBakedModel model, Collection<PAnimationController<T>> poseControllers)
+	{
 		ControllerState newState = this.stateHandler.handle(new AnimatableState<>(animatable, this));
 		if (newState != this.state)
 			this.state = newState;
@@ -138,6 +146,9 @@ public class PAnimationController<T extends PAnimatable<T>>
 			this.state = ControllerState.STOP;
 			return;
 		}
+		
+		if (model == null)
+			return;
 		
 		PRawAnimation.AnimationStage stage = this.currentAnimation.getStages().get(this.stageIndex);
 		
@@ -165,14 +176,14 @@ public class PAnimationController<T extends PAnimatable<T>>
 			case PLAY_ONCE ->
 			{
 				this.time = nextTime;
-				fireEvents(animatable, animation, this.prevTime, Math.min(this.time, length));
+				fireEvents(animatable, model, poseControllers, animation, this.prevTime, Math.min(this.time, length));
 				if (this.time >= length)
 					nextStage();
 			}
 			case HOLD_LAST_FRAME ->
 			{
 				this.time = nextTime;
-				fireEvents(animatable, animation, this.prevTime, Math.min(this.time, length));
+				fireEvents(animatable, model, poseControllers, animation, this.prevTime, Math.min(this.time, length));
 				if (this.time >= length)
 				{
 					this.time = length;
@@ -185,14 +196,14 @@ public class PAnimationController<T extends PAnimatable<T>>
 				{
 					if (nextTime >= length)
 					{
-						fireEvents(animatable, animation, this.prevTime, length);
+						fireEvents(animatable, model, poseControllers, animation, this.prevTime, length);
 						this.time = nextTime % length;
-						fireEvents(animatable, animation, 0f, this.time);
+						fireEvents(animatable, model, poseControllers, animation, 0f, this.time);
 					}
 					else
 					{
 						this.time = nextTime;
-						fireEvents(animatable, animation, this.prevTime, this.time);
+						fireEvents(animatable, model, poseControllers, animation, this.prevTime, this.time);
 					}
 				}
 				else
@@ -201,10 +212,15 @@ public class PAnimationController<T extends PAnimatable<T>>
 		}
 	}
 	
-	private void fireEvents(T animatable, PAnimation animation, float from, float to)
+	private void fireEvents(T animatable,
+	                        PBakedModel model,
+	                        Collection<PAnimationController<T>> poseControllers,
+	                        PAnimation animation,
+	                        float from,
+	                        float to)
 	{
 		animation.eventsBetween(from, to).
-				forEach(event -> PAnimationEventDispatcher.dispatch(animatable, event));
+				forEach(event -> PAnimationEventDispatcher.dispatch(animatable, event, model, poseControllers));
 	}
 	
 	private void nextStage()

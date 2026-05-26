@@ -24,6 +24,8 @@ public sealed interface PAnimationEvent permits PAnimationEvent.Sound, PAnimatio
 {
 	float time();
 	
+	String locator();
+	
 	void dispatch(PAnimationEventDispatcher.PositionContext position);
 	
 	record Sound(float time,
