@@ -22,8 +22,9 @@ public class PTestArmor extends PEntityRenderLayer<TestEntity>
 	public PTestArmor()
 	{
 		super(new DefaultEntityLayerModelData.
-						DefaultEntityLayerModelDataBuilder(Registration.EntityTypeReg.TEST_ENTITY.getId(), PLibDatabase.rl("armor")).
-						build(),
+						DefaultEntityLayerModelDataBuilder(Registration.EntityTypeReg.TEST_ENTITY.getId(),
+						PLibDatabase.rl("armor")).
+							build(),
 				PRenderTypes.RenderTypeProvider :: trianglesSolid);
 	}
 	

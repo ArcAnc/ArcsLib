@@ -21,7 +21,6 @@ import com.arcanc.pulselib.util.helpers.PLibParserHelper;
 import com.mojang.datafixers.util.Pair;
 import de.javagl.jgltf.model.*;
 import de.javagl.jgltf.model.io.GltfModelReader;
-import de.javagl.jgltf.model.v2.MaterialModelV2;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
 
@@ -32,36 +31,40 @@ import java.nio.FloatBuffer;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class PModelParser
+public class PGltfModelParser
 {
 	public static PModel parse(InputStream stream) throws IOException
 	{
-		GltfModel glModel = new GltfModelReader().readWithoutReferences(stream);
+		GltfModel model = new GltfModelReader().readWithoutReferences(stream);
 		
-		PModel model = new PModel();
+		PModel pModel = new PModel();
 		
 		Map<UUID, PBone> uuidToBone = new HashMap<>();
 		Map<UUID, PMesh> uuidToMesh = new HashMap<>();
-		Map<NodeModel, PBone> nodeToBone = parseBones(glModel, uuidToBone, uuidToMesh);
-		Map<String, PAnimation> animations = parseAnimations(glModel, nodeToBone);
+		Map<NodeModel, PBone> nodeToBone = parseBones(model, uuidToBone, uuidToMesh);
+		Map<String, PAnimation> animations = parseAnimations(model, nodeToBone);
 		
-		model.bones.putAll(uuidToBone);
-		model.meshes.putAll(uuidToMesh);
-		model.boneMeshes.putAll(uuidToBone.values().stream().
-				collect(Collectors.toMap(PBone :: uuid, bone -> Pair.of(bone.uuid(), bone.meshUUIDS().stream().toList()))));
-		model.animations.putAll(animations);
+		pModel.bones.putAll(uuidToBone);
+		pModel.meshes.putAll(uuidToMesh);
+		pModel.boneMeshes.putAll(uuidToBone.values().stream().
+				collect(Collectors.toMap(PBone :: uuid, pBone -> Pair.of(pBone.uuid(), pBone.meshUUIDS().stream().toList()))));
+		pModel.animations.putAll(animations);
 		
-		return model;
-
+		return pModel;
+		
 	}
 	
 	private static Map<NodeModel, PBone> parseBones(GltfModel model, Map<UUID, PBone> uuidToBone, Map<UUID, PMesh> uuidToMesh)
 	{
-		List<NodeModel> joints = model.getNodeModels();
+		List<NodeModel> nodes = model.getNodeModels();
 		final Map<NodeModel, PBone> nodeToBone = new HashMap<>();
-
-		if (joints == null || joints.isEmpty())
+		
+		if (nodes == null || nodes.isEmpty())
 			return nodeToBone;
+		
+		List<NodeModel> joints = nodes.stream().
+				filter(node -> !isBlockbenchLocatorMarker(node)).
+				toList();
 		
 		for (NodeModel node : joints)
 			parseBone(node, nodeToBone, model, uuidToMesh);
@@ -78,7 +81,11 @@ public class PModelParser
 			List<NodeModel> children = node.getChildren();
 			if (children != null && !children.isEmpty())
 				for (NodeModel child : children)
-					bone.children().add(nodeToBone.get(child));
+				{
+					PBone childBone = nodeToBone.get(child);
+					if (childBone != null)
+						bone.children().add(childBone);
+				}
 		}
 		
 		nodeToBone.forEach((nodeModel, pBone) ->
@@ -86,13 +93,13 @@ public class PModelParser
 		
 		return nodeToBone;
 	}
-
+	
 	private static void parseBone(NodeModel node, Map<NodeModel, PBone> nodeToBone, GltfModel model, Map<UUID, PMesh> uuidToMesh)
 	{
 		float[] rawTranslation = node.getTranslation();
 		Vector3f pivot = new Vector3f();
 		if (rawTranslation != null && rawTranslation.length == 3)
-			pivot.set(rawTranslation[0], rawTranslation[1], rawTranslation[2]);
+			pivot.add(rawTranslation[0], rawTranslation[1], rawTranslation[2]);
 		float[] rawRotation = node.getRotation();
 		Quaternionf baseRotation = new Quaternionf();
 		if (rawRotation != null && rawRotation.length == 4)
@@ -117,6 +124,28 @@ public class PModelParser
 		nodeToBone.put(node, bone);
 	}
 	
+	private static boolean isBlockbenchLocatorMarker(NodeModel node)
+	{
+		NodeModel parent = node.getParent();
+		if (parent == null)
+			return false;
+		
+		String nodeName = node.getName();
+		if (nodeName == null || !nodeName.equals(parent.getName()))
+			return false;
+		
+		List<MeshModel> meshes = node.getMeshModels();
+		if (meshes != null && !meshes.isEmpty())
+			return false;
+		
+		List<NodeModel> children = node.getChildren();
+		if (children != null && !children.isEmpty())
+			return false;
+		
+		float[] scale = node.getScale();
+		return scale != null && scale.length == 3 && scale[0] < 0.1f && scale[1] < 0.1f && scale[2] < 0.1f;
+	}
+	
 	private static UUID parseMesh(MeshModel mesh, GltfModel model, Map<UUID, PMesh> uuidToMesh)
 	{
 		//Only one primitive per mesh. At least for BBmodel
@@ -138,9 +167,6 @@ public class PModelParser
 		
 		MaterialModel material = primitive.getMaterialModel();
 		String textureName = PLibParserHelper.extractTextureName(material);
-		MaterialModelV2.AlphaMode alpha = MaterialModelV2.AlphaMode.OPAQUE;
-		if (material instanceof MaterialModelV2 mat)
-			alpha = mat.getAlphaMode();
 		PMesh pMesh = new PMesh(
 				UUID.randomUUID(),
 				vertexCount,
@@ -150,7 +176,6 @@ public class PModelParser
 				indicesCount,
 				indices,
 				indicesType,
-				alpha,
 				textureName
 		);
 		
@@ -212,18 +237,11 @@ public class PModelParser
 						for (int k = 0; k < inputTimes.limit(); k++)
 						{
 							float time = inputTimes.get(k) * 20;
-							
-							float x = bb.getFloat(k * 16);
-							float y = bb.getFloat(k * 16 + 4);
-							float z = bb.getFloat(k * 16 + 8);
-							float w = bb.getFloat(k * 16 + 12);
-							
 							Quaternionf value = new Quaternionf(
-								x,
-								y,
-								z,
-								w);
-								
+									bb.getFloat(k * 16),
+									bb.getFloat(k * 16 + 4),
+									bb.getFloat(k * 16 + 8),
+									bb.getFloat(k * 16 + 12));
 							keyframes.add(new PKeyFrameChannel.RotationKeyFrame(time, value));
 						}
 					}

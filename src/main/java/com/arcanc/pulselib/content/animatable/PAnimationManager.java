@@ -62,7 +62,7 @@ public class PAnimationManager<T extends PAnimatable<T>>
 	public void tick()
 	{
 		for (PAnimationController<T> controller : this.controllers.values())
-			controller.tick(this.animatable, 1, this.model);
+			controller.tick(this.animatable, 1, this.model, this.controllers.values());
 	}
 	
 	public record PAnimationRegistrar<T extends PAnimatable<T>>(List<Entry<T>> entries)

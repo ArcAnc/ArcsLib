@@ -10,8 +10,6 @@
 package com.arcanc.pulselib.content.model;
 
 
-import de.javagl.jgltf.model.v2.MaterialModelV2;
-
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
 import java.util.UUID;
@@ -25,7 +23,6 @@ public record PMesh(
 			int indicesCount,
 			ByteBuffer indices,
 			int glIndexType,
-			MaterialModelV2.AlphaMode alphaMode,
 			String texture
 )
 {
