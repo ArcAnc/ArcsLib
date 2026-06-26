@@ -11,6 +11,7 @@ package com.arcanc.pulselib.util;
 
 
 import com.arcanc.pulselib.content.event.CustomEvents;
+import com.arcanc.pulselib.content.model.textures.atlas.PLibSpriteMetadata;
 import com.arcanc.pulselib.util.helpers.PLibRenderHelper;
 import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.resources.model.sprite.AtlasManager;
@@ -49,6 +50,7 @@ public class PTextureCache
 	private static void registerAtlas(final RegisterTextureAtlasesEvent event)
 	{
 		event.register(new AtlasManager.AtlasConfig(ATLAS_LOCATION, ATLAS_FILE_LOCATION, false));
+		event.addAdditionalMetadata(ATLAS_FILE_LOCATION, PLibSpriteMetadata.TYPE);
 	}
 	
 	@ApiStatus.Internal

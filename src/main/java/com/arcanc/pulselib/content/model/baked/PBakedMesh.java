@@ -21,6 +21,7 @@ public record PBakedMesh(UUID uuid,
                          GpuBuffer indices,
                          int indicesCount,
                          VertexFormat.IndexType indexType,
-                         String textureName)
+                         String textureName,
+                         boolean isEmissive)
 {
 }

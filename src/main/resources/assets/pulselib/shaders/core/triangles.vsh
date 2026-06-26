@@ -59,12 +59,16 @@ void main()
 
     gl_Position = ProjMat * ModelViewMat * model * vec4(Position, 1.0);
 
+    vec4 color = instanceColor;
+    #ifdef EMISSIVE
+    vertexColorBack = color;
+    vertexColorFront = color;
+    #else
     vec3 normalTransformed = normalize(mat3(model) * Normal);
     vec2 light = minecraft_compute_light(Light0_Direction, Light1_Direction, normalTransformed);
-
-    vec4 color = instanceColor;
     vertexColorBack = minecraft_mix_light_separate(-light, color);
     vertexColorFront = minecraft_mix_light_separate(light, color);
+    #endif
 
     #ifndef NO_OVERLAY
     overlayColor = texelFetch(Sampler1, ivec2(instanceOverlay), 0);

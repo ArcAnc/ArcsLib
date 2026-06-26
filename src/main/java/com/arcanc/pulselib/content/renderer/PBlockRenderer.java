@@ -165,7 +165,10 @@ public abstract class PBlockRenderer<T extends BlockEntity & PAnimatable<T>, RS 
 			if (mesh.textureName().isEmpty())
 				return;
 			
-			RenderType type = renderType.apply(PTextureCache.ATLAS_LOCATION);
+			RenderType baseType = renderType.apply(PTextureCache.ATLAS_LOCATION);
+			RenderType type = mesh.isEmissive() ?
+					PRenderTypes.RenderTypeProvider.emissiveVariant(baseType, PTextureCache.ATLAS_LOCATION) :
+					baseType;
 			
 			if (PRenderTypes.isTransparent(type))
 				PRenderQueue.submitBlockEntityTranslucentMesh(type, mesh, new PRenderQueue.InstanceData(matrix4fstack, color, packedLight, packedOverlay));

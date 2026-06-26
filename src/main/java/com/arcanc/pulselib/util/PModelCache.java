@@ -17,6 +17,7 @@ import com.arcanc.pulselib.content.model.baked.AtlasBufferBuilder;
 import com.arcanc.pulselib.content.model.baked.PBakedBone;
 import com.arcanc.pulselib.content.model.baked.PBakedMesh;
 import com.arcanc.pulselib.content.model.baked.PBakedModel;
+import com.arcanc.pulselib.content.model.textures.atlas.PLibSpriteMetadata;
 import com.arcanc.pulselib.data.PGltfModelLoader;
 import com.arcanc.pulselib.data.PModelLoader;
 import com.google.common.collect.ImmutableList;
@@ -159,6 +160,10 @@ public class PModelCache
 					
 					TextureAtlasSprite sprite = PTextureCache.getTextureAtlas().getSprite(loc);
 					
+					boolean emissive = sprite.contents().getAdditionalMetadata(PLibSpriteMetadata.TYPE).
+							map(PLibSpriteMetadata :: emissive).
+							orElse(false);
+					
 					ByteBufferBuilder byteBufferBuilder = ByteBufferBuilder.
 							exactlySized(mesh.vertexCount() * PRenderTypes.VertexFormatProvider.POSITION_TEX_NORMAL.getVertexSize());
 					BufferBuilder bufferBuilder;
@@ -216,7 +221,8 @@ public class PModelCache
 								gpuIndexBuffer,
 								mesh.indicesCount(),
 								type,
-								mesh.texture()));
+								mesh.texture(),
+								emissive));
 					}
 				}
 			}

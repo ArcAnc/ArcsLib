@@ -28,7 +28,7 @@ public class PRenderStagesHandler
 		PRenderQueue.flush(PRenderQueue.RenderStage.SOLID_BLOCKS);
 	}
 	
-	private static void renderTranslucent(final RenderLevelStageEvent.AfterTranslucentFeatures event)
+	private static void renderTranslucent(final RenderLevelStageEvent.AfterTranslucentBlocks event)
 	{
 		PRenderQueue.flush(PRenderQueue.RenderStage.ENTITIES);
 		

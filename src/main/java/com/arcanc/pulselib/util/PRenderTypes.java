@@ -67,6 +67,23 @@ public class PRenderTypes
 				withCull(false).
 				withColorTargetState(new ColorTargetState(BlendFunction.TRANSLUCENT)).
 				build());
+
+		public static final RenderPipeline TRIANGLES_EMISSIVE_CUTOUT = registerPipeline(RenderPipeline.builder(TRIANGLES_SNIPPET).
+				withLocation(PLibDatabase.rl("pipeline/triangles_emissive_cutout_no_cull")).
+				withSampler("Sampler1").
+				withShaderDefine("EMISSIVE").
+				withShaderDefine("ALPHA_CUTOUT", 0.1F).
+				withCull(false).
+				build());
+
+		public static final RenderPipeline TRIANGLES_EMISSIVE_TRANSLUCENT = registerPipeline(RenderPipeline.builder(TRIANGLES_SNIPPET).
+				withLocation(PLibDatabase.rl("pipeline/triangles_emissive_translucent_no_cull")).
+				withSampler("Sampler1").
+				withShaderDefine("EMISSIVE").
+				withShaderDefine("ALPHA_CUTOUT", 0.1F).
+				withCull(false).
+				withColorTargetState(new ColorTargetState(BlendFunction.TRANSLUCENT)).
+				build());
 		
 		public static final RenderPipeline TRIANGLES_GUI = registerPipeline(RenderPipeline.builder(RenderPipelines.MATRICES_PROJECTION_SNIPPET).
 				withVertexShader(PLibDatabase.rl("core/triangles_gui")).
@@ -111,6 +128,8 @@ public class PRenderTypes
 		private static final Function<Identifier, RenderType> TRIANGLES_SOLID = Util.memoize(RenderTypeProvider :: createTrianglesSolid);
 		private static final Function<Identifier, RenderType> TRIANGLES_CUTOUT = Util.memoize(RenderTypeProvider :: createTrianglesCutout);
 		private static final Function<Identifier, RenderType> TRIANGLES_TRANSLUCENT = Util.memoize(RenderTypeProvider :: createTrianglesTranslucent);
+		private static final Function<Identifier, RenderType> TRIANGLES_EMISSIVE_CUTOUT = Util.memoize(RenderTypeProvider :: createTrianglesEmissiveCutout);
+		private static final Function<Identifier, RenderType> TRIANGLES_EMISSIVE_TRANSLUCENT = Util.memoize(RenderTypeProvider :: createTrianglesEmissiveTranslucent);
 		private static final Function<Identifier, RenderType> TRIANGLES_GUI = Util.memoize(RenderTypeProvider :: createTrianglesGui);
 		
 		private static RenderType createTrianglesSolid(Identifier texture)
@@ -151,6 +170,30 @@ public class PRenderTypes
 			
 			return RenderType.create(PLibDatabase.rl("triangles_translucent").toString(), setup);
 		}
+
+		private static RenderType createTrianglesEmissiveCutout(Identifier texture)
+		{
+			RenderSetup setup = RenderSetup.builder(RenderPipelinesProvider.TRIANGLES_EMISSIVE_CUTOUT).
+					withTexture("Sampler0", texture).
+					useOverlay().
+					affectsCrumbling().
+					setOutline(RenderSetup.OutlineProperty.AFFECTS_OUTLINE).
+					createRenderSetup();
+
+			return RenderType.create(PLibDatabase.rl("triangles_emissive_cutout").toString(), setup);
+		}
+
+		private static RenderType createTrianglesEmissiveTranslucent(Identifier texture)
+		{
+			RenderSetup setup = RenderSetup.builder(RenderPipelinesProvider.TRIANGLES_EMISSIVE_TRANSLUCENT).
+					withTexture("Sampler0", texture).
+					useOverlay().
+					affectsCrumbling().
+					setOutline(RenderSetup.OutlineProperty.AFFECTS_OUTLINE).
+					createRenderSetup();
+
+			return RenderType.create(PLibDatabase.rl("triangles_emissive_translucent").toString(), setup);
+		}
 		
 		private static RenderType createTrianglesGui(Identifier texture)
 		{
@@ -177,10 +220,25 @@ public class PRenderTypes
 		{
 			return TRIANGLES_TRANSLUCENT.apply(texture);
 		}
+
+		public static RenderType trianglesEmissiveCutout(Identifier texture)
+		{
+			return TRIANGLES_EMISSIVE_CUTOUT.apply(texture);
+		}
+
+		public static RenderType trianglesEmissiveTranslucent(Identifier texture)
+		{
+			return TRIANGLES_EMISSIVE_TRANSLUCENT.apply(texture);
+		}
 		
 		public static RenderType trianglesGui(Identifier texture)
 		{
 			return TRIANGLES_GUI.apply(texture);
+		}
+
+		public static RenderType emissiveVariant(RenderType baseType, Identifier texture)
+		{
+			return isTransparent(baseType) ? trianglesEmissiveTranslucent(texture) : trianglesEmissiveCutout(texture);
 		}
 	}
 	

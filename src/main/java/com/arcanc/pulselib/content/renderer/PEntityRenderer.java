@@ -20,6 +20,7 @@ import com.arcanc.pulselib.content.model.baked.PBakedMesh;
 import com.arcanc.pulselib.content.model.baked.PBakedModel;
 import com.arcanc.pulselib.content.renderer.base.PEntityRenderState;
 import com.arcanc.pulselib.content.renderer.modelData.PModelData;
+import com.arcanc.pulselib.util.PRenderTypes;
 import com.arcanc.pulselib.util.PTextureCache;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
@@ -375,7 +376,10 @@ public abstract class PEntityRenderer<T extends Entity & PAnimatable<T>, RS exte
 			if (mesh.textureName().isEmpty())
 				continue;
 			
-			RenderType type = renderType.apply(PTextureCache.ATLAS_LOCATION);
+			RenderType baseType = renderType.apply(PTextureCache.ATLAS_LOCATION);
+			RenderType type = mesh.isEmissive() ?
+					PRenderTypes.RenderTypeProvider.emissiveVariant(baseType, PTextureCache.ATLAS_LOCATION) :
+					baseType;
 			int packedColor = renderLayer == null ? color : renderLayer.getColor(renderState, bone, mesh, color);
 			
 			PRenderQueue.submitEntityMesh(type, mesh, new PRenderQueue.InstanceData(matrix4fstack, packedColor, packedLight, packedOverlay));
