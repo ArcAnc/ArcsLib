@@ -23,6 +23,7 @@ import com.arcanc.pulselib.util.PRenderTypes;
 import com.arcanc.pulselib.util.PTextureCache;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
+import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderStateShard;
 import net.minecraft.client.renderer.RenderType;
@@ -173,14 +174,16 @@ public abstract class PBlockRenderer<T extends BlockEntity & PAnimatable<T>>
 			if (mesh.textureName().isEmpty())
 				return;
 			
-			RenderType type = renderType.apply(PTextureCache.ATLAS_LOCATION);
+			RenderType baseType = renderType.apply(PTextureCache.ATLAS_LOCATION);
+			RenderType type = mesh.isEmissive() ? PRenderTypes.RenderTypeProvider.emissiveVariant(baseType, PTextureCache.ATLAS_LOCATION) : baseType;
+			int meshPackedLight = mesh.isEmissive() ? LightTexture.FULL_BRIGHT : packedLight;
 			
 			PRenderTypes.getTransparencyState(type).ifPresent(transparency ->
 			{
 				if (transparency == RenderStateShard.TransparencyStateShard.NO_TRANSPARENCY)
-					PRenderQueue.submitBlockEntityMesh(type, mesh.vertexBuffer(), new PRenderQueue.InstanceData(matrix4fstack, color, packedLight, packedOverlay));
+					PRenderQueue.submitBlockEntityMesh(type, mesh.vertexBuffer(), new PRenderQueue.InstanceData(matrix4fstack, color, meshPackedLight, packedOverlay));
 				else
-					PRenderQueue.submitBlockEntityTranslucentMesh(type, mesh.vertexBuffer(), new PRenderQueue.InstanceData(matrix4fstack, color, packedLight, packedOverlay));
+					PRenderQueue.submitBlockEntityTranslucentMesh(type, mesh.vertexBuffer(), new PRenderQueue.InstanceData(matrix4fstack, color, meshPackedLight, packedOverlay));
 			});
 		});
 	}

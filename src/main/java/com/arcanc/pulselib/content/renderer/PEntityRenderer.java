@@ -20,10 +20,12 @@ import com.arcanc.pulselib.content.model.baked.PBakedBone;
 import com.arcanc.pulselib.content.model.baked.PBakedMesh;
 import com.arcanc.pulselib.content.model.baked.PBakedModel;
 import com.arcanc.pulselib.content.renderer.modelData.PModelData;
+import com.arcanc.pulselib.util.PRenderTypes;
 import com.arcanc.pulselib.util.PTextureCache;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
+import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.entity.EntityRenderer;
@@ -348,9 +350,12 @@ public abstract class PEntityRenderer<T extends Entity & PAnimatable<T>> extends
 				continue;
 			
 			RenderType type = renderType.apply(PTextureCache.ATLAS_LOCATION);
+			if (mesh.isEmissive())
+				type = PRenderTypes.RenderTypeProvider.emissiveVariant(type, PTextureCache.ATLAS_LOCATION);
 			int packedColor = renderLayer == null ? color : renderLayer.getColor(animatable, bone, mesh, color);
+			int meshPackedLight = mesh.isEmissive() ? LightTexture.FULL_BRIGHT : packedLight;
 			
-			PRenderQueue.submitEntityMesh(type, mesh.vertexBuffer(), new PRenderQueue.InstanceData(matrix4fstack, packedColor, packedLight, packedOverlay));
+			PRenderQueue.submitEntityMesh(type, mesh.vertexBuffer(), new PRenderQueue.InstanceData(matrix4fstack, packedColor, meshPackedLight, packedOverlay));
 		}
 	}
 	

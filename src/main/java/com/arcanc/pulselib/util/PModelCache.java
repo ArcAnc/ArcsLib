@@ -18,6 +18,7 @@ import com.arcanc.pulselib.content.model.baked.AtlasBufferBuilder;
 import com.arcanc.pulselib.content.model.baked.PBakedBone;
 import com.arcanc.pulselib.content.model.baked.PBakedMesh;
 import com.arcanc.pulselib.content.model.baked.PBakedModel;
+import com.arcanc.pulselib.content.model.textures.atlas.PLibMetadata;
 import com.arcanc.pulselib.data.PGltfModelLoader;
 import com.arcanc.pulselib.data.PGltfModelParser;
 import com.arcanc.pulselib.data.PModelLoader;
@@ -157,6 +158,12 @@ public class PModelCache
 					ResourceLocation loc = textureLocation(modelPath, mesh.texture());
 					
 					TextureAtlasSprite sprite = PTextureCache.getTextureAtlas().getSprite(loc);
+					boolean isEmissive = sprite.contents().
+							metadata().
+							getSection(PLibMetadata.TYPE).
+							map(PLibMetadata :: isEmissive).
+							orElse(false);
+					
 					
 					ByteBufferBuilder byteBufferBuilder = new ByteBufferBuilder(mesh.vertexCount() * PRenderTypes.VertexFormatProvider.POSITION_TEX_NORMAL.getVertexSize());
 					BufferBuilder bufferBuilder;
@@ -207,7 +214,8 @@ public class PModelCache
 						builder.meshes.add(new PBakedMesh(
 								meshUUID,
 								vertexBuffer,
-								mesh.texture()));
+								mesh.texture(),
+								isEmissive));
 					}
 				}
 			}

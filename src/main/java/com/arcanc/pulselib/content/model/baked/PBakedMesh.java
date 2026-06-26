@@ -17,6 +17,7 @@ import java.util.UUID;
 public record PBakedMesh(
 		UUID uuid,
 		VertexBuffer vertexBuffer,
-		String textureName)
+		String textureName,
+		boolean isEmissive)
 {
 }

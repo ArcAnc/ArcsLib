@@ -25,6 +25,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
 import net.minecraft.client.model.geom.EntityModelSet;
 import net.minecraft.client.renderer.BlockEntityWithoutLevelRenderer;
+import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderDispatcher;
@@ -163,8 +164,11 @@ public abstract class PItemRenderer<T extends Item & PAnimatable<T>> extends Blo
 				return;
 			
 			RenderType type = renderType.apply(PTextureCache.ATLAS_LOCATION);
+			if (mesh.isEmissive())
+				type = PRenderTypes.RenderTypeProvider.emissiveVariant(type, PTextureCache.ATLAS_LOCATION);
+			int meshPackedLight = mesh.isEmissive() ? LightTexture.FULL_BRIGHT : packedLight;
 			
-			PRenderQueue.submitItem(context, type, mesh.vertexBuffer(), new PRenderQueue.InstanceData(matrix4fstack, color, packedLight, packedOverlay));
+			PRenderQueue.submitItem(context, type, mesh.vertexBuffer(), new PRenderQueue.InstanceData(matrix4fstack, color, meshPackedLight, packedOverlay));
 		});
 	}
 }

@@ -14,6 +14,7 @@ import com.arcanc.pulselib.content.animatable.PAnimatable;
 import com.arcanc.pulselib.content.animatable.PAnimationController;
 import com.arcanc.pulselib.content.model.animation.BoneFrame;
 import com.arcanc.pulselib.content.renderer.modelData.PModelData;
+import com.arcanc.pulselib.util.PRenderTypes;
 import com.arcanc.pulselib.util.PTextureCache;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
@@ -70,8 +71,6 @@ public record PBakedBone(String name,
 		Matrix4f matrix4fstack = new Matrix4f(RenderSystem.getModelViewMatrix());
 		matrix4fstack.mul(poseStack.last().pose());
 		
-		int blockLight = LightTexture.block(packedLight);
-		int skyLight   = LightTexture.sky(packedLight);
 		int u = packedOverlay & 0xFFFF;
 		int v = (packedOverlay >> 16) & 0xFFFF;
 		int red = FastColor.ARGB32.red(color);
@@ -87,6 +86,11 @@ public record PBakedBone(String name,
 				return;
 			
 			RenderType type = renderType.apply(PTextureCache.ATLAS_LOCATION);
+			if (mesh.isEmissive())
+				type = PRenderTypes.RenderTypeProvider.emissiveVariant(type, PTextureCache.ATLAS_LOCATION);
+			int meshPackedLight = mesh.isEmissive() ? LightTexture.FULL_BRIGHT : packedLight;
+			int blockLight = LightTexture.block(meshPackedLight);
+			int skyLight = LightTexture.sky(meshPackedLight);
 			type.setupRenderState();
 			
 			ShaderInstance shaderInstance = RenderSystem.getShader();
