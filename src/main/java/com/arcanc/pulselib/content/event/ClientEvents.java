@@ -21,11 +21,25 @@ import com.arcanc.pulselib.util.PLibDatabase;
 import com.arcanc.pulselib.util.PModelCache;
 import com.arcanc.pulselib.util.PRenderTypes;
 import com.arcanc.pulselib.util.PTextureCache;
+import com.arcanc.pulselib.util.armor.PArmorLayer;
+import com.arcanc.pulselib.util.armor.PulseArmorClientExtensions;
+import com.arcanc.pulselib.util.armor.PulseArmorModels;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.model.HumanoidModel;
+import net.minecraft.client.renderer.entity.EntityRenderer;
+import net.minecraft.client.renderer.entity.LivingEntityRenderer;
+import net.minecraft.client.renderer.entity.player.PlayerRenderer;
+import net.minecraft.client.resources.PlayerSkin;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.world.entity.HumanoidArm;
+import net.minecraft.world.item.Item;
 import net.neoforged.bus.api.EventPriority;
 import net.neoforged.bus.api.IEventBus;
+import net.neoforged.neoforge.client.event.EntityRenderersEvent;
 import net.neoforged.neoforge.client.event.RegisterClientReloadListenersEvent;
 import net.neoforged.neoforge.client.event.RegisterSpriteSourceTypesEvent;
+import net.neoforged.neoforge.client.event.RenderArmEvent;
+import net.neoforged.neoforge.client.extensions.common.IClientItemExtensions;
 import net.neoforged.neoforge.client.extensions.common.RegisterClientExtensionsEvent;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.level.LevelEvent;
@@ -40,7 +54,9 @@ public class ClientEvents
 		modEventBus.addListener(EventPriority.HIGHEST, ClientEvents :: registerSpriteSources);
 		modEventBus.addListener(ClientEvents :: registerReloadListeners);
 		modEventBus.addListener(ClientEvents :: registerClientExtensions);
+		modEventBus.addListener(ClientEvents :: addArmorLayers);
 		NeoForge.EVENT_BUS.addListener(ClientEvents :: playerDisconnected);
+		NeoForge.EVENT_BUS.addListener(ClientEvents :: renderFirstPersonArmor);
 		PRenderTypes.register(modEventBus);
 		PLibAnimationTicker.register(modEventBus);
 		PRenderStagesHandler.register(modEventBus);
@@ -50,9 +66,60 @@ public class ClientEvents
 	private static void registerClientExtensions(final RegisterClientExtensionsEvent event)
 	{
 		BuiltInRegistries.ITEM.stream().
-				filter(item -> item instanceof PItemAnimatable<?>).
-				forEach(item ->
-						event.registerItem(((PItemAnimatable<?>) item).registerClientExtension(), item));
+				filter(item -> item instanceof PItemAnimatable<?> || PulseArmorModels.contains(item)).
+				forEach(item -> registerClientExtension(event, item));
+	}
+	
+	private static void registerClientExtension(final RegisterClientExtensionsEvent event, final Item item)
+	{
+		if (event.isItemRegistered(item))
+			return;
+		
+		IClientItemExtensions base = item instanceof PItemAnimatable<?> animatable ?
+				animatable.registerClientExtension() :
+				IClientItemExtensions.DEFAULT;
+		IClientItemExtensions extension = PulseArmorClientExtensions.buildFor(item, base);
+		
+		if (extension != IClientItemExtensions.DEFAULT)
+			event.registerItem(extension, item);
+	}
+	
+	@SuppressWarnings({"rawtypes", "unchecked"})
+	private static void addArmorLayers(final EntityRenderersEvent.AddLayers event)
+	{
+		for (PlayerSkin.Model skin : event.getSkins())
+		{
+			PlayerRenderer renderer = event.getSkin(skin);
+			if (renderer != null)
+				renderer.addLayer(new PArmorLayer(renderer));
+		}
+		
+		for (var entityType : event.getEntityTypes())
+		{
+			EntityRenderer<?> renderer = event.getRenderer(entityType);
+			if (renderer instanceof LivingEntityRenderer livingRenderer &&
+					livingRenderer.getModel() instanceof HumanoidModel)
+				livingRenderer.addLayer(new PArmorLayer(livingRenderer));
+		}
+	}
+	
+	private static void renderFirstPersonArmor(final RenderArmEvent event)
+	{
+		Minecraft mc = Minecraft.getInstance();
+		EntityRenderer<?> renderer = mc.getEntityRenderDispatcher().getRenderer(event.getPlayer());
+		if (!(renderer instanceof PlayerRenderer playerRenderer))
+			return;
+		
+		HumanoidModel<?> model = playerRenderer.getModel();
+		float partialTick = mc.isPaused() ? 0 : mc.getTimer().getGameTimeDeltaPartialTick(false);
+		
+		PArmorLayer.renderFirstPersonArm(
+				event.getPoseStack(),
+				event.getPackedLight(),
+				event.getPlayer(),
+				event.getArm(),
+				event.getArm() == HumanoidArm.RIGHT ? model.rightArm : model.leftArm,
+				partialTick);
 	}
 	
 	private static void registerReloadListeners(final RegisterClientReloadListenersEvent event)
@@ -93,5 +160,6 @@ public class ClientEvents
 				addTextureLocation(TestBlockEntityRenderer.PYRAMID);
 		event.addTextureLocation(TestBlockItemRenderer.PYRAMID).
 				addTextureLocation(TestBlockItemRenderer.CIRCLE);
+		event.addTextureLocation(TestArmor.TEXTURE);
 	}*/
 }

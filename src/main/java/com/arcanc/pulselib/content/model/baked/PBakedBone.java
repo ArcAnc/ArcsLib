@@ -100,6 +100,7 @@ public record PBakedBone(String name,
 			shaderInstance.safeGetUniform("Color").set(colorVector);
 			shaderInstance.safeGetUniform("Light").set(blockLight, skyLight);
 			shaderInstance.safeGetUniform("Overlay").set(u, v);
+			shaderInstance.safeGetUniform("NormalMat").set(poseStack.last().normal());
 			shaderInstance.apply();
 			mesh.vertexBuffer().drawWithShader(matrix4fstack, RenderSystem.getProjectionMatrix(), shaderInstance);
 			VertexBuffer.unbind();
