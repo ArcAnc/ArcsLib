@@ -14,6 +14,7 @@ import com.arcanc.pulselib.content.registration.block.block_entity.TestBlockEnti
 import com.arcanc.pulselib.content.registration.entity.TestEntity;
 import com.arcanc.pulselib.content.registration.item.TestArmor;
 import com.arcanc.pulselib.content.registration.item.TestBlockItem;
+import com.arcanc.pulselib.content.registration.item.TestTailItem;
 import com.arcanc.pulselib.util.PLibDatabase;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
@@ -85,6 +86,9 @@ public class Registration
 				ArmorMaterials.DIAMOND,
 				ArmorItem.Type.LEGGINGS,
 				new Item.Properties().durability(ArmorItem.Type.LEGGINGS.getDurability(33))));
+		
+		public static final DeferredItem<TestTailItem> TEST_TAIL = ITEMS.register("test_tail", identifier -> new TestTailItem(
+				new Item.Properties().stacksTo(1)));
 		
 		private static void init (@NotNull final IEventBus bus)
 		{

@@ -14,12 +14,30 @@ import com.arcanc.pulselib.content.renderer.modelData.PModelData;
 import net.minecraft.world.entity.EquipmentSlot;
 
 import java.util.List;
-import java.util.Set;
 
-public record PulseArmorDefinition(
-		PModelData modelData,
-		Set<EquipmentSlot> slots,
-		List<PulseArmorAttachment> attachments,
-		boolean hideVanilla)
+public class PulseArmorDefinition extends PulseHumanoidDefinition
 {
+	private final EquipmentSlot slot;
+	private final List<PulseArmorAttachment> armorAttachments;
+	
+	public PulseArmorDefinition(
+			PModelData modelData,
+			EquipmentSlot slot,
+			List<PulseArmorAttachment> attachments,
+			boolean hideVanilla)
+	{
+		super(modelData, PulseLivingAttachmentSource.equipmentSlot(slot), attachments, hideVanilla);
+		this.slot = slot;
+		this.armorAttachments = attachments;
+	}
+	
+	public EquipmentSlot slot()
+	{
+		return this.slot;
+	}
+	
+	public List<PulseArmorAttachment> armorAttachments()
+	{
+		return this.armorAttachments;
+	}
 }

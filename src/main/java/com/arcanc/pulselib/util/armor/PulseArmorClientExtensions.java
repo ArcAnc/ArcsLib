@@ -52,7 +52,7 @@ public class PulseArmorClientExtensions implements IClientItemExtensions
 	public static IClientItemExtensions buildFor(Item item, @Nullable IClientItemExtensions base)
 	{
 		IClientItemExtensions resolvedBase = base == null ? IClientItemExtensions.DEFAULT : base;
-		if (!PulseArmorModels.contains(item))
+		if (!PulseLivingAttachments.contains(item))
 			return resolvedBase;
 		return new PulseArmorClientExtensions(resolvedBase);
 	}
@@ -96,10 +96,10 @@ public class PulseArmorClientExtensions implements IClientItemExtensions
 	                                  EquipmentSlot equipmentSlot,
 	                                  HumanoidModel<?> original)
 	{
-		return PulseArmorModels.get(itemStack, equipmentSlot).
-				filter(PulseArmorDefinition :: hideVanilla).
-				< Model > map($ -> EMPTY_ARMOR_MODEL).
-				orElseGet(() -> this.base.getGenericArmorModel(livingEntity, itemStack, equipmentSlot, original));
+		if (PulseLivingAttachments.hidesVanillaArmor(itemStack, equipmentSlot, livingEntity))
+			return EMPTY_ARMOR_MODEL;
+		
+		return this.base.getGenericArmorModel(livingEntity, itemStack, equipmentSlot, original);
 	}
 	
 	@Override
@@ -144,10 +144,8 @@ public class PulseArmorClientExtensions implements IClientItemExtensions
 	@Override
 	public int getArmorLayerTintColor(ItemStack stack, LivingEntity entity, ArmorMaterial.Layer layer, int layerIdx, int fallbackColor)
 	{
-		boolean hideVanilla = PulseArmorModels.get(stack, entity.getEquipmentSlotForItem(stack)).
-				map(PulseArmorDefinition :: hideVanilla).
-				orElse(false);
-		return hideVanilla ? 0 : this.base.getArmorLayerTintColor(stack, entity, layer, layerIdx, fallbackColor);
+		EquipmentSlot slot = entity.getEquipmentSlotForItem(stack);
+		return PulseLivingAttachments.hidesVanillaArmor(stack, slot, entity) ? 0 : this.base.getArmorLayerTintColor(stack, entity, layer, layerIdx, fallbackColor);
 	}
 	
 	@Override

@@ -10,39 +10,39 @@
 package com.arcanc.pulselib.util.armor;
 
 
-import it.unimi.dsi.fastutil.objects.Reference2ObjectLinkedOpenHashMap;
 import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 
 import java.util.Collection;
-import java.util.Map;
 import java.util.Optional;
 
+/**
+ * Armor-specific convenience facade. The actual registry is {@link PulseHumanoidAttachments}.
+ */
 public class PulseArmorModels
 {
-	private static final Map<Item, PulseArmorDefinition> ARMOR_MODELS = new Reference2ObjectLinkedOpenHashMap<>();
-	
 	public static void register(Item item, PulseArmorDefinition definition)
 	{
-		ARMOR_MODELS.put(item, definition);
+		PulseLivingAttachments.register(item, definition);
 	}
 	
 	public static boolean contains(Item item)
 	{
-		return ARMOR_MODELS.containsKey(item);
+		return PulseLivingAttachments.contains(item);
 	}
 	
-	public static Optional<PulseArmorDefinition> get(ItemStack stack, EquipmentSlot slot)
+	public static Optional<PulseArmorDefinition> get(ItemStack stack, EquipmentSlot slot, LivingEntity entity)
 	{
-		PulseArmorDefinition definition = ARMOR_MODELS.get(stack.getItem());
-		if (definition == null || !definition.slots().contains(slot))
-			return Optional.empty();
-		return Optional.of(definition);
+		return PulseLivingAttachments.get(stack, slot, entity).stream().
+				filter(PulseArmorDefinition.class :: isInstance).
+				map(PulseArmorDefinition.class :: cast).
+				findFirst();
 	}
 	
 	public static Collection<Item> items()
 	{
-		return ARMOR_MODELS.keySet();
+		return PulseLivingAttachments.items();
 	}
 }

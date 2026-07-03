@@ -15,32 +15,107 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.EquipmentSlot;
 import org.joml.Vector3f;
 
+import java.util.Objects;
 import java.util.function.Function;
 
-public record PulseArmorAttachment(
-		EquipmentSlot slot,
-		VanillaHumanoidPart vanillaPart,
-		String pulseBone,
-		Function<ResourceLocation, RenderType> renderType,
-		Vector3f offset,
-		int color)
+public class PulseArmorAttachment extends PulseHumanoidAttachment
 {
+	private final EquipmentSlot slot;
+	
 	public PulseArmorAttachment(
 			EquipmentSlot slot,
-			VanillaHumanoidPart vanillaPart,
-			String pulseBone,
-			Function<ResourceLocation, RenderType> renderType,
-			int color)
+			PulseAttachmentAnchor anchor,
+			String pulseBone)
 	{
-		this(slot, vanillaPart, pulseBone, renderType, new Vector3f(), color);
+		super(anchor, pulseBone);
+		this.slot = Objects.requireNonNull(slot);
 	}
 	
 	public PulseArmorAttachment(
 			EquipmentSlot slot,
-			VanillaHumanoidPart vanillaPart,
+			PulseAttachmentAnchor anchor,
+			String pulseBone,
+			int color)
+	{
+		super(anchor, pulseBone, color);
+		this.slot = Objects.requireNonNull(slot);
+	}
+	
+	public PulseArmorAttachment(
+			EquipmentSlot slot,
+			PulseAttachmentAnchor anchor,
+			String pulseBone,
+			Function<ResourceLocation, RenderType> renderType,
+			Vector3f offset,
+			int color)
+	{
+		super(anchor, pulseBone, renderType, offset, color);
+		this.slot = Objects.requireNonNull(slot);
+	}
+	
+	public PulseArmorAttachment(
+			EquipmentSlot slot,
+			PulseAttachmentAnchor anchor,
+			String pulseBone,
+			Function<ResourceLocation, RenderType> renderType,
+			Vector3f offset,
+			Vector3f rotation,
+			Vector3f scale,
+			int color)
+	{
+		super(anchor, pulseBone, renderType, offset, rotation, scale, color);
+		this.slot = Objects.requireNonNull(slot);
+	}
+	
+	public PulseArmorAttachment(
+			EquipmentSlot slot,
+			PulseAttachmentAnchor anchor,
+			String pulseBone,
+			Function<ResourceLocation, RenderType> renderType,
+			int color)
+	{
+		this(slot, anchor, pulseBone, renderType, new Vector3f(), color);
+	}
+	
+	public PulseArmorAttachment(
+			EquipmentSlot slot,
+			PulseAttachmentAnchor anchor,
 			String pulseBone,
 			Function<ResourceLocation, RenderType> renderType)
 	{
-		this(slot, vanillaPart, pulseBone, renderType, new Vector3f(), -1);
+		this(slot, anchor, pulseBone, renderType, new Vector3f(), -1);
+	}
+	
+	public EquipmentSlot slot()
+	{
+		return this.slot;
+	}
+	
+	protected PulseArmorAttachment(Builder builder)
+	{
+		super(builder);
+		this.slot = builder.slot;
+	}
+	
+	public static Builder builder(EquipmentSlot slot, PulseAttachmentAnchor anchor, String pulseBone)
+	{
+		return new Builder(slot, anchor, pulseBone);
+	}
+	
+	public static class Builder extends PulseHumanoidAttachment.Builder<Builder>
+	{
+		protected final EquipmentSlot slot;
+		
+		protected Builder(EquipmentSlot slot, PulseAttachmentAnchor anchor, String pulseBone)
+		{
+			super(anchor, pulseBone);
+			this.slot = Objects.requireNonNull(slot);
+		}
+		
+		@Override
+		public PulseArmorAttachment build()
+		{
+			return new PulseArmorAttachment(this);
+		}
 	}
 }

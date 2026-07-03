@@ -12,18 +12,16 @@ package com.arcanc.pulselib.content.registration.item;
 
 import com.arcanc.pulselib.content.renderer.modelData.PModelData;
 import com.arcanc.pulselib.util.PLibDatabase;
-import com.arcanc.pulselib.util.PRenderTypes;
 import com.arcanc.pulselib.util.armor.PulseArmorAttachment;
 import com.arcanc.pulselib.util.armor.PulseArmorDefinition;
 import com.arcanc.pulselib.util.armor.PulseArmorModels;
-import com.arcanc.pulselib.util.armor.VanillaHumanoidPart;
+import com.arcanc.pulselib.util.armor.PulseHumanoidAnchors;
 import net.minecraft.core.Holder;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ArmorItem;
 import net.minecraft.world.item.ArmorMaterial;
 
 import java.util.List;
-import java.util.Set;
 
 public class TestArmor extends ArmorItem
 {
@@ -39,7 +37,7 @@ public class TestArmor extends ArmorItem
 	{
 		return new PulseArmorDefinition(
 				new PModelData.Builder(PLibDatabase.rl("armor/test_armor"), "entity").build(),
-				Set.of(type.getSlot()),
+				type.getSlot(),
 				attachments(type),
 				true);
 	}
@@ -48,21 +46,9 @@ public class TestArmor extends ArmorItem
 	{
 		return switch (type)
 		{
-			case HELMET -> List.of(new PulseArmorAttachment(
-					type.getSlot(),
-					VanillaHumanoidPart.HEAD,
-					"head",
-					PRenderTypes.RenderTypeProvider :: trianglesSolid));
-			case CHESTPLATE -> List.of(new PulseArmorAttachment(
-					type.getSlot(),
-					VanillaHumanoidPart.RIGHT_ARM,
-					"right_arm",
-					PRenderTypes.RenderTypeProvider :: trianglesSolid));
-			case LEGGINGS -> List.of(new PulseArmorAttachment(
-					type.getSlot(),
-					VanillaHumanoidPart.RIGHT_LEG,
-					"right_leg",
-					PRenderTypes.RenderTypeProvider :: trianglesSolid));
+			case HELMET -> List.of(PulseArmorAttachment.builder(type.getSlot(), PulseHumanoidAnchors.HEAD, "head").build());
+			case CHESTPLATE -> List.of(PulseArmorAttachment.builder(type.getSlot(), PulseHumanoidAnchors.RIGHT_ARM, "right_arm").build());
+			case LEGGINGS -> List.of(PulseArmorAttachment.builder(type.getSlot(), PulseHumanoidAnchors.RIGHT_LEG, "right_leg").build());
 			case BODY, BOOTS -> List.of();
 		};
 	}
