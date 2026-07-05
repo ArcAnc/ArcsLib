@@ -12,6 +12,7 @@ package com.arcanc.pulselib.content.registration;
 import com.arcanc.pulselib.content.registration.block.TestBlock;
 import com.arcanc.pulselib.content.registration.block.block_entity.TestBlockEntity;
 import com.arcanc.pulselib.content.registration.entity.TestEntity;
+import com.arcanc.pulselib.content.registration.item.TestArmorItem;
 import com.arcanc.pulselib.content.registration.item.TestBlockItem;
 import com.arcanc.pulselib.util.PLibDatabase;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -20,6 +21,8 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.equipment.ArmorMaterials;
+import net.minecraft.world.item.equipment.ArmorType;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.neoforged.bus.api.IEventBus;
@@ -69,6 +72,10 @@ public class Registration
 				new Item.Properties().setId(
 						ResourceKey.create(Registries.ITEM, PLibDatabase.rl("test_block")))));
 		
+		public static final DeferredItem<TestArmorItem> TEST_ARMOR = ITEMS.registerItem("test_armor",
+				TestArmorItem :: new,
+				() -> new Item.Properties().humanoidArmor(ArmorMaterials.DIAMOND, ArmorType.CHESTPLATE));
+		
 		private static void init (@NotNull final IEventBus bus)
 		{
 			ITEMS.register(bus);
@@ -91,7 +98,7 @@ public class Registration
 			ENTITIES.register(bus);
 		}
 	}
-	
+
 	public static void init(@NotNull final IEventBus bus)
 	{
 		/*EntityTypeReg.init(bus);

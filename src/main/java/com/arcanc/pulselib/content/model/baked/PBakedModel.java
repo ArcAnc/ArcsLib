@@ -42,4 +42,24 @@ public record PBakedModel(List<PBakedBone> bones, Map<String, PAnimation> animat
 				packedOverlay,
 				partialTick));
 	}
+
+	public <T extends PAnimatable<T>>void instantDraw(PoseStack poseStack,
+	                                                  PModelData modelData,
+	                                                  Collection<PAnimationController<T>> controllers,
+	                                                  Function<Identifier, RenderType> renderType,
+	                                                  int color,
+	                                                  int packedLight,
+	                                                  int packedOverlay,
+	                                                  float partialTick)
+	{
+		this.bones.forEach(bone -> bone.instantDraw(
+				poseStack,
+				modelData,
+				controllers,
+				renderType,
+				color,
+				packedLight,
+				packedOverlay,
+				partialTick));
+	}
 }

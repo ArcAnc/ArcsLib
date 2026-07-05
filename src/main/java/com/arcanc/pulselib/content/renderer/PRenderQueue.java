@@ -21,6 +21,7 @@ import com.mojang.blaze3d.buffers.Std140SizeCalculator;
 import com.mojang.blaze3d.pipeline.RenderTarget;
 import com.mojang.blaze3d.systems.RenderPass;
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.systems.ScissorState;
 import com.mojang.blaze3d.textures.FilterMode;
 import com.mojang.blaze3d.textures.GpuTextureView;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
@@ -70,8 +71,7 @@ public class PRenderQueue
 			     HEAD, ON_SHELF -> RenderStage.ENTITIES;
 			case GROUND, FIXED, NONE -> RenderStage.TRANSLUCENT_BLOCKS;
 		};
-		if (stage!= RenderStage.GUI)
-			submit(stage, renderType, mesh, data);
+		submit(stage, renderType, mesh, data);
 	}
 	
 	public static void submitEntityMesh(RenderType renderType, PBakedMesh mesh, InstanceData data)
@@ -144,6 +144,7 @@ public class PRenderQueue
 					RenderSystem.bindDefaultUniforms(pass);
 					pass.setUniform("DynamicTransforms", dynamicTransforms);
 					pass.setUniform("InstanceData", instanceData.currentBuffer());
+					applyActiveScissor(pass);
 					pass.bindTexture("Sampler0", atlas.getTextureView(), atlas.getSampler());
 					pass.bindTexture("Sampler1", overlayTexture.getTextureView(), RenderSystem.getSamplerCache().getClampToEdge(FilterMode.LINEAR));
 					pass.bindTexture("Sampler2", lightTexture, RenderSystem.getSamplerCache().getClampToEdge(FilterMode.LINEAR));
@@ -160,6 +161,15 @@ public class PRenderQueue
 		}
 	}
 	
+	private static void applyActiveScissor(RenderPass pass)
+	{
+		ScissorState scissor = RenderSystem.getScissorStateForRenderTypeDraws();
+		if (scissor.enabled())
+			pass.enableScissor(scissor.x(), scissor.y(), scissor.width(), scissor.height());
+		else
+			pass.disableScissor();
+	}
+
 	public static void cleanUp()
 	{
 		for (Map<BatchKey, InstanceBatch> stageMap : COMMANDS.values())

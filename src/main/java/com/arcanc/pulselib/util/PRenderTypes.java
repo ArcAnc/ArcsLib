@@ -99,6 +99,43 @@ public class PRenderTypes
 				withDepthStencilState(DepthStencilState.DEFAULT).
 				withVertexFormat(VertexFormatProvider.POSITION_TEX_NORMAL, VertexFormat.Mode.TRIANGLES).
 				build());
+
+		private static final RenderPipeline.Snippet TRIANGLES_INSTANT_SNIPPET = RenderPipeline.builder(RenderPipelines.MATRICES_PROJECTION_SNIPPET).
+				withVertexShader(PLibDatabase.rl("core/triangles_instant")).
+				withFragmentShader(PLibDatabase.rl("core/triangles_instant")).
+				withSampler("Sampler0").
+				withSampler("Sampler1").
+				withSampler("Sampler2").
+				withUniform("Lighting", UniformType.UNIFORM_BUFFER).
+				withUniform("ColorOverlay", UniformType.UNIFORM_BUFFER).
+				withCull(false).
+				withDepthStencilState(DepthStencilState.DEFAULT).
+				withVertexFormat(VertexFormatProvider.POSITION_TEX_NORMAL, VertexFormat.Mode.TRIANGLES).
+				buildSnippet();
+
+		public static final RenderPipeline TRIANGLES_INSTANT_CUTOUT = registerPipeline(RenderPipeline.builder(TRIANGLES_INSTANT_SNIPPET).
+				withLocation(PLibDatabase.rl("pipeline/triangles_instant_cutout")).
+				withShaderDefine("ALPHA_CUTOUT", 0.1F).
+				build());
+
+		public static final RenderPipeline TRIANGLES_INSTANT_TRANSLUCENT = registerPipeline(RenderPipeline.builder(TRIANGLES_INSTANT_SNIPPET).
+				withLocation(PLibDatabase.rl("pipeline/triangles_instant_translucent")).
+				withShaderDefine("ALPHA_CUTOUT", 0.1F).
+				withColorTargetState(new ColorTargetState(BlendFunction.TRANSLUCENT)).
+				build());
+
+		public static final RenderPipeline TRIANGLES_INSTANT_EMISSIVE_CUTOUT = registerPipeline(RenderPipeline.builder(TRIANGLES_INSTANT_SNIPPET).
+				withLocation(PLibDatabase.rl("pipeline/triangles_instant_emissive_cutout")).
+				withShaderDefine("EMISSIVE").
+				withShaderDefine("ALPHA_CUTOUT", 0.1F).
+				build());
+
+		public static final RenderPipeline TRIANGLES_INSTANT_EMISSIVE_TRANSLUCENT = registerPipeline(RenderPipeline.builder(TRIANGLES_INSTANT_SNIPPET).
+				withLocation(PLibDatabase.rl("pipeline/triangles_instant_emissive_translucent")).
+				withShaderDefine("EMISSIVE").
+				withShaderDefine("ALPHA_CUTOUT", 0.1F).
+				withColorTargetState(new ColorTargetState(BlendFunction.TRANSLUCENT)).
+				build());
 		
 		private static RenderPipeline registerPipeline(RenderPipeline pipeline)
 		{
@@ -131,6 +168,10 @@ public class PRenderTypes
 		private static final Function<Identifier, RenderType> TRIANGLES_EMISSIVE_CUTOUT = Util.memoize(RenderTypeProvider :: createTrianglesEmissiveCutout);
 		private static final Function<Identifier, RenderType> TRIANGLES_EMISSIVE_TRANSLUCENT = Util.memoize(RenderTypeProvider :: createTrianglesEmissiveTranslucent);
 		private static final Function<Identifier, RenderType> TRIANGLES_GUI = Util.memoize(RenderTypeProvider :: createTrianglesGui);
+		private static final Function<Identifier, RenderType> TRIANGLES_INSTANT_CUTOUT = Util.memoize(RenderTypeProvider :: createTrianglesInstantCutout);
+		private static final Function<Identifier, RenderType> TRIANGLES_INSTANT_TRANSLUCENT = Util.memoize(RenderTypeProvider :: createTrianglesInstantTranslucent);
+		private static final Function<Identifier, RenderType> TRIANGLES_INSTANT_EMISSIVE_CUTOUT = Util.memoize(RenderTypeProvider :: createTrianglesInstantEmissiveCutout);
+		private static final Function<Identifier, RenderType> TRIANGLES_INSTANT_EMISSIVE_TRANSLUCENT = Util.memoize(RenderTypeProvider :: createTrianglesInstantEmissiveTranslucent);
 		
 		private static RenderType createTrianglesSolid(Identifier texture)
 		{
@@ -205,6 +246,52 @@ public class PRenderTypes
 			
 			return RenderType.create(PLibDatabase.rl("triangles_gui").toString(), setup);
 		}
+
+		private static RenderType createTrianglesInstantCutout(Identifier texture)
+		{
+			RenderSetup setup = RenderSetup.builder(RenderPipelinesProvider.TRIANGLES_INSTANT_CUTOUT).
+					withTexture("Sampler0", texture).
+					useLightmap().
+					useOverlay().
+					setOutline(RenderSetup.OutlineProperty.AFFECTS_OUTLINE).
+					createRenderSetup();
+
+			return RenderType.create(PLibDatabase.rl("triangles_instant_cutout").toString(), setup);
+		}
+
+		private static RenderType createTrianglesInstantTranslucent(Identifier texture)
+		{
+			RenderSetup setup = RenderSetup.builder(RenderPipelinesProvider.TRIANGLES_INSTANT_TRANSLUCENT).
+					withTexture("Sampler0", texture).
+					useLightmap().
+					useOverlay().
+					setOutline(RenderSetup.OutlineProperty.AFFECTS_OUTLINE).
+					createRenderSetup();
+
+			return RenderType.create(PLibDatabase.rl("triangles_instant_translucent").toString(), setup);
+		}
+
+		private static RenderType createTrianglesInstantEmissiveCutout(Identifier texture)
+		{
+			RenderSetup setup = RenderSetup.builder(RenderPipelinesProvider.TRIANGLES_INSTANT_EMISSIVE_CUTOUT).
+					withTexture("Sampler0", texture).
+					useOverlay().
+					setOutline(RenderSetup.OutlineProperty.AFFECTS_OUTLINE).
+					createRenderSetup();
+
+			return RenderType.create(PLibDatabase.rl("triangles_instant_emissive_cutout").toString(), setup);
+		}
+
+		private static RenderType createTrianglesInstantEmissiveTranslucent(Identifier texture)
+		{
+			RenderSetup setup = RenderSetup.builder(RenderPipelinesProvider.TRIANGLES_INSTANT_EMISSIVE_TRANSLUCENT).
+					withTexture("Sampler0", texture).
+					useOverlay().
+					setOutline(RenderSetup.OutlineProperty.AFFECTS_OUTLINE).
+					createRenderSetup();
+
+			return RenderType.create(PLibDatabase.rl("triangles_instant_emissive_translucent").toString(), setup);
+		}
 		
 		public static RenderType trianglesSolid(Identifier texture)
 		{
@@ -236,9 +323,39 @@ public class PRenderTypes
 			return TRIANGLES_GUI.apply(texture);
 		}
 
+		public static RenderType trianglesInstantCutout(Identifier texture)
+		{
+			return TRIANGLES_INSTANT_CUTOUT.apply(texture);
+		}
+
+		public static RenderType trianglesInstantTranslucent(Identifier texture)
+		{
+			return TRIANGLES_INSTANT_TRANSLUCENT.apply(texture);
+		}
+
+		public static RenderType trianglesInstantEmissiveCutout(Identifier texture)
+		{
+			return TRIANGLES_INSTANT_EMISSIVE_CUTOUT.apply(texture);
+		}
+
+		public static RenderType trianglesInstantEmissiveTranslucent(Identifier texture)
+		{
+			return TRIANGLES_INSTANT_EMISSIVE_TRANSLUCENT.apply(texture);
+		}
+
 		public static RenderType emissiveVariant(RenderType baseType, Identifier texture)
 		{
 			return isTransparent(baseType) ? trianglesEmissiveTranslucent(texture) : trianglesEmissiveCutout(texture);
+		}
+
+		public static RenderType instantVariant(RenderType baseType, Identifier texture)
+		{
+			return isTransparent(baseType) ? trianglesInstantTranslucent(texture) : trianglesInstantCutout(texture);
+		}
+
+		public static RenderType instantEmissiveVariant(RenderType baseType, Identifier texture)
+		{
+			return isTransparent(baseType) ? trianglesInstantEmissiveTranslucent(texture) : trianglesInstantEmissiveCutout(texture);
 		}
 	}
 	

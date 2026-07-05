@@ -15,6 +15,7 @@ import com.arcanc.pulselib.content.animatable.PAnimationController;
 import com.arcanc.pulselib.content.model.animation.BoneFrame;
 import com.arcanc.pulselib.content.renderer.modelData.PModelData;
 import com.arcanc.pulselib.util.PLibDatabase;
+import com.arcanc.pulselib.util.PRenderTypes;
 import com.arcanc.pulselib.util.PTextureCache;
 import com.arcanc.pulselib.util.helpers.PLibRenderHelper;
 import com.mojang.blaze3d.buffers.GpuBuffer;
@@ -34,6 +35,7 @@ import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.ARGB;
+import net.minecraft.util.LightCoordsUtil;
 import org.jetbrains.annotations.ApiStatus;
 import org.joml.*;
 import org.jspecify.annotations.Nullable;
@@ -53,6 +55,7 @@ public class PBakedBone
 	private final @Nullable PBakedBone parent;
 	private final List<PBakedMesh> meshes;
 	private @Nullable MappableRingBuffer colorLightOverlay;
+	private static final int FULL_BRIGHT = 0x00F000F0;
 	
 	public PBakedBone(String name,
 	                  Vector3f basePosition,
@@ -79,6 +82,7 @@ public class PBakedBone
 				GpuBuffer.USAGE_UNIFORM | GpuBuffer.USAGE_MAP_WRITE,
 				new Std140SizeCalculator().
 						putVec4().
+						putVec2().
 						putIVec2().
 						get());
 	}
@@ -88,6 +92,18 @@ public class PBakedBone
 	                                                  Collection<PAnimationController<T>> controllers,
 	                                                  Function<Identifier, RenderType> renderType,
 	                                                  int color,
+	                                                  int packedOverlay,
+	                                                  float partialTick)
+	{
+		instantDraw(poseStack, modelData, controllers, renderType, color, FULL_BRIGHT, packedOverlay, partialTick);
+	}
+
+	public <T extends PAnimatable<T>>void instantDraw(PoseStack poseStack,
+	                                                  PModelData modelData,
+	                                                  Collection<PAnimationController<T>> controllers,
+	                                                  Function<Identifier, RenderType> renderType,
+	                                                  int color,
+	                                                  int packedLight,
 	                                                  int packedOverlay,
 	                                                  float partialTick)
 	{
@@ -106,17 +122,7 @@ public class PBakedBone
 		}
 		
 		Minecraft mc = PLibRenderHelper.mc();
-		RenderType type = renderType.apply(PTextureCache.ATLAS_LOCATION);
-		
-		RenderTarget renderTarget = type.outputTarget().getRenderTarget();
-		
-		GpuTextureView colorAttachment = RenderSystem.outputColorTextureOverride != null
-				? RenderSystem.outputColorTextureOverride
-				: renderTarget.getColorTextureView();
-		
-		GpuTextureView depthTexture = renderTarget.useDepth
-				? (RenderSystem.outputDepthTextureOverride != null ? RenderSystem.outputDepthTextureOverride : renderTarget.getDepthTextureView())
-				: null;
+		RenderType baseType = renderType.apply(PTextureCache.ATLAS_LOCATION);
 		
 		TextureAtlas atlas = PTextureCache.getTextureAtlas();
 		Matrix4f matrix4fStack = new Matrix4f(RenderSystem.getModelViewMatrix());
@@ -134,16 +140,29 @@ public class PBakedBone
 			
 			Std140Builder.intoBuffer(colorLightOverlayMappedView.data()).
 					putVec4(ARGB.vector4fFromARGB32(color)).
+					putVec2(LightCoordsUtil.block(packedLight), LightCoordsUtil.sky(packedLight)).
 					putIVec2(new Vector2i(u, v));
 			
 		}
-		Matrix4f matrix4fstack = new Matrix4f(RenderSystem.getModelViewMatrix());
-		matrix4fstack.mul(poseStack.last().pose());
 		
 		this.meshes().forEach(mesh ->
 		{
 			if (mesh.textureName().isEmpty())
 				return;
+
+			RenderType type = mesh.isEmissive() ?
+					PRenderTypes.RenderTypeProvider.instantEmissiveVariant(baseType, PTextureCache.ATLAS_LOCATION) :
+					PRenderTypes.RenderTypeProvider.instantVariant(baseType, PTextureCache.ATLAS_LOCATION);
+
+			RenderTarget renderTarget = type.outputTarget().getRenderTarget();
+
+			GpuTextureView colorAttachment = RenderSystem.outputColorTextureOverride != null
+					? RenderSystem.outputColorTextureOverride
+					: renderTarget.getColorTextureView();
+
+			GpuTextureView depthTexture = renderTarget.useDepth
+					? (RenderSystem.outputDepthTextureOverride != null ? RenderSystem.outputDepthTextureOverride : renderTarget.getDepthTextureView())
+					: null;
 			
 			GpuTextureView lightTexture = mc.gameRenderer.levelLightmap();
 			OverlayTexture overlayTexture = mc.gameRenderer.overlayTexture();
@@ -166,7 +185,7 @@ public class PBakedBone
 		});
 		
 		this.children().forEach(children ->
-				children.instantDraw(poseStack, modelData, controllers, renderType, color, packedOverlay, partialTick));
+				children.instantDraw(poseStack, modelData, controllers, renderType, color, packedLight, packedOverlay, partialTick));
 		
 		poseStack.popPose();
 	}

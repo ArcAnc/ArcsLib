@@ -20,6 +20,8 @@ import com.arcanc.pulselib.util.PLibDatabase;
 import com.arcanc.pulselib.util.PModelCache;
 import com.arcanc.pulselib.util.PRenderTypes;
 import com.arcanc.pulselib.util.PTextureCache;
+import com.arcanc.pulselib.util.armor.PLibArmorHandler;
+import com.arcanc.pulselib.util.armor.PulseAttachmentAnchorResolvers;
 import net.neoforged.bus.api.EventPriority;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.client.event.AddClientReloadListenersEvent;
@@ -42,6 +44,8 @@ public class ClientEvents
 		PLibAnimationTicker.register(modEventBus);
 		PRenderStagesHandler.register(modEventBus);
 		PTextureCache.register(modEventBus);
+		PLibArmorHandler.register(modEventBus);
+		PulseAttachmentAnchorResolvers.init(modEventBus);
 	}
 	
 	private static void registerReloadListeners(final AddClientReloadListenersEvent event)
@@ -66,11 +70,11 @@ public class ClientEvents
 	/*private static void registerClientExtensions(final RegisterSpecialModelRendererEvent event)
 	{
 		event.register(PLibDatabase.rl("test_block"), TestBlockItemRenderer.Unbaked.MAP_CODEC);
-	}*/
+	}
 	
 	/*private static void registerRenderers(final EntityRenderersEvent.RegisterRenderers event)
 	{
-		//event.registerBlockEntityRenderer(Registration.BETypeReg.TEST_BLOCK_ENTITY.get(), TestBlockEntityRenderer :: new);
+		event.registerBlockEntityRenderer(Registration.BETypeReg.TEST_BLOCK_ENTITY.get(), TestBlockEntityRenderer :: new);
 		event.registerEntityRenderer(Registration.EntityTypeReg.TEST_ENTITY.get(), TestEntityRender :: new);
 	}*/
 	

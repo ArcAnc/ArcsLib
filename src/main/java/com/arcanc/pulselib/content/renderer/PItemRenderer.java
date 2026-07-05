@@ -128,7 +128,11 @@ public abstract class PItemRenderer<T extends Item & PAnimatable<T>, RS extends 
 		ItemDisplayContext context = ((ItemStackRenderStateAccessor)renderState.itemRenderState()).pulselib$getDisplayContext();
 		if (context == ItemDisplayContext.GUI)
 		{
-			model.instantDraw(poseStack, getModelData(renderState), controllers, PRenderTypes.RenderTypeProvider :: trianglesGui, -1, renderState.overlayCoords(), renderState.partialTick());
+			model.bones().forEach(bone -> perBoneSubmit(renderState, poseStack, bone, controllers, renderType, -1, renderState.lightCoords(), renderState.overlayCoords(), renderState.partialTick(), context));
+			submitNodeCollector.submitCustomGeometry(
+					poseStack,
+					this.renderType.apply(PTextureCache.ATLAS_LOCATION),
+					(_, _) -> PRenderQueue.flush(PRenderQueue.RenderStage.GUI));
 			return;
 		}
 		model.bones().forEach(bone -> perBoneSubmit(renderState, poseStack, bone, controllers, renderType, -1, renderState.lightCoords(), renderState.overlayCoords(), renderState.partialTick(), context));
@@ -142,7 +146,10 @@ public abstract class PItemRenderer<T extends Item & PAnimatable<T>, RS extends 
 	protected void perBoneSubmit(RS renderState, PoseStack poseStack, PBakedBone bone, Collection<PAnimationController<T>> controllers, Function<Identifier, RenderType> renderType, int packedColor, int packedLight, int packedOverlay, float partialTick, ItemDisplayContext context)
 	{
 		PModelData data = this.getModelData(renderState);
-		BoneFrame frame = bone.mixBone(data.getModel(), controllers, partialTick);
+		PBakedModel model = data.getModel();
+		if (model == null)
+			return;
+		BoneFrame frame = bone.mixBone(model, controllers, partialTick);
 		poseStack.pushPose();
 		if (frame != null)
 		{
