@@ -18,6 +18,7 @@ import com.arcanc.pulselib.content.model.animation.BoneFrame;
 import com.arcanc.pulselib.content.model.baked.PBakedBone;
 import com.arcanc.pulselib.content.model.baked.PBakedMesh;
 import com.arcanc.pulselib.content.model.baked.PBakedModel;
+import com.arcanc.pulselib.content.model.baked.PMeshRenderContext;
 import com.arcanc.pulselib.content.renderer.base.PEntityRenderState;
 import com.arcanc.pulselib.content.renderer.modelData.PModelData;
 import com.arcanc.pulselib.util.PRenderTypes;
@@ -39,6 +40,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
+import net.minecraft.util.LightCoordsUtil;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
@@ -159,7 +161,7 @@ public abstract class PEntityRenderer<T extends Entity & PAnimatable<T>, RS exte
 		if (this.renderLayers.isEmpty())
 		{
 			for (PBakedBone bone : model.bones())
-				perBoneSubmit(renderState, poseStack, bone, controllers, this.getModelData(renderState), renderType, - 1, renderState.lightCoords, packedOverlay, renderState.partialTick(), submitNodeCollector, cameraRenderState, null, null, null, null);
+				perBoneSubmit(renderState, poseStack, bone, controllers, this.getModelData(renderState), renderType, - 1, renderState.lightCoords, packedOverlay, submitNodeCollector, cameraRenderState, null, null, null, null);
 		}
 		else
 		{
@@ -167,10 +169,10 @@ public abstract class PEntityRenderer<T extends Entity & PAnimatable<T>, RS exte
 			List<DeferredLayerSubmit> deferredLayers = new ArrayList<>();
 
 			for (PBakedBone bone : model.bones())
-				perBoneSubmit(renderState, poseStack, bone, controllers, this.getModelData(renderState), renderType, -1, renderState.lightCoords, packedOverlay, renderState.partialTick(), submitNodeCollector, cameraRenderState, null, entityBonePoses, null, deferredLayers);
+				perBoneSubmit(renderState, poseStack, bone, controllers, this.getModelData(renderState), renderType, -1, renderState.lightCoords, packedOverlay, submitNodeCollector, cameraRenderState, null, entityBonePoses, null, deferredLayers);
 			
 			for (DeferredLayerSubmit deferredLayer : deferredLayers)
-				submitDeferredLayer(renderState, poseStack, submitNodeCollector, cameraRenderState, controllers, renderState.partialTick(), entityBonePoses, deferredLayer);
+				submitDeferredLayer(renderState, poseStack, submitNodeCollector, cameraRenderState, controllers, entityBonePoses, deferredLayer);
 		}
 	}
 	
@@ -189,12 +191,11 @@ public abstract class PEntityRenderer<T extends Entity & PAnimatable<T>, RS exte
 	                             int packedColor,
 	                             int packedLight,
 	                             int packedOverlay,
-	                             float partialTick,
 	                             SubmitNodeCollector submitNodeCollector,
 	                             CameraRenderState cameraRenderState,
 	                             @Nullable PEntityRenderLayer<T, RS> renderLayer)
 	{
-		perBoneSubmit(renderState, poseStack, bone, controllers, data, renderType, packedColor, packedLight, packedOverlay, partialTick, submitNodeCollector, cameraRenderState, renderLayer, null, null, null);
+		perBoneSubmit(renderState, poseStack, bone, controllers, data, renderType, packedColor, packedLight, packedOverlay, submitNodeCollector, cameraRenderState, renderLayer, null, null, null);
 	}
 	
 	protected void perBoneSubmit(RS renderState,
@@ -206,14 +207,13 @@ public abstract class PEntityRenderer<T extends Entity & PAnimatable<T>, RS exte
 	                             int packedColor,
 	                             int packedLight,
 	                             int packedOverlay,
-	                             float partialTick,
 	                             SubmitNodeCollector submitNodeCollector,
 	                             CameraRenderState cameraRenderState,
 	                             @Nullable PEntityRenderLayer<T, RS> renderLayer,
 	                             @Nullable Map<String, Matrix4f> entityBonePoses,
 	                             @Nullable Matrix4f layerTransform)
 	{
-		perBoneSubmit(renderState, poseStack, bone, controllers, data, renderType, packedColor, packedLight, packedOverlay, partialTick, submitNodeCollector, cameraRenderState, renderLayer, entityBonePoses, layerTransform, null);
+		perBoneSubmit(renderState, poseStack, bone, controllers, data, renderType, packedColor, packedLight, packedOverlay, submitNodeCollector, cameraRenderState, renderLayer, entityBonePoses, layerTransform, null);
 	}
 
 	private void perBoneSubmit(RS renderState,
@@ -225,7 +225,6 @@ public abstract class PEntityRenderer<T extends Entity & PAnimatable<T>, RS exte
 	                           int packedColor,
 	                           int packedLight,
 	                           int packedOverlay,
-	                           float partialTick,
 	                           SubmitNodeCollector submitNodeCollector,
 	                           CameraRenderState cameraRenderState,
 	                           @Nullable PEntityRenderLayer<T, RS> renderLayer,
@@ -233,7 +232,7 @@ public abstract class PEntityRenderer<T extends Entity & PAnimatable<T>, RS exte
 	                           @Nullable Matrix4f layerTransform,
 	                           @Nullable List<DeferredLayerSubmit> deferredLayers)
 	{
-		BoneFrame frame = bone.mixBone(data.getModel(), controllers, partialTick);
+		BoneFrame frame = bone.mixBone(data.getModel(), controllers, renderState.partialTick());
 		poseStack.pushPose();
 		if (renderLayer != null && entityBonePoses != null)
 			applyBoundLayerBonePose(poseStack, bone, renderLayer, entityBonePoses, layerTransform);
@@ -257,7 +256,7 @@ public abstract class PEntityRenderer<T extends Entity & PAnimatable<T>, RS exte
 			entityBonePoses.put(bone.name(), new Matrix4f(poseStack.last().pose()));
 		if (renderLayer == null)
 		{
-			this.submitBone(renderState, bone, poseStack, data, controllers, renderType, packedColor, packedLight, packedOverlay, partialTick);
+			this.submitBone(renderState, bone, poseStack, data, controllers, renderType, packedColor, packedLight, packedOverlay);
 			List<PEntityRenderLayer<T, RS>> layers = this.renderLayers.get(bone.name());
 			if (layers != null)
 				for (PEntityRenderLayer<T, RS> layer : layers)
@@ -273,16 +272,16 @@ public abstract class PEntityRenderer<T extends Entity & PAnimatable<T>, RS exte
 						if (deferredLayers != null)
 							deferredLayers.add(new DeferredLayerSubmit(layer, new Matrix4f(poseStack.last().pose()), attachmentTransform, packedColor, packedLight, packedOverlay));
 						else
-							layer.submit(this, renderState, poseStack, submitNodeCollector, cameraRenderState, controllers, packedColor, packedLight, packedOverlay, partialTick, entityBonePoses, attachmentTransform);
+							layer.submit(this, renderState, poseStack, submitNodeCollector, cameraRenderState, controllers, packedColor, packedLight, packedOverlay, entityBonePoses, attachmentTransform);
 						poseStack.popPose();
 					}
 		}
 		else
-			this.submitBone(renderState, bone, poseStack, data, controllers, renderType, packedColor, packedLight, packedOverlay, partialTick, renderLayer);
+			this.submitBone(renderState, bone, poseStack, data, controllers, renderType, packedColor, packedLight, packedOverlay, renderLayer);
 		
 		if (!bone.children().isEmpty())
 			for(PBakedBone child : bone.children())
-				perBoneSubmit(renderState, poseStack, child, controllers, data, renderType, packedColor, packedLight, packedOverlay, partialTick, submitNodeCollector, cameraRenderState, renderLayer, entityBonePoses, layerTransform, deferredLayers);
+				perBoneSubmit(renderState, poseStack, child, controllers, data, renderType, packedColor, packedLight, packedOverlay, submitNodeCollector, cameraRenderState, renderLayer, entityBonePoses, layerTransform, deferredLayers);
 		
 		poseStack.popPose();
 	}
@@ -292,7 +291,6 @@ public abstract class PEntityRenderer<T extends Entity & PAnimatable<T>, RS exte
 	                                 SubmitNodeCollector submitNodeCollector,
 	                                 CameraRenderState cameraRenderState,
 	                                 Collection<PAnimationController<T>> controllers,
-	                                 float partialTick,
 	                                 Map<String, Matrix4f> entityBonePoses,
 	                                 DeferredLayerSubmit deferredLayer)
 	{
@@ -308,7 +306,6 @@ public abstract class PEntityRenderer<T extends Entity & PAnimatable<T>, RS exte
 				deferredLayer.packedColor,
 				deferredLayer.packedLight,
 				deferredLayer.packedOverlay,
-				partialTick,
 				entityBonePoses,
 				deferredLayer.layerTransform);
 		poseStack.popPose();
@@ -351,10 +348,9 @@ public abstract class PEntityRenderer<T extends Entity & PAnimatable<T>, RS exte
 	                          Function<Identifier, RenderType> renderType,
 	                          int color,
 	                          int packedLight,
-	                          int packedOverlay,
-	                          float partialTick)
+	                          int packedOverlay)
 	{
-		submitBone(renderState, bone, poseStack, modelData, controllers, renderType, color, packedLight, packedOverlay, partialTick, null);
+		submitBone(renderState, bone, poseStack, modelData, controllers, renderType, color, packedLight, packedOverlay, null);
 	}
 	
 	protected void submitBone(RS renderState,
@@ -366,7 +362,6 @@ public abstract class PEntityRenderer<T extends Entity & PAnimatable<T>, RS exte
 	                          int color,
 	                          int packedLight,
 	                          int packedOverlay,
-	                          float partialTick,
 	                          @Nullable PEntityRenderLayer<T, RS> renderLayer)
 	{
 		Matrix4f matrix4fstack = new Matrix4f(poseStack.last().pose());
@@ -376,14 +371,30 @@ public abstract class PEntityRenderer<T extends Entity & PAnimatable<T>, RS exte
 			if (mesh.textureName().isEmpty())
 				continue;
 			
-			RenderType baseType = renderType.apply(PTextureCache.ATLAS_LOCATION);
+			PMeshRenderContext inherited = new PMeshRenderContext(
+					renderType,
+					color,
+					mesh.isEmissive() ? LightCoordsUtil.FULL_BRIGHT : packedLight,
+					packedOverlay);
+			PMeshRenderContext meshContext = renderLayer == null ?
+					resolveMeshRender(renderState, bone, mesh, inherited) :
+					renderLayer.resolveMeshRender(renderState, bone, mesh, inherited);
+			
+			RenderType baseType = meshContext.renderType().apply(PTextureCache.ATLAS_LOCATION);
 			RenderType type = mesh.isEmissive() ?
 					PRenderTypes.RenderTypeProvider.emissiveVariant(baseType, PTextureCache.ATLAS_LOCATION) :
 					baseType;
-			int packedColor = renderLayer == null ? color : renderLayer.getColor(renderState, bone, mesh, color);
 			
-			PRenderQueue.submitEntityMesh(type, mesh, new PRenderQueue.InstanceData(matrix4fstack, packedColor, packedLight, packedOverlay));
+			PRenderQueue.submitEntityMesh(type, mesh, new PRenderQueue.InstanceData(matrix4fstack, meshContext.color(), meshContext.packedLight(), meshContext.packedOverlay()));
 		}
+	}
+	
+	protected PMeshRenderContext resolveMeshRender(RS renderState,
+	                                               PBakedBone bone,
+	                                               PBakedMesh mesh,
+	                                               PMeshRenderContext inherited)
+	{
+		return inherited;
 	}
 	
 	protected void setupRotations(LivingEntityRenderState renderState, PoseStack poseStack, float yBodyRot, float scale)

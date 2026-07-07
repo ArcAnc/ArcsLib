@@ -10,18 +10,21 @@
 package com.arcanc.pulselib.content.registration.item;
 
 
-import com.arcanc.pulselib.content.animatable.AnimManagerKey;
-import com.arcanc.pulselib.content.animatable.ControllerState;
-import com.arcanc.pulselib.content.animatable.PAnimatable;
-import com.arcanc.pulselib.content.animatable.PAnimationController;
-import com.arcanc.pulselib.content.animatable.PAnimationManager;
 import com.arcanc.pulselib.content.model.animation.PRawAnimation;
-import com.arcanc.pulselib.content.animatable.singleton.SingletonAnimationManager;
+import com.arcanc.pulselib.content.model.baked.PBakedBone;
+import com.arcanc.pulselib.content.model.baked.PBakedMesh;
+import com.arcanc.pulselib.content.model.baked.PMeshRenderContext;
+import com.arcanc.pulselib.content.renderer.modelData.PModelData;
+import com.arcanc.pulselib.util.PLibDatabase;
+import net.minecraft.resources.Identifier;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.Item;
-import org.jspecify.annotations.NonNull;
+import net.minecraft.world.item.ItemStack;
 
-public class TestArmorItem extends Item implements PAnimatable<TestArmorItem>
+public class TestArmorItem extends Item
 {
+	public static final Identifier TEXTURE = PLibDatabase.rl("entity/armor/test_armor/0");
+	public static final PModelData MODEL_DATA = new PModelData.Builder(PLibDatabase.rl("armor/test_armor"), "entity").build();
 	private final PRawAnimation tailSwing = PRawAnimation.begin().
 			thenLoop("swing").
 			build();
@@ -30,24 +33,46 @@ public class TestArmorItem extends Item implements PAnimatable<TestArmorItem>
 	{
 		super(properties);
 	}
-
-	@Override
-	public PAnimationManager<TestArmorItem> getAnimationManager(AnimManagerKey key)
+	
+	public static PMeshRenderContext resolveArmorRender(LivingEntity entity,
+	                                                    ItemStack stack,
+	                                                    PBakedBone bone,
+	                                                    PBakedMesh mesh,
+	                                                    PMeshRenderContext inherited,
+	                                                    float partialTick)
 	{
-		return SingletonAnimationManager.getManager(key, this);
+		return new PMeshRenderContext(
+				inherited.renderType(),
+				dayTimeColor(entity, partialTick),
+				inherited.packedLight(),
+				inherited.packedOverlay());
 	}
-
-	public PAnimationController<TestArmorItem> createTailController()
+	
+	private static int dayTimeColor(LivingEntity entity, float partialTick)
 	{
-		return new PAnimationController<>("tail", state ->
-		{
-			state.controller().play(this.tailSwing);
-			return ControllerState.PLAY;
-		});
+		float time = ((entity.level().getOverworldClockTime() % 24000L) + partialTick) / 24000f;
+		
+		if (time < 0.25f)
+			return lerpColor(0xFFFFD36A, 0xFFFFFFFF, time / 0.25f);
+		if (time < 0.50f)
+			return lerpColor(0xFFFFFFFF, 0xFFFF9A3D, (time - 0.25f) / 0.25f);
+		if (time < 0.75f)
+			return lerpColor(0xFFFF9A3D, 0xFF5E7CFF, (time - 0.50f) / 0.25f);
+		return lerpColor(0xFF5E7CFF, 0xFFFFD36A, (time - 0.75f) / 0.25f);
 	}
-
-	@Override
-	public void registerAnimationControllers(PAnimationManager.@NonNull PAnimationRegistrar<TestArmorItem> registrar)
+	
+	private static int lerpColor(int from, int to, float delta)
 	{
+		int alpha = lerp((from >>> 24) & 0xFF, (to >>> 24) & 0xFF, delta);
+		int red = lerp((from >>> 16) & 0xFF, (to >>> 16) & 0xFF, delta);
+		int green = lerp((from >>> 8) & 0xFF, (to >>> 8) & 0xFF, delta);
+		int blue = lerp(from & 0xFF, to & 0xFF, delta);
+		
+		return alpha << 24 | red << 16 | green << 8 | blue;
+	}
+	
+	private static int lerp(int from, int to, float delta)
+	{
+		return (int)(from + (to - from) * delta);
 	}
 }

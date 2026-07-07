@@ -10,7 +10,7 @@
 package com.arcanc.pulselib.content.registration.entity.renderer;
 
 
-import com.arcanc.pulselib.content.registration.Registration;
+import com.arcanc.pulselib.content.registration.PLibRegistration;
 import com.arcanc.pulselib.content.registration.entity.TestEntity;
 import com.arcanc.pulselib.content.renderer.PEntityRenderLayer;
 import com.arcanc.pulselib.content.renderer.base.PEntityRenderState;
@@ -23,7 +23,7 @@ public class PTestArmor extends PEntityRenderLayer<TestEntity, PEntityRenderStat
 	public PTestArmor()
 	{
 		super(new DefaultEntityLayerModelData.
-						DefaultEntityLayerModelDataBuilder(Registration.EntityTypeReg.TEST_ENTITY.getId(),
+						DefaultEntityLayerModelDataBuilder(PLibRegistration.EntityTypeReg.TEST_ENTITY.getId(),
 						PLibDatabase.rl("armor")).
 							build(),
 				PRenderTypes.RenderTypeProvider :: trianglesSolid);

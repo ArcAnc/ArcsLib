@@ -16,7 +16,9 @@ import com.arcanc.pulselib.content.animatable.PAnimationManager;
 import com.arcanc.pulselib.content.mixin.ItemStackRenderStateAccessor;
 import com.arcanc.pulselib.content.model.animation.BoneFrame;
 import com.arcanc.pulselib.content.model.baked.PBakedBone;
+import com.arcanc.pulselib.content.model.baked.PBakedMesh;
 import com.arcanc.pulselib.content.model.baked.PBakedModel;
+import com.arcanc.pulselib.content.model.baked.PMeshRenderContext;
 import com.arcanc.pulselib.content.renderer.base.PItemRenderState;
 import com.arcanc.pulselib.content.renderer.modelData.PModelData;
 import com.arcanc.pulselib.util.PRenderTypes;
@@ -44,6 +46,7 @@ public abstract class PItemRenderer<T extends Item & PAnimatable<T>, RS extends 
 {
 	private final PModelData modelData;
 	private final Function<Identifier, RenderType> renderType;
+	private static final int FULL_BRIGHT = 0x00F000F0;
 	
 	public PItemRenderer(PModelData modelData, Function<Identifier, RenderType> renderType)
 	{
@@ -128,14 +131,14 @@ public abstract class PItemRenderer<T extends Item & PAnimatable<T>, RS extends 
 		ItemDisplayContext context = ((ItemStackRenderStateAccessor)renderState.itemRenderState()).pulselib$getDisplayContext();
 		if (context == ItemDisplayContext.GUI)
 		{
-			model.bones().forEach(bone -> perBoneSubmit(renderState, poseStack, bone, controllers, renderType, -1, renderState.lightCoords(), renderState.overlayCoords(), renderState.partialTick(), context));
+			model.bones().forEach(bone -> perBoneSubmit(renderState, renderState.stack(), poseStack, bone, controllers, renderType, -1, renderState.lightCoords(), renderState.overlayCoords(), renderState.partialTick(), context));
 			submitNodeCollector.submitCustomGeometry(
 					poseStack,
 					this.renderType.apply(PTextureCache.ATLAS_LOCATION),
 					(_, _) -> PRenderQueue.flush(PRenderQueue.RenderStage.GUI));
 			return;
 		}
-		model.bones().forEach(bone -> perBoneSubmit(renderState, poseStack, bone, controllers, renderType, -1, renderState.lightCoords(), renderState.overlayCoords(), renderState.partialTick(), context));
+		model.bones().forEach(bone -> perBoneSubmit(renderState, renderState.stack(), poseStack, bone, controllers, renderType, -1, renderState.lightCoords(), renderState.overlayCoords(), renderState.partialTick(), context));
 	}
 	
 	@Override
@@ -143,7 +146,7 @@ public abstract class PItemRenderer<T extends Item & PAnimatable<T>, RS extends 
 	{
 	}
 	
-	protected void perBoneSubmit(RS renderState, PoseStack poseStack, PBakedBone bone, Collection<PAnimationController<T>> controllers, Function<Identifier, RenderType> renderType, int packedColor, int packedLight, int packedOverlay, float partialTick, ItemDisplayContext context)
+	protected void perBoneSubmit(RS renderState, ItemStack stack, PoseStack poseStack, PBakedBone bone, Collection<PAnimationController<T>> controllers, Function<Identifier, RenderType> renderType, int packedColor, int packedLight, int packedOverlay, float partialTick, ItemDisplayContext context)
 	{
 		PModelData data = this.getModelData(renderState);
 		PBakedModel model = data.getModel();
@@ -163,15 +166,16 @@ public abstract class PItemRenderer<T extends Item & PAnimatable<T>, RS extends 
 			poseStack.mulPose(bone.baseRotation());
 		}
 		
-		this.submitBone(renderState, bone, poseStack, data, controllers, renderType, packedColor, packedLight, packedOverlay, partialTick, context);
+		this.submitBone(renderState, stack, bone, poseStack, data, controllers, renderType, packedColor, packedLight, packedOverlay, partialTick, context);
 		
 		if (!bone.children().isEmpty())
-			bone.children().forEach(child -> perBoneSubmit(renderState, poseStack, child, controllers, renderType, packedColor, packedLight, packedOverlay, partialTick, context));
+			bone.children().forEach(child -> perBoneSubmit(renderState, stack, poseStack, child, controllers, renderType, packedColor, packedLight, packedOverlay, partialTick, context));
 		
 		poseStack.popPose();
 	}
 	
 	protected void submitBone(RS renderState,
+	                          ItemStack stack,
 	                          PBakedBone bone,
 	                          PoseStack poseStack,
 	                          PModelData modelData,
@@ -190,12 +194,30 @@ public abstract class PItemRenderer<T extends Item & PAnimatable<T>, RS extends 
 			if (mesh.textureName().isEmpty())
 				return;
 			
-			RenderType baseType = renderType.apply(PTextureCache.ATLAS_LOCATION);
+			PMeshRenderContext inherited = new PMeshRenderContext(
+					renderType,
+					color,
+					mesh.isEmissive() ? FULL_BRIGHT : packedLight,
+					packedOverlay);
+			PMeshRenderContext meshContext = resolveMeshRender(renderState.getAnimatable(), stack, context, bone, mesh, inherited, partialTick);
+			
+			RenderType baseType = meshContext.renderType().apply(PTextureCache.ATLAS_LOCATION);
 			RenderType type = mesh.isEmissive() ?
 					PRenderTypes.RenderTypeProvider.emissiveVariant(baseType, PTextureCache.ATLAS_LOCATION) :
 					baseType;
 			
-			PRenderQueue.submitItem(context, type, mesh, new PRenderQueue.InstanceData(matrix4fstack, color, packedLight, packedOverlay));
+			PRenderQueue.submitItem(context, type, mesh, new PRenderQueue.InstanceData(matrix4fstack, meshContext.color(), meshContext.packedLight(), meshContext.packedOverlay()));
 		});
+	}
+	
+	protected PMeshRenderContext resolveMeshRender(T animatable,
+	                                               ItemStack stack,
+	                                               ItemDisplayContext context,
+	                                               PBakedBone bone,
+	                                               PBakedMesh mesh,
+	                                               PMeshRenderContext inherited,
+	                                               float partialTick)
+	{
+		return inherited;
 	}
 }

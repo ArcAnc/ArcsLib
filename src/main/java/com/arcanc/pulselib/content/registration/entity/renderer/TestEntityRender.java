@@ -10,7 +10,11 @@
 package com.arcanc.pulselib.content.registration.entity.renderer;
 
 
+import com.arcanc.pulselib.content.model.baked.PBakedBone;
+import com.arcanc.pulselib.content.model.baked.PBakedMesh;
+import com.arcanc.pulselib.content.model.baked.PMeshRenderContext;
 import com.arcanc.pulselib.content.registration.entity.TestEntity;
+import com.arcanc.pulselib.content.registration.renderer.TestDayTimeColor;
 import com.arcanc.pulselib.content.renderer.PEntityRenderer;
 import com.arcanc.pulselib.content.renderer.base.PEntityRenderState;
 import com.arcanc.pulselib.content.renderer.modelData.DefaultEntityModelData;
@@ -44,5 +48,19 @@ public class TestEntityRender extends PEntityRenderer<TestEntity, PEntityRenderS
 	public PEntityRenderState.LivingImpl<TestEntity> createRenderState()
 	{
 		return PLibHelper.livingRenderState();
+	}
+	
+	@Override
+	protected PMeshRenderContext resolveMeshRender(PEntityRenderState.LivingImpl<TestEntity> renderState,
+	                                               PBakedBone bone,
+	                                               PBakedMesh mesh,
+	                                               PMeshRenderContext inherited)
+	{
+		return new PMeshRenderContext(
+				inherited.renderType(),
+				TestDayTimeColor.color(renderState.getAnimatable().level(), renderState.partialTick()),
+				inherited.packedLight(),
+				inherited.packedOverlay()
+		);
 	}
 }

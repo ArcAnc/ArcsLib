@@ -1,47 +1,47 @@
 /**
  * @author ArcAnc
- * Created at: 05.07.2026
+ * Created at: 07.07.2026
  * Copyright (c) 2026
  * <p>
  * This code is licensed under "Arc's License of Common Sense"
  * Details can be found in the license file in the root folder of this project
  */
 
-package com.arcanc.pulselib.util.armor;
+package com.arcanc.pulselib.util.attachments;
 
 
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.item.ItemStack;
 
 import java.util.function.Predicate;
 
-@FunctionalInterface
-public interface PulseLivingAttachmentSource
+public final class PLivingAttachmentSources
 {
-	boolean shouldRender(LivingEntity entity, EquipmentSlot slot, ItemStack stack);
-
-	static PulseLivingAttachmentSource anyEquipmentSlot()
+	private PLivingAttachmentSources()
+	{
+	}
+	
+	public static PLivingAttachmentSource anyEquipmentSlot()
 	{
 		return (entity, slot, stack) -> true;
 	}
-
-	static PulseLivingAttachmentSource equipmentSlot(EquipmentSlot slot)
+	
+	public static PLivingAttachmentSource equipmentSlot(EquipmentSlot slot)
 	{
 		return (entity, currentSlot, stack) -> currentSlot == slot;
 	}
-
-	static PulseLivingAttachmentSource hand()
+	
+	public static PLivingAttachmentSource hand()
 	{
 		return (entity, slot, stack) -> slot.getType() == EquipmentSlot.Type.HAND;
 	}
-
-	static PulseLivingAttachmentSource entityPredicate(Predicate<LivingEntity> predicate)
+	
+	public static PLivingAttachmentSource entityPredicate(Predicate<LivingEntity> predicate)
 	{
 		return (entity, slot, stack) -> predicate.test(entity);
 	}
-
-	static PulseLivingAttachmentSource equipmentSlotPredicate(EquipmentSlot slot, Predicate<LivingEntity> predicate)
+	
+	public static PLivingAttachmentSource equipmentSlotPredicate(EquipmentSlot slot, Predicate<LivingEntity> predicate)
 	{
 		return (entity, currentSlot, stack) -> currentSlot == slot && predicate.test(entity);
 	}

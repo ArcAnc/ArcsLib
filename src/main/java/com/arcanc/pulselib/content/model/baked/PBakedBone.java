@@ -107,6 +107,21 @@ public class PBakedBone
 	                                                  int packedOverlay,
 	                                                  float partialTick)
 	{
+		PMeshRenderContext context = new PMeshRenderContext(
+				renderType,
+				color,
+				packedLight,
+				packedOverlay);
+		instantDraw(poseStack, modelData, controllers, (bone, mesh, inherited) -> inherited, context, partialTick);
+	}
+	
+	public <T extends PAnimatable<T>>void instantDraw(PoseStack poseStack,
+	                                                  PModelData modelData,
+	                                                  Collection<PAnimationController<T>> controllers,
+	                                                  PMeshRenderResolver resolver,
+	                                                  PMeshRenderContext inherited,
+	                                                  float partialTick)
+	{
 		BoneFrame frame = mixBone(modelData.getModel(), controllers, partialTick);
 		poseStack.pushPose();
 		if (frame != null)
@@ -122,7 +137,6 @@ public class PBakedBone
 		}
 		
 		Minecraft mc = PLibRenderHelper.mc();
-		RenderType baseType = renderType.apply(PTextureCache.ATLAS_LOCATION);
 		
 		TextureAtlas atlas = PTextureCache.getTextureAtlas();
 		Matrix4f matrix4fStack = new Matrix4f(RenderSystem.getModelViewMatrix());
@@ -130,26 +144,14 @@ public class PBakedBone
 		GpuBufferSlice transforms = RenderSystem.getDynamicUniforms().
 				writeTransform(matrix4fStack, new Vector4f(1.0f, 1.0f, 1.0f, 1.0f), new Vector3f(), new Matrix4f());
 				
-		this.ensureBufferInitialized();
-		try (GpuBuffer.MappedView colorLightOverlayMappedView = RenderSystem.getDevice().
-				createCommandEncoder().
-				mapBuffer(this.colorLightOverlay.currentBuffer(), false, true))
-		{
-			int u = packedOverlay & 0xFFFF;
-			int v = (packedOverlay >> 16) & 0xFFFF;
-			
-			Std140Builder.intoBuffer(colorLightOverlayMappedView.data()).
-					putVec4(ARGB.vector4fFromARGB32(color)).
-					putVec2(LightCoordsUtil.block(packedLight), LightCoordsUtil.sky(packedLight)).
-					putIVec2(new Vector2i(u, v));
-			
-		}
-		
+		PMeshRenderContext boneContext = inherited;
 		this.meshes().forEach(mesh ->
 		{
 			if (mesh.textureName().isEmpty())
 				return;
-
+			
+			PMeshRenderContext meshContext = resolver.resolve(this, mesh, boneContext);
+			RenderType baseType = meshContext.renderType().apply(PTextureCache.ATLAS_LOCATION);
 			RenderType type = mesh.isEmissive() ?
 					PRenderTypes.RenderTypeProvider.instantEmissiveVariant(baseType, PTextureCache.ATLAS_LOCATION) :
 					PRenderTypes.RenderTypeProvider.instantVariant(baseType, PTextureCache.ATLAS_LOCATION);
@@ -166,6 +168,21 @@ public class PBakedBone
 			
 			GpuTextureView lightTexture = mc.gameRenderer.levelLightmap();
 			OverlayTexture overlayTexture = mc.gameRenderer.overlayTexture();
+			
+			this.ensureBufferInitialized();
+			try (GpuBuffer.MappedView colorLightOverlayMappedView = RenderSystem.getDevice().
+					createCommandEncoder().
+					mapBuffer(this.colorLightOverlay.currentBuffer(), false, true))
+			{
+				int u = meshContext.packedOverlay() & 0xFFFF;
+				int v = (meshContext.packedOverlay() >> 16) & 0xFFFF;
+				
+				Std140Builder.intoBuffer(colorLightOverlayMappedView.data()).
+						putVec4(ARGB.vector4fFromARGB32(meshContext.color())).
+						putVec2(LightCoordsUtil.block(meshContext.packedLight()), LightCoordsUtil.sky(meshContext.packedLight())).
+						putIVec2(new Vector2i(u, v));
+				
+			}
 			
 			try(RenderPass pass = RenderSystem.getDevice().createCommandEncoder().
 					createRenderPass(mesh.uuid() :: toString, colorAttachment, OptionalInt.empty(), depthTexture, OptionalDouble.empty()))
@@ -185,7 +202,7 @@ public class PBakedBone
 		});
 		
 		this.children().forEach(children ->
-				children.instantDraw(poseStack, modelData, controllers, renderType, color, packedLight, packedOverlay, partialTick));
+				children.instantDraw(poseStack, modelData, controllers, resolver, boneContext, partialTick));
 		
 		poseStack.popPose();
 	}

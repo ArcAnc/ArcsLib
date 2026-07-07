@@ -2,7 +2,7 @@ package com.arcanc.pulselib;
 
 import com.arcanc.pulselib.content.event.ClientEvents;
 import com.arcanc.pulselib.content.event.CommonEvents;
-import com.arcanc.pulselib.content.registration.Registration;
+import com.arcanc.pulselib.content.registration.PLibRegistration;
 import com.arcanc.pulselib.util.PLibDatabase;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.ModContainer;
@@ -14,7 +14,7 @@ public class PLib
 {
     public PLib(IEventBus modEventBus, ModContainer modContainer)
     {
-	    Registration.init(modEventBus);
+	    PLibRegistration.init(modEventBus);
 	    
 	    setupEvents(modEventBus);
     }

@@ -32,7 +32,7 @@ import net.neoforged.neoforge.registries.DeferredItem;
 import net.neoforged.neoforge.registries.DeferredRegister;
 import org.jetbrains.annotations.NotNull;
 
-public class Registration
+public class PLibRegistration
 {
 	public static class BlockReg
 	{
@@ -72,9 +72,17 @@ public class Registration
 				new Item.Properties().setId(
 						ResourceKey.create(Registries.ITEM, PLibDatabase.rl("test_block")))));
 		
-		public static final DeferredItem<TestArmorItem> TEST_ARMOR = ITEMS.registerItem("test_armor",
+		public static final DeferredItem<TestArmorItem> TEST_HAT = ITEMS.registerItem("test_hat",
+				TestArmorItem :: new,
+				() -> new Item.Properties().humanoidArmor(ArmorMaterials.DIAMOND, ArmorType.HELMET));
+		
+		public static final DeferredItem<TestArmorItem> TEST_CHESTPLATE = ITEMS.registerItem("test_chestplate",
 				TestArmorItem :: new,
 				() -> new Item.Properties().humanoidArmor(ArmorMaterials.DIAMOND, ArmorType.CHESTPLATE));
+		
+		public static final DeferredItem<TestArmorItem> TEST_LEGGINGS = ITEMS.registerItem("test_leggings",
+				TestArmorItem :: new,
+				() -> new Item.Properties().humanoidArmor(ArmorMaterials.DIAMOND, ArmorType.LEGGINGS));
 		
 		private static void init (@NotNull final IEventBus bus)
 		{

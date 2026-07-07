@@ -10,8 +10,12 @@
 package com.arcanc.pulselib.content.registration.block.block_entity.ber;
 
 
+import com.arcanc.pulselib.content.model.baked.PBakedBone;
+import com.arcanc.pulselib.content.model.baked.PBakedMesh;
+import com.arcanc.pulselib.content.model.baked.PMeshRenderContext;
 import com.arcanc.pulselib.content.registration.block.block_entity.TestBlockEntity;
 import com.arcanc.pulselib.content.registration.block.block_entity.ber.renderState.TestBlockEntityRenderState;
+import com.arcanc.pulselib.content.registration.renderer.TestDayTimeColor;
 import com.arcanc.pulselib.content.renderer.PBlockRenderer;
 import com.arcanc.pulselib.content.renderer.modelData.DefaultBlockModelData;
 import com.arcanc.pulselib.util.PLibDatabase;
@@ -36,5 +40,15 @@ public class TestBlockEntityRenderer extends PBlockRenderer<TestBlockEntity, Tes
 	public TestBlockEntityRenderState createRenderState()
 	{
 		return new TestBlockEntityRenderState();
+	}
+	
+	@Override
+	protected PMeshRenderContext resolveMeshRender(TestBlockEntityRenderState renderState, PBakedBone bone, PBakedMesh mesh, PMeshRenderContext inherited)
+	{
+		return new PMeshRenderContext(
+				inherited.renderType(),
+				TestDayTimeColor.color(renderState.getAnimatable().getLevel(), renderState.partialTick()),
+				inherited.packedLight(),
+				inherited.packedOverlay());
 	}
 }

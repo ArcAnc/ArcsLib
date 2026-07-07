@@ -1,24 +1,25 @@
 /**
  * @author ArcAnc
- * Created at: 05.07.2026
+ * Created at: 04.07.2026
  * Copyright (c) 2026
  * <p>
  * This code is licensed under "Arc's License of Common Sense"
  * Details can be found in the license file in the root folder of this project
  */
 
-package com.arcanc.pulselib.util.armor;
+package com.arcanc.pulselib.util.attachments;
+
 
 import net.minecraft.resources.Identifier;
 
-public record PulseAttachmentAnchor(Identifier id)
+public record PAttachmentAnchor(Identifier id)
 {
-	public static PulseAttachmentAnchor of(Identifier id)
+	public static PAttachmentAnchor of(Identifier id)
 	{
-		return new PulseAttachmentAnchor(id);
+		return new PAttachmentAnchor(id);
 	}
-
-	public static PulseAttachmentAnchor minecraft(String path)
+	
+	public static PAttachmentAnchor minecraft(String path)
 	{
 		return of(Identifier.withDefaultNamespace(path));
 	}

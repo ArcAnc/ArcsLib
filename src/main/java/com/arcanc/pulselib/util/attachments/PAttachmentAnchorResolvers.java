@@ -7,9 +7,10 @@
  * Details can be found in the license file in the root folder of this project
  */
 
-package com.arcanc.pulselib.util.armor;
+package com.arcanc.pulselib.util.attachments;
 
 
+import com.arcanc.pulselib.util.attachments.humanoid.PHumanoidAnchors;
 import it.unimi.dsi.fastutil.objects.Object2ObjectLinkedOpenHashMap;
 import net.minecraft.client.model.EntityModel;
 import net.minecraft.client.model.geom.ModelPart;
@@ -20,41 +21,41 @@ import org.jspecify.annotations.Nullable;
 
 import java.util.Map;
 
-public class PulseAttachmentAnchorResolvers
+public class PAttachmentAnchorResolvers
 {
-	private static final Map<Class<?>, Map<PulseAttachmentAnchor, AnchorResolver>> RESOLVERS = new Object2ObjectLinkedOpenHashMap<>();
-
+	private static final Map<Class<?>, Map<PAttachmentAnchor, AnchorResolver>> RESOLVERS = new Object2ObjectLinkedOpenHashMap<>();
+	
 	@ApiStatus.Internal
 	public static void init(IEventBus bus)
 	{
-		PulseHumanoidAnchors.registerDefaults();
+		PHumanoidAnchors.registerDefaults();
 	}
-
+	
 	public static void register(
 			Class<?> modelClass,
-			PulseAttachmentAnchor anchor,
+			PAttachmentAnchor anchor,
 			AnchorResolver resolver)
 	{
 		RESOLVERS.computeIfAbsent(modelClass, _ -> new Object2ObjectLinkedOpenHashMap<>()).put(anchor, resolver);
 	}
-
-	public static @Nullable <S extends EntityRenderState> ModelPart resolve(S state, EntityModel<? super S> model, PulseAttachmentAnchor anchor)
+	
+	public static @Nullable <S extends EntityRenderState> ModelPart resolve(S state, EntityModel<? super S> model, PAttachmentAnchor anchor)
 	{
-		for (Map.Entry<Class<?>, Map<PulseAttachmentAnchor, AnchorResolver>> entry : RESOLVERS.entrySet())
+		for (Map.Entry<Class<?>, Map<PAttachmentAnchor, AnchorResolver>> entry : RESOLVERS.entrySet())
 		{
 			if (!entry.getKey().isInstance(model))
 				continue;
-
+			
 			AnchorResolver resolver = entry.getValue().get(anchor);
 			if (resolver == null)
 				continue;
-
+			
 			return resolver.resolve(state, model);
 		}
-
+		
 		return null;
 	}
-
+	
 	@FunctionalInterface
 	public interface AnchorResolver
 	{

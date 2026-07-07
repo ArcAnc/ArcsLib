@@ -7,9 +7,10 @@
  * Details can be found in the license file in the root folder of this project
  */
 
-package com.arcanc.pulselib.util.armor;
+package com.arcanc.pulselib.util.attachments.humanoid.armor;
 
 
+import com.arcanc.pulselib.util.attachments.PLivingAttachments;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.gui.Font;
@@ -35,37 +36,37 @@ import org.jspecify.annotations.Nullable;
 import java.util.List;
 import java.util.Map;
 
-public class PulseArmorClientExtensions implements IClientItemExtensions
+public class PArmorClientExtensions implements IClientItemExtensions
 {
 	private static final Model<Unit> EMPTY_ARMOR_MODEL = new Model.Simple(new ModelPart(List.of(), Map.of()), RenderTypes :: armorCutoutNoCull);
-
+	
 	private final IClientItemExtensions base;
-
-	public PulseArmorClientExtensions(IClientItemExtensions base)
+	
+	public PArmorClientExtensions(IClientItemExtensions base)
 	{
 		this.base = base;
 	}
-
+	
 	public static IClientItemExtensions buildFor(Item item, @Nullable IClientItemExtensions base)
 	{
 		IClientItemExtensions resolvedBase = base == null ? IClientItemExtensions.DEFAULT : base;
-		if (!PulseLivingAttachments.contains(item))
+		if (!PLivingAttachments.contains(item))
 			return resolvedBase;
-		return new PulseArmorClientExtensions(resolvedBase);
+		return new PArmorClientExtensions(resolvedBase);
 	}
-
+	
 	@Override
 	public @Nullable Font getFont(ItemStack stack, FontContext context)
 	{
 		return this.base.getFont(stack, context);
 	}
-
+	
 	@Override
 	public HumanoidModel.@Nullable ArmPose getArmPose(LivingEntity entityLiving, InteractionHand hand, ItemStack itemStack)
 	{
 		return this.base.getArmPose(entityLiving, hand, itemStack);
 	}
-
+	
 	@Override
 	public boolean applyForgeHandTransform(PoseStack poseStack,
 	                                       LocalPlayer player,
@@ -77,22 +78,22 @@ public class PulseArmorClientExtensions implements IClientItemExtensions
 	{
 		return this.base.applyForgeHandTransform(poseStack, player, arm, itemInHand, partialTick, equipProcess, swingProcess);
 	}
-
+	
 	@Override
 	public Model<?> getHumanoidArmorModel(ItemStack itemStack, EquipmentClientInfo.LayerType layerType, Model original)
 	{
 		return this.base.getHumanoidArmorModel(itemStack, layerType, original);
 	}
-
+	
 	@Override
 	public Model<?> getGenericArmorModel(ItemStack itemStack, EquipmentClientInfo.LayerType layerType, Model original)
 	{
-		if (PulseLivingAttachments.hidesVanillaArmor(itemStack))
+		if (PLivingAttachments.hidesVanillaArmor(itemStack))
 			return EMPTY_ARMOR_MODEL;
-
+		
 		return this.base.getGenericArmorModel(itemStack, layerType, original);
 	}
-
+	
 	@Override
 	public void setupModelAnimations(LivingEntity livingEntity,
 	                                 ItemStack itemStack,
@@ -107,7 +108,7 @@ public class PulseArmorClientExtensions implements IClientItemExtensions
 	{
 		this.base.setupModelAnimations(livingEntity, itemStack, equipmentSlot, model, limbSwing, limbSwingAmount, partialTick, ageInTicks, netHeadYaw, headPitch);
 	}
-
+	
 	@Override
 	public void renderFirstPersonOverlay(ItemStack stack,
 	                                     EquipmentSlot equipmentSlot,
@@ -117,37 +118,37 @@ public class PulseArmorClientExtensions implements IClientItemExtensions
 	{
 		this.base.renderFirstPersonOverlay(stack, equipmentSlot, player, guiGraphics, deltaTracker);
 	}
-
+	
 	@Override
 	public boolean shouldBobAsEntity(ItemStack stack)
 	{
 		return this.base.shouldBobAsEntity(stack);
 	}
-
+	
 	@Override
 	public boolean shouldSpreadAsEntity(ItemStack stack)
 	{
 		return this.base.shouldSpreadAsEntity(stack);
 	}
-
+	
 	@Override
 	public int getArmorLayerTintColor(ItemStack stack, EquipmentClientInfo.Layer layer, int layerIdx, int fallbackColor)
 	{
-		return PulseLivingAttachments.hidesVanillaArmor(stack) ? 0 : this.base.getArmorLayerTintColor(stack, layer, layerIdx, fallbackColor);
+		return PLivingAttachments.hidesVanillaArmor(stack) ? 0 : this.base.getArmorLayerTintColor(stack, layer, layerIdx, fallbackColor);
 	}
-
+	
 	@Override
 	public int getDefaultDyeColor(ItemStack stack)
 	{
 		return this.base.getDefaultDyeColor(stack);
 	}
-
+	
 	@Override
 	public Identifier getScopeOverlayTexture(ItemStack stack)
 	{
 		return this.base.getScopeOverlayTexture(stack);
 	}
-
+	
 	@Override
 	public @Nullable Identifier getArmorTexture(ItemStack stack,
 	                                            EquipmentClientInfo.LayerType type,

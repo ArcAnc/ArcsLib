@@ -37,6 +37,7 @@ public interface PItemRenderState<T extends Item & PAnimatable<T>> extends PRend
 	int overlayCoords();
 	boolean hasFoil();
 	int outlineColor();
+	ItemStack stack();
 	
 	ItemStackRenderState itemRenderState();
 	
@@ -49,6 +50,7 @@ public interface PItemRenderState<T extends Item & PAnimatable<T>> extends PRend
 		private int overlayCoords;
 		private boolean hasFoil;
 		private int outlineColor;
+		private ItemStack stack = ItemStack.EMPTY;
 		private ItemStackRenderState guiItemRenderState;
 		private AnimManagerKey key;
 		
@@ -81,6 +83,7 @@ public interface PItemRenderState<T extends Item & PAnimatable<T>> extends PRend
 		public <RS extends PItemRenderState<T>> void extractStackData(ItemStack stack, PItemRenderer<T, RS> renderer)
 		{
 			this.extractData();
+			this.stack = stack.copy();
 			this.model = renderer.getModel((RS) this);
 			this.key = AnimManagerKey.of(stack);
 			//TODO: remove this hack
@@ -124,6 +127,12 @@ public interface PItemRenderState<T extends Item & PAnimatable<T>> extends PRend
 		public int outlineColor()
 		{
 			return this.outlineColor;
+		}
+		
+		@Override
+		public ItemStack stack()
+		{
+			return this.stack;
 		}
 		
 		@Override

@@ -12,6 +12,7 @@ package com.arcanc.pulselib.content.registration.block.block_entity;
 
 import com.arcanc.pulselib.content.animatable.*;
 import com.arcanc.pulselib.content.model.animation.PRawAnimation;
+import com.arcanc.pulselib.content.registration.PLibRegistration;
 import com.arcanc.pulselib.util.helpers.PLibHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -30,7 +31,7 @@ public class TestBlockEntity extends BlockEntity implements PAnimatable<TestBloc
 	
 	public TestBlockEntity(BlockPos pos, BlockState blockState)
 	{
-		super(com.arcanc.pulselib.content.registration.Registration.BETypeReg.TEST_BLOCK_ENTITY.get(), pos, blockState);
+		super(PLibRegistration.BETypeReg.TEST_BLOCK_ENTITY.get(), pos, blockState);
 	}
 	
 	public void changePlayAnimation()

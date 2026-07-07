@@ -21,6 +21,6 @@ public class CommonEvents
 	
 	/*private static void registerAttributes(final EntityAttributeCreationEvent event)
 	{
-		event.put(Registration.EntityTypeReg.TEST_ENTITY.get(), TestEntity.createAttributes().build());
+		event.put(PLibRegistration.EntityTypeReg.TEST_ENTITY.get(), TestEntity.createAttributes().build());
 	}*/
 }

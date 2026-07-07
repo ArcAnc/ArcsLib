@@ -17,7 +17,9 @@ import com.arcanc.pulselib.content.animatable.instance.InstanceAnimationManager;
 import com.arcanc.pulselib.content.mixin.BlockEntityRenderStateAccessor;
 import com.arcanc.pulselib.content.model.animation.BoneFrame;
 import com.arcanc.pulselib.content.model.baked.PBakedBone;
+import com.arcanc.pulselib.content.model.baked.PBakedMesh;
 import com.arcanc.pulselib.content.model.baked.PBakedModel;
+import com.arcanc.pulselib.content.model.baked.PMeshRenderContext;
 import com.arcanc.pulselib.content.renderer.base.PBlockRenderState;
 import com.arcanc.pulselib.content.renderer.modelData.PModelData;
 import com.arcanc.pulselib.util.PRenderTypes;
@@ -33,6 +35,7 @@ import net.minecraft.client.renderer.state.level.CameraRenderState;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.core.Direction;
 import net.minecraft.resources.Identifier;
+import net.minecraft.util.LightCoordsUtil;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
@@ -114,7 +117,7 @@ public abstract class PBlockRenderer<T extends BlockEntity & PAnimatable<T>, RS 
 		Collection<PAnimationController<T>> controllers = manager.getControllers().values();
 		InstanceAnimationManager.addManager(manager);
 		
-		model.bones().forEach(bone -> perBoneSubmit(renderState, poseStack, bone, controllers, renderType, -1, renderState.lightCoords, OverlayTexture.NO_OVERLAY, renderState.partialTick()));
+		model.bones().forEach(bone -> perBoneSubmit(renderState, poseStack, bone, controllers, renderType, -1, renderState.lightCoords, OverlayTexture.NO_OVERLAY));
 	}
 	
 	@Override
@@ -122,10 +125,10 @@ public abstract class PBlockRenderer<T extends BlockEntity & PAnimatable<T>, RS 
 	{
 	}
 	
-	protected void perBoneSubmit(RS renderState, PoseStack poseStack, PBakedBone bone, Collection<PAnimationController<T>> controllers, Function<Identifier, RenderType> renderType, int packedColor, int packedLight, int packedOverlay, float partialTick)
+	protected void perBoneSubmit(RS renderState, PoseStack poseStack, PBakedBone bone, Collection<PAnimationController<T>> controllers, Function<Identifier, RenderType> renderType, int packedColor, int packedLight, int packedOverlay)
 	{
 		PModelData data = this.getModelData(renderState);
-		BoneFrame frame = bone.mixBone(data.getModel(), controllers, partialTick);
+		BoneFrame frame = bone.mixBone(data.getModel(), controllers, renderState.partialTick());
 		poseStack.pushPose();
 		if (frame != null)
 		{
@@ -139,10 +142,10 @@ public abstract class PBlockRenderer<T extends BlockEntity & PAnimatable<T>, RS 
 			poseStack.mulPose(bone.baseRotation());
 		}
 		
-		this.submitBone(renderState, bone, poseStack, data, controllers, renderType, packedColor, packedLight, packedOverlay, partialTick);
+		this.submitBone(renderState, bone, poseStack, data, controllers, renderType, packedColor, packedLight, packedOverlay);
 		
 		if (!bone.children().isEmpty())
-			bone.children().forEach(child -> perBoneSubmit(renderState, poseStack, child, controllers, renderType, packedColor, packedLight, packedOverlay, partialTick));
+			bone.children().forEach(child -> perBoneSubmit(renderState, poseStack, child, controllers, renderType, packedColor, packedLight, packedOverlay));
 		
 		poseStack.popPose();
 	}
@@ -155,8 +158,7 @@ public abstract class PBlockRenderer<T extends BlockEntity & PAnimatable<T>, RS 
 	                          Function<Identifier, RenderType> renderType,
 	                          int color,
 	                          int packedLight,
-	                          int packedOverlay,
-	                          float partialTick)
+	                          int packedOverlay)
 	{
 		Matrix4f matrix4fstack = new Matrix4f(poseStack.last().pose());
 		
@@ -165,16 +167,31 @@ public abstract class PBlockRenderer<T extends BlockEntity & PAnimatable<T>, RS 
 			if (mesh.textureName().isEmpty())
 				return;
 			
-			RenderType baseType = renderType.apply(PTextureCache.ATLAS_LOCATION);
+			PMeshRenderContext inherited = new PMeshRenderContext(
+					renderType,
+					color,
+					mesh.isEmissive() ? LightCoordsUtil.FULL_BRIGHT : packedLight,
+					packedOverlay);
+			PMeshRenderContext meshContext = resolveMeshRender(renderState, bone, mesh, inherited);
+			
+			RenderType baseType = meshContext.renderType().apply(PTextureCache.ATLAS_LOCATION);
 			RenderType type = mesh.isEmissive() ?
 					PRenderTypes.RenderTypeProvider.emissiveVariant(baseType, PTextureCache.ATLAS_LOCATION) :
 					baseType;
 			
 			if (PRenderTypes.isTransparent(type))
-				PRenderQueue.submitBlockEntityTranslucentMesh(type, mesh, new PRenderQueue.InstanceData(matrix4fstack, color, packedLight, packedOverlay));
+				PRenderQueue.submitBlockEntityTranslucentMesh(type, mesh, new PRenderQueue.InstanceData(matrix4fstack, meshContext.color(), meshContext.packedLight(), meshContext.packedOverlay()));
 			else
-				PRenderQueue.submitBlockEntityMesh(type, mesh, new PRenderQueue.InstanceData(matrix4fstack, color, packedLight, packedOverlay));
+				PRenderQueue.submitBlockEntityMesh(type, mesh, new PRenderQueue.InstanceData(matrix4fstack, meshContext.color(), meshContext.packedLight(), meshContext.packedOverlay()));
 		});
+	}
+	
+	protected PMeshRenderContext resolveMeshRender(RS renderState,
+	                                               PBakedBone bone,
+	                                               PBakedMesh mesh,
+	                                               PMeshRenderContext inherited)
+	{
+		return inherited;
 	}
 	
 	private void tryRotateToRealRotation(PoseStack poseStack, Direction facing)

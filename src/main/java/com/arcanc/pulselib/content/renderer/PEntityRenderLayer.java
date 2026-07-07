@@ -15,6 +15,7 @@ import com.arcanc.pulselib.content.animatable.PAnimationController;
 import com.arcanc.pulselib.content.model.baked.PBakedBone;
 import com.arcanc.pulselib.content.model.baked.PBakedMesh;
 import com.arcanc.pulselib.content.model.baked.PBakedModel;
+import com.arcanc.pulselib.content.model.baked.PMeshRenderContext;
 import com.arcanc.pulselib.content.renderer.base.PEntityRenderState;
 import com.arcanc.pulselib.content.renderer.modelData.PModelData;
 import com.mojang.blaze3d.vertex.PoseStack;
@@ -106,6 +107,18 @@ public abstract class PEntityRenderLayer<T extends Entity & PAnimatable<T>, RS e
 		return packedOverlay;
 	}
 	
+	public PMeshRenderContext resolveMeshRender(RS renderState,
+	                                            PBakedBone bone,
+	                                            PBakedMesh mesh,
+	                                            PMeshRenderContext inherited)
+	{
+		return new PMeshRenderContext(
+				inherited.renderType(),
+				getColor(renderState, bone, mesh, inherited.color()),
+				getPackedLight(renderState, inherited.packedLight()),
+				getPackedOverlay(renderState, inherited.packedOverlay()));
+	}
+	
 	public void submit(PEntityRenderer<T, RS> renderer,
 	                   RS renderState,
 	                   PoseStack poseStack,
@@ -114,10 +127,9 @@ public abstract class PEntityRenderLayer<T extends Entity & PAnimatable<T>, RS e
 	                   Collection<PAnimationController<T>> controllers,
 	                   int packedColor,
 	                   int packedLight,
-	                   int packedOverlay,
-	                   float partialTick)
+	                   int packedOverlay)
 	{
-		submit(renderer, renderState, poseStack, submitNodeCollector, cameraRenderState, controllers, packedColor, packedLight, packedOverlay, partialTick, null, null);
+		submit(renderer, renderState, poseStack, submitNodeCollector, cameraRenderState, controllers, packedColor, packedLight, packedOverlay, null, null);
 	}
 
 	public void submit(PEntityRenderer<T, RS> renderer,
@@ -129,7 +141,6 @@ public abstract class PEntityRenderLayer<T extends Entity & PAnimatable<T>, RS e
 	                   int packedColor,
 	                   int packedLight,
 	                   int packedOverlay,
-	                   float partialTick,
 	                   @Nullable Map<String, Matrix4f> entityBonePoses,
 	                   @Nullable Matrix4f layerTransform)
 	{
@@ -148,9 +159,8 @@ public abstract class PEntityRenderLayer<T extends Entity & PAnimatable<T>, RS e
 					data,
 					this :: getRenderType,
 					packedColor,
-					getPackedLight(renderState, packedLight),
-					getPackedOverlay(renderState, packedOverlay),
-					partialTick,
+					packedLight,
+					packedOverlay,
 					submitNodeCollector,
 					cameraRenderState,
 					this,

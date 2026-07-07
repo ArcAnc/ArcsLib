@@ -7,9 +7,11 @@
  * Details can be found in the license file in the root folder of this project
  */
 
-package com.arcanc.pulselib.util.armor;
+package com.arcanc.pulselib.util.attachments.humanoid.armor;
 
 
+import com.arcanc.pulselib.util.attachments.PLivingAttachmentLayer;
+import com.arcanc.pulselib.util.attachments.humanoid.PHumanoidAttachmentLayer;
 import com.arcanc.pulselib.util.helpers.PLibRenderHelper;
 import com.google.common.reflect.TypeToken;
 import net.minecraft.client.Minecraft;
@@ -38,7 +40,7 @@ public class PLibArmorHandler
 		modEventBus.addListener(PLibArmorHandler :: registerRenderStateModifiers);
 		NeoForge.EVENT_BUS.addListener(PLibArmorHandler :: renderFirstPersonArmor);
 	}
-
+	
 	@SuppressWarnings({"rawtypes", "unchecked"})
 	private static void addArmorLayers(final EntityRenderersEvent.AddLayers event)
 	{
@@ -48,7 +50,7 @@ public class PLibArmorHandler
 			if (renderer != null)
 				renderer.addLayer(new PHumanoidAttachmentLayer(renderer));
 		}
-
+		
 		for (var entityType : event.getEntityTypes())
 		{
 			EntityRenderer<?, ?> renderer = event.getRenderer(entityType);
@@ -60,30 +62,30 @@ public class PLibArmorHandler
 				livingRenderer.addLayer(new PLivingAttachmentLayer(livingRenderer));
 		}
 	}
-
+	
 	private static void registerRenderStateModifiers(final RegisterRenderStateModifiersEvent event)
 	{
 		event.registerEntityModifier(
 				new TypeToken<LivingEntityRenderer<LivingEntity, LivingEntityRenderState, ?>>() {},
 				PLibArmorHandler :: extractAttachmentRenderData);
 	}
-
+	
 	private static void extractAttachmentRenderData(LivingEntity entity, LivingEntityRenderState state)
 	{
 		List<PLivingAttachmentLayer.RenderEntry> entries = PLivingAttachmentLayer.extractRenderEntries(entity, state.partialTick);
 		state.setRenderData(PLivingAttachmentLayer.RENDER_DATA, entries.isEmpty() ? null : entries);
 	}
-
+	
 	private static void renderFirstPersonArmor(final RenderArmEvent event)
 	{
 		Minecraft mc = PLibRenderHelper.mc();
 		EntityRenderer<?, ?> renderer = mc.getEntityRenderDispatcher().getRenderer(event.getPlayer());
 		if (!(renderer instanceof AvatarRenderer<?> playerRenderer))
 			return;
-
+		
 		HumanoidModel<?> model = playerRenderer.getModel();
 		float partialTick = mc.isPaused() ? 0 : mc.getDeltaTracker().getGameTimeDeltaPartialTick(false);
-
+		
 		PHumanoidAttachmentLayer.renderFirstPersonArm(
 				event.getPoseStack(),
 				event.getPackedLight(),

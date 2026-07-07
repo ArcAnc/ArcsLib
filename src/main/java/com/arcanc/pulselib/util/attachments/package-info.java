@@ -1,6 +1,6 @@
 /**
  * @author ArcAnc
- * Created at: 05.07.2026
+ * Created at: 02.07.2026
  * Copyright (c) 2026
  * <p>
  * This code is licensed under "Arc's License of Common Sense"
@@ -8,6 +8,6 @@
  */
 
 @NullMarked
-package com.arcanc.pulselib.util.armor;
+package com.arcanc.pulselib.util.attachments;
 
 import org.jspecify.annotations.NullMarked;
