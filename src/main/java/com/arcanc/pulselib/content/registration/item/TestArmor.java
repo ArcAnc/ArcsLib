@@ -10,46 +10,66 @@
 package com.arcanc.pulselib.content.registration.item;
 
 
+import com.arcanc.pulselib.content.model.baked.PBakedBone;
+import com.arcanc.pulselib.content.model.baked.PBakedMesh;
+import com.arcanc.pulselib.content.model.baked.PMeshRenderContext;
 import com.arcanc.pulselib.content.renderer.modelData.PModelData;
 import com.arcanc.pulselib.util.PLibDatabase;
-import com.arcanc.pulselib.util.armor.PulseArmorAttachment;
-import com.arcanc.pulselib.util.armor.PulseArmorDefinition;
-import com.arcanc.pulselib.util.armor.PulseArmorModels;
-import com.arcanc.pulselib.util.armor.PulseHumanoidAnchors;
 import net.minecraft.core.Holder;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ArmorItem;
 import net.minecraft.world.item.ArmorMaterial;
-
-import java.util.List;
+import net.minecraft.world.item.ItemStack;
 
 public class TestArmor extends ArmorItem
 {
 	public static final ResourceLocation TEXTURE = PLibDatabase.rl("entity/armor/test_armor/0");
-	
+	public static final PModelData MODEL_DATA = new PModelData.Builder(PLibDatabase.rl("armor/test_armor"), "entity").build();
 	public TestArmor(Holder<ArmorMaterial> material, Type type, Properties properties)
 	{
 		super(material, type, properties);
-		PulseArmorModels.register(this, createArmorDefinition(type));
 	}
 	
-	private static PulseArmorDefinition createArmorDefinition(Type type)
+	public static PMeshRenderContext resolveArmorRender(LivingEntity entity,
+	                                                     ItemStack stack,
+	                                                     PBakedBone bone,
+	                                                     PBakedMesh mesh,
+	                                                     PMeshRenderContext inherited,
+	                                                     float partialTick)
 	{
-		return new PulseArmorDefinition(
-				new PModelData.Builder(PLibDatabase.rl("armor/test_armor"), "entity").build(),
-				type.getSlot(),
-				attachments(type),
-				true);
+		return new PMeshRenderContext(
+				inherited.renderType(),
+				dayTimeColor(entity, partialTick),
+				inherited.packedLight(),
+				inherited.packedOverlay());
 	}
 	
-	private static List<PulseArmorAttachment> attachments(Type type)
+	private static int dayTimeColor(LivingEntity entity, float partialTick)
 	{
-		return switch (type)
-		{
-			case HELMET -> List.of(PulseArmorAttachment.builder(type.getSlot(), PulseHumanoidAnchors.HEAD, "head").build());
-			case CHESTPLATE -> List.of(PulseArmorAttachment.builder(type.getSlot(), PulseHumanoidAnchors.RIGHT_ARM, "right_arm").build());
-			case LEGGINGS -> List.of(PulseArmorAttachment.builder(type.getSlot(), PulseHumanoidAnchors.RIGHT_LEG, "right_leg").build());
-			case BODY, BOOTS -> List.of();
-		};
+		float time = ((entity.level().getDayTime() % 24000L) + partialTick) / 24000f;
+		
+		if (time < 0.25f)
+			return lerpColor(0xFFFFD36A, 0xFFFFFFFF, time / 0.25f);
+		if (time < 0.50f)
+			return lerpColor(0xFFFFFFFF, 0xFFFF9A3D, (time - 0.25f) / 0.25f);
+		if (time < 0.75f)
+			return lerpColor(0xFFFF9A3D, 0xFF5E7CFF, (time - 0.50f) / 0.25f);
+		return lerpColor(0xFF5E7CFF, 0xFFFFD36A, (time - 0.75f) / 0.25f);
+	}
+	
+	private static int lerpColor(int from, int to, float delta)
+	{
+		int alpha = lerp((from >>> 24) & 0xFF, (to >>> 24) & 0xFF, delta);
+		int red = lerp((from >>> 16) & 0xFF, (to >>> 16) & 0xFF, delta);
+		int green = lerp((from >>> 8) & 0xFF, (to >>> 8) & 0xFF, delta);
+		int blue = lerp(from & 0xFF, to & 0xFF, delta);
+		
+		return alpha << 24 | red << 16 | green << 8 | blue;
+	}
+	
+	private static int lerp(int from, int to, float delta)
+	{
+		return (int)(from + (to - from) * delta);
 	}
 }

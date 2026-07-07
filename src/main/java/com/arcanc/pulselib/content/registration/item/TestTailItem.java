@@ -43,22 +43,23 @@ public class TestTailItem extends Item
 		PulseLivingAttachments.register(this, createDefinition());
 	}
 	
-	public static PulseLivingDefinition createDefinition(PulseLivingAttachmentSource source, PulseAttachmentAnchor anchor, Vector3f offset, Vector3f rotation)
+	public static PLivingAttachmentDefinition createDefinition(PLivingAttachmentSource source, PulseAttachmentAnchor anchor, Vector3f offset, Vector3f rotation)
 	{
-		return new PulseLivingDefinition(
+		return new PLivingAttachmentDefinition(
 				MODEL_DATA,
 				source,
-				List.of(PulseLivingAttachment.builder(anchor, "body").
-						offset(offset).
-						rotation(rotation).
-						build()),
+				List.of(PHumanoidBindings.bind(
+						anchor,
+						"body",
+						PTransform.of(offset, rotation, new Vector3f(1, 1, 1)))),
+				PMeshRenderResolvers.defaultLit(),
 				false,
 				TestTailItem :: controllers);
 	}
 	
-	private PulseLivingDefinition createDefinition()
+	private PLivingAttachmentDefinition createDefinition()
 	{
-		return createDefinition(PulseLivingAttachmentSource.hand(), PulseHumanoidAnchors.BODY, new Vector3f(), new Vector3f());
+		return createDefinition(PLivingAttachmentSources.hand(), PulseHumanoidAnchors.BODY, new Vector3f(), new Vector3f());
 	}
 	
 	private static Collection<PAnimationController<?>> controllers(LivingEntity entity, ItemStack stack, PBakedModel model, float partialTick)

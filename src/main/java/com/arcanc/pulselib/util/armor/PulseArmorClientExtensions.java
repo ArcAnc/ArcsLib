@@ -87,6 +87,12 @@ public class PulseArmorClientExtensions implements IClientItemExtensions
 	                                              EquipmentSlot equipmentSlot,
 	                                              HumanoidModel<?> original)
 	{
+		if (PulseLivingAttachments.hidesVanillaArmor(itemStack, equipmentSlot, livingEntity))
+		{
+			original.setAllVisible(false);
+			return original;
+		}
+		
 		return this.base.getHumanoidArmorModel(livingEntity, itemStack, equipmentSlot, original);
 	}
 	

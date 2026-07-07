@@ -13,6 +13,8 @@ package com.arcanc.pulselib.util.armor;
 import com.arcanc.pulselib.content.animatable.PAnimationController;
 import com.arcanc.pulselib.content.model.baked.PBakedBone;
 import com.arcanc.pulselib.content.model.baked.PBakedModel;
+import com.arcanc.pulselib.content.model.baked.PMeshRenderContext;
+import com.arcanc.pulselib.util.PRenderTypes;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
 import net.minecraft.client.model.EntityModel;
@@ -62,14 +64,14 @@ public class PLivingAttachmentLayer<T extends LivingEntity, M extends EntityMode
 		for (EquipmentSlot slot : EQUIPMENT_SLOTS)
 		{
 			ItemStack stack = entity.getItemBySlot(slot);
-			for (PulseLivingDefinition definition : PulseLivingAttachments.get(stack, slot, entity))
+			for (PLivingAttachmentDefinition definition : PulseLivingAttachments.get(stack, slot, entity))
 				renderDefinition(poseStack, light, partialTick, entity, stack, definition,
-						attachment -> PulseAttachmentAnchorResolvers.resolve(entity, this.getParentModel(), attachment.anchor()));
+						binding -> PulseAttachmentAnchorResolvers.resolve(entity, this.getParentModel(), binding.anchor()));
 		}
 		
-		for (PulseLivingDefinition definition : PulseLivingAttachments.getGlobal(entity))
+		for (PLivingAttachmentDefinition definition : PulseLivingAttachments.getGlobal(entity))
 			renderDefinition(poseStack, light, partialTick, entity, ItemStack.EMPTY, definition,
-					attachment -> PulseAttachmentAnchorResolvers.resolve(entity, this.getParentModel(), attachment.anchor()));
+					binding -> PulseAttachmentAnchorResolvers.resolve(entity, this.getParentModel(), binding.anchor()));
 	}
 	
 	protected static void renderFirstPersonAnchor(PoseStack poseStack,
@@ -91,14 +93,14 @@ public class PLivingAttachmentLayer<T extends LivingEntity, M extends EntityMode
 			for (EquipmentSlot slot : EQUIPMENT_SLOTS)
 			{
 				ItemStack stack = entity.getItemBySlot(slot);
-				for (PulseLivingDefinition definition : PulseLivingAttachments.get(stack, slot, entity))
+				for (PLivingAttachmentDefinition definition : PulseLivingAttachments.get(stack, slot, entity))
 					renderDefinition(poseStack, light, partialTick, entity, stack, definition,
-							attachment -> attachment.anchor().equals(targetAnchor) ? anchorPart : null);
+							binding -> binding.anchor().equals(targetAnchor) ? anchorPart : null);
 			}
 			
-			for (PulseLivingDefinition definition : PulseLivingAttachments.getGlobal(entity))
+			for (PLivingAttachmentDefinition definition : PulseLivingAttachments.getGlobal(entity))
 				renderDefinition(poseStack, light, partialTick, entity, ItemStack.EMPTY, definition,
-						attachment -> attachment.anchor().equals(targetAnchor) ? anchorPart : null);
+						binding -> binding.anchor().equals(targetAnchor) ? anchorPart : null);
 		}
 		finally
 		{
@@ -114,70 +116,78 @@ public class PLivingAttachmentLayer<T extends LivingEntity, M extends EntityMode
 			float partialTick,
 			LivingEntity entity,
 			ItemStack stack,
-			PulseLivingDefinition definition,
+			PLivingAttachmentDefinition definition,
 			AttachmentPartResolver partResolver)
 	{
-		PBakedModel model = definition.modelData().getModel();
+		PBakedModel model = definition.model().getModel();
 		if (model == null)
 			return;
 		
 		Collection<PAnimationController<?>> controllers = definition.animationControllers(entity, stack, model, partialTick);
 		
-		for (PulseLivingAttachment attachment : definition.attachments())
+		for (PAttachmentBinding binding : definition.bindings())
 		{
-			ModelPart vanillaPart = partResolver.resolve(attachment);
+			ModelPart vanillaPart = partResolver.resolve(binding);
 			if (vanillaPart == null)
 				continue;
 			
-			PBakedBone bone = findBone(model.bones(), attachment.pulseBone());
+			PBakedBone bone = findBone(model.bones(), binding.bone());
 			if (bone == null)
 				continue;
 			
 			poseStack.pushPose();
 			vanillaPart.translateAndRotate(poseStack);
 			poseStack.mulPose(Axis.ZP.rotationDegrees(180));
-			Vector3f offset = attachment.offset();
-			Quaternionf rotation = attachment.rotation();
-			Vector3f scale = attachment.scale();
+			PTransform transform = binding.transform();
+			Vector3f offset = transform.offset();
+			Quaternionf rotation = transform.rotation();
+			Vector3f scale = transform.scale();
 			poseStack.translate(offset.x(), offset.y(), offset.z());
 			poseStack.mulPose(rotation);
 			poseStack.scale(scale.x(), scale.y(), scale.z());
 			poseStack.translate(-bone.basePosition().x(), -bone.basePosition().y(), -bone.basePosition().z());
 			
-			drawBone(poseStack, definition, bone, attachment, controllers, light, partialTick);
+			drawBone(poseStack, definition, bone, entity, stack, controllers, light, partialTick);
 			
 			poseStack.popPose();
 		}
 	}
 	
 	private static void drawBone(PoseStack poseStack,
-	                             PulseLivingDefinition definition,
+	                             PLivingAttachmentDefinition definition,
 	                             PBakedBone bone,
-	                             PulseLivingAttachment attachment,
+	                             LivingEntity entity,
+	                             ItemStack stack,
 	                             Collection<PAnimationController<?>> controllers,
 	                             int light,
 	                             float partialTick)
 	{
-		drawBoneUnchecked(poseStack, definition, bone, attachment, controllers, light, partialTick);
+		drawBoneUnchecked(poseStack, definition, bone, entity, stack, controllers, light, partialTick);
 	}
 	
 	@SuppressWarnings({"rawtypes", "unchecked"})
 	private static void drawBoneUnchecked(PoseStack poseStack,
-	                                      PulseLivingDefinition definition,
+	                                      PLivingAttachmentDefinition definition,
 	                                      PBakedBone bone,
-	                                      PulseLivingAttachment attachment,
+	                                      LivingEntity entity,
+	                                      ItemStack stack,
 	                                      Collection<PAnimationController<?>> controllers,
 	                                      int light,
 	                                      float partialTick)
 	{
+		PMeshRenderContext context = new PMeshRenderContext(
+				PRenderTypes.RenderTypeProvider :: trianglesLit,
+				-1,
+				light,
+				OverlayTexture.NO_OVERLAY);
+		
 		bone.instantDraw(
 				poseStack,
-				definition.modelData(),
+				definition.model(),
 				(Collection) controllers,
-				attachment.renderType(),
-				attachment.color(),
-				light,
-				OverlayTexture.NO_OVERLAY,
+				(bakedBone, mesh, inherited) ->
+						definition.renderResolver().resolve(entity, stack, bakedBone, mesh, inherited, partialTick),
+				context,
 				partialTick);
 	}
 	
@@ -199,6 +209,6 @@ public class PLivingAttachmentLayer<T extends LivingEntity, M extends EntityMode
 	@FunctionalInterface
 	private interface AttachmentPartResolver
 	{
-		@Nullable ModelPart resolve(PulseLivingAttachment attachment);
+		@Nullable ModelPart resolve(PAttachmentBinding binding);
 	}
 }

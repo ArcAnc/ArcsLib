@@ -23,20 +23,20 @@ import java.util.Map;
 
 public class PulseLivingAttachments
 {
-	private static final Map<Item, List<PulseLivingDefinition>> ITEM_ATTACHMENTS = new Reference2ObjectLinkedOpenHashMap<>();
-	private static final List<PulseLivingDefinition> GLOBAL_ATTACHMENTS = new ArrayList<>();
+	private static final Map<Item, List<PLivingAttachmentDefinition>> ITEM_ATTACHMENTS = new Reference2ObjectLinkedOpenHashMap<>();
+	private static final List<PLivingAttachmentDefinition> GLOBAL_ATTACHMENTS = new ArrayList<>();
 	
-	public static void register(Item item, PulseLivingDefinition definition)
+	public static void register(Item item, PLivingAttachmentDefinition definition)
 	{
 		ITEM_ATTACHMENTS.computeIfAbsent(item, $ -> new ArrayList<>()).add(definition);
 	}
 	
-	public static void register(Item item, Collection<? extends PulseLivingDefinition> definitions)
+	public static void register(Item item, Collection<? extends PLivingAttachmentDefinition> definitions)
 	{
 		definitions.forEach(definition -> register(item, definition));
 	}
 	
-	public static void registerGlobal(PulseLivingDefinition definition)
+	public static void registerGlobal(PLivingAttachmentDefinition definition)
 	{
 		GLOBAL_ATTACHMENTS.add(definition);
 	}
@@ -46,24 +46,24 @@ public class PulseLivingAttachments
 		return ITEM_ATTACHMENTS.containsKey(item);
 	}
 	
-	public static List<PulseLivingDefinition> get(ItemStack stack, EquipmentSlot slot, LivingEntity entity)
+	public static List<PLivingAttachmentDefinition> get(ItemStack stack, EquipmentSlot slot, LivingEntity entity)
 	{
-		List<PulseLivingDefinition> definitions = ITEM_ATTACHMENTS.get(stack.getItem());
+		List<PLivingAttachmentDefinition> definitions = ITEM_ATTACHMENTS.get(stack.getItem());
 		if (definitions == null)
 			return List.of();
 		
-		List<PulseLivingDefinition> result = new ArrayList<>();
-		for (PulseLivingDefinition definition : definitions)
+		List<PLivingAttachmentDefinition> result = new ArrayList<>();
+		for (PLivingAttachmentDefinition definition : definitions)
 			if (definition.source().shouldRender(entity, slot, stack))
 				result.add(definition);
 		
 		return result;
 	}
 	
-	public static List<PulseLivingDefinition> getGlobal(LivingEntity entity)
+	public static List<PLivingAttachmentDefinition> getGlobal(LivingEntity entity)
 	{
-		List<PulseLivingDefinition> result = new ArrayList<>();
-		for (PulseLivingDefinition definition : GLOBAL_ATTACHMENTS)
+		List<PLivingAttachmentDefinition> result = new ArrayList<>();
+		for (PLivingAttachmentDefinition definition : GLOBAL_ATTACHMENTS)
 			if (definition.source().shouldRender(entity, EquipmentSlot.BODY, ItemStack.EMPTY))
 				result.add(definition);
 		
@@ -72,7 +72,7 @@ public class PulseLivingAttachments
 	
 	public static boolean hidesVanillaArmor(ItemStack stack, EquipmentSlot slot, LivingEntity entity)
 	{
-		for (PulseLivingDefinition definition : get(stack, slot, entity))
+		for (PLivingAttachmentDefinition definition : get(stack, slot, entity))
 			if (definition.hideVanilla())
 				return true;
 		

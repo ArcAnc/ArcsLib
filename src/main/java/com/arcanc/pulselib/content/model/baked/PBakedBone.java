@@ -46,14 +46,29 @@ public record PBakedBone(String name,
                          @Nullable PBakedBone parent,
                          List<PBakedMesh> meshes)
 {
-	public <T extends PAnimatable<T>>void instantDraw(PoseStack poseStack,
-	                                             PModelData modelData,
-	                                             Collection<PAnimationController<T>> controllers,
-	                                             Function<ResourceLocation, RenderType> renderType,
-	                                             int color,
-	                                             int packedLight,
-	                                             int packedOverlay,
-	                                             float partialTick)
+	public <T extends PAnimatable<T>> void instantDraw(PoseStack poseStack,
+	                                                   PModelData modelData,
+	                                                   Collection<PAnimationController<T>> controllers,
+	                                                   Function<ResourceLocation, RenderType> renderType,
+	                                                   int color,
+	                                                   int packedLight,
+	                                                   int packedOverlay,
+	                                                   float partialTick)
+	{
+		PMeshRenderContext context = new PMeshRenderContext(
+				renderType,
+				color,
+				packedLight,
+				packedOverlay);
+		instantDraw(poseStack, modelData, controllers, (bone, mesh, inherited) -> inherited, context, partialTick);
+	}
+	
+	public <T extends PAnimatable<T>> void instantDraw(PoseStack poseStack,
+	                                                   PModelData modelData,
+	                                                   Collection<PAnimationController<T>> controllers,
+	                                                   PMeshRenderResolver resolver,
+	                                                   PMeshRenderContext inherited,
+	                                                   float partialTick)
 	{
 		BoneFrame frame = mixBone(modelData.getModel(), controllers, partialTick);
 		poseStack.pushPose();
@@ -71,24 +86,27 @@ public record PBakedBone(String name,
 		Matrix4f matrix4fstack = new Matrix4f(RenderSystem.getModelViewMatrix());
 		matrix4fstack.mul(poseStack.last().pose());
 		
-		int u = packedOverlay & 0xFFFF;
-		int v = (packedOverlay >> 16) & 0xFFFF;
-		int red = FastColor.ARGB32.red(color);
-		int green = FastColor.ARGB32.green(color);
-		int blue = FastColor.ARGB32.blue(color);
-		int alpha = FastColor.ARGB32.alpha(color);
-		
-		Vector4f colorVector = new Vector4f(red/255f, green/255f, blue/255f, alpha/255f);
-		
+		PMeshRenderContext boneContext = inherited;
 		this.meshes().forEach(mesh ->
 		{
 			if (mesh.textureName().isEmpty())
 				return;
 			
-			RenderType type = renderType.apply(PTextureCache.ATLAS_LOCATION);
+			PMeshRenderContext meshContext = resolver.resolve(this, mesh, boneContext);
+			
+			RenderType type = meshContext.renderType().apply(PTextureCache.ATLAS_LOCATION);
 			if (mesh.isEmissive())
 				type = PRenderTypes.RenderTypeProvider.emissiveVariant(type, PTextureCache.ATLAS_LOCATION);
-			int meshPackedLight = mesh.isEmissive() ? LightTexture.FULL_BRIGHT : packedLight;
+			
+			int u = meshContext.packedOverlay() & 0xFFFF;
+			int v = (meshContext.packedOverlay() >> 16) & 0xFFFF;
+			int red = FastColor.ARGB32.red(meshContext.color());
+			int green = FastColor.ARGB32.green(meshContext.color());
+			int blue = FastColor.ARGB32.blue(meshContext.color());
+			int alpha = FastColor.ARGB32.alpha(meshContext.color());
+			Vector4f colorVector = new Vector4f(red / 255f, green / 255f, blue / 255f, alpha / 255f);
+			
+			int meshPackedLight = meshContext.packedLight();
 			int blockLight = LightTexture.block(meshPackedLight);
 			int skyLight = LightTexture.sky(meshPackedLight);
 			type.setupRenderState();
@@ -108,7 +126,7 @@ public record PBakedBone(String name,
 		});
 		
 		this.children().forEach(children ->
-				children.instantDraw(poseStack, modelData, controllers, renderType, color, packedLight, packedOverlay, partialTick));
+				children.instantDraw(poseStack, modelData, controllers, resolver, boneContext, partialTick));
 		
 		poseStack.popPose();
 	}

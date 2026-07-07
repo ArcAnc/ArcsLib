@@ -26,6 +26,8 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.item.Item;
 import net.neoforged.bus.api.EventPriority;
 import net.neoforged.bus.api.IEventBus;
+import net.neoforged.fml.ModLoader;
+import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
 import net.neoforged.neoforge.client.event.RegisterClientReloadListenersEvent;
 import net.neoforged.neoforge.client.event.RegisterSpriteSourceTypesEvent;
 import net.neoforged.neoforge.client.extensions.common.IClientItemExtensions;
@@ -36,6 +38,7 @@ import net.neoforged.neoforge.event.level.LevelEvent;
 public class ClientEvents
 {
 	private static final PulseAttachmentAnchor TEST_COW_BODY = PulseAttachmentAnchor.of(PLibDatabase.rl("cow_body"));
+	private static boolean pulseClientContentRegistered;
 	
 	public static void registerClientEvents(final IEventBus modEventBus)
 	{
@@ -46,6 +49,7 @@ public class ClientEvents
 		
 		modEventBus.addListener(EventPriority.HIGHEST, ClientEvents :: registerSpriteSources);
 		modEventBus.addListener(ClientEvents :: registerReloadListeners);
+		modEventBus.addListener(ClientEvents :: registerPulseClientContent);
 		modEventBus.addListener(ClientEvents :: registerClientExtensions);
 		NeoForge.EVENT_BUS.addListener(ClientEvents :: playerDisconnected);
 		PLibArmorHandler.register(modEventBus);
@@ -60,14 +64,57 @@ public class ClientEvents
 		PulseAttachmentAnchorResolvers.register(CowModel.class, TEST_COW_BODY,
 				(entity, model) -> entity.getType() == EntityType.COW ? ((CowModel<?>)model).body : null);
 		PulseLivingAttachments.registerGlobal(TestTailItem.createDefinition(
-				PulseLivingAttachmentSource.entityPredicate(entity -> entity.getType() == EntityType.COW),
+				PLivingAttachmentSources.entityPredicate(entity -> entity.getType() == EntityType.COW),
 				TEST_COW_BODY,
 				new Vector3f(0, -0.4f, 0.8f),
 				new Vector3f(90, 0, 0)));
 	}*/
 	
+	private static void registerPulseClientContent(final FMLClientSetupEvent event)
+	{
+		ensurePulseClientContentRegistered();
+	}
+	
+	private static void ensurePulseClientContentRegistered()
+	{
+		if (pulseClientContentRegistered)
+			return;
+		
+		PulseClientRegistrationEvent registrationEvent = new PulseClientRegistrationEvent();
+		ModLoader.postEvent(registrationEvent);
+		
+		/*registrationEvent.registration().livingAttachment(Registration.ItemReg.TEST_HAT.get(),
+				new PLivingAttachmentDefinition(
+				TestArmor.MODEL_DATA,
+				PLivingAttachmentSources.equipmentSlot(EquipmentSlot.HEAD),
+				List.of(PHumanoidBindings.head("head")),
+				TestArmor :: resolveArmorRender,
+				true));
+		
+		registrationEvent.registration().livingAttachment(Registration.ItemReg.TEST_CHESTPLATE.get(),
+				new PLivingAttachmentDefinition(
+						TestArmor.MODEL_DATA,
+						PLivingAttachmentSources.equipmentSlot(EquipmentSlot.CHEST),
+						List.of(PHumanoidBindings.rightArm("right_arm")),
+						TestArmor :: resolveArmorRender,
+						true));
+		
+		registrationEvent.registration().livingAttachment(Registration.ItemReg.TEST_LEGGINGS.get(),
+				new PLivingAttachmentDefinition(
+						TestArmor.MODEL_DATA,
+						PLivingAttachmentSources.equipmentSlot(EquipmentSlot.LEGS),
+						List.of(PHumanoidBindings.rightLeg("right_leg")),
+						TestArmor :: resolveArmorRender,
+						true));*/
+		
+		registrationEvent.registration().apply();
+		pulseClientContentRegistered = true;
+	}
+	
 	private static void registerClientExtensions(final RegisterClientExtensionsEvent event)
 	{
+		ensurePulseClientContentRegistered();
+		
 		BuiltInRegistries.ITEM.stream().
 				filter(item -> item instanceof PItemAnimatable<?> || PulseLivingAttachments.contains(item)).
 				forEach(item -> registerClientExtension(event, item));
@@ -125,7 +172,7 @@ public class ClientEvents
 				addTextureLocation(TestBlockEntityRenderer.PYRAMID);
 		event.addTextureLocation(TestBlockItemRenderer.PYRAMID).
 				addTextureLocation(TestBlockItemRenderer.CIRCLE);
-		event.addTextureLocation(TestArmor.TEXTURE);
 		event.addTextureLocation(TestTailItem.TEXTURE);
+		event.addTextureLocation(TestArmor.TEXTURE);
 	}*/
 }
