@@ -7,7 +7,7 @@
  * Details can be found in the license file in the root folder of this project
  */
 
-package com.arcanc.pulselib.util.armor;
+package com.arcanc.pulselib.util.attachments;
 
 
 import com.arcanc.pulselib.content.animatable.PAnimationController;
@@ -64,20 +64,20 @@ public class PLivingAttachmentLayer<T extends LivingEntity, M extends EntityMode
 		for (EquipmentSlot slot : EQUIPMENT_SLOTS)
 		{
 			ItemStack stack = entity.getItemBySlot(slot);
-			for (PLivingAttachmentDefinition definition : PulseLivingAttachments.get(stack, slot, entity))
+			for (PLivingAttachmentDefinition definition : PLivingAttachments.get(stack, slot, entity))
 				renderDefinition(poseStack, light, partialTick, entity, stack, definition,
-						binding -> PulseAttachmentAnchorResolvers.resolve(entity, this.getParentModel(), binding.anchor()));
+						binding -> PAttachmentAnchorResolvers.resolve(entity, this.getParentModel(), binding.anchor()));
 		}
 		
-		for (PLivingAttachmentDefinition definition : PulseLivingAttachments.getGlobal(entity))
+		for (PLivingAttachmentDefinition definition : PLivingAttachments.getGlobal(entity))
 			renderDefinition(poseStack, light, partialTick, entity, ItemStack.EMPTY, definition,
-					binding -> PulseAttachmentAnchorResolvers.resolve(entity, this.getParentModel(), binding.anchor()));
+					binding -> PAttachmentAnchorResolvers.resolve(entity, this.getParentModel(), binding.anchor()));
 	}
 	
 	protected static void renderFirstPersonAnchor(PoseStack poseStack,
 	                                              int light,
 	                                              LivingEntity entity,
-	                                              PulseAttachmentAnchor targetAnchor,
+	                                              PAttachmentAnchor targetAnchor,
 	                                              ModelPart anchorPart,
 	                                              float partialTick)
 	{
@@ -93,12 +93,12 @@ public class PLivingAttachmentLayer<T extends LivingEntity, M extends EntityMode
 			for (EquipmentSlot slot : EQUIPMENT_SLOTS)
 			{
 				ItemStack stack = entity.getItemBySlot(slot);
-				for (PLivingAttachmentDefinition definition : PulseLivingAttachments.get(stack, slot, entity))
+				for (PLivingAttachmentDefinition definition : PLivingAttachments.get(stack, slot, entity))
 					renderDefinition(poseStack, light, partialTick, entity, stack, definition,
 							binding -> binding.anchor().equals(targetAnchor) ? anchorPart : null);
 			}
 			
-			for (PLivingAttachmentDefinition definition : PulseLivingAttachments.getGlobal(entity))
+			for (PLivingAttachmentDefinition definition : PLivingAttachments.getGlobal(entity))
 				renderDefinition(poseStack, light, partialTick, entity, ItemStack.EMPTY, definition,
 						binding -> binding.anchor().equals(targetAnchor) ? anchorPart : null);
 		}

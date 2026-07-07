@@ -7,9 +7,11 @@
  * Details can be found in the license file in the root folder of this project
  */
 
-package com.arcanc.pulselib.util.armor;
+package com.arcanc.pulselib.util.attachments.humanoid.armor;
 
 
+import com.arcanc.pulselib.util.attachments.PLivingAttachmentLayer;
+import com.arcanc.pulselib.util.attachments.humanoid.PHumanoidAttachmentLayer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.EntityModel;
 import net.minecraft.client.model.HumanoidModel;

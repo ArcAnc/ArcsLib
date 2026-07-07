@@ -15,7 +15,10 @@ import com.arcanc.pulselib.content.model.animation.PRawAnimation;
 import com.arcanc.pulselib.content.model.baked.PBakedModel;
 import com.arcanc.pulselib.content.renderer.modelData.PModelData;
 import com.arcanc.pulselib.util.PLibDatabase;
-import com.arcanc.pulselib.util.armor.*;
+import com.arcanc.pulselib.util.attachments.*;
+import com.arcanc.pulselib.util.attachments.humanoid.PHumanoidAnchors;
+import com.arcanc.pulselib.util.attachments.humanoid.PHumanoidBindings;
+import com.arcanc.pulselib.util.attachments.PLivingAttachmentDefinition;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.Item;
@@ -40,10 +43,10 @@ public class TestTailItem extends Item
 	public TestTailItem(Properties properties)
 	{
 		super(properties);
-		PulseLivingAttachments.register(this, createDefinition());
+		PLivingAttachments.register(this, createDefinition());
 	}
 	
-	public static PLivingAttachmentDefinition createDefinition(PLivingAttachmentSource source, PulseAttachmentAnchor anchor, Vector3f offset, Vector3f rotation)
+	public static PLivingAttachmentDefinition createDefinition(PLivingAttachmentSource source, PAttachmentAnchor anchor, Vector3f offset, Vector3f rotation)
 	{
 		return new PLivingAttachmentDefinition(
 				MODEL_DATA,
@@ -52,14 +55,14 @@ public class TestTailItem extends Item
 						anchor,
 						"body",
 						PTransform.of(offset, rotation, new Vector3f(1, 1, 1)))),
-				PMeshRenderResolvers.defaultLit(),
+				PLivingMeshRenderResolvers.defaultLit(),
 				false,
 				TestTailItem :: controllers);
 	}
 	
 	private PLivingAttachmentDefinition createDefinition()
 	{
-		return createDefinition(PLivingAttachmentSources.hand(), PulseHumanoidAnchors.BODY, new Vector3f(), new Vector3f());
+		return createDefinition(PLivingAttachmentSources.hand(), PHumanoidAnchors.BODY, new Vector3f(), new Vector3f());
 	}
 	
 	private static Collection<PAnimationController<?>> controllers(LivingEntity entity, ItemStack stack, PBakedModel model, float partialTick)

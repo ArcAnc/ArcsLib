@@ -7,9 +7,11 @@
  * Details can be found in the license file in the root folder of this project
  */
 
-package com.arcanc.pulselib.util.armor;
+package com.arcanc.pulselib.util.attachments.humanoid;
 
 
+import com.arcanc.pulselib.util.attachments.PAttachmentAnchor;
+import com.arcanc.pulselib.util.attachments.PLivingAttachmentLayer;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.model.HumanoidModel;
 import net.minecraft.client.model.geom.ModelPart;
@@ -31,7 +33,7 @@ public class PHumanoidAttachmentLayer<T extends LivingEntity, M extends Humanoid
 	                                        ModelPart armPart,
 	                                        float partialTick)
 	{
-		PulseAttachmentAnchor targetAnchor = arm == HumanoidArm.RIGHT ? PulseHumanoidAnchors.RIGHT_ARM : PulseHumanoidAnchors.LEFT_ARM;
+		PAttachmentAnchor targetAnchor = arm == HumanoidArm.RIGHT ? PHumanoidAnchors.RIGHT_ARM : PHumanoidAnchors.LEFT_ARM;
 		renderFirstPersonAnchor(poseStack, light, entity, targetAnchor, armPart, partialTick);
 	}
 }

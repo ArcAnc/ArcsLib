@@ -7,7 +7,7 @@
  * Details can be found in the license file in the root folder of this project
  */
 
-package com.arcanc.pulselib.util.armor;
+package com.arcanc.pulselib.util.attachments;
 
 
 import com.arcanc.pulselib.content.animatable.PAnimationController;
@@ -24,14 +24,14 @@ public record PLivingAttachmentDefinition(
 		PModelData model,
 		PLivingAttachmentSource source,
 		List<PAttachmentBinding> bindings,
-		PMeshRenderResolver renderResolver,
+		PLivingMeshRenderResolver renderResolver,
 		boolean hideVanilla,
 		ControllerProvider controllerProvider)
 {
 	public PLivingAttachmentDefinition(PModelData model,
 	                                   PLivingAttachmentSource source,
 	                                   List<PAttachmentBinding> bindings,
-	                                   PMeshRenderResolver renderResolver,
+	                                   PLivingMeshRenderResolver renderResolver,
 	                                   boolean hideVanilla)
 	{
 		this(model, source, bindings, renderResolver, hideVanilla, ControllerProvider.EMPTY);

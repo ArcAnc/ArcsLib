@@ -7,9 +7,10 @@
  * Details can be found in the license file in the root folder of this project
  */
 
-package com.arcanc.pulselib.util.armor;
+package com.arcanc.pulselib.util.attachments.humanoid.armor;
 
 
+import com.arcanc.pulselib.util.attachments.PLivingAttachments;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.client.DeltaTracker;
@@ -32,7 +33,7 @@ import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.client.extensions.common.IClientItemExtensions;
 import org.jetbrains.annotations.Nullable;
 
-public class PulseArmorClientExtensions implements IClientItemExtensions
+public class PArmorClientExtensions implements IClientItemExtensions
 {
 	private static final Model EMPTY_ARMOR_MODEL = new Model(RenderType :: entityCutoutNoCull)
 	{
@@ -44,7 +45,7 @@ public class PulseArmorClientExtensions implements IClientItemExtensions
 	
 	private final IClientItemExtensions base;
 	
-	public PulseArmorClientExtensions(IClientItemExtensions base)
+	public PArmorClientExtensions(IClientItemExtensions base)
 	{
 		this.base = base;
 	}
@@ -52,9 +53,9 @@ public class PulseArmorClientExtensions implements IClientItemExtensions
 	public static IClientItemExtensions buildFor(Item item, @Nullable IClientItemExtensions base)
 	{
 		IClientItemExtensions resolvedBase = base == null ? IClientItemExtensions.DEFAULT : base;
-		if (!PulseLivingAttachments.contains(item))
+		if (! PLivingAttachments.contains(item))
 			return resolvedBase;
-		return new PulseArmorClientExtensions(resolvedBase);
+		return new PArmorClientExtensions(resolvedBase);
 	}
 	
 	@Override
@@ -87,7 +88,7 @@ public class PulseArmorClientExtensions implements IClientItemExtensions
 	                                              EquipmentSlot equipmentSlot,
 	                                              HumanoidModel<?> original)
 	{
-		if (PulseLivingAttachments.hidesVanillaArmor(itemStack, equipmentSlot, livingEntity))
+		if (PLivingAttachments.hidesVanillaArmor(itemStack, equipmentSlot, livingEntity))
 		{
 			original.setAllVisible(false);
 			return original;
@@ -102,7 +103,7 @@ public class PulseArmorClientExtensions implements IClientItemExtensions
 	                                  EquipmentSlot equipmentSlot,
 	                                  HumanoidModel<?> original)
 	{
-		if (PulseLivingAttachments.hidesVanillaArmor(itemStack, equipmentSlot, livingEntity))
+		if (PLivingAttachments.hidesVanillaArmor(itemStack, equipmentSlot, livingEntity))
 			return EMPTY_ARMOR_MODEL;
 		
 		return this.base.getGenericArmorModel(livingEntity, itemStack, equipmentSlot, original);
@@ -151,7 +152,7 @@ public class PulseArmorClientExtensions implements IClientItemExtensions
 	public int getArmorLayerTintColor(ItemStack stack, LivingEntity entity, ArmorMaterial.Layer layer, int layerIdx, int fallbackColor)
 	{
 		EquipmentSlot slot = entity.getEquipmentSlotForItem(stack);
-		return PulseLivingAttachments.hidesVanillaArmor(stack, slot, entity) ? 0 : this.base.getArmorLayerTintColor(stack, entity, layer, layerIdx, fallbackColor);
+		return PLivingAttachments.hidesVanillaArmor(stack, slot, entity) ? 0 : this.base.getArmorLayerTintColor(stack, entity, layer, layerIdx, fallbackColor);
 	}
 	
 	@Override

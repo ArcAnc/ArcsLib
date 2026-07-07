@@ -7,8 +7,12 @@
  * Details can be found in the license file in the root folder of this project
  */
 
-package com.arcanc.pulselib.util.armor;
+package com.arcanc.pulselib.util.attachments.humanoid;
 
+
+import com.arcanc.pulselib.util.attachments.PAttachmentAnchor;
+import com.arcanc.pulselib.util.attachments.PAttachmentBinding;
+import com.arcanc.pulselib.util.attachments.PTransform;
 
 import java.util.Objects;
 
@@ -18,47 +22,47 @@ public final class PHumanoidBindings
 	{
 	}
 	
-	public static PAttachmentBinding bind(PulseAttachmentAnchor anchor, String bone)
+	public static PAttachmentBinding bind(PAttachmentAnchor anchor, String bone)
 	{
 		return new Binding(anchor, bone, PTransform.IDENTITY);
 	}
 	
-	public static PAttachmentBinding bind(PulseAttachmentAnchor anchor, String bone, PTransform transform)
+	public static PAttachmentBinding bind(PAttachmentAnchor anchor, String bone, PTransform transform)
 	{
 		return new Binding(anchor, bone, transform);
 	}
 	
 	public static PAttachmentBinding head(String bone)
 	{
-		return bind(PulseHumanoidAnchors.HEAD, bone);
+		return bind(PHumanoidAnchors.HEAD, bone);
 	}
 	
 	public static PAttachmentBinding body(String bone)
 	{
-		return bind(PulseHumanoidAnchors.BODY, bone);
+		return bind(PHumanoidAnchors.BODY, bone);
 	}
 	
 	public static PAttachmentBinding rightArm(String bone)
 	{
-		return bind(PulseHumanoidAnchors.RIGHT_ARM, bone);
+		return bind(PHumanoidAnchors.RIGHT_ARM, bone);
 	}
 	
 	public static PAttachmentBinding leftArm(String bone)
 	{
-		return bind(PulseHumanoidAnchors.LEFT_ARM, bone);
+		return bind(PHumanoidAnchors.LEFT_ARM, bone);
 	}
 	
 	public static PAttachmentBinding rightLeg(String bone)
 	{
-		return bind(PulseHumanoidAnchors.RIGHT_LEG, bone);
+		return bind(PHumanoidAnchors.RIGHT_LEG, bone);
 	}
 	
 	public static PAttachmentBinding leftLeg(String bone)
 	{
-		return bind(PulseHumanoidAnchors.LEFT_LEG, bone);
+		return bind(PHumanoidAnchors.LEFT_LEG, bone);
 	}
 	
-	private record Binding(PulseAttachmentAnchor anchor, String bone, PTransform transform) implements PAttachmentBinding
+	private record Binding(PAttachmentAnchor anchor, String bone, PTransform transform) implements PAttachmentBinding
 	{
 		private Binding
 		{

@@ -10,7 +10,7 @@
 package com.arcanc.pulselib.util;
 
 
-import com.arcanc.pulselib.content.event.CustomEvents;
+import com.arcanc.pulselib.content.event.PulseLibEvents;
 import com.arcanc.pulselib.util.helpers.PLibRenderHelper;
 import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.resources.ResourceLocation;
@@ -59,6 +59,6 @@ public class PTextureCache
 	@ApiStatus.Internal
 	public static void postEvent()
 	{
-		ModLoader.postEvent(new CustomEvents.PLibRegisterTextureEvent(TEXTURE_CACHE));
+		ModLoader.postEvent(new PulseLibEvents.RegisterTextureEvent(TEXTURE_CACHE));
 	}
 }

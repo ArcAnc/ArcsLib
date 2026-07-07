@@ -7,12 +7,12 @@
  * Details can be found in the license file in the root folder of this project
  */
 
-package com.arcanc.pulselib.util.armor;
+package com.arcanc.pulselib.util.attachments;
 
 
 public interface PAttachmentBinding
 {
-	PulseAttachmentAnchor anchor();
+	PAttachmentAnchor anchor();
 	
 	String bone();
 	

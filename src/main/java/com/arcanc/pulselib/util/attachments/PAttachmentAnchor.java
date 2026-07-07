@@ -7,19 +7,19 @@
  * Details can be found in the license file in the root folder of this project
  */
 
-package com.arcanc.pulselib.util.armor;
+package com.arcanc.pulselib.util.attachments;
 
 
 import net.minecraft.resources.ResourceLocation;
 
-public record PulseAttachmentAnchor(ResourceLocation id)
+public record PAttachmentAnchor(ResourceLocation id)
 {
-	public static PulseAttachmentAnchor of(ResourceLocation id)
+	public static PAttachmentAnchor of(ResourceLocation id)
 	{
-		return new PulseAttachmentAnchor(id);
+		return new PAttachmentAnchor(id);
 	}
 	
-	public static PulseAttachmentAnchor minecraft(String path)
+	public static PAttachmentAnchor minecraft(String path)
 	{
 		return of(ResourceLocation.withDefaultNamespace(path));
 	}

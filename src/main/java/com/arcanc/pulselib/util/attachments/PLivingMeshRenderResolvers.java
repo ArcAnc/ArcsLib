@@ -7,21 +7,21 @@
  * Details can be found in the license file in the root folder of this project
  */
 
-package com.arcanc.pulselib.util.armor;
+package com.arcanc.pulselib.util.attachments;
 
 
-public final class PMeshRenderResolvers
+public final class PLivingMeshRenderResolvers
 {
-	private PMeshRenderResolvers()
+	private PLivingMeshRenderResolvers()
 	{
 	}
 	
-	public static PMeshRenderResolver inherited()
+	public static PLivingMeshRenderResolver inherited()
 	{
 		return (entity, stack, bone, mesh, inherited, partialTick) -> inherited;
 	}
 	
-	public static PMeshRenderResolver defaultLit()
+	public static PLivingMeshRenderResolver defaultLit()
 	{
 		return inherited();
 	}

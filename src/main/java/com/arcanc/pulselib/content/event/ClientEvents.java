@@ -21,7 +21,9 @@ import com.arcanc.pulselib.util.PLibDatabase;
 import com.arcanc.pulselib.util.PModelCache;
 import com.arcanc.pulselib.util.PRenderTypes;
 import com.arcanc.pulselib.util.PTextureCache;
-import com.arcanc.pulselib.util.armor.*;
+import com.arcanc.pulselib.util.attachments.*;
+import com.arcanc.pulselib.util.attachments.humanoid.armor.PArmorClientExtensions;
+import com.arcanc.pulselib.util.attachments.humanoid.armor.PLibArmorHandler;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.item.Item;
 import net.neoforged.bus.api.EventPriority;
@@ -37,14 +39,14 @@ import net.neoforged.neoforge.event.level.LevelEvent;
 
 public class ClientEvents
 {
-	private static final PulseAttachmentAnchor TEST_COW_BODY = PulseAttachmentAnchor.of(PLibDatabase.rl("cow_body"));
+	private static final PAttachmentAnchor TEST_COW_BODY = PAttachmentAnchor.of(PLibDatabase.rl("cow_body"));
 	private static boolean pulseClientContentRegistered;
 	
 	public static void registerClientEvents(final IEventBus modEventBus)
 	{
 		//modEventBus.addListener(ClientEvents :: registerRenderers);
 		//modEventBus.addListener(ClientEvents :: registerCustomTextures);
-		PulseAttachmentAnchorResolvers.init(modEventBus);
+		PAttachmentAnchorResolvers.init(modEventBus);
 		//registerTestCowTail();
 		
 		modEventBus.addListener(EventPriority.HIGHEST, ClientEvents :: registerSpriteSources);
@@ -80,7 +82,7 @@ public class ClientEvents
 		if (pulseClientContentRegistered)
 			return;
 		
-		PulseClientRegistrationEvent registrationEvent = new PulseClientRegistrationEvent();
+		PulseLibEvents.AttachmentRegistrationEvent registrationEvent = new PulseLibEvents.AttachmentRegistrationEvent();
 		ModLoader.postEvent(registrationEvent);
 		
 		/*registrationEvent.registration().livingAttachment(Registration.ItemReg.TEST_HAT.get(),
@@ -116,7 +118,7 @@ public class ClientEvents
 		ensurePulseClientContentRegistered();
 		
 		BuiltInRegistries.ITEM.stream().
-				filter(item -> item instanceof PItemAnimatable<?> || PulseLivingAttachments.contains(item)).
+				filter(item -> item instanceof PItemAnimatable<?> || PLivingAttachments.contains(item)).
 				forEach(item -> registerClientExtension(event, item));
 	}
 	
@@ -128,7 +130,7 @@ public class ClientEvents
 		IClientItemExtensions base = item instanceof PItemAnimatable<?> animatable ?
 				animatable.registerClientExtension() :
 				IClientItemExtensions.DEFAULT;
-		IClientItemExtensions extension = PulseArmorClientExtensions.buildFor(item, base);
+		IClientItemExtensions extension = PArmorClientExtensions.buildFor(item, base);
 		
 		if (extension != IClientItemExtensions.DEFAULT)
 			event.registerItem(extension, item);
