@@ -19,6 +19,7 @@ import com.arcanc.pulselib.content.model.animation.BoneFrame;
 import com.arcanc.pulselib.content.model.baked.PBakedBone;
 import com.arcanc.pulselib.content.model.baked.PBakedMesh;
 import com.arcanc.pulselib.content.model.baked.PBakedModel;
+import com.arcanc.pulselib.content.model.baked.PMeshRenderContext;
 import com.arcanc.pulselib.content.renderer.modelData.PModelData;
 import com.arcanc.pulselib.util.PRenderTypes;
 import com.arcanc.pulselib.util.PTextureCache;
@@ -349,14 +350,30 @@ public abstract class PEntityRenderer<T extends Entity & PAnimatable<T>> extends
 			if (mesh.textureName().isEmpty())
 				continue;
 			
-			RenderType type = renderType.apply(PTextureCache.ATLAS_LOCATION);
+			PMeshRenderContext inherited = new PMeshRenderContext(
+					renderType,
+					color,
+					mesh.isEmissive() ? LightTexture.FULL_BRIGHT : packedLight,
+					packedOverlay);
+			PMeshRenderContext meshContext = renderLayer == null ?
+					resolveMeshRender(animatable, bone, mesh, inherited, partialTick) :
+					renderLayer.resolveMeshRender(animatable, bone, mesh, inherited, partialTick);
+			
+			RenderType type = meshContext.renderType().apply(PTextureCache.ATLAS_LOCATION);
 			if (mesh.isEmissive())
 				type = PRenderTypes.RenderTypeProvider.emissiveVariant(type, PTextureCache.ATLAS_LOCATION);
-			int packedColor = renderLayer == null ? color : renderLayer.getColor(animatable, bone, mesh, color);
-			int meshPackedLight = mesh.isEmissive() ? LightTexture.FULL_BRIGHT : packedLight;
 			
-			PRenderQueue.submitEntityMesh(type, mesh.vertexBuffer(), new PRenderQueue.InstanceData(matrix4fstack, packedColor, meshPackedLight, packedOverlay));
+			PRenderQueue.submitEntityMesh(type, mesh.vertexBuffer(), new PRenderQueue.InstanceData(matrix4fstack, meshContext.color(), meshContext.packedLight(), meshContext.packedOverlay()));
 		}
+	}
+	
+	protected PMeshRenderContext resolveMeshRender(T animatable,
+	                                               PBakedBone bone,
+	                                               PBakedMesh mesh,
+	                                               PMeshRenderContext inherited,
+	                                               float partialTick)
+	{
+		return inherited;
 	}
 	
 	protected HeadRotation applyPositioning(LivingEntity entity, PoseStack poseStack, float partialTick)

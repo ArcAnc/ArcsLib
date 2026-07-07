@@ -92,7 +92,10 @@ public record PBakedBone(String name,
 			if (mesh.textureName().isEmpty())
 				return;
 			
-			PMeshRenderContext meshContext = resolver.resolve(this, mesh, boneContext);
+			PMeshRenderContext inheritedContext = mesh.isEmissive() ?
+					new PMeshRenderContext(boneContext.renderType(), boneContext.color(), LightTexture.FULL_BRIGHT, boneContext.packedOverlay()) :
+					boneContext;
+			PMeshRenderContext meshContext = resolver.resolve(this, mesh, inheritedContext);
 			
 			RenderType type = meshContext.renderType().apply(PTextureCache.ATLAS_LOCATION);
 			if (mesh.isEmissive())

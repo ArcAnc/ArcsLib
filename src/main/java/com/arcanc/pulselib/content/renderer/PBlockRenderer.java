@@ -17,7 +17,9 @@ import com.arcanc.pulselib.content.animatable.PAnimationManager;
 import com.arcanc.pulselib.content.animatable.instance.InstanceAnimationManager;
 import com.arcanc.pulselib.content.model.animation.BoneFrame;
 import com.arcanc.pulselib.content.model.baked.PBakedBone;
+import com.arcanc.pulselib.content.model.baked.PBakedMesh;
 import com.arcanc.pulselib.content.model.baked.PBakedModel;
+import com.arcanc.pulselib.content.model.baked.PMeshRenderContext;
 import com.arcanc.pulselib.content.renderer.modelData.PModelData;
 import com.arcanc.pulselib.util.PRenderTypes;
 import com.arcanc.pulselib.util.PTextureCache;
@@ -174,17 +176,32 @@ public abstract class PBlockRenderer<T extends BlockEntity & PAnimatable<T>>
 			if (mesh.textureName().isEmpty())
 				return;
 			
-			RenderType baseType = renderType.apply(PTextureCache.ATLAS_LOCATION);
+			PMeshRenderContext inherited = new PMeshRenderContext(
+					renderType,
+					color,
+					mesh.isEmissive() ? LightTexture.FULL_BRIGHT : packedLight,
+					packedOverlay);
+			PMeshRenderContext meshContext = resolveMeshRender(animatable, bone, mesh, inherited, partialTick);
+			
+			RenderType baseType = meshContext.renderType().apply(PTextureCache.ATLAS_LOCATION);
 			RenderType type = mesh.isEmissive() ? PRenderTypes.RenderTypeProvider.emissiveVariant(baseType, PTextureCache.ATLAS_LOCATION) : baseType;
-			int meshPackedLight = mesh.isEmissive() ? LightTexture.FULL_BRIGHT : packedLight;
 			
 			PRenderTypes.getTransparencyState(type).ifPresent(transparency ->
 			{
 				if (transparency == RenderStateShard.TransparencyStateShard.NO_TRANSPARENCY)
-					PRenderQueue.submitBlockEntityMesh(type, mesh.vertexBuffer(), new PRenderQueue.InstanceData(matrix4fstack, color, meshPackedLight, packedOverlay));
+					PRenderQueue.submitBlockEntityMesh(type, mesh.vertexBuffer(), new PRenderQueue.InstanceData(matrix4fstack, meshContext.color(), meshContext.packedLight(), meshContext.packedOverlay()));
 				else
-					PRenderQueue.submitBlockEntityTranslucentMesh(type, mesh.vertexBuffer(), new PRenderQueue.InstanceData(matrix4fstack, color, meshPackedLight, packedOverlay));
+					PRenderQueue.submitBlockEntityTranslucentMesh(type, mesh.vertexBuffer(), new PRenderQueue.InstanceData(matrix4fstack, meshContext.color(), meshContext.packedLight(), meshContext.packedOverlay()));
 			});
 		});
+	}
+	
+	protected PMeshRenderContext resolveMeshRender(T animatable,
+	                                               PBakedBone bone,
+	                                               PBakedMesh mesh,
+	                                               PMeshRenderContext inherited,
+	                                               float partialTick)
+	{
+		return inherited;
 	}
 }
