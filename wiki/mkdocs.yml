@@ -1,0 +1,80 @@
+site_name: PulseLib
+site_description: Animation library for Minecraft mods
+site_url: https://arcanc.github.io/PulseLib/
+
+repo_name: ArcAnc/PulseLib
+repo_url: https://github.com/ArcAnc/PulseLib
+
+docs_dir: .
+site_dir: ../site
+
+exclude_docs: |
+  /mkdocs.yml
+
+remote_branch: gh-pages
+
+theme:
+  name: material
+
+  palette:
+    - scheme: slate
+      primary: deep purple
+      accent: purple
+
+  features:
+    - navigation.sections
+    - navigation.top
+    - navigation.tabs
+    - search.suggest
+    - search.highlight
+    - content.code.copy
+
+plugins:
+  - search
+  - mike:
+      alias_type: redirect
+
+extra:
+  version:
+    provider: mike
+    alias: true
+
+markdown_extensions:
+  - admonition
+  - attr_list
+  - tables
+  - toc:
+      permalink: true
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.superfences
+  - pymdownx.inlinehilite
+  - pymdownx.tabbed:
+      alternate_style: true
+
+
+nav:
+  - Start:
+      - Home: index.md
+      - Installation: installation.md
+      - Getting Started: getting-started.md
+      - Basic: basic.md
+
+  - Core API:
+      - ModelData: modeldata.md
+      - Animatables and Controllers: animatables-and-controllers.md
+      - Animation Events: animation-events.md
+      - Renderers: renderers.md
+      - Render Types and Queue: render-types-and-queue.md
+      - Textures and Emissive: textures-and-emissive.md
+
+  - Guides:
+      - PulseLib Entities: pulselib-entities.md
+      - PulseLib Blocks: pulselib-blocks.md
+      - PulseLib Items: pulselib-items.md
+      - Entity Render Layers: entity-render-layers.md
+      - Armor and Attachments: armor-and-attachments.md
+      - GUI Rendering: gui-rendering.md
+  - Advanced:
+      - Model Loaders: model-loaders.md
+      - API Reference: api-reference.md
