@@ -27,7 +27,7 @@ This page is a compact map of PulseLib public API. Classes marked internal in so
 
 ## Model data and caches
 
-* [`PModelData`](https://github.com/ArcAnc/PulseLib/blob/1.21.1/src/main/java/com/arcanc/pulselib/content/renderer/modelData/PModelData.java) - renderer-facing model and texture mapping.
+* [`PModelData`](https://github.com/ArcAnc/PulseLib/blob/1.21.1/src/main/java/com/arcanc/pulselib/content/renderer/modelData/PModelData.java) - renderer-facing model location, model format, and texture mapping.
 * [`DefaultBlockModelData`](https://github.com/ArcAnc/PulseLib/blob/1.21.1/src/main/java/com/arcanc/pulselib/content/renderer/modelData/DefaultBlockModelData.java)
 * [`DefaultItemModelData`](https://github.com/ArcAnc/PulseLib/blob/1.21.1/src/main/java/com/arcanc/pulselib/content/renderer/modelData/DefaultItemModelData.java)
 * [`DefaultEntityModelData`](https://github.com/ArcAnc/PulseLib/blob/1.21.1/src/main/java/com/arcanc/pulselib/content/renderer/modelData/DefaultEntityModelData.java)
@@ -36,7 +36,7 @@ This page is a compact map of PulseLib public API. Classes marked internal in so
 * [`PBone`](https://github.com/ArcAnc/PulseLib/blob/1.21.1/src/main/java/com/arcanc/pulselib/content/model/PBone.java) and [`PMesh`](https://github.com/ArcAnc/PulseLib/blob/1.21.1/src/main/java/com/arcanc/pulselib/content/model/PMesh.java) - raw bones and meshes.
 * [`PBakedModel`](https://github.com/ArcAnc/PulseLib/blob/1.21.1/src/main/java/com/arcanc/pulselib/content/model/baked/PBakedModel.java), [`PBakedBone`](https://github.com/ArcAnc/PulseLib/blob/1.21.1/src/main/java/com/arcanc/pulselib/content/model/baked/PBakedBone.java), [`PBakedMesh`](https://github.com/ArcAnc/PulseLib/blob/1.21.1/src/main/java/com/arcanc/pulselib/content/model/baked/PBakedMesh.java) - baked GPU-ready model representation.
 * [`PMeshRenderContext`](https://github.com/ArcAnc/PulseLib/blob/1.21.1/src/main/java/com/arcanc/pulselib/content/model/baked/PMeshRenderContext.java) - render type, color, light, and overlay inherited or overridden per mesh.
-* [`PMeshRenderResolver`](https://github.com/ArcAnc/PulseLib/blob/1.21.1/src/main/java/com/arcanc/pulselib/content/model/baked/PMeshRenderResolver.java) - simple baked-bone/baked-mesh resolver used by immediate model drawing.
+* [`PMeshRenderResolver`](https://github.com/ArcAnc/PulseLib/blob/1.21.1/src/main/java/com/arcanc/pulselib/content/model/baked/PMeshRenderResolver.java) - baked-bone/baked-mesh resolver used by immediate model drawing and attachment rendering.
 * [`PModelCache`](https://github.com/ArcAnc/PulseLib/blob/1.21.1/src/main/java/com/arcanc/pulselib/util/PModelCache.java) - model loader registry, client reload listener, baking, cache cleanup.
 
 ## Loading
@@ -49,11 +49,12 @@ This page is a compact map of PulseLib public API. Classes marked internal in so
 
 ## Rendering
 
-* [`PRenderer<T>`](https://github.com/ArcAnc/PulseLib/blob/1.21.1/src/main/java/com/arcanc/pulselib/content/renderer/PRenderer.java) - renderer contract.
-* [`PBlockRenderer<T>`](https://github.com/ArcAnc/PulseLib/blob/1.21.1/src/main/java/com/arcanc/pulselib/content/renderer/PBlockRenderer.java)
-* [`PItemRenderer<T>`](https://github.com/ArcAnc/PulseLib/blob/1.21.1/src/main/java/com/arcanc/pulselib/content/renderer/PItemRenderer.java)
-* [`PEntityRenderer<T>`](https://github.com/ArcAnc/PulseLib/blob/1.21.1/src/main/java/com/arcanc/pulselib/content/renderer/PEntityRenderer.java)
-* [`PEntityRenderLayer<T>`](https://github.com/ArcAnc/PulseLib/blob/1.21.1/src/main/java/com/arcanc/pulselib/content/renderer/PEntityRenderLayer.java)
+* [`PRenderer<T, RS>`](https://github.com/ArcAnc/PulseLib/blob/1.21.1/src/main/java/com/arcanc/pulselib/content/renderer/PRenderer.java) - render-state based renderer contract.
+* [`PBlockRenderer<T, RS>`](https://github.com/ArcAnc/PulseLib/blob/1.21.1/src/main/java/com/arcanc/pulselib/content/renderer/PBlockRenderer.java)
+* [`PItemRenderer<T, RS>`](https://github.com/ArcAnc/PulseLib/blob/1.21.1/src/main/java/com/arcanc/pulselib/content/renderer/PItemRenderer.java)
+* [`PEntityRenderer<T, RS>`](https://github.com/ArcAnc/PulseLib/blob/1.21.1/src/main/java/com/arcanc/pulselib/content/renderer/PEntityRenderer.java)
+* [`PEntityRenderLayer<T, RS>`](https://github.com/ArcAnc/PulseLib/blob/1.21.1/src/main/java/com/arcanc/pulselib/content/renderer/PEntityRenderLayer.java)
+* [`PRenderState<T>`](https://github.com/ArcAnc/PulseLib/blob/1.21.1/src/main/java/com/arcanc/pulselib/content/renderer/base/PRenderState.java), [`PBlockRenderState<T>`](https://github.com/ArcAnc/PulseLib/blob/1.21.1/src/main/java/com/arcanc/pulselib/content/renderer/base/PBlockRenderState.java), [`PItemRenderState<T>`](https://github.com/ArcAnc/PulseLib/blob/1.21.1/src/main/java/com/arcanc/pulselib/content/renderer/base/PItemRenderState.java), [`PEntityRenderState<T>`](https://github.com/ArcAnc/PulseLib/blob/1.21.1/src/main/java/com/arcanc/pulselib/content/renderer/base/PEntityRenderState.java) - renderer state extraction and cached model/animatable/key access.
 * [`PRenderTypes`](https://github.com/ArcAnc/PulseLib/blob/1.21.1/src/main/java/com/arcanc/pulselib/util/PRenderTypes.java) - triangle render types, shaders, vertex format.
 * [`PRenderQueue`](https://github.com/ArcAnc/PulseLib/blob/1.21.1/src/main/java/com/arcanc/pulselib/content/renderer/PRenderQueue.java) - instanced render submission.
 
@@ -61,7 +62,7 @@ This page is a compact map of PulseLib public API. Classes marked internal in so
 
 * [`PTextureCache`](https://github.com/ArcAnc/PulseLib/blob/1.21.1/src/main/java/com/arcanc/pulselib/util/PTextureCache.java) - runtime atlas registration and texture cache.
 * [`RuntimeLoader`](https://github.com/ArcAnc/PulseLib/blob/1.21.1/src/main/java/com/arcanc/pulselib/content/model/textures/atlas/RuntimeLoader.java) - atlas sprite source.
-* [`PLibMetadata`](https://github.com/ArcAnc/PulseLib/blob/1.21.1/src/main/java/com/arcanc/pulselib/content/model/textures/atlas/PLibMetadata.java) - `pulselib.emissive` texture metadata.
+* [`PLibSpriteMetadata`](https://github.com/ArcAnc/PulseLib/blob/1.21.1/src/main/java/com/arcanc/pulselib/content/model/textures/atlas/PLibSpriteMetadata.java) - `pulselib.emissive` texture metadata.
 * [`PulseLibEvents.RegisterTextureEvent`](https://github.com/ArcAnc/PulseLib/blob/1.21.1/src/main/java/com/arcanc/pulselib/content/event/PulseLibEvents.java) - mod bus texture registration event.
 
 ## Armor and attachments
@@ -86,7 +87,7 @@ This page is a compact map of PulseLib public API. Classes marked internal in so
 
 ## Helpers
 
-* [`PLibHelper`](https://github.com/ArcAnc/PulseLib/blob/1.21.1/src/main/java/com/arcanc/pulselib/util/helpers/PLibHelper.java) - manager creation and GUI model rendering.
+* [`PLibHelper`](https://github.com/ArcAnc/PulseLib/blob/1.21.1/src/main/java/com/arcanc/pulselib/util/helpers/PLibHelper.java) - manager creation and default entity/living render-state factories.
 * [`PLibRenderHelper`](https://github.com/ArcAnc/PulseLib/blob/1.21.1/src/main/java/com/arcanc/pulselib/util/helpers/PLibRenderHelper.java) - `Minecraft.getInstance()` helper.
 * [`PLibParserHelper`](https://github.com/ArcAnc/PulseLib/blob/1.21.1/src/main/java/com/arcanc/pulselib/util/helpers/PLibParserHelper.java) - glTF accessor helpers.
 * [`PLibDatabase`](https://github.com/ArcAnc/PulseLib/blob/1.21.1/src/main/java/com/arcanc/pulselib/util/PLibDatabase.java) - constants and `rl(String)`.

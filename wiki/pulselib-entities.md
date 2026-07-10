@@ -43,12 +43,17 @@ public class RobotEntity extends PathfinderMob implements PAnimatable<RobotEntit
 The renderer is mostly declarative: model data plus render type. Living entity rotation and scaling are handled by `PEntityRenderer`.
 
 ```java
-public class RobotRenderer extends PEntityRenderer<RobotEntity> {
+public class RobotRenderer extends PEntityRenderer<RobotEntity, PEntityRenderState.LivingImpl<RobotEntity>> {
     public RobotRenderer(EntityRendererProvider.Context context) {
         super(context,
                 new DefaultEntityModelData.DefaultEntityModelDataBuilder(
-                        ResourceLocation.fromNamespaceAndPath("examplemod", "robot")).build(),
+                        Identifier.fromNamespaceAndPath("examplemod", "robot")).build(),
                 PRenderTypes.RenderTypeProvider::trianglesSolid);
+    }
+
+    @Override
+    public PEntityRenderState.LivingImpl<RobotEntity> createRenderState() {
+        return PLibHelper.livingRenderState();
     }
 }
 ```

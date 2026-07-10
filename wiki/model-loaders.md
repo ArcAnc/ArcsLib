@@ -46,7 +46,7 @@ Use it in model data:
 
 ```java
 PModelData data = new DefaultEntityModelData.DefaultEntityModelDataBuilder(
-        ResourceLocation.fromNamespaceAndPath("examplemod", "robot"),
+        Identifier.fromNamespaceAndPath("examplemod", "robot"),
         PGeckoModelLoader.INSTANCE.id())
         .build();
 ```
@@ -58,34 +58,34 @@ The parser is [`PGeckoModelParser`](https://github.com/ArcAnc/PulseLib/blob/mast
 ```java
 public final class MyModelLoader implements PModelLoader {
     public static final MyModelLoader INSTANCE = new MyModelLoader();
-    private static final ResourceLocation ID =
-            ResourceLocation.fromNamespaceAndPath("examplemod", "my_format");
+    private static final Identifier ID =
+            Identifier.fromNamespaceAndPath("examplemod", "my_format");
 
     @Override
-    public ResourceLocation id() {
+    public Identifier id() {
         return ID;
     }
 
     @Override
-    public boolean supports(ResourceLocation modelPath) {
+    public boolean supports(Identifier modelPath) {
         return modelPath.getPath().startsWith("mymodels/")
                 && modelPath.getPath().endsWith(".json");
     }
 
     @Override
-    public ResourceLocation defaultModelLocation(ResourceLocation modelLocation, String modelType) {
+    public Identifier defaultModelLocation(Identifier modelLocation, String modelType) {
         return modelLocation.withPrefix("mymodels/" + modelType + "/").withSuffix(".json");
     }
 
     @Override
-    public ResourceLocation textureLocation(ResourceLocation modelPath, String textureName) {
+    public Identifier textureLocation(Identifier modelPath, String textureName) {
         return modelPath.withPath("entity/" + textureName);
     }
 
     @Override
     public CompletableFuture<?> loadModels(Executor backgroundExecutor,
                                            ResourceManager resourceManager,
-                                           BiConsumer<ResourceLocation, PModel> elementConsumer) {
+                                           BiConsumer<Identifier, PModel> elementConsumer) {
         return CompletableFuture.runAsync(() -> {
             // Parse resources and call elementConsumer.accept(modelLocation, model).
         }, backgroundExecutor);

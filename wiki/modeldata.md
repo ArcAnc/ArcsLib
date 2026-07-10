@@ -8,10 +8,10 @@ Use the direct builder when you already know the exact model path, or when you a
 
 ```java
 PModelData data = new PModelData.Builder(
-        ResourceLocation.fromNamespaceAndPath("examplemod", "glmodels/block/crusher.glb"),
+        Identifier.fromNamespaceAndPath("examplemod", "glmodels/block/crusher.glb"),
         "")
-        .addTexture("body", ResourceLocation.fromNamespaceAndPath("examplemod", "block/crusher/body"))
-        .addTexture("glass", ResourceLocation.fromNamespaceAndPath("examplemod", "block/crusher/glass"))
+        .addTexture("body", Identifier.fromNamespaceAndPath("examplemod", "block/crusher/body"))
+        .addTexture("glass", Identifier.fromNamespaceAndPath("examplemod", "block/crusher/glass"))
         .build();
 ```
 
@@ -23,9 +23,9 @@ For normal mods, default builders are more pleasant because they keep model and 
 
 ```java
 PModelData blockData = new DefaultBlockModelData.DefaultBlockModelDataBuilder(
-        ResourceLocation.fromNamespaceAndPath("examplemod", "crusher"))
-        .addTexture(ResourceLocation.fromNamespaceAndPath("examplemod", "body"))
-        .addTexture(ResourceLocation.fromNamespaceAndPath("examplemod", "glass"))
+        Identifier.fromNamespaceAndPath("examplemod", "crusher"))
+        .addTexture(Identifier.fromNamespaceAndPath("examplemod", "body"))
+        .addTexture(Identifier.fromNamespaceAndPath("examplemod", "glass"))
         .build();
 ```
 
@@ -58,7 +58,7 @@ PulseLib can load Gecko-style JSON models through [`PGeckoModelLoader`](https://
 PModelCache.registerModelLoader(PGeckoModelLoader.INSTANCE);
 
 PModelData data = new DefaultEntityModelData.DefaultEntityModelDataBuilder(
-        ResourceLocation.fromNamespaceAndPath("examplemod", "robot"),
+        Identifier.fromNamespaceAndPath("examplemod", "robot"),
         PGeckoModelLoader.INSTANCE.id())
         .build();
 ```

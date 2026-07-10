@@ -68,12 +68,17 @@ public class CrusherBlockEntity extends BlockEntity implements PAnimatable<Crush
 The renderer is intentionally small. It only needs model data and a PulseLib render type unless you want extra custom drawing.
 
 ```java
-public class CrusherRenderer extends PBlockRenderer<CrusherBlockEntity> {
+public class CrusherRenderer extends PBlockRenderer<CrusherBlockEntity, PBlockRenderState.Impl<CrusherBlockEntity>> {
     public CrusherRenderer(BlockEntityRendererProvider.Context context) {
         super(new DefaultBlockModelData.DefaultBlockModelDataBuilder(
-                        ResourceLocation.fromNamespaceAndPath("examplemod", "crusher"))
+                        Identifier.fromNamespaceAndPath("examplemod", "crusher"))
                         .build(),
                 PRenderTypes.RenderTypeProvider::trianglesSolid);
+    }
+
+    @Override
+    public PBlockRenderState.Impl<CrusherBlockEntity> createRenderState() {
+        return new PBlockRenderState.Impl<>();
     }
 }
 ```
@@ -85,14 +90,10 @@ Use hooks when the model is not the whole visual. For example, a machine might r
 ```java
 @Override
 public void postSubmit(PoseStack poseStack,
-                       CrusherBlockEntity animatable,
-                       Function<ResourceLocation, RenderType> renderType,
-                       MultiBufferSource bufferSource,
-                       int packedLight,
-                       int packedOverlay,
-                       float partialTick,
-                       Object... additionalData) {
-    // Add vanilla buffer rendering or extra PulseLib queue submissions here.
+                       PBlockRenderState.Impl<CrusherBlockEntity> renderState,
+                       CameraRenderState cameraRenderState,
+                       SubmitNodeCollector submitNodeCollector) {
+    // Add custom submit nodes or extra PulseLib queue submissions here.
 }
 ```
 

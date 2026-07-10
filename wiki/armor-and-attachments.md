@@ -32,7 +32,7 @@ public final class ExampleClientEvents {
         event.registration().registerLiving(MyItems.EXAMPLE_HELMET.get(),
                 new PLivingAttachmentDefinition(
                         new PModelData.Builder(
-                                ResourceLocation.fromNamespaceAndPath("examplemod", "armor/example_helmet"),
+                                Identifier.fromNamespaceAndPath("examplemod", "armor/example_helmet"),
                                 "entity").build(),
                         PLivingAttachmentSources.equipmentSlot(EquipmentSlot.HEAD),
                         List.of(PHumanoidBindings.head("helmet")),
@@ -58,7 +58,7 @@ Attachments are not limited to armor slots. A held item can render a tail, an am
 event.registration().registerLiving(MyItems.TAIL.get(),
         new PLivingAttachmentDefinition(
                 new PModelData.Builder(
-                        ResourceLocation.fromNamespaceAndPath("examplemod", "attachment/tail"),
+                        Identifier.fromNamespaceAndPath("examplemod", "attachment/tail"),
                         "entity").build(),
                 PLivingAttachmentSources.hand(),
                 List.of(PHumanoidBindings.bind(
@@ -122,7 +122,7 @@ Register anchors for custom vanilla `EntityModel` classes through [`PAttachmentA
 
 ```java
 public static final PAttachmentAnchor SHELL =
-        PAttachmentAnchor.of(ResourceLocation.fromNamespaceAndPath("examplemod", "shell"));
+        PAttachmentAnchor.of(Identifier.fromNamespaceAndPath("examplemod", "shell"));
 
 public static void registerAnchors() {
     PAttachmentAnchorResolvers.register(MyEntityModel.class, SHELL,

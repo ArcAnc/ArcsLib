@@ -1,36 +1,43 @@
-PulseLib can draw a baked model directly in a GUI through [`PLibHelper.renderModelInGui`](https://github.com/ArcAnc/PulseLib/blob/master/src/main/java/com/arcanc/pulselib/util/helpers/PLibHelper.java).
+PulseLib no longer exposes a `PLibHelper.renderModelInGui` helper. GUI item rendering goes through [`PItemRenderer`](https://github.com/ArcAnc/PulseLib/blob/master/src/main/java/com/arcanc/pulselib/content/renderer/PItemRenderer.java).
+
+When Minecraft renders a PulseLib item with `ItemDisplayContext.GUI`, `PItemRenderer`:
+
+* extracts the item render state through `PItemRenderState`;
+* submits posed meshes to `PRenderQueue.RenderStage.GUI`;
+* flushes the GUI stage immediately through the supplied `SubmitNodeCollector`.
+
+That means normal animated items do not need separate GUI drawing code. Use the same item renderer and model data described on [PulseLib Items](PulseLib-Items).
+
+## Direct model drawing
+
+For advanced screens that are not item rendering, draw the baked model bones directly with [`PBakedBone.instantDraw`](https://github.com/ArcAnc/PulseLib/blob/master/src/main/java/com/arcanc/pulselib/content/model/baked/PBakedBone.java):
 
 ```java
-PLibHelper.renderModelInGui(
-        guiGraphics,
-        modelData,
-        manager.getControllers().values(),
-        PRenderTypes.RenderTypeProvider::trianglesGui,
-        80,
-        60,
-        new Vector3f(24.0f, 24.0f, 24.0f),
-        0xFFFFFFFF,
-        LightTexture.FULL_BRIGHT,
-        OverlayTexture.NO_OVERLAY,
-        partialTick);
+PBakedModel model = modelData.getModel();
+if (model != null) {
+    poseStack.pushPose();
+    poseStack.translate(x, y, 0);
+    poseStack.scale(scale, scale, scale);
+
+    for (PBakedBone bone : model.bones()) {
+        bone.instantDraw(
+                poseStack,
+                modelData,
+                manager.getControllers().values(),
+                PRenderTypes.RenderTypeProvider::trianglesGui,
+                0xFFFFFFFF,
+                LightTexture.FULL_BRIGHT,
+                OverlayTexture.NO_OVERLAY,
+                partialTick);
+    }
+
+    poseStack.popPose();
+}
 ```
-
-Parameters:
-
-* `GuiGraphics guiGraphics` - target GUI renderer.
-* `PModelData modelData` - model to draw.
-* `Collection<PAnimationController<T>> controllers` - active controllers used to pose bones.
-* `Function<ResourceLocation, RenderType> renderType` - usually `trianglesGui`.
-* `x`, `y` - GUI position.
-* `Vector3f scale` - model scale.
-* `packedColor` - ARGB color.
-* `packedLight` and `packedOverlay` - standard Minecraft packed values.
-* `partialTick` - interpolation time.
-
-For item rendering in GUI, [`PItemRenderer`](https://github.com/ArcAnc/PulseLib/blob/master/src/main/java/com/arcanc/pulselib/content/renderer/PItemRenderer.java) already switches to immediate GUI drawing internally.
 
 Classes used:
 
-* [`PLibHelper`](https://github.com/ArcAnc/PulseLib/blob/master/src/main/java/com/arcanc/pulselib/util/helpers/PLibHelper.java)
-* [`PBakedModel`](https://github.com/ArcAnc/PulseLib/blob/master/src/main/java/com/arcanc/pulselib/content/model/baked/PBakedModel.java)
-* [`PRenderTypes`](https://github.com/ArcAnc/PulseLib/blob/master/src/main/java/com/arcanc/pulselib/util/PRenderTypes.java)
+* [`PItemRenderer`](https://github.com/ArcAnc/PulseLib/blob/master/src/main/java/com/arcanc/pulselib/content/renderer/PItemRenderer.java)
+* [`PItemRenderState`](https://github.com/ArcAnc/PulseLib/blob/master/src/main/java/com/arcanc/pulselib/content/renderer/base/PItemRenderState.java)
+* [`PBakedBone`](https://github.com/ArcAnc/PulseLib/blob/master/src/main/java/com/arcanc/pulselib/content/model/baked/PBakedBone.java)
+* [`PRenderQueue`](https://github.com/ArcAnc/PulseLib/blob/master/src/main/java/com/arcanc/pulselib/content/renderer/PRenderQueue.java)

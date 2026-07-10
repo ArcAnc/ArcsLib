@@ -94,7 +94,7 @@ Manual dispatch:
 ```java
 PAnimationEvent event = new PAnimationEvent.Sound(
         0,
-        ResourceLocation.withDefaultNamespace("block.note_block.pling"),
+        Identifier.withDefaultNamespace("block.note_block.pling"),
         "",
         1.0f,
         1.0f);

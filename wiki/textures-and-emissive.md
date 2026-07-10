@@ -11,9 +11,9 @@ Subscribe on the mod event bus and add every texture that a PulseLib model may u
 public final class ExampleClientEvents {
     @SubscribeEvent
     public static void registerPulseTextures(PulseLibEvents.RegisterTextureEvent event) {
-        event.addTextureLocation(ResourceLocation.fromNamespaceAndPath(
+        event.addTextureLocation(Identifier.fromNamespaceAndPath(
                 ExampleMod.MOD_ID, "entity/robot/body"));
-        event.addTextureLocation(ResourceLocation.fromNamespaceAndPath(
+        event.addTextureLocation(Identifier.fromNamespaceAndPath(
                 ExampleMod.MOD_ID, "entity/robot/eyes"));
     }
 }
@@ -28,7 +28,7 @@ assets/examplemod/textures/entity/robot/body.png
 becomes:
 
 ```java
-ResourceLocation.fromNamespaceAndPath("examplemod", "entity/robot/body")
+Identifier.fromNamespaceAndPath("examplemod", "entity/robot/body")
 ```
 
 ## Runtime atlas
@@ -50,7 +50,7 @@ Renderers normally pass `PTextureCache.ATLAS_LOCATION` to `PRenderTypes`, so you
 
 ## Emissive textures
 
-Emissive textures are useful for eyes, screens, lamps, energy parts, and other pieces that should ignore normal light. PulseLib reads this flag from texture metadata through [`PLibMetadata`](https://github.com/ArcAnc/PulseLib/blob/1.21.1/src/main/java/com/arcanc/pulselib/content/model/textures/atlas/PLibMetadata.java).
+Emissive textures are useful for eyes, screens, lamps, energy parts, and other pieces that should ignore normal light. PulseLib reads this flag from texture metadata through [`PLibSpriteMetadata`](https://github.com/ArcAnc/PulseLib/blob/1.21.1/src/main/java/com/arcanc/pulselib/content/model/textures/atlas/PLibSpriteMetadata.java).
 
 To mark a texture as emissive, add a `.png.mcmeta` file next to it:
 
@@ -76,16 +76,15 @@ PRenderTypes.RenderTypeProvider.emissiveVariant(baseType, PTextureCache.ATLAS_LO
 You can also choose an emissive render type directly in custom rendering code:
 
 ```java
-PRenderTypes.RenderTypeProvider::trianglesSolidEmissive
-PRenderTypes.RenderTypeProvider::trianglesCutoutEmissive
-PRenderTypes.RenderTypeProvider::trianglesTranslucentEmissive
-PRenderTypes.RenderTypeProvider::trianglesGuiEmissive
-PRenderTypes.RenderTypeProvider::trianglesLitEmissive
+PRenderTypes.RenderTypeProvider::trianglesEmissiveCutout
+PRenderTypes.RenderTypeProvider::trianglesEmissiveTranslucent
+PRenderTypes.RenderTypeProvider::trianglesInstantEmissiveCutout
+PRenderTypes.RenderTypeProvider::trianglesInstantEmissiveTranslucent
 ```
 
 Classes used:
 
 * [`PTextureCache`](https://github.com/ArcAnc/PulseLib/blob/1.21.1/src/main/java/com/arcanc/pulselib/util/PTextureCache.java)
 * [`RuntimeLoader`](https://github.com/ArcAnc/PulseLib/blob/1.21.1/src/main/java/com/arcanc/pulselib/content/model/textures/atlas/RuntimeLoader.java)
-* [`PLibMetadata`](https://github.com/ArcAnc/PulseLib/blob/1.21.1/src/main/java/com/arcanc/pulselib/content/model/textures/atlas/PLibMetadata.java)
+* [`PLibSpriteMetadata`](https://github.com/ArcAnc/PulseLib/blob/1.21.1/src/main/java/com/arcanc/pulselib/content/model/textures/atlas/PLibSpriteMetadata.java)
 * [`PRenderTypes`](https://github.com/ArcAnc/PulseLib/blob/1.21.1/src/main/java/com/arcanc/pulselib/util/PRenderTypes.java)

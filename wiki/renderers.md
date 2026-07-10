@@ -6,19 +6,26 @@ All built-in renderers implement [`PRenderer`](https://github.com/ArcAnc/PulseLi
 * `trueSubmit(...)` - default PulseLib model submission.
 * `postSubmit(...)` - hook after model submission.
 
-Most custom renderers only need a constructor. Override `preSubmit` or `postSubmit` when you need to draw something extra around the PulseLib model.
+The current renderer API is render-state based. `PBlockRenderer`, `PItemRenderer`, `PEntityRenderer`, and `PEntityRenderLayer` all take a render-state type parameter, and hook methods receive that render state rather than the raw animatable.
+
+Most custom renderers only need a constructor and `createRenderState()`. Override `preSubmit`, `resolveMeshRender`, or `postSubmit` when you need to draw something extra around the PulseLib model or change mesh color/light/overlay.
 
 ## Block renderer
 
 Use [`PBlockRenderer`](https://github.com/ArcAnc/PulseLib/blob/master/src/main/java/com/arcanc/pulselib/content/renderer/PBlockRenderer.java) for block entities. The block itself should hide vanilla rendering; the block entity renderer becomes the visible model.
 
 ```java
-public class CrusherRenderer extends PBlockRenderer<CrusherBlockEntity> {
+public class CrusherRenderer extends PBlockRenderer<CrusherBlockEntity, PBlockRenderState.Impl<CrusherBlockEntity>> {
     public CrusherRenderer(BlockEntityRendererProvider.Context context) {
         super(new DefaultBlockModelData.DefaultBlockModelDataBuilder(
-                        ResourceLocation.fromNamespaceAndPath("examplemod", "crusher"))
+                        Identifier.fromNamespaceAndPath("examplemod", "crusher"))
                         .build(),
                 PRenderTypes.RenderTypeProvider::trianglesCutout);
+    }
+
+    @Override
+    public PBlockRenderState.Impl<CrusherBlockEntity> createRenderState() {
+        return new PBlockRenderState.Impl<>();
     }
 }
 ```
@@ -37,31 +44,39 @@ public static void registerRenderers(EntityRenderersEvent.RegisterRenderers even
 Use [`PItemRenderer`](https://github.com/ArcAnc/PulseLib/blob/master/src/main/java/com/arcanc/pulselib/content/renderer/PItemRenderer.java) when the item model needs real animation instead of a static baked item JSON. The item must implement [`PItemAnimatable`](https://github.com/ArcAnc/PulseLib/blob/master/src/main/java/com/arcanc/pulselib/content/animatable/PItemAnimatable.java) and return client extensions.
 
 ```java
-public class WandRenderer extends PItemRenderer<WandItem> {
-    public WandRenderer(BlockEntityRenderDispatcher blockEntityRenderDispatcher, EntityModelSet entityModelSet) {
+public class WandRenderer extends PItemRenderer<WandItem, PItemRenderState.Impl<WandItem>> {
+    public WandRenderer() {
         super(new DefaultItemModelData.DefaultItemModelDataBuilder(
-                        ResourceLocation.fromNamespaceAndPath("examplemod", "wand"))
+                        Identifier.fromNamespaceAndPath("examplemod", "wand"))
                         .build(),
-                PRenderTypes.RenderTypeProvider::trianglesSolid,
-                blockEntityRenderDispatcher,
-                entityModelSet);
+                PRenderTypes.RenderTypeProvider::trianglesSolid);
+    }
+
+    @Override
+    protected PItemRenderState.Impl<WandItem> createRenderState() {
+        return new PItemRenderState.Impl<>();
     }
 }
 ```
 
-In GUI context, `PItemRenderer` uses `trianglesGui` and immediate drawing. That avoids sending GUI item poses into the normal world/entity queue.
+`PItemRenderer` implements Minecraft's `SpecialModelRenderer<RS>`. Register an unbaked special renderer codec and point the item JSON at that renderer type. In GUI context, `PItemRenderer` submits to `PRenderQueue.RenderStage.GUI` and flushes that stage immediately.
 
 ## Entity renderer
 
 Use [`PEntityRenderer`](https://github.com/ArcAnc/PulseLib/blob/master/src/main/java/com/arcanc/pulselib/content/renderer/PEntityRenderer.java) when the entire entity model is a PulseLib model.
 
 ```java
-public class RobotRenderer extends PEntityRenderer<RobotEntity> {
+public class RobotRenderer extends PEntityRenderer<RobotEntity, PEntityRenderState.LivingImpl<RobotEntity>> {
     public RobotRenderer(EntityRendererProvider.Context context) {
         super(context,
                 new DefaultEntityModelData.DefaultEntityModelDataBuilder(
-                        ResourceLocation.fromNamespaceAndPath("examplemod", "robot")).build(),
+                        Identifier.fromNamespaceAndPath("examplemod", "robot")).build(),
                 PRenderTypes.RenderTypeProvider::trianglesSolid);
+    }
+
+    @Override
+    public PEntityRenderState.LivingImpl<RobotEntity> createRenderState() {
+        return PLibHelper.livingRenderState();
     }
 }
 ```
@@ -77,7 +92,10 @@ PRenderTypes.RenderTypeProvider::trianglesSolid
 PRenderTypes.RenderTypeProvider::trianglesCutout
 PRenderTypes.RenderTypeProvider::trianglesTranslucent
 PRenderTypes.RenderTypeProvider::trianglesGui
-PRenderTypes.RenderTypeProvider::trianglesLit
+PRenderTypes.RenderTypeProvider::trianglesEmissiveCutout
+PRenderTypes.RenderTypeProvider::trianglesEmissiveTranslucent
+PRenderTypes.RenderTypeProvider::trianglesInstantCutout
+PRenderTypes.RenderTypeProvider::trianglesInstantTranslucent
 ```
 
 Do not pass vanilla entity/block `RenderType` values unless they use a compatible triangle vertex format and shader setup.

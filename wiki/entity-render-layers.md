@@ -5,18 +5,18 @@ Layers are useful for armor pieces, equipment, accessories, conditional attachme
 ## Layer class
 
 ```java
-public class RobotChestLayer extends PEntityRenderLayer<RobotEntity> {
+public class RobotChestLayer extends PEntityRenderLayer<RobotEntity, PEntityRenderState.LivingImpl<RobotEntity>> {
     public RobotChestLayer() {
         super(new DefaultEntityLayerModelData.DefaultEntityLayerModelDataBuilder(
                         MyEntities.ROBOT.getId(),
-                        ResourceLocation.fromNamespaceAndPath("examplemod", "armor"))
+                        Identifier.fromNamespaceAndPath("examplemod", "armor"))
                         .build(),
                 PRenderTypes.RenderTypeProvider::trianglesSolid);
     }
 
     @Override
-    public boolean shouldRender(RobotEntity animatable) {
-        return animatable.hasChestPlate();
+    public boolean shouldRender(PEntityRenderState.LivingImpl<RobotEntity> renderState) {
+        return renderState.getAnimatable().hasChestPlate();
     }
 }
 ```
@@ -24,7 +24,7 @@ public class RobotChestLayer extends PEntityRenderLayer<RobotEntity> {
 ## Add layer to renderer
 
 ```java
-public class RobotRenderer extends PEntityRenderer<RobotEntity> {
+public class RobotRenderer extends PEntityRenderer<RobotEntity, PEntityRenderState.LivingImpl<RobotEntity>> {
     public RobotRenderer(EntityRendererProvider.Context context) {
         super(context, ROBOT_MODEL_DATA, PRenderTypes.RenderTypeProvider::trianglesSolid);
 
@@ -64,13 +64,16 @@ Override appearance hooks:
 
 ```java
 @Override
-public int getColor(RobotEntity entity, PBakedBone bone, PBakedMesh mesh, int packedColor) {
-    return entity.isPowered() ? 0xFF80FFFF : packedColor;
+public int getColor(PEntityRenderState.LivingImpl<RobotEntity> renderState,
+                    PBakedBone bone,
+                    PBakedMesh mesh,
+                    int packedColor) {
+    return renderState.getAnimatable().isPowered() ? 0xFF80FFFF : packedColor;
 }
 
 @Override
-public int getPackedLight(RobotEntity entity, int packedLight) {
-    return entity.isPowered() ? LightTexture.FULL_BRIGHT : packedLight;
+public int getPackedLight(PEntityRenderState.LivingImpl<RobotEntity> renderState, int packedLight) {
+    return renderState.getAnimatable().isPowered() ? LightTexture.FULL_BRIGHT : packedLight;
 }
 ```
 
