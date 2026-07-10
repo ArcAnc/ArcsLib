@@ -77,6 +77,11 @@
     <label class="md-overlay" for="__drawer"></label>
     <div data-md-component="skip">
       
+        
+        <a href="#direct-model-drawing" class="md-skip">
+          Skip to content
+        </a>
+      
     </div>
     <div data-md-component="announce">
       
@@ -940,6 +945,24 @@
       
       
       
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    GUI Rendering
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
       <a href="./" class="md-nav__link md-nav__link--active">
         
   
@@ -956,6 +979,34 @@
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#direct-model-drawing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Direct model drawing
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
       
     </li>
   
@@ -1102,6 +1153,25 @@
   
   
   
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#direct-model-drawing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Direct model drawing
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
 </nav>
                   </div>
                 </div>
@@ -1122,38 +1192,43 @@
 
   <h1>GUI Rendering</h1>
 
-<p>PulseLib can draw a baked model directly in a GUI through <a href="https://github.com/ArcAnc/PulseLib/blob/master/src/main/java/com/arcanc/pulselib/util/helpers/PLibHelper.java"><code>PLibHelper.renderModelInGui</code></a>.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="n">PLibHelper</span><span class="p">.</span><span class="na">renderModelInGui</span><span class="p">(</span>
-<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="w">        </span><span class="n">guiGraphics</span><span class="p">,</span>
-<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="w">        </span><span class="n">modelData</span><span class="p">,</span>
-<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="w">        </span><span class="n">manager</span><span class="p">.</span><span class="na">getControllers</span><span class="p">().</span><span class="na">values</span><span class="p">(),</span>
-<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="w">        </span><span class="n">PRenderTypes</span><span class="p">.</span><span class="na">RenderTypeProvider</span><span class="p">::</span><span class="n">trianglesGui</span><span class="p">,</span>
-<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="w">        </span><span class="mi">80</span><span class="p">,</span>
-<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a><span class="w">        </span><span class="mi">60</span><span class="p">,</span>
-<a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a><span class="w">        </span><span class="k">new</span><span class="w"> </span><span class="n">Vector3f</span><span class="p">(</span><span class="mf">24.0f</span><span class="p">,</span><span class="w"> </span><span class="mf">24.0f</span><span class="p">,</span><span class="w"> </span><span class="mf">24.0f</span><span class="p">),</span>
-<a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a><span class="w">        </span><span class="mh">0xFFFFFFFF</span><span class="p">,</span>
-<a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a><span class="w">        </span><span class="n">LightTexture</span><span class="p">.</span><span class="na">FULL_BRIGHT</span><span class="p">,</span>
-<a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a><span class="w">        </span><span class="n">OverlayTexture</span><span class="p">.</span><span class="na">NO_OVERLAY</span><span class="p">,</span>
-<a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a><span class="w">        </span><span class="n">partialTick</span><span class="p">);</span>
-</code></pre></div>
-<p>Parameters:</p>
+<p>PulseLib no longer exposes a <code>PLibHelper.renderModelInGui</code> helper. GUI item rendering goes through <a href="https://github.com/ArcAnc/PulseLib/blob/master/src/main/java/com/arcanc/pulselib/content/renderer/PItemRenderer.java"><code>PItemRenderer</code></a>.</p>
+<p>When Minecraft renders a PulseLib item with <code>ItemDisplayContext.GUI</code>, <code>PItemRenderer</code>:</p>
 <ul>
-<li><code>GuiGraphics guiGraphics</code> - target GUI renderer.</li>
-<li><code>PModelData modelData</code> - model to draw.</li>
-<li><code>Collection&lt;PAnimationController&lt;T&gt;&gt; controllers</code> - active controllers used to pose bones.</li>
-<li><code>Function&lt;ResourceLocation, RenderType&gt; renderType</code> - usually <code>trianglesGui</code>.</li>
-<li><code>x</code>, <code>y</code> - GUI position.</li>
-<li><code>Vector3f scale</code> - model scale.</li>
-<li><code>packedColor</code> - ARGB color.</li>
-<li><code>packedLight</code> and <code>packedOverlay</code> - standard Minecraft packed values.</li>
-<li><code>partialTick</code> - interpolation time.</li>
+<li>extracts the item render state through <code>PItemRenderState</code>;</li>
+<li>submits posed meshes to <code>PRenderQueue.RenderStage.GUI</code>;</li>
+<li>flushes the GUI stage immediately through the supplied <code>SubmitNodeCollector</code>.</li>
 </ul>
-<p>For item rendering in GUI, <a href="https://github.com/ArcAnc/PulseLib/blob/master/src/main/java/com/arcanc/pulselib/content/renderer/PItemRenderer.java"><code>PItemRenderer</code></a> already switches to immediate GUI drawing internally.</p>
+<p>That means normal animated items do not need separate GUI drawing code. Use the same item renderer and model data described on <a href="PulseLib-Items">PulseLib Items</a>.</p>
+<h2 id="direct-model-drawing">Direct model drawing<a class="headerlink" href="#direct-model-drawing" title="Permanent link">&para;</a></h2>
+<p>For advanced screens that are not item rendering, draw the baked model bones directly with <a href="https://github.com/ArcAnc/PulseLib/blob/master/src/main/java/com/arcanc/pulselib/content/model/baked/PBakedBone.java"><code>PBakedBone.instantDraw</code></a>:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="n">PBakedModel</span><span class="w"> </span><span class="n">model</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">modelData</span><span class="p">.</span><span class="na">getModel</span><span class="p">();</span>
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">model</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="kc">null</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="w">    </span><span class="n">poseStack</span><span class="p">.</span><span class="na">pushPose</span><span class="p">();</span>
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="w">    </span><span class="n">poseStack</span><span class="p">.</span><span class="na">translate</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="w"> </span><span class="n">y</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">);</span>
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="w">    </span><span class="n">poseStack</span><span class="p">.</span><span class="na">scale</span><span class="p">(</span><span class="n">scale</span><span class="p">,</span><span class="w"> </span><span class="n">scale</span><span class="p">,</span><span class="w"> </span><span class="n">scale</span><span class="p">);</span>
+<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>
+<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a><span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="n">PBakedBone</span><span class="w"> </span><span class="n">bone</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="n">model</span><span class="p">.</span><span class="na">bones</span><span class="p">())</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a><span class="w">        </span><span class="n">bone</span><span class="p">.</span><span class="na">instantDraw</span><span class="p">(</span>
+<a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a><span class="w">                </span><span class="n">poseStack</span><span class="p">,</span>
+<a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a><span class="w">                </span><span class="n">modelData</span><span class="p">,</span>
+<a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a><span class="w">                </span><span class="n">manager</span><span class="p">.</span><span class="na">getControllers</span><span class="p">().</span><span class="na">values</span><span class="p">(),</span>
+<a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a><span class="w">                </span><span class="n">PRenderTypes</span><span class="p">.</span><span class="na">RenderTypeProvider</span><span class="p">::</span><span class="n">trianglesGui</span><span class="p">,</span>
+<a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a><span class="w">                </span><span class="mh">0xFFFFFFFF</span><span class="p">,</span>
+<a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a><span class="w">                </span><span class="n">LightTexture</span><span class="p">.</span><span class="na">FULL_BRIGHT</span><span class="p">,</span>
+<a id="__codelineno-0-15" name="__codelineno-0-15" href="#__codelineno-0-15"></a><span class="w">                </span><span class="n">OverlayTexture</span><span class="p">.</span><span class="na">NO_OVERLAY</span><span class="p">,</span>
+<a id="__codelineno-0-16" name="__codelineno-0-16" href="#__codelineno-0-16"></a><span class="w">                </span><span class="n">partialTick</span><span class="p">);</span>
+<a id="__codelineno-0-17" name="__codelineno-0-17" href="#__codelineno-0-17"></a><span class="w">    </span><span class="p">}</span>
+<a id="__codelineno-0-18" name="__codelineno-0-18" href="#__codelineno-0-18"></a>
+<a id="__codelineno-0-19" name="__codelineno-0-19" href="#__codelineno-0-19"></a><span class="w">    </span><span class="n">poseStack</span><span class="p">.</span><span class="na">popPose</span><span class="p">();</span>
+<a id="__codelineno-0-20" name="__codelineno-0-20" href="#__codelineno-0-20"></a><span class="p">}</span>
+</code></pre></div>
 <p>Classes used:</p>
 <ul>
-<li><a href="https://github.com/ArcAnc/PulseLib/blob/master/src/main/java/com/arcanc/pulselib/util/helpers/PLibHelper.java"><code>PLibHelper</code></a></li>
-<li><a href="https://github.com/ArcAnc/PulseLib/blob/master/src/main/java/com/arcanc/pulselib/content/model/baked/PBakedModel.java"><code>PBakedModel</code></a></li>
-<li><a href="https://github.com/ArcAnc/PulseLib/blob/master/src/main/java/com/arcanc/pulselib/util/PRenderTypes.java"><code>PRenderTypes</code></a></li>
+<li><a href="https://github.com/ArcAnc/PulseLib/blob/master/src/main/java/com/arcanc/pulselib/content/renderer/PItemRenderer.java"><code>PItemRenderer</code></a></li>
+<li><a href="https://github.com/ArcAnc/PulseLib/blob/master/src/main/java/com/arcanc/pulselib/content/renderer/base/PItemRenderState.java"><code>PItemRenderState</code></a></li>
+<li><a href="https://github.com/ArcAnc/PulseLib/blob/master/src/main/java/com/arcanc/pulselib/content/model/baked/PBakedBone.java"><code>PBakedBone</code></a></li>
+<li><a href="https://github.com/ArcAnc/PulseLib/blob/master/src/main/java/com/arcanc/pulselib/content/renderer/PRenderQueue.java"><code>PRenderQueue</code></a></li>
 </ul>
 
 
