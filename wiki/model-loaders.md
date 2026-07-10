@@ -1,0 +1,102 @@
+PulseLib model loading is extensible through [`PModelLoader`](https://github.com/ArcAnc/PulseLib/blob/master/src/main/java/com/arcanc/pulselib/data/PModelLoader.java). Loaded raw models are baked into [`PBakedModel`](https://github.com/ArcAnc/PulseLib/blob/master/src/main/java/com/arcanc/pulselib/content/model/baked/PBakedModel.java) by [`PModelCache`](https://github.com/ArcAnc/PulseLib/blob/master/src/main/java/com/arcanc/pulselib/util/PModelCache.java).
+
+## Built-in glTF loader
+
+[`PGltfModelLoader`](https://github.com/ArcAnc/PulseLib/blob/master/src/main/java/com/arcanc/pulselib/data/PGltfModelLoader.java) is registered by default.
+
+Supported roots and extensions:
+
+```text
+assets/<modid>/glmodels/**/*.glb
+assets/<modid>/glmodels/**/*.gltf
+```
+
+Default path:
+
+```java
+new DefaultEntityModelData.DefaultEntityModelDataBuilder(id)
+```
+
+resolves to:
+
+```text
+assets/<namespace>/glmodels/entity/<path>.glb
+```
+
+The parser is [`PGltfModelParser`](https://github.com/ArcAnc/PulseLib/blob/master/src/main/java/com/arcanc/pulselib/data/PGltfModelParser.java).
+
+## Gecko loader
+
+[`PGeckoModelLoader`](https://github.com/ArcAnc/PulseLib/blob/master/src/main/java/com/arcanc/pulselib/data/PGeckoModelLoader.java) supports:
+
+```text
+assets/<modid>/geckolib/models/**/*.geo.json
+assets/<modid>/geckolib/models/**/*.json
+assets/<modid>/geckolib/animations/**/*.animation.json
+assets/<modid>/geckolib/animations/**/*.json
+```
+
+Register it:
+
+```java
+PModelCache.registerModelLoader(PGeckoModelLoader.INSTANCE);
+```
+
+Use it in model data:
+
+```java
+PModelData data = new DefaultEntityModelData.DefaultEntityModelDataBuilder(
+        ResourceLocation.fromNamespaceAndPath("examplemod", "robot"),
+        PGeckoModelLoader.INSTANCE.id())
+        .build();
+```
+
+The parser is [`PGeckoModelParser`](https://github.com/ArcAnc/PulseLib/blob/master/src/main/java/com/arcanc/pulselib/data/PGeckoModelParser.java).
+
+## Custom loader
+
+```java
+public final class MyModelLoader implements PModelLoader {
+    public static final MyModelLoader INSTANCE = new MyModelLoader();
+    private static final ResourceLocation ID =
+            ResourceLocation.fromNamespaceAndPath("examplemod", "my_format");
+
+    @Override
+    public ResourceLocation id() {
+        return ID;
+    }
+
+    @Override
+    public boolean supports(ResourceLocation modelPath) {
+        return modelPath.getPath().startsWith("mymodels/")
+                && modelPath.getPath().endsWith(".json");
+    }
+
+    @Override
+    public ResourceLocation defaultModelLocation(ResourceLocation modelLocation, String modelType) {
+        return modelLocation.withPrefix("mymodels/" + modelType + "/").withSuffix(".json");
+    }
+
+    @Override
+    public ResourceLocation textureLocation(ResourceLocation modelPath, String textureName) {
+        return modelPath.withPath("entity/" + textureName);
+    }
+
+    @Override
+    public CompletableFuture<?> loadModels(Executor backgroundExecutor,
+                                           ResourceManager resourceManager,
+                                           BiConsumer<ResourceLocation, PModel> elementConsumer) {
+        return CompletableFuture.runAsync(() -> {
+            // Parse resources and call elementConsumer.accept(modelLocation, model).
+        }, backgroundExecutor);
+    }
+}
+```
+
+Register before client resource reload:
+
+```java
+PModelCache.registerModelLoader(MyModelLoader.INSTANCE);
+```
+
+`PModel` contains raw bones, meshes, bone-to-mesh mapping, and animations. `PModelCache` owns baking, vertex buffer creation, atlas UV conversion, emissive metadata, and cache cleanup.
