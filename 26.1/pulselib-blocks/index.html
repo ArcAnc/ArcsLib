@@ -1287,7 +1287,7 @@
   <h1>PulseLib Blocks</h1>
 
 <p>Animated blocks in Minecraft are really animated block entities. The block still handles placement, collision, interaction, redstone behavior, and blockstate data. The visible animated model is rendered by the block entity renderer.</p>
-<p>That split is important: implement <a href="https://github.com/ArcAnc/PulseLib/blob/master/src/main/java/com/arcanc/pulselib/content/animatable/PAnimatable.java"><code>PAnimatable</code></a> on the <code>BlockEntity</code>, not on the <code>Block</code>.</p>
+<p>That split is important: implement <a href="https://github.com/ArcAnc/ArcsLib/blob/26.1/src/main/java/com/arcanc/pulselib/content/animatable/PAnimatable.java"><code>PAnimatable</code></a> on the <code>BlockEntity</code>, not on the <code>Block</code>.</p>
 <h2 id="block-class">Block class<a class="headerlink" href="#block-class" title="Permanent link">&para;</a></h2>
 <p>The block should create a block entity and hide vanilla block rendering. If you forget to hide vanilla rendering, you may see the normal block model fighting with the PulseLib model, or you may simply render the wrong thing.</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="kd">public</span><span class="w"> </span><span class="kd">class</span> <span class="nc">CrusherBlock</span><span class="w"> </span><span class="kd">extends</span><span class="w"> </span><span class="n">Block</span><span class="w"> </span><span class="kd">implements</span><span class="w"> </span><span class="n">EntityBlock</span><span class="w"> </span><span class="p">{</span>
@@ -1368,10 +1368,10 @@
 </code></pre></div>
 <p>Classes used:</p>
 <ul>
-<li><a href="https://github.com/ArcAnc/PulseLib/blob/master/src/main/java/com/arcanc/pulselib/content/renderer/PBlockRenderer.java"><code>PBlockRenderer</code></a></li>
-<li><a href="https://github.com/ArcAnc/PulseLib/blob/master/src/main/java/com/arcanc/pulselib/content/renderer/modelData/DefaultBlockModelData.java"><code>DefaultBlockModelData</code></a></li>
-<li><a href="https://github.com/ArcAnc/PulseLib/blob/master/src/main/java/com/arcanc/pulselib/content/animatable/PAnimatable.java"><code>PAnimatable</code></a></li>
-<li><a href="https://github.com/ArcAnc/PulseLib/blob/master/src/main/java/com/arcanc/pulselib/util/helpers/PLibHelper.java"><code>PLibHelper</code></a></li>
+<li><a href="https://github.com/ArcAnc/ArcsLib/blob/26.1/src/main/java/com/arcanc/pulselib/content/renderer/PBlockRenderer.java"><code>PBlockRenderer</code></a></li>
+<li><a href="https://github.com/ArcAnc/ArcsLib/blob/26.1/src/main/java/com/arcanc/pulselib/content/renderer/modelData/DefaultBlockModelData.java"><code>DefaultBlockModelData</code></a></li>
+<li><a href="https://github.com/ArcAnc/ArcsLib/blob/26.1/src/main/java/com/arcanc/pulselib/content/animatable/PAnimatable.java"><code>PAnimatable</code></a></li>
+<li><a href="https://github.com/ArcAnc/ArcsLib/blob/26.1/src/main/java/com/arcanc/pulselib/util/helpers/PLibHelper.java"><code>PLibHelper</code></a></li>
 </ul>
 
 

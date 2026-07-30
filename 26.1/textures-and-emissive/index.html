@@ -1265,7 +1265,7 @@
   <h1>Textures and Emissive</h1>
 
 <p>PulseLib does not draw model textures directly from arbitrary files. It first collects them into a runtime atlas, then the baked model stores UVs for that atlas. This is why texture registration is a required step instead of an optional convenience.</p>
-<p>Texture registration uses <a href="https://github.com/ArcAnc/PulseLib/blob/1.21.1/src/main/java/com/arcanc/pulselib/content/event/PulseLibEvents.java"><code>PulseLibEvents.RegisterTextureEvent</code></a>.</p>
+<p>Texture registration uses <a href="https://github.com/ArcAnc/ArcsLib/blob/26.1/src/main/java/com/arcanc/pulselib/content/event/PulseLibEvents.java"><code>PulseLibEvents.RegisterTextureEvent</code></a>.</p>
 <h2 id="register-textures">Register textures<a class="headerlink" href="#register-textures" title="Permanent link">&para;</a></h2>
 <p>Subscribe on the mod event bus and add every texture that a PulseLib model may use:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nd">@Mod.EventBusSubscriber</span><span class="p">(</span><span class="n">modid</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ExampleMod</span><span class="p">.</span><span class="na">MOD_ID</span><span class="p">,</span><span class="w"> </span><span class="n">bus</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Mod</span><span class="p">.</span><span class="na">EventBusSubscriber</span><span class="p">.</span><span class="na">Bus</span><span class="p">.</span><span class="na">MOD</span><span class="p">,</span><span class="w"> </span><span class="n">value</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Dist</span><span class="p">.</span><span class="na">CLIENT</span><span class="p">)</span>
@@ -1289,15 +1289,15 @@
 <p>The atlas is registered by PulseLib itself. Your mod only contributes texture locations.</p>
 <p>Runtime atlas classes:</p>
 <ul>
-<li><a href="https://github.com/ArcAnc/PulseLib/blob/1.21.1/src/main/java/com/arcanc/pulselib/util/PTextureCache.java"><code>PTextureCache</code></a></li>
-<li><a href="https://github.com/ArcAnc/PulseLib/blob/1.21.1/src/main/java/com/arcanc/pulselib/content/model/textures/atlas/RuntimeLoader.java"><code>RuntimeLoader</code></a></li>
+<li><a href="https://github.com/ArcAnc/ArcsLib/blob/26.1/src/main/java/com/arcanc/pulselib/util/PTextureCache.java"><code>PTextureCache</code></a></li>
+<li><a href="https://github.com/ArcAnc/ArcsLib/blob/26.1/src/main/java/com/arcanc/pulselib/content/model/textures/atlas/RuntimeLoader.java"><code>RuntimeLoader</code></a></li>
 </ul>
 <p>PulseLib registers the atlas at:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="n">PTextureCache</span><span class="p">.</span><span class="na">ATLAS_LOCATION</span><span class="w"> </span><span class="c1">// pulselib:textures/atlas.png</span>
 </code></pre></div>
 <p>Renderers normally pass <code>PTextureCache.ATLAS_LOCATION</code> to <code>PRenderTypes</code>, so you rarely need to access the atlas manually.</p>
 <h2 id="emissive-textures">Emissive textures<a class="headerlink" href="#emissive-textures" title="Permanent link">&para;</a></h2>
-<p>Emissive textures are useful for eyes, screens, lamps, energy parts, and other pieces that should ignore normal light. PulseLib reads this flag from texture metadata through <a href="https://github.com/ArcAnc/PulseLib/blob/1.21.1/src/main/java/com/arcanc/pulselib/content/model/textures/atlas/PLibSpriteMetadata.java"><code>PLibSpriteMetadata</code></a>.</p>
+<p>Emissive textures are useful for eyes, screens, lamps, energy parts, and other pieces that should ignore normal light. PulseLib reads this flag from texture metadata through <a href="https://github.com/ArcAnc/ArcsLib/blob/26.1/src/main/java/com/arcanc/pulselib/content/model/textures/atlas/PLibSpriteMetadata.java"><code>PLibSpriteMetadata</code></a>.</p>
 <p>To mark a texture as emissive, add a <code>.png.mcmeta</code> file next to it:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>assets/examplemod/textures/entity/robot/eyes.png
 <a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>assets/examplemod/textures/entity/robot/eyes.png.mcmeta
@@ -1319,10 +1319,10 @@
 </code></pre></div>
 <p>Classes used:</p>
 <ul>
-<li><a href="https://github.com/ArcAnc/PulseLib/blob/1.21.1/src/main/java/com/arcanc/pulselib/util/PTextureCache.java"><code>PTextureCache</code></a></li>
-<li><a href="https://github.com/ArcAnc/PulseLib/blob/1.21.1/src/main/java/com/arcanc/pulselib/content/model/textures/atlas/RuntimeLoader.java"><code>RuntimeLoader</code></a></li>
-<li><a href="https://github.com/ArcAnc/PulseLib/blob/1.21.1/src/main/java/com/arcanc/pulselib/content/model/textures/atlas/PLibSpriteMetadata.java"><code>PLibSpriteMetadata</code></a></li>
-<li><a href="https://github.com/ArcAnc/PulseLib/blob/1.21.1/src/main/java/com/arcanc/pulselib/util/PRenderTypes.java"><code>PRenderTypes</code></a></li>
+<li><a href="https://github.com/ArcAnc/ArcsLib/blob/26.1/src/main/java/com/arcanc/pulselib/util/PTextureCache.java"><code>PTextureCache</code></a></li>
+<li><a href="https://github.com/ArcAnc/ArcsLib/blob/26.1/src/main/java/com/arcanc/pulselib/content/model/textures/atlas/RuntimeLoader.java"><code>RuntimeLoader</code></a></li>
+<li><a href="https://github.com/ArcAnc/ArcsLib/blob/26.1/src/main/java/com/arcanc/pulselib/content/model/textures/atlas/PLibSpriteMetadata.java"><code>PLibSpriteMetadata</code></a></li>
+<li><a href="https://github.com/ArcAnc/ArcsLib/blob/26.1/src/main/java/com/arcanc/pulselib/util/PRenderTypes.java"><code>PRenderTypes</code></a></li>
 </ul>
 
 

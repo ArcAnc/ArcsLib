@@ -1287,7 +1287,7 @@
   <h1>PulseLib Items</h1>
 
 <p>Items need a slightly different setup from entities and block entities. Minecraft creates one <code>Item</code> object for the item type, but the player can hold many <code>ItemStack</code>s of that type. If animation state lived directly on the item object, every stack would share the same animation.</p>
-<p>PulseLib handles this by using <a href="https://github.com/ArcAnc/PulseLib/blob/master/src/main/java/com/arcanc/pulselib/content/animatable/AnimManagerKey.java"><code>AnimManagerKey</code></a> and <a href="https://github.com/ArcAnc/PulseLib/blob/master/src/main/java/com/arcanc/pulselib/content/animatable/singleton/SingletonAnimationManager.java"><code>SingletonAnimationManager</code></a>. The item still implements <a href="https://github.com/ArcAnc/PulseLib/blob/master/src/main/java/com/arcanc/pulselib/content/animatable/PItemAnimatable.java"><code>PItemAnimatable</code></a>, but the actual manager is resolved per key.</p>
+<p>PulseLib handles this by using <a href="https://github.com/ArcAnc/ArcsLib/blob/26.1/src/main/java/com/arcanc/pulselib/content/animatable/AnimManagerKey.java"><code>AnimManagerKey</code></a> and <a href="https://github.com/ArcAnc/ArcsLib/blob/26.1/src/main/java/com/arcanc/pulselib/content/animatable/singleton/SingletonAnimationManager.java"><code>SingletonAnimationManager</code></a>. The item still implements <a href="https://github.com/ArcAnc/ArcsLib/blob/26.1/src/main/java/com/arcanc/pulselib/content/animatable/PItemAnimatable.java"><code>PItemAnimatable</code></a>, but the actual manager is resolved per key.</p>
 <h2 id="item-json">Item JSON<a class="headerlink" href="#item-json" title="Permanent link">&para;</a></h2>
 <p>Create a modern item definition file. This is not the animated GLB model; it tells Minecraft to use your registered special model renderer.</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>assets/&lt;modid&gt;/items/&lt;item&gt;.json
@@ -1375,10 +1375,10 @@
 <p><code>AnimManagerKey.of(ItemStack)</code> uses item id, stack count, and component data. If your item animation should differ by custom data, store it in item components so the key changes. If two stacks have identical key data, they can reuse the same cached manager.</p>
 <p>Classes used:</p>
 <ul>
-<li><a href="https://github.com/ArcAnc/PulseLib/blob/master/src/main/java/com/arcanc/pulselib/content/animatable/PItemAnimatable.java"><code>PItemAnimatable</code></a></li>
-<li><a href="https://github.com/ArcAnc/PulseLib/blob/master/src/main/java/com/arcanc/pulselib/content/renderer/PItemRenderer.java"><code>PItemRenderer</code></a></li>
-<li><a href="https://github.com/ArcAnc/PulseLib/blob/master/src/main/java/com/arcanc/pulselib/content/animatable/singleton/SingletonAnimationManager.java"><code>SingletonAnimationManager</code></a></li>
-<li><a href="https://github.com/ArcAnc/PulseLib/blob/master/src/main/java/com/arcanc/pulselib/content/renderer/modelData/DefaultItemModelData.java"><code>DefaultItemModelData</code></a></li>
+<li><a href="https://github.com/ArcAnc/ArcsLib/blob/26.1/src/main/java/com/arcanc/pulselib/content/animatable/PItemAnimatable.java"><code>PItemAnimatable</code></a></li>
+<li><a href="https://github.com/ArcAnc/ArcsLib/blob/26.1/src/main/java/com/arcanc/pulselib/content/renderer/PItemRenderer.java"><code>PItemRenderer</code></a></li>
+<li><a href="https://github.com/ArcAnc/ArcsLib/blob/26.1/src/main/java/com/arcanc/pulselib/content/animatable/singleton/SingletonAnimationManager.java"><code>SingletonAnimationManager</code></a></li>
+<li><a href="https://github.com/ArcAnc/ArcsLib/blob/26.1/src/main/java/com/arcanc/pulselib/content/renderer/modelData/DefaultItemModelData.java"><code>DefaultItemModelData</code></a></li>
 </ul>
 
 

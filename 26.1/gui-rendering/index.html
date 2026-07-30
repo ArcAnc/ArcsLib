@@ -1220,7 +1220,7 @@
 
   <h1>GUI Rendering</h1>
 
-<p>PulseLib no longer exposes a <code>PLibHelper.renderModelInGui</code> helper. GUI item rendering goes through <a href="https://github.com/ArcAnc/PulseLib/blob/master/src/main/java/com/arcanc/pulselib/content/renderer/PItemRenderer.java"><code>PItemRenderer</code></a>.</p>
+<p>PulseLib no longer exposes a <code>PLibHelper.renderModelInGui</code> helper. GUI item rendering goes through <a href="https://github.com/ArcAnc/ArcsLib/blob/26.1/src/main/java/com/arcanc/pulselib/content/renderer/PItemRenderer.java"><code>PItemRenderer</code></a>.</p>
 <p>When Minecraft renders a PulseLib item with <code>ItemDisplayContext.GUI</code>, <code>PItemRenderer</code>:</p>
 <ul>
 <li>extracts the item render state through <code>PItemRenderState</code>;</li>
@@ -1229,7 +1229,7 @@
 </ul>
 <p>That means normal animated items do not need separate GUI drawing code. Use the same item renderer and model data described on <a href="PulseLib-Items">PulseLib Items</a>.</p>
 <h2 id="direct-model-drawing">Direct model drawing<a class="headerlink" href="#direct-model-drawing" title="Permanent link">&para;</a></h2>
-<p>For advanced screens that are not item rendering, draw the baked model bones directly with <a href="https://github.com/ArcAnc/PulseLib/blob/master/src/main/java/com/arcanc/pulselib/content/model/baked/PBakedBone.java"><code>PBakedBone.instantDraw</code></a>:</p>
+<p>For advanced screens that are not item rendering, draw the baked model bones directly with <a href="https://github.com/ArcAnc/ArcsLib/blob/26.1/src/main/java/com/arcanc/pulselib/content/model/baked/PBakedBone.java"><code>PBakedBone.instantDraw</code></a>:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="n">PBakedModel</span><span class="w"> </span><span class="n">model</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">modelData</span><span class="p">.</span><span class="na">getModel</span><span class="p">();</span>
 <a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">model</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="kc">null</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
 <a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="w">    </span><span class="n">poseStack</span><span class="p">.</span><span class="na">pushPose</span><span class="p">();</span>
@@ -1253,10 +1253,10 @@
 </code></pre></div>
 <p>Classes used:</p>
 <ul>
-<li><a href="https://github.com/ArcAnc/PulseLib/blob/master/src/main/java/com/arcanc/pulselib/content/renderer/PItemRenderer.java"><code>PItemRenderer</code></a></li>
-<li><a href="https://github.com/ArcAnc/PulseLib/blob/master/src/main/java/com/arcanc/pulselib/content/renderer/base/PItemRenderState.java"><code>PItemRenderState</code></a></li>
-<li><a href="https://github.com/ArcAnc/PulseLib/blob/master/src/main/java/com/arcanc/pulselib/content/model/baked/PBakedBone.java"><code>PBakedBone</code></a></li>
-<li><a href="https://github.com/ArcAnc/PulseLib/blob/master/src/main/java/com/arcanc/pulselib/content/renderer/PRenderQueue.java"><code>PRenderQueue</code></a></li>
+<li><a href="https://github.com/ArcAnc/ArcsLib/blob/26.1/src/main/java/com/arcanc/pulselib/content/renderer/PItemRenderer.java"><code>PItemRenderer</code></a></li>
+<li><a href="https://github.com/ArcAnc/ArcsLib/blob/26.1/src/main/java/com/arcanc/pulselib/content/renderer/base/PItemRenderState.java"><code>PItemRenderState</code></a></li>
+<li><a href="https://github.com/ArcAnc/ArcsLib/blob/26.1/src/main/java/com/arcanc/pulselib/content/model/baked/PBakedBone.java"><code>PBakedBone</code></a></li>
+<li><a href="https://github.com/ArcAnc/ArcsLib/blob/26.1/src/main/java/com/arcanc/pulselib/content/renderer/PRenderQueue.java"><code>PRenderQueue</code></a></li>
 </ul>
 
 
