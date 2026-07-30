@@ -29,6 +29,7 @@ public class PAnimationManager<T extends PAnimatable<T>>
 	protected static final long THRESHOLD_TIME = 5_000;
 	
 	protected final T animatable;
+	protected final AnimManagerKey key;
 	protected final Map<String, Supplier<PAnimationController.StateHandler<T>>> factories = new Object2ObjectArrayMap<>();
 	protected final Map<String, PAnimationController<T>> controllers = new Object2ObjectArrayMap<>();
 	
@@ -40,13 +41,24 @@ public class PAnimationManager<T extends PAnimatable<T>>
 	
 	public PAnimationManager(final T animatable)
 	{
+		this(animatable, AnimManagerKey.ofObject(animatable));
+	}
+
+	public PAnimationManager(final T animatable, final AnimManagerKey key)
+	{
 		this.animatable = animatable;
+		this.key = key;
 		
 		PAnimationRegistrar<T> registrar = new PAnimationRegistrar<>(new ObjectArrayList<>());
 		
 		this.animatable.registerAnimationControllers(registrar);
 		
 		registrar.entries.forEach(entry -> this.factories.put(entry.name(), entry.factory()));
+	}
+
+	public AnimManagerKey key()
+	{
+		return this.key;
 	}
 	
 	

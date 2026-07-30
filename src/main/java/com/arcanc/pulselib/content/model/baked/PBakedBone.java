@@ -13,6 +13,7 @@ package com.arcanc.pulselib.content.model.baked;
 import com.arcanc.pulselib.content.animatable.PAnimatable;
 import com.arcanc.pulselib.content.animatable.PAnimationController;
 import com.arcanc.pulselib.content.model.animation.BoneFrame;
+import com.arcanc.pulselib.content.model.animation.PAnimationPoseResolver;
 import com.arcanc.pulselib.content.renderer.modelData.PModelData;
 import com.arcanc.pulselib.util.PLibDatabase;
 import com.arcanc.pulselib.util.PRenderTypes;
@@ -212,26 +213,9 @@ public class PBakedBone
 			Collection<PAnimationController<T>> controllers,
 			float partialTick)
 	{
-		Vector3f translation = new Vector3f(this.basePosition());
-		Quaternionf rotation = new Quaternionf(this.baseRotation());
-		Vector3f scale = new Vector3f(1, 1, 1);
-		
-		boolean hasTransform = false;
-		for (PAnimationController<?> controller : controllers)
-		{
-			BoneFrame frame = controller.calculateBoneTransformations(this.name(), model, partialTick);
-			if (frame == null)
-				continue;
-			translation.add(frame.translation());
-			scale.mul(frame.scale());
-			rotation.premul(frame.rotation());
-			hasTransform = true;
-		}
-		
-		if (!hasTransform)
-			return null;
-		
-		return new BoneFrame(translation, rotation, scale);
+		PAnimationPoseResolver.LocalPose pose = PAnimationPoseResolver.resolveLocal(
+				this, model, controllers, PAnimationPoseResolver.defaultContexts(), partialTick);
+		return pose.hasTranslation() || pose.hasRotation() || pose.hasScale() ? pose.localTransform() : null;
 	}
 	
 	public String name()

@@ -14,7 +14,7 @@ import com.arcanc.pulselib.content.player.animation.PPlayerPart;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.client.renderer.ItemInHandRenderer;
-import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.item.ItemStack;
@@ -40,7 +40,7 @@ public abstract class ItemInHandRendererMixin
 	                                                ItemStack stack,
 	                                                float equippedProgress,
 	                                                PoseStack poseStack,
-	                                                MultiBufferSource buffer,
+	                                                SubmitNodeCollector submitNodeCollector,
 	                                                int packedLight,
 	                                                CallbackInfo ci)
 	{
@@ -54,7 +54,7 @@ public abstract class ItemInHandRendererMixin
 
 		((ItemInHandRendererAccessor)this).pulselib$renderPlayerArm(
 				poseStack,
-				buffer,
+				submitNodeCollector,
 				packedLight,
 				equippedProgress,
 				swingProgress,

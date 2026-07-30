@@ -15,7 +15,6 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.phys.Vec3;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
@@ -28,19 +27,17 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(Camera.class)
 public abstract class CameraMixin
 {
+	@Shadow private boolean detached;
+
 	@Shadow protected abstract void setPosition(Vec3 pos);
 
 	@Shadow protected abstract void setRotation(float yRot, float xRot, float roll);
 
-	@Inject(method = "setup", at = @At("TAIL"))
-	private void pulselib$followAnimatedHead(BlockGetter level,
-	                                          Entity entity,
-	                                          boolean detached,
-	                                          boolean thirdPersonReverse,
-	                                          float partialTick,
-	                                          CallbackInfo ci)
+	@Inject(method = "alignWithEntity", at = @At("TAIL"))
+	private void pulselib$followAnimatedHead(float partialTick, CallbackInfo ci)
 	{
-		if (detached || entity != Minecraft.getInstance().player || !(entity instanceof LocalPlayer player))
+		Entity entity = Minecraft.getInstance().getCameraEntity();
+		if (this.detached || entity != Minecraft.getInstance().player || !(entity instanceof LocalPlayer player))
 			return;
 
 		PPlayerAnimations.PPlayerCameraPose pose = PPlayerAnimations.cameraPose(player, partialTick);
@@ -52,7 +49,7 @@ public abstract class CameraMixin
 
 		Vector3f positionOffset = pose.positionOffset(player.getEyeHeight());
 		positionOffset.set(-positionOffset.x, -positionOffset.y, positionOffset.z).rotate(bodyRotation);
-		this.setPosition(camera.getPosition().add(positionOffset.x, positionOffset.y, positionOffset.z));
+		this.setPosition(camera.position().add(positionOffset.x, positionOffset.y, positionOffset.z));
 
 		Quaternionf modelRotation = pose.rotation();
 		modelRotation.set(-modelRotation.x, -modelRotation.y, modelRotation.z, modelRotation.w);

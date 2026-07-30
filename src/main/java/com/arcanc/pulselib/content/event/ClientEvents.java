@@ -15,6 +15,7 @@ import com.arcanc.pulselib.content.animatable.PLibAnimationTicker;
 import com.arcanc.pulselib.content.animatable.instance.InstanceAnimationManager;
 import com.arcanc.pulselib.content.animatable.singleton.SingletonAnimationManager;
 import com.arcanc.pulselib.content.model.textures.atlas.RuntimeLoader;
+import com.arcanc.pulselib.content.player.animation.PPlayerAnimations;
 import com.arcanc.pulselib.content.renderer.PRenderQueue;
 import com.arcanc.pulselib.content.renderer.PRenderStagesHandler;
 import com.arcanc.pulselib.util.PLibDatabase;
@@ -78,6 +79,8 @@ public class ClientEvents
 		
 		PulseLibEvents.AttachmentRegistrationEvent registrationEvent = new PulseLibEvents.AttachmentRegistrationEvent();
 		ModLoader.postEvent(registrationEvent);
+		PulseLibEvents.PlayerAnimationRegistrationEvent playerAnimationRegistrationEvent = new PulseLibEvents.PlayerAnimationRegistrationEvent();
+		ModLoader.postEvent(playerAnimationRegistrationEvent);
 		
 		/*registrationEvent.registration().registerLiving(PLibRegistration.ItemReg.TEST_HAT.get(),
 				new PLivingAttachmentDefinition(
@@ -104,6 +107,7 @@ public class ClientEvents
 						true));*/
 		
 		registrationEvent.registration().apply();
+		playerAnimationRegistrationEvent.registration().apply();
 		pulseClientContentRegistered = true;
 	}
 	
@@ -137,6 +141,7 @@ public class ClientEvents
 		PRenderQueue.cleanUp();
 		SingletonAnimationManager.cleanUp();
 		InstanceAnimationManager.cleanUp();
+		PPlayerAnimations.cleanUp();
 	}
 	
 	private static void registerSpriteSources(final RegisterSpriteSourcesEvent event)

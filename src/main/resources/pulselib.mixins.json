@@ -12,6 +12,11 @@
   },
   "client": [
     "BlockEntityRenderStateAccessor",
+	"CameraMixin",
+	"ItemInHandRendererAccessor",
+	"ItemInHandRendererMixin",
+	"LivingEntityRendererMixin",
+	"PlayerRendererMixin",
     "ItemModelResolverAccessor",
     "ItemStackRenderStateAccessor",
     "SpecialModelWrapperAccessor",

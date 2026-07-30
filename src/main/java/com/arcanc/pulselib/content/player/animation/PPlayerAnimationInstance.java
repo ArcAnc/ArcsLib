@@ -17,7 +17,7 @@ import com.arcanc.pulselib.content.animatable.instance.InstanceAnimationManager;
 import com.arcanc.pulselib.content.model.animation.PAnimationPoseResolver;
 import com.arcanc.pulselib.content.model.baked.PBakedModel;
 import com.arcanc.pulselib.data.MolangParser;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.player.Player;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Quaternionf;
@@ -27,11 +27,11 @@ import java.util.Objects;
 public final class PPlayerAnimationInstance implements PAnimatable<PPlayerAnimationInstance>
 {
 	private Player player;
-	private final ResourceLocation id;
+	private final Identifier id;
 	private final PPlayerAnimationDefinition definition;
 	private final PAnimationManager<PPlayerAnimationInstance> animationManager;
 
-	PPlayerAnimationInstance(Player player, ResourceLocation id, PPlayerAnimationDefinition definition)
+	PPlayerAnimationInstance(Player player, Identifier id, PPlayerAnimationDefinition definition)
 	{
 		this.player = Objects.requireNonNull(player);
 		this.id = Objects.requireNonNull(id);
@@ -50,7 +50,7 @@ public final class PPlayerAnimationInstance implements PAnimatable<PPlayerAnimat
 		this.player = Objects.requireNonNull(player);
 	}
 
-	public ResourceLocation id()
+	public Identifier id()
 	{
 		return this.id;
 	}

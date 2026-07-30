@@ -10,7 +10,7 @@
 package com.arcanc.pulselib.content.player.animation;
 
 import net.minecraft.client.model.geom.ModelPart;
-import net.minecraft.client.model.PlayerModel;
+import net.minecraft.client.model.player.PlayerModel;
 
 import java.util.List;
 
@@ -24,7 +24,7 @@ public enum PPlayerPart
 	RIGHT_LEG,
 	LEFT_LEG;
 
-	List<ModelPart> resolve(PlayerModel<?> model)
+	List<ModelPart> resolve(PlayerModel model)
 	{
 		return switch (this)
 		{

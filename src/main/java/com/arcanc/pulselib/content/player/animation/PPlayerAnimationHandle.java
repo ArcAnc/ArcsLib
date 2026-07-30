@@ -12,7 +12,7 @@ package com.arcanc.pulselib.content.player.animation;
 import com.arcanc.pulselib.content.animatable.ControllerState;
 import com.arcanc.pulselib.content.animatable.PAnimationController;
 import com.arcanc.pulselib.content.model.animation.PRawAnimation;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.player.Player;
 import org.jetbrains.annotations.Nullable;
 
@@ -21,9 +21,9 @@ import java.util.Objects;
 public final class PPlayerAnimationHandle
 {
 	private final Player player;
-	private final ResourceLocation id;
+	private final Identifier id;
 
-	PPlayerAnimationHandle(Player player, ResourceLocation id)
+	PPlayerAnimationHandle(Player player, Identifier id)
 	{
 		this.player = Objects.requireNonNull(player);
 		this.id = Objects.requireNonNull(id);
@@ -34,7 +34,7 @@ public final class PPlayerAnimationHandle
 		return this.player;
 	}
 
-	public ResourceLocation id()
+	public Identifier id()
 	{
 		return this.id;
 	}

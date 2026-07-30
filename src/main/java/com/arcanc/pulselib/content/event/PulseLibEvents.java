@@ -12,6 +12,8 @@ package com.arcanc.pulselib.content.event;
 
 import com.arcanc.pulselib.util.attachments.PLivingAttachmentDefinition;
 import com.arcanc.pulselib.util.attachments.PLivingAttachments;
+import com.arcanc.pulselib.content.player.animation.PPlayerAnimationDefinition;
+import com.arcanc.pulselib.content.player.animation.PPlayerAnimations;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.ItemLike;
 import net.neoforged.bus.api.Event;
@@ -62,6 +64,31 @@ public class PulseLibEvents
 				this.actions.add(() -> PLivingAttachments.registerGlobal(definition));
 			}
 			
+			public void apply()
+			{
+				this.actions.forEach(Runnable :: run);
+			}
+		}
+	}
+
+	public static class PlayerAnimationRegistrationEvent extends Event implements IModBusEvent
+	{
+		private final PlayerAnimationRegistration registration = new PlayerAnimationRegistration();
+
+		public PlayerAnimationRegistration registration()
+		{
+			return this.registration;
+		}
+
+		public static final class PlayerAnimationRegistration
+		{
+			private final List<Runnable> actions = new ArrayList<>();
+
+			public void register(Identifier id, PPlayerAnimationDefinition definition)
+			{
+				this.actions.add(() -> PPlayerAnimations.register(id, definition));
+			}
+
 			public void apply()
 			{
 				this.actions.forEach(Runnable :: run);

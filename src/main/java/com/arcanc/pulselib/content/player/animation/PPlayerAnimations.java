@@ -10,10 +10,10 @@
 package com.arcanc.pulselib.content.player.animation;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import net.minecraft.client.model.PlayerModel;
+import net.minecraft.client.model.player.PlayerModel;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.multiplayer.ClientLevel;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.player.Player;
 import org.jetbrains.annotations.ApiStatus;
@@ -25,31 +25,31 @@ import java.util.*;
 
 public final class PPlayerAnimations
 {
-	private static final Map<ResourceLocation, PPlayerAnimationDefinition> DEFINITIONS = new HashMap<>();
-	private static final Map<UUID, Map<ResourceLocation, PPlayerAnimationInstance>> INSTANCES = new HashMap<>();
+	private static final Map<Identifier, PPlayerAnimationDefinition> DEFINITIONS = new HashMap<>();
+	private static final Map<UUID, Map<Identifier, PPlayerAnimationInstance>> INSTANCES = new HashMap<>();
 
 	private PPlayerAnimations()
 	{
 	}
 
-	public static void register(ResourceLocation id, PPlayerAnimationDefinition definition)
+	public static void register(Identifier id, PPlayerAnimationDefinition definition)
 	{
 		if (DEFINITIONS.putIfAbsent(id, definition) != null)
 			throw new IllegalArgumentException("Duplicate player animation definition: " + id);
 	}
 
-	public static @Nullable PPlayerAnimationDefinition get(ResourceLocation id)
+	public static @Nullable PPlayerAnimationDefinition get(Identifier id)
 	{
 		return DEFINITIONS.get(id);
 	}
 	
-	public static @Nullable PPlayerAnimationInstance getInstance(Player player, ResourceLocation id)
+	public static @Nullable PPlayerAnimationInstance getInstance(Player player, Identifier id)
 	{
 		PPlayerAnimationDefinition definition = DEFINITIONS.get(id);
 		return definition == null ? null : instance(player, id, definition);
 	}
 	
-	public static @Nullable PPlayerAnimationHandle getHandle(Player player, ResourceLocation id)
+	public static @Nullable PPlayerAnimationHandle getHandle(Player player, Identifier id)
 	{
 		return DEFINITIONS.containsKey(id) ? new PPlayerAnimationHandle(player, id) : null;
 	}
@@ -61,7 +61,7 @@ public final class PPlayerAnimations
 		for (Player player : level.players())
 		{
 			livePlayers.add(player.getUUID());
-			for (Map.Entry<ResourceLocation, PPlayerAnimationDefinition> entry : DEFINITIONS.entrySet())
+			for (Map.Entry<Identifier, PPlayerAnimationDefinition> entry : DEFINITIONS.entrySet())
 				instance(player, entry.getKey(), entry.getValue()).tick();
 		}
 		INSTANCES.keySet().removeIf(uuid -> !livePlayers.contains(uuid));
@@ -74,7 +74,7 @@ public final class PPlayerAnimations
 	}
 	
 	@ApiStatus.Internal
-	public static PPlayerModelPose apply(Player player, PlayerModel<?> model, float partialTick, Set<PPlayerPart> allowedParts)
+	public static PPlayerModelPose apply(Player player, PlayerModel model, float partialTick, Set<PPlayerPart> allowedParts)
 	{
 		PPlayerModelPose originalPose = PPlayerModelPose.capture(model, allowedParts);
 		applyDefinitions(player, partialTick, allowedParts, (part, pose, definition, weight) ->
@@ -87,7 +87,7 @@ public final class PPlayerAnimations
 
 	@ApiStatus.Internal
 	public static PPlayerModelPose applyPart(Player player,
-	                                         PlayerModel<?> model,
+	                                         PlayerModel model,
 	                                         PPlayerPart playerPart,
 	                                         ModelPart modelPart,
 	                                         float partialTick)
@@ -140,12 +140,12 @@ public final class PPlayerAnimations
 	                                     Set<PPlayerPart> allowedParts,
 	                                     PoseConsumer consumer)
 	{
-		List<Map.Entry<ResourceLocation, PPlayerAnimationDefinition>> definitions = new ArrayList<>(DEFINITIONS.entrySet());
+		List<Map.Entry<Identifier, PPlayerAnimationDefinition>> definitions = new ArrayList<>(DEFINITIONS.entrySet());
 		definitions.sort(Comparator.
-				comparingInt((Map.Entry<ResourceLocation, PPlayerAnimationDefinition> entry) -> entry.getValue().priority()).
+				comparingInt((Map.Entry<Identifier, PPlayerAnimationDefinition> entry) -> entry.getValue().priority()).
 				thenComparing(Map.Entry :: getKey));
 
-		for (Map.Entry<ResourceLocation, PPlayerAnimationDefinition> entry : definitions)
+		for (Map.Entry<Identifier, PPlayerAnimationDefinition> entry : definitions)
 		{
 			PPlayerAnimationDefinition definition = entry.getValue();
 			if (!definition.shouldApply(player))
@@ -175,9 +175,9 @@ public final class PPlayerAnimations
 		}
 	}
 
-	private static PPlayerAnimationInstance instance(Player player, ResourceLocation id, PPlayerAnimationDefinition definition)
+	private static PPlayerAnimationInstance instance(Player player, Identifier id, PPlayerAnimationDefinition definition)
 	{
-		Map<ResourceLocation, PPlayerAnimationInstance> playerInstances = INSTANCES.computeIfAbsent(player.getUUID(), $ -> new HashMap<>());
+		Map<Identifier, PPlayerAnimationInstance> playerInstances = INSTANCES.computeIfAbsent(player.getUUID(), $ -> new HashMap<>());
 		PPlayerAnimationInstance instance = playerInstances.computeIfAbsent(id, $ -> new PPlayerAnimationInstance(player, id, definition));
 		instance.updatePlayer(player);
 		return instance;
@@ -343,7 +343,7 @@ public final class PPlayerAnimations
 			this.parts = parts;
 		}
 
-		private static PPlayerModelPose capture(PlayerModel<?> model, Set<PPlayerPart> allowedParts)
+		private static PPlayerModelPose capture(PlayerModel model, Set<PPlayerPart> allowedParts)
 		{
 			Map<ModelPart, PartPose> parts = new IdentityHashMap<>();
 			for (PPlayerPart part : allowedParts)
