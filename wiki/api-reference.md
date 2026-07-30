@@ -85,6 +85,18 @@ This page is a compact map of PulseLib public API. Classes marked internal in so
 * [`PLibArmorHandler`](https://github.com/ArcAnc/PulseLib/blob/1.21.1/src/main/java/com/arcanc/pulselib/util/attachments/humanoid/armor/PLibArmorHandler.java)
 * [`PulseLibEvents.AttachmentRegistrationEvent`](https://github.com/ArcAnc/PulseLib/blob/1.21.1/src/main/java/com/arcanc/pulselib/content/event/PulseLibEvents.java) - mod bus attachment definition registration event.
 
+## Player animations
+
+* [`PPlayerAnimationDefinition`](https://github.com/ArcAnc/PulseLib/blob/1.21.1/src/main/java/com/arcanc/pulselib/content/player/animation/PPlayerAnimationDefinition.java) - client-side definition, bindings, mask, controller registration, blend mode, and weight.
+* [`PPlayerAnimations`](https://github.com/ArcAnc/PulseLib/blob/1.21.1/src/main/java/com/arcanc/pulselib/content/player/animation/PPlayerAnimations.java) - player-animation registry and internal pose application.
+* [`PPlayerAnimationInstance`](https://github.com/ArcAnc/PulseLib/blob/1.21.1/src/main/java/com/arcanc/pulselib/content/player/animation/PPlayerAnimationInstance.java) - per-player, per-definition controller state.
+* [`PPlayerAnimationHandle`](https://github.com/ArcAnc/PulseLib/blob/1.21.1/src/main/java/com/arcanc/pulselib/content/player/animation/PPlayerAnimationHandle.java) - public runtime control of named player-animation controllers.
+* [`PPlayerAnimationMask`](https://github.com/ArcAnc/PulseLib/blob/1.21.1/src/main/java/com/arcanc/pulselib/content/player/animation/PPlayerAnimationMask.java) - static or dynamic per-part animation mask.
+* [`PPlayerPart`](https://github.com/ArcAnc/PulseLib/blob/1.21.1/src/main/java/com/arcanc/pulselib/content/player/animation/PPlayerPart.java) - semantic vanilla player parts, including outer skin layers.
+* [`PPlayerAnimationBlendMode`](https://github.com/ArcAnc/PulseLib/blob/1.21.1/src/main/java/com/arcanc/pulselib/content/player/animation/PPlayerAnimationBlendMode.java) - `ADDITIVE` or `REPLACE`.
+* [`PPlayerAnimationWeight`](https://github.com/ArcAnc/PulseLib/blob/1.21.1/src/main/java/com/arcanc/pulselib/content/player/animation/PPlayerAnimationWeight.java) - constant or dynamic render-time blend weight.
+* [`PulseLibEvents.PlayerAnimationRegistrationEvent`](https://github.com/ArcAnc/PulseLib/blob/1.21.1/src/main/java/com/arcanc/pulselib/content/event/PulseLibEvents.java) - client mod-bus registration event.
+
 ## Helpers
 
 * [`PLibHelper`](https://github.com/ArcAnc/PulseLib/blob/1.21.1/src/main/java/com/arcanc/pulselib/util/helpers/PLibHelper.java) - manager creation and default entity/living render-state factories.

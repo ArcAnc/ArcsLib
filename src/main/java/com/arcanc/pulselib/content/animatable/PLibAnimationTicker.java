@@ -12,6 +12,9 @@ package com.arcanc.pulselib.content.animatable;
 
 import com.arcanc.pulselib.content.animatable.instance.InstanceAnimationManager;
 import com.arcanc.pulselib.content.animatable.singleton.SingletonAnimationManager;
+import com.arcanc.pulselib.content.player.animation.PPlayerAnimations;
+import com.arcanc.pulselib.util.helpers.PLibRenderHelper;
+import net.minecraft.client.Minecraft;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.tick.LevelTickEvent;
@@ -31,5 +34,8 @@ public class PLibAnimationTicker
 			return;
 		SingletonAnimationManager.tickAll();
 		InstanceAnimationManager.tickAll();
+		Minecraft mc = PLibRenderHelper.mc();
+		if (mc.level != null)
+			PPlayerAnimations.tick(mc.level);
 	}
 }

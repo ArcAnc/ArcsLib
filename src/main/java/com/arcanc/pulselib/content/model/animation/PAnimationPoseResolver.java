@@ -1,0 +1,258 @@
+/**
+ * @author ArcAnc
+ * Created at: 30.07.2026
+ * Copyright (c) 2026
+ * <p>
+ * This code is licensed under "Arc's License of Common Sense"
+ * Details can be found in the license file in the root folder of this project
+ */
+
+package com.arcanc.pulselib.content.model.animation;
+
+import com.arcanc.pulselib.content.animatable.PAnimatable;
+import com.arcanc.pulselib.content.animatable.PAnimationController;
+import com.arcanc.pulselib.content.model.baked.PBakedBone;
+import com.arcanc.pulselib.content.model.baked.PBakedModel;
+import com.arcanc.pulselib.data.MolangParser;
+import org.jetbrains.annotations.Nullable;
+import org.joml.Matrix4f;
+import org.joml.Quaternionf;
+import org.joml.Vector3f;
+
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
+
+public final class PAnimationPoseResolver<T extends PAnimatable<T>>
+{
+	private final PBakedModel model;
+	private final Collection<PAnimationController<T>> controllers;
+	private final MolangContextProvider<T> molangContexts;
+	private final float partialTick;
+	private final Map<String, PBakedBone> bones = new HashMap<>();
+	private final Map<String, BonePose> poses = new HashMap<>();
+
+	public PAnimationPoseResolver(PBakedModel model,
+	                              Collection<PAnimationController<T>> controllers,
+	                              MolangContextProvider<T> molangContexts,
+	                              float partialTick)
+	{
+		this.model = Objects.requireNonNull(model);
+		this.controllers = Objects.requireNonNull(controllers);
+		this.molangContexts = Objects.requireNonNull(molangContexts);
+		this.partialTick = partialTick;
+		this.model.bones().forEach(this :: index);
+	}
+
+	public @Nullable BonePose resolve(String boneName)
+	{
+		PBakedBone bone = this.bones.get(boneName);
+		return bone == null ? null : resolve(bone);
+	}
+
+	public BonePose resolve(PBakedBone bone)
+	{
+		BonePose cached = this.poses.get(bone.name());
+		if (cached != null)
+			return cached;
+
+		LocalPose local = resolveLocal(
+				bone,
+				this.model,
+				this.controllers,
+				this.molangContexts,
+				this.partialTick);
+		BonePose parent = bone.parent() == null ? null : resolve(bone.parent());
+
+		Matrix4f bindTransform = parent == null ? new Matrix4f() : new Matrix4f(parent.bindTransform());
+		apply(bindTransform, new BoneFrame(
+				new Vector3f(bone.basePosition()),
+				new Quaternionf(bone.baseRotation()),
+				new Vector3f(1.0f)));
+
+		Matrix4f modelTransform = parent == null ? new Matrix4f() : new Matrix4f(parent.modelTransform());
+		apply(modelTransform, local.localTransform());
+
+		BonePose pose = new BonePose(
+				local.animationTransform(),
+				local.localTransform(),
+				bindTransform,
+				modelTransform,
+				local.hasTranslation(),
+				local.hasRotation(),
+				local.hasScale());
+		this.poses.put(bone.name(), pose);
+		return pose;
+	}
+	
+	public @Nullable AnimationDelta animationDelta(String boneName, @Nullable String rootBoneName)
+	{
+		BonePose bone = resolve(boneName);
+		if (bone == null)
+			return null;
+
+		BonePose root = rootBoneName == null ? null : resolve(rootBoneName);
+		Matrix4f current = new Matrix4f(bone.modelTransform());
+		Matrix4f bind = new Matrix4f(bone.bindTransform());
+		if (root != null && root != bone)
+		{
+			current = new Matrix4f(root.modelTransform()).invert().mul(current);
+			bind = new Matrix4f(root.bindTransform()).invert().mul(bind);
+		}
+
+		Vector3f currentTranslation = current.getTranslation(new Vector3f());
+		Vector3f bindTranslation = bind.getTranslation(new Vector3f());
+		Vector3f translation = currentTranslation.sub(bindTranslation);
+		Quaternionf currentRotation = current.getUnnormalizedRotation(new Quaternionf());
+		Quaternionf bindRotation = bind.getUnnormalizedRotation(new Quaternionf());
+		Quaternionf rotation = new Quaternionf(bindRotation).invert().premul(currentRotation);
+		Vector3f currentScale = current.getScale(new Vector3f());
+		Vector3f bindScale = bind.getScale(new Vector3f());
+		Vector3f scale = new Vector3f(
+				ratio(currentScale.x, bindScale.x),
+				ratio(currentScale.y, bindScale.y),
+				ratio(currentScale.z, bindScale.z));
+
+		return new AnimationDelta(
+				translation,
+				rotation,
+				scale,
+				translation.lengthSquared() > 1.0e-10f,
+				Math.abs(currentRotation.dot(bindRotation)) < 0.999999f,
+				Math.abs(scale.x - 1.0f) > 1.0e-5f ||
+						Math.abs(scale.y - 1.0f) > 1.0e-5f ||
+						Math.abs(scale.z - 1.0f) > 1.0e-5f);
+	}
+	
+	public static <T extends PAnimatable<T>> LocalPose resolveLocal(PBakedBone bone,
+	                                                                PBakedModel model,
+	                                                                Collection<PAnimationController<T>> controllers,
+	                                                                MolangContextProvider<T> molangContexts,
+	                                                                float partialTick)
+	{
+		Vector3f translation = new Vector3f(bone.basePosition());
+		Quaternionf rotation = new Quaternionf(bone.baseRotation());
+		Vector3f scale = new Vector3f(1.0f);
+		Vector3f animationTranslation = new Vector3f();
+		Quaternionf animationRotation = new Quaternionf();
+		Vector3f animationScale = new Vector3f(1.0f);
+		boolean hasTranslation = false;
+		boolean hasRotation = false;
+		boolean hasScale = false;
+
+		for (PAnimationController<T> controller : controllers)
+		{
+			PRawAnimation.AnimationStage stage = controller.getCurrentStage();
+			if (stage == null || stage.isWaiting())
+				continue;
+
+			PAnimation animation = model.animations().get(stage.animationName());
+			if (animation == null)
+				continue;
+
+			PBoneAnimation boneAnimation = animation.boneAnimations().get(bone.name());
+			if (boneAnimation == null)
+				continue;
+
+			BoneFrame frame = controller.calculateBoneTransformations(
+					bone.name(),
+					model,
+					partialTick,
+					molangContexts.context(controller, partialTick),
+					new BoneFrame(new Vector3f(translation), new Quaternionf(rotation), new Vector3f(scale)));
+			if (frame == null)
+				continue;
+
+			if (boneAnimation.channels().containsKey(PAnimationChannel.POSITION))
+			{
+				translation.add(frame.translation());
+				animationTranslation.add(frame.translation());
+				hasTranslation = true;
+			}
+			if (boneAnimation.channels().containsKey(PAnimationChannel.ROTATION))
+			{
+				rotation.premul(frame.rotation());
+				animationRotation.premul(frame.rotation());
+				hasRotation = true;
+			}
+			if (boneAnimation.channels().containsKey(PAnimationChannel.SCALE))
+			{
+				scale.mul(frame.scale());
+				animationScale.mul(frame.scale());
+				hasScale = true;
+			}
+		}
+
+		return new LocalPose(
+				new BoneFrame(animationTranslation, animationRotation, animationScale),
+				new BoneFrame(translation, rotation, scale),
+			hasTranslation,
+			hasRotation,
+			hasScale);
+	}
+
+	public static <T extends PAnimatable<T>> MolangContextProvider<T> defaultContexts()
+	{
+		return (controller, partialTick) -> new MolangParser.Context().
+				query("anim_time", controller.getInterpolatedTime(partialTick)).
+				randomSeed(0L);
+	}
+
+	private void index(PBakedBone bone)
+	{
+		this.bones.putIfAbsent(bone.name(), bone);
+		bone.children().forEach(this :: index);
+	}
+
+	private static void apply(Matrix4f matrix, BoneFrame frame)
+	{
+		matrix.translate(frame.translation()).rotate(frame.rotation()).scale(frame.scale());
+	}
+
+	private static float ratio(float value, float base)
+	{
+		return Math.abs(base) < 1.0e-6f ? value : value / base;
+	}
+
+	@FunctionalInterface
+	public interface MolangContextProvider<T extends PAnimatable<T>>
+	{
+		MolangParser.Context context(PAnimationController<T> controller, float partialTick);
+	}
+
+	public record LocalPose(BoneFrame animationTransform,
+	                        BoneFrame localTransform,
+	                        boolean hasTranslation,
+	                        boolean hasRotation,
+	                        boolean hasScale)
+	{
+	}
+
+	public record BonePose(BoneFrame animationTransform,
+	                       BoneFrame localTransform,
+	                       Matrix4f bindTransform,
+	                       Matrix4f modelTransform,
+	                       boolean hasTranslation,
+	                       boolean hasRotation,
+	                       boolean hasScale)
+	{
+		public boolean isAnimated()
+		{
+			return this.hasTranslation || this.hasRotation || this.hasScale;
+		}
+	}
+
+	public record AnimationDelta(Vector3f translation,
+	                             Quaternionf rotation,
+	                             Vector3f scale,
+	                             boolean hasTranslation,
+	                             boolean hasRotation,
+	                             boolean hasScale)
+	{
+		public boolean isAnimated()
+		{
+			return this.hasTranslation || this.hasRotation || this.hasScale;
+		}
+	}
+}
