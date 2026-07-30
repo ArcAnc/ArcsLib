@@ -84,6 +84,7 @@ public final class PPlayerAnimations
 			for (ModelPart modelPart : part.resolve(model))
 				apply(modelPart, originalPose.part(modelPart), pose, definition.blendMode(), weight);
 		});
+		syncOuterLayers(model, allowedParts);
 		return originalPose;
 	}
 
@@ -246,6 +247,35 @@ public final class PPlayerAnimations
 				part.zScale = Mth.lerp(weight, part.zScale, original.zScale * pose.scale().z());
 			}
 		}
+	}
+
+	private static void syncOuterLayers(PlayerModel model, Set<PPlayerPart> allowedParts)
+	{
+		if (allowedParts.contains(PPlayerPart.HEAD))
+			copyTransform(model.head, model.hat);
+		if (allowedParts.contains(PPlayerPart.BODY))
+			copyTransform(model.body, model.jacket);
+		if (allowedParts.contains(PPlayerPart.RIGHT_ARM))
+			copyTransform(model.rightArm, model.rightSleeve);
+		if (allowedParts.contains(PPlayerPart.LEFT_ARM))
+			copyTransform(model.leftArm, model.leftSleeve);
+		if (allowedParts.contains(PPlayerPart.RIGHT_LEG))
+			copyTransform(model.rightLeg, model.rightPants);
+		if (allowedParts.contains(PPlayerPart.LEFT_LEG))
+			copyTransform(model.leftLeg, model.leftPants);
+	}
+
+	private static void copyTransform(ModelPart source, ModelPart target)
+	{
+		target.x = source.x;
+		target.y = source.y;
+		target.z = source.z;
+		target.xRot = source.xRot;
+		target.yRot = source.yRot;
+		target.zRot = source.zRot;
+		target.xScale = source.xScale;
+		target.yScale = source.yScale;
+		target.zScale = source.zScale;
 	}
 
 	@FunctionalInterface
