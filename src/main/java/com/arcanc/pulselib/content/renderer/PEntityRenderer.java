@@ -21,6 +21,7 @@ import com.arcanc.pulselib.content.model.baked.PBakedMesh;
 import com.arcanc.pulselib.content.model.baked.PBakedModel;
 import com.arcanc.pulselib.content.model.baked.PMeshRenderContext;
 import com.arcanc.pulselib.content.renderer.modelData.PModelData;
+import com.arcanc.pulselib.data.MolangParser;
 import com.arcanc.pulselib.util.PRenderTypes;
 import com.arcanc.pulselib.util.PTextureCache;
 import com.mojang.blaze3d.vertex.PoseStack;
@@ -130,6 +131,7 @@ public abstract class PEntityRenderer<T extends Entity & PAnimatable<T>> extends
 		InstanceAnimationManager.addManager(manager);
 		
 		Collection<PAnimationController<T>> controllers = manager.getControllers().values();
+		Map<PAnimationController<T>, MolangParser.Context> molangContexts = prepareMolangContexts(animatable, manager.key(), controllers, partialTick);
 		HeadRotation headRotation = null;
 		if (animatable instanceof LivingEntity livingEntity)
 			headRotation = applyPositioning(livingEntity, poseStack, partialTick);
@@ -137,7 +139,7 @@ public abstract class PEntityRenderer<T extends Entity & PAnimatable<T>> extends
 		if (this.renderLayers.isEmpty())
 		{
 			for (PBakedBone bone : model.bones())
-				perBoneSubmit(animatable, poseStack, bone, controllers, this.getModelData(animatable), renderType, - 1, packedLight, packedOverlay, partialTick, headRotation, null, null, null, null);
+				perBoneSubmit(animatable, poseStack, bone, controllers, this.getModelData(animatable), renderType, - 1, packedLight, packedOverlay, partialTick, headRotation, null, null, null, null, molangContexts);
 		}
 		else
 		{
@@ -145,10 +147,10 @@ public abstract class PEntityRenderer<T extends Entity & PAnimatable<T>> extends
 			List<DeferredLayerSubmit> deferredLayers = new ArrayList<>();
 			
 			for (PBakedBone bone : model.bones())
-				perBoneSubmit(animatable, poseStack, bone, controllers, this.getModelData(animatable), renderType, -1, packedLight, packedOverlay, partialTick, headRotation, null, entityBonePoses, null, deferredLayers);
+				perBoneSubmit(animatable, poseStack, bone, controllers, this.getModelData(animatable), renderType, -1, packedLight, packedOverlay, partialTick, headRotation, null, entityBonePoses, null, deferredLayers, molangContexts);
 			
 			for (DeferredLayerSubmit deferredLayer : deferredLayers)
-				submitDeferredLayer(animatable, poseStack, controllers, partialTick, headRotation, entityBonePoses, deferredLayer);
+				submitDeferredLayer(animatable, poseStack, controllers, molangContexts, partialTick, headRotation, entityBonePoses, deferredLayer);
 		}
 	}
 	
@@ -156,40 +158,6 @@ public abstract class PEntityRenderer<T extends Entity & PAnimatable<T>> extends
 	public void postSubmit(PoseStack poseStack, T animatable, Function<ResourceLocation, RenderType> renderType, MultiBufferSource bufferSource, int packedLight, int packedOverlay, float partialTick, @Nullable Object... additionalData)
 	{
 	
-	}
-	
-	protected void perBoneSubmit(T animatable,
-	                             PoseStack poseStack,
-	                             PBakedBone bone,
-	                             Collection<PAnimationController<T>> controllers,
-	                             PModelData data,
-	                             Function<ResourceLocation, RenderType> renderType,
-	                             int packedColor,
-	                             int packedLight,
-	                             int packedOverlay,
-	                             float partialTick,
-	                             @Nullable HeadRotation headRotation,
-	                             @Nullable PEntityRenderLayer<T> renderLayer)
-	{
-		perBoneSubmit(animatable, poseStack, bone, controllers, data, renderType, packedColor, packedLight, packedOverlay, partialTick, headRotation, renderLayer, null, null, null);
-	}
-	
-	protected void perBoneSubmit(T animatable,
-	                             PoseStack poseStack,
-	                             PBakedBone bone,
-	                             Collection<PAnimationController<T>> controllers,
-	                             PModelData data,
-	                             Function<ResourceLocation, RenderType> renderType,
-	                             int packedColor,
-	                             int packedLight,
-	                             int packedOverlay,
-	                             float partialTick,
-								 @Nullable HeadRotation headRotation,
-	                             @Nullable PEntityRenderLayer<T> renderLayer,
-	                             @Nullable Map<String, Matrix4f> entityBonePoses,
-	                             @Nullable Matrix4f layerTransform)
-	{
-		perBoneSubmit(animatable, poseStack, bone, controllers, data, renderType, packedColor, packedLight, packedOverlay, partialTick, headRotation, renderLayer, entityBonePoses, layerTransform, null);
 	}
 	
 	protected void perBoneSubmit(T animatable,
@@ -206,9 +174,10 @@ public abstract class PEntityRenderer<T extends Entity & PAnimatable<T>> extends
 	                             @Nullable PEntityRenderLayer<T> renderLayer,
 	                             @Nullable Map<String, Matrix4f> entityBonePoses,
 	                             @Nullable Matrix4f layerTransform,
-	                             @Nullable List<DeferredLayerSubmit> deferredLayers)
+	                             @Nullable List<DeferredLayerSubmit> deferredLayers,
+	                             Map<PAnimationController<T>, MolangParser.Context> molangContexts)
 	{
-		BoneFrame frame = bone.mixBone(data.getModel(), controllers, partialTick);
+		BoneFrame frame = bone.mixBone(data.getModel(), controllers, molangContexts, partialTick);
 		poseStack.pushPose();
 		if (renderLayer != null && entityBonePoses != null)
 			applyBoundLayerBonePose(poseStack, bone, renderLayer, entityBonePoses, layerTransform);
@@ -249,7 +218,7 @@ public abstract class PEntityRenderer<T extends Entity & PAnimatable<T>> extends
 						if (deferredLayers != null)
 							deferredLayers.add(new DeferredLayerSubmit(layer, new Matrix4f(poseStack.last().pose()), attachmentTransform, packedColor, packedLight, packedOverlay));
 						else
-							layer.submit(this, animatable, poseStack, controllers, packedColor, packedLight, packedOverlay, partialTick, headRotation, entityBonePoses, attachmentTransform);
+							layer.submit(this, animatable, poseStack, controllers, molangContexts, packedColor, packedLight, packedOverlay, partialTick, headRotation, entityBonePoses, attachmentTransform);
 						
 						poseStack.popPose();
 					}
@@ -259,7 +228,7 @@ public abstract class PEntityRenderer<T extends Entity & PAnimatable<T>> extends
 		
 		if (!bone.children().isEmpty())
 			for (PBakedBone child : bone.children())
-				perBoneSubmit(animatable, poseStack, child, controllers, data, renderType, packedColor, packedLight, packedOverlay, partialTick, headRotation, renderLayer, entityBonePoses, layerTransform, deferredLayers);
+				perBoneSubmit(animatable, poseStack, child, controllers, data, renderType, packedColor, packedLight, packedOverlay, partialTick, headRotation, renderLayer, entityBonePoses, layerTransform, deferredLayers, molangContexts);
 		
 		poseStack.popPose();
 	}
@@ -267,6 +236,7 @@ public abstract class PEntityRenderer<T extends Entity & PAnimatable<T>> extends
 	private void submitDeferredLayer(T animatable,
 	                                 PoseStack poseStack,
 	                                 Collection<PAnimationController<T>> controllers,
+	                                 Map<PAnimationController<T>, MolangParser.Context> molangContexts,
 	                                 float partialTick,
 									 @Nullable HeadRotation headRotation,
 	                                 Map<String, Matrix4f> entityBonePoses,
@@ -279,6 +249,7 @@ public abstract class PEntityRenderer<T extends Entity & PAnimatable<T>> extends
 				animatable,
 				poseStack,
 				controllers,
+				molangContexts,
 				deferredLayer.packedColor,
 				deferredLayer.packedLight,
 				deferredLayer.packedOverlay,
@@ -297,6 +268,30 @@ public abstract class PEntityRenderer<T extends Entity & PAnimatable<T>> extends
 		if (anchorPose == null)
 			return new Matrix4f();
 		return new Matrix4f(anchorPose).invert().mul(poseStack.last().pose());
+	}
+
+	private Map<PAnimationController<T>, MolangParser.Context> prepareMolangContexts(T animatable,
+	                                                                                   AnimManagerKey key,
+	                                                                                   Collection<PAnimationController<T>> controllers,
+	                                                                                   float partialTick)
+	{
+		Map<PAnimationController<T>, MolangParser.Context> contexts = new Object2ObjectOpenHashMap<>();
+		for (PAnimationController<T> controller : controllers)
+		{
+			MolangParser.Context context = new MolangParser.Context().
+					query("anim_time", controller.getInterpolatedTime(partialTick)).
+					randomSeed(key.key());
+			populateMolangContext(animatable, controller, context, partialTick);
+			contexts.put(controller, context);
+		}
+		return contexts;
+	}
+
+	protected void populateMolangContext(T animatable,
+	                                    PAnimationController<T> controller,
+	                                    MolangParser.Context context,
+	                                    float partialTick)
+	{
 	}
 	
 	private void applyBoundLayerBonePose(PoseStack poseStack,

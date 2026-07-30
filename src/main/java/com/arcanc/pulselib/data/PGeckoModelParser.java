@@ -13,6 +13,7 @@ import com.arcanc.pulselib.content.model.PBone;
 import com.arcanc.pulselib.content.model.PMesh;
 import com.arcanc.pulselib.content.model.PModel;
 import com.arcanc.pulselib.content.model.animation.*;
+import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonNull;
 import com.google.gson.JsonObject;
@@ -277,7 +278,7 @@ public class PGeckoModelParser
 		
 		if (isArray(channelNode))
 		{
-			keyframes.add(createKeyFrame(channel, 0f, channelValue(channelNode, channel)));
+			keyframes.add(createKeyFrame(channel, 0f, channelNode));
 		}
 		else if (isObject(channelNode))
 		{
@@ -285,7 +286,7 @@ public class PGeckoModelParser
 			{
 				float time = secondsToTicks(parseFloat(entry.getKey(), 0f));
 				JsonElement valueNode = keyFrameValueNode(entry.getValue());
-				keyframes.add(createKeyFrame(channel, time, channelValue(valueNode, channel)));
+				keyframes.add(createKeyFrame(channel, time, valueNode));
 				maxTime = Math.max(maxTime, time);
 			}
 		}
@@ -315,14 +316,60 @@ public class PGeckoModelParser
 		return node;
 	}
 	
-	private static PKeyFrameChannel<?> createKeyFrame(PAnimationChannel channel, float time, Object value)
+	private static PKeyFrameChannel<?> createKeyFrame(PAnimationChannel channel, float time, JsonElement valueNode)
 	{
+		if (containsMolang(valueNode))
+			return createMolangKeyFrame(channel, time, valueNode);
+
+		Object value = channelValue(valueNode, channel);
 		return switch (channel)
 		{
 			case POSITION -> new PKeyFrameChannel.PositionKeyFrame(time, (Vector3f) value);
 			case ROTATION -> new PKeyFrameChannel.RotationKeyFrame(time, (Quaternionf) value);
 			case SCALE -> new PKeyFrameChannel.ScaleKeyFrame(time, (Vector3f) value);
 		};
+	}
+
+	private static PKeyFrameChannel<?> createMolangKeyFrame(PAnimationChannel channel, float time, JsonElement valueNode)
+	{
+		VectorExpression vector = vectorExpression(valueNode, channel == PAnimationChannel.SCALE ? 1f : 0f);
+		return switch (channel)
+		{
+			case POSITION -> new PKeyFrameChannel.PositionKeyFrame(time, data -> scale(vector.evaluate(data)));
+			case ROTATION -> new PKeyFrameChannel.RotationKeyFrame(time, data -> eulerDegreesToQuaternion(vector.evaluate(data)));
+			case SCALE -> new PKeyFrameChannel.ScaleKeyFrame(time, vector :: evaluate);
+		};
+	}
+
+	private static boolean containsMolang(JsonElement node)
+	{
+		if (!isArray(node))
+			return false;
+
+		for (JsonElement component : node.getAsJsonArray())
+			if (component.isJsonPrimitive() && component.getAsJsonPrimitive().isString())
+				return true;
+		return false;
+	}
+
+	private static VectorExpression vectorExpression(JsonElement node, float fallback)
+	{
+		JsonArray values = node.getAsJsonArray();
+		return new VectorExpression(
+				componentExpression(values, 0, fallback),
+				componentExpression(values, 1, fallback),
+				componentExpression(values, 2, fallback));
+	}
+
+	private static MolangParser.Expression componentExpression(JsonArray values, int index, float fallback)
+	{
+		if (values.size() <= index)
+			return context -> fallback;
+
+		JsonElement value = values.get(index);
+		if (value.isJsonPrimitive() && value.getAsJsonPrimitive().isString())
+			return MolangParser.parse(value.getAsString());
+		return context -> floatValue(value, fallback);
 	}
 	
 	private static Object channelValue(JsonElement node, PAnimationChannel channel)
@@ -585,6 +632,24 @@ public class PGeckoModelParser
 	
 	private record TextureSize(float width, float height)
 	{
+	}
+
+	private record VectorExpression(MolangParser.Expression x, MolangParser.Expression y, MolangParser.Expression z)
+	{
+		Vector3f evaluate(Object data)
+		{
+			return new Vector3f(
+					evaluateComponent(this.x, data, 0),
+					evaluateComponent(this.y, data, 1),
+					evaluateComponent(this.z, data, 2));
+		}
+
+		private static float evaluateComponent(MolangParser.Expression expression, Object data, int component)
+		{
+			if (data instanceof MolangParser.Context context)
+				context.thisValue(context.thisComponent(component));
+			return expression.evaluate(data);
+		}
 	}
 	
 	private static class GeometryBuffers

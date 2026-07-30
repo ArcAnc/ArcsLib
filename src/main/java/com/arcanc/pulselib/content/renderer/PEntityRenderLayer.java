@@ -17,8 +17,8 @@ import com.arcanc.pulselib.content.model.baked.PBakedMesh;
 import com.arcanc.pulselib.content.model.baked.PBakedModel;
 import com.arcanc.pulselib.content.model.baked.PMeshRenderContext;
 import com.arcanc.pulselib.content.renderer.modelData.PModelData;
+import com.arcanc.pulselib.data.MolangParser;
 import com.mojang.blaze3d.vertex.PoseStack;
-import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
@@ -122,19 +122,7 @@ public abstract class PEntityRenderLayer<T extends Entity & PAnimatable<T>>
 	                   T animatable,
 	                   PoseStack poseStack,
 	                   Collection<PAnimationController<T>> controllers,
-	                   int packedColor,
-	                   int packedLight,
-	                   int packedOverlay,
-	                   float partialTick,
-	                   @Nullable PEntityRenderer.HeadRotation headRotation)
-	{
-		submit(renderer, animatable, poseStack, controllers, packedColor, packedLight, packedOverlay, partialTick, headRotation, null, null);
-	}
-	
-	public void submit(PEntityRenderer<T> renderer,
-	                   T animatable,
-	                   PoseStack poseStack,
-	                   Collection<PAnimationController<T>> controllers,
+	                   Map<PAnimationController<T>, MolangParser.Context> molangContexts,
 	                   int packedColor,
 	                   int packedLight,
 	                   int packedOverlay,
@@ -164,7 +152,9 @@ public abstract class PEntityRenderLayer<T extends Entity & PAnimatable<T>>
 					headRotation,
 					this,
 					entityBonePoses,
-					layerTransform);
+					layerTransform,
+					null,
+					molangContexts);
 		}
 	}
 	

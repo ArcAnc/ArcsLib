@@ -114,3 +114,5 @@ Useful controller methods:
 * `getCurrentStage()`
 
 Multiple controllers are mixed on the same bones in renderer order. Register broad base pose controllers first and specific overrides later. A common pattern is one movement controller for idle/walk/run and another controller for attacks or short actions.
+
+For expressions embedded in Gecko animation vectors, see [Molang animations](molang-animations.md). Molang context creation belongs to the renderer; `PAnimationController` only consumes the prepared context while mixing a pose.

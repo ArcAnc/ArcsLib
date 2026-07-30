@@ -50,7 +50,7 @@ public class PLibHelper
 		if (manager != null)
 			return manager;
 		
-		return singleton ? new SingletonAnimationManager<>(animatable) : new InstanceAnimationManager<>(animatable);
+		return singleton ? new SingletonAnimationManager<>(animatable, key) : new InstanceAnimationManager<>(animatable, key);
 	}
 	
 	public static <T extends PAnimatable<T>> void renderModelInGui(GuiGraphics guiGraphics,

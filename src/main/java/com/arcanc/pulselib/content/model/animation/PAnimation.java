@@ -10,6 +10,7 @@
 package com.arcanc.pulselib.content.model.animation;
 
 
+import com.arcanc.pulselib.data.MolangParser;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
@@ -26,7 +27,7 @@ public record PAnimation(String name,
 	{
 		this(name, length, boneAnimations, List.of());
 	}
-	
+
 	public PAnimation
 	{
 		events = List.copyOf(events);
@@ -34,18 +35,39 @@ public record PAnimation(String name,
 	
 	public @Nullable BoneFrame calculateBoneTransformations(String boneName, float time, PInterpolationType interpolationType)
 	{
+		return calculateBoneTransformations(boneName, time, interpolationType, null);
+	}
+	public @Nullable BoneFrame calculateBoneTransformations(String boneName,
+	                                                        float time,
+	                                                        PInterpolationType interpolationType,
+	                                                        Object data)
+	{
+		return calculateBoneTransformations(boneName, time, interpolationType, data, null);
+	}
+	public @Nullable BoneFrame calculateBoneTransformations(String boneName,
+	                                                        float time,
+	                                                        PInterpolationType interpolationType,
+	                                                        Object data,
+	                                                        @Nullable BoneFrame accumulatedFrame)
+	{
 		PBoneAnimation boneAnimation = this.boneAnimations.get(boneName);
 		if (boneAnimation == null)
 			return null;
+
+		Vector3f accumulatedTranslation = accumulatedFrame == null ? new Vector3f() : accumulatedFrame.translation();
+		Vector3f accumulatedScale = accumulatedFrame == null ? new Vector3f(1f, 1f, 1f) : accumulatedFrame.scale();
+		Vector3f accumulatedRotation = accumulatedFrame == null ?
+				new Vector3f() :
+				accumulatedFrame.rotation().getEulerAnglesXYZ(new Vector3f()).mul((float) (180d / Math.PI));
 		
 		Vector3f translation =
-				sampleVectorChannel(boneAnimation, PAnimationChannel.POSITION, time, interpolationType);
+				sampleVectorChannel(boneAnimation, PAnimationChannel.POSITION, time, interpolationType, data, accumulatedTranslation);
 		
 		Vector3f scale =
-				sampleVectorChannel(boneAnimation, PAnimationChannel.SCALE, time, interpolationType);
+				sampleVectorChannel(boneAnimation, PAnimationChannel.SCALE, time, interpolationType, data, accumulatedScale);
 		
 		Quaternionf rotation =
-				sampleRotationChannel(boneAnimation, time, interpolationType);
+				sampleRotationChannel(boneAnimation, time, interpolationType, data, accumulatedRotation);
 		
 		if (translation == null && rotation == null && scale == null)
 			return null;
@@ -73,10 +95,17 @@ public record PAnimation(String name,
 	}
 	
 	@SuppressWarnings("unchecked")
-	private @Nullable Vector3f sampleVectorChannel(PBoneAnimation boneAnimation, PAnimationChannel channel, float time, PInterpolationType interpolationType)
+	private @Nullable Vector3f sampleVectorChannel(PBoneAnimation boneAnimation,
+	                                               PAnimationChannel channel,
+	                                               float time,
+	                                               PInterpolationType interpolationType,
+	                                               Object data,
+	                                               Vector3f thisValue)
 	{
 		if (channel == PAnimationChannel.ROTATION)
 			return null;
+
+		setThisValue(data, thisValue);
 		
 		List<PKeyFrameChannel<Vector3f>> keyframes = (List<PKeyFrameChannel<Vector3f>>) boneAnimation.channels().get(channel);
 		
@@ -84,7 +113,7 @@ public record PAnimation(String name,
 			return null;
 		
 		if (keyframes.size() == 1)
-			return new Vector3f(keyframes.getFirst().value());
+			return new Vector3f(keyframes.getFirst().value(data));
 		
 		PKeyFrameChannel<Vector3f> previous = null;
 		PKeyFrameChannel<Vector3f> next = null;
@@ -102,19 +131,25 @@ public record PAnimation(String name,
 		}
 		
 		if (previous == null)
-			return new Vector3f(keyframes.getFirst().value());
+			return new Vector3f(keyframes.getFirst().value(data));
 		
 		if (next == null)
-			return new Vector3f(previous.value());
+			return new Vector3f(previous.value(data));
 		
 		float alpha = transformAlpha(previous, next, time, interpolationType);
 		
-		return new Vector3f(previous.value()).lerp(next.value(), alpha);
+		return new Vector3f(previous.value(data)).lerp(next.value(data), alpha);
 	}
 	
 	@SuppressWarnings("unchecked")
-	private @Nullable Quaternionf sampleRotationChannel(PBoneAnimation boneAnimation, float time, PInterpolationType interpolationType)
+	private @Nullable Quaternionf sampleRotationChannel(PBoneAnimation boneAnimation,
+	                                                     float time,
+	                                                     PInterpolationType interpolationType,
+	                                                     Object data,
+	                                                     Vector3f thisValue)
 	{
+		setThisValue(data, thisValue);
+
 		List<PKeyFrameChannel<Quaternionf>> keyframes =
 				(List<PKeyFrameChannel<Quaternionf>>) boneAnimation.channels().get(PAnimationChannel.ROTATION);
 		
@@ -122,7 +157,7 @@ public record PAnimation(String name,
 			return null;
 		
 		if (keyframes.size() == 1)
-			return keyframes.getFirst().value();
+			return keyframes.getFirst().value(data);
 		
 		PKeyFrameChannel<Quaternionf> previous = null;
 		PKeyFrameChannel<Quaternionf> next = null;
@@ -140,17 +175,23 @@ public record PAnimation(String name,
 		}
 		
 		if (previous == null)
-			return keyframes.getFirst().value();
+			return keyframes.getFirst().value(data);
 		
 		if (next == null)
-			return previous.value();
+			return previous.value(data);
 		
 		float alpha = transformAlpha(previous, next, time, interpolationType);
 		
-		Quaternionf q1 = new Quaternionf(previous.value());
-		Quaternionf q2 = new Quaternionf(next.value());
+		Quaternionf q1 = new Quaternionf(previous.value(data));
+		Quaternionf q2 = new Quaternionf(next.value(data));
 		
 		return q1.slerp(q2, alpha);
+	}
+
+	private static void setThisValue(Object data, Vector3f value)
+	{
+		if (data instanceof MolangParser.Context context)
+			context.thisValues(value.x(), value.y(), value.z());
 	}
 	
 	private static <T> float transformAlpha(PKeyFrameChannel<T> previous,

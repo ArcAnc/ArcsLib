@@ -13,6 +13,7 @@ package com.arcanc.pulselib.content.model.baked;
 import com.arcanc.pulselib.content.animatable.PAnimatable;
 import com.arcanc.pulselib.content.animatable.PAnimationController;
 import com.arcanc.pulselib.content.model.animation.BoneFrame;
+import com.arcanc.pulselib.data.MolangParser;
 import com.arcanc.pulselib.content.renderer.modelData.PModelData;
 import com.arcanc.pulselib.util.PRenderTypes;
 import com.arcanc.pulselib.util.PTextureCache;
@@ -33,6 +34,7 @@ import org.joml.Vector4f;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.function.Function;
 
@@ -55,12 +57,25 @@ public record PBakedBone(String name,
 	                                                   int packedOverlay,
 	                                                   float partialTick)
 	{
+		instantDraw(poseStack, modelData, controllers, Map.of(), renderType, color, packedLight, packedOverlay, partialTick);
+	}
+
+	public <T extends PAnimatable<T>> void instantDraw(PoseStack poseStack,
+	                                                   PModelData modelData,
+	                                                   Collection<PAnimationController<T>> controllers,
+	                                                   Map<PAnimationController<T>, MolangParser.Context> molangContexts,
+	                                                   Function<ResourceLocation, RenderType> renderType,
+	                                                   int color,
+	                                                   int packedLight,
+	                                                   int packedOverlay,
+	                                                   float partialTick)
+	{
 		PMeshRenderContext context = new PMeshRenderContext(
 				renderType,
 				color,
 				packedLight,
 				packedOverlay);
-		instantDraw(poseStack, modelData, controllers, (bone, mesh, inherited) -> inherited, context, partialTick);
+		instantDraw(poseStack, modelData, controllers, molangContexts, (bone, mesh, inherited) -> inherited, context, partialTick);
 	}
 	
 	public <T extends PAnimatable<T>> void instantDraw(PoseStack poseStack,
@@ -70,7 +85,18 @@ public record PBakedBone(String name,
 	                                                   PMeshRenderContext inherited,
 	                                                   float partialTick)
 	{
-		BoneFrame frame = mixBone(modelData.getModel(), controllers, partialTick);
+		instantDraw(poseStack, modelData, controllers, Map.of(), resolver, inherited, partialTick);
+	}
+
+	public <T extends PAnimatable<T>> void instantDraw(PoseStack poseStack,
+	                                                   PModelData modelData,
+	                                                   Collection<PAnimationController<T>> controllers,
+	                                                   Map<PAnimationController<T>, MolangParser.Context> molangContexts,
+	                                                   PMeshRenderResolver resolver,
+	                                                   PMeshRenderContext inherited,
+	                                                   float partialTick)
+	{
+		BoneFrame frame = mixBone(modelData.getModel(), controllers, molangContexts, partialTick);
 		poseStack.pushPose();
 		if (frame != null)
 		{
@@ -129,7 +155,7 @@ public record PBakedBone(String name,
 		});
 		
 		this.children().forEach(children ->
-				children.instantDraw(poseStack, modelData, controllers, resolver, boneContext, partialTick));
+				children.instantDraw(poseStack, modelData, controllers, molangContexts, resolver, boneContext, partialTick));
 		
 		poseStack.popPose();
 	}
@@ -138,14 +164,33 @@ public record PBakedBone(String name,
 			PBakedModel model,
 			Collection<PAnimationController<T>> controllers, float partialTick)
 	{
+		return mixBone(model, controllers, Map.of(), partialTick);
+	}
+
+	public <T extends PAnimatable<T>>@Nullable BoneFrame mixBone(
+			PBakedModel model,
+			Collection<PAnimationController<T>> controllers,
+			Map<PAnimationController<T>, MolangParser.Context> molangContexts,
+			float partialTick)
+	{
 		Vector3f translation = new Vector3f(this.basePosition());
 		Quaternionf rotation = new Quaternionf(this.baseRotation());
 		Vector3f scale = new Vector3f(1, 1, 1);
 		
 		boolean hasTransform = false;
-		for (PAnimationController<?> controller : controllers)
+		for (PAnimationController<T> controller : controllers)
 		{
-			BoneFrame frame = controller.calculateBoneTransformations(this.name(), model, partialTick);
+			MolangParser.Context molangContext = molangContexts.get(controller);
+			if (molangContext == null)
+				molangContext = new MolangParser.Context().
+						query("anim_time", controller.getInterpolatedTime(partialTick) / 20f).
+						randomSeed(0L);
+			BoneFrame frame = controller.calculateBoneTransformations(
+					this.name(),
+					model,
+					partialTick,
+					molangContext,
+					new BoneFrame(new Vector3f(translation), new Quaternionf(rotation), new Vector3f(scale)));
 			if (frame == null)
 				continue;
 			translation.add(frame.translation());

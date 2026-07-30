@@ -13,6 +13,7 @@ package com.arcanc.pulselib.content.model.baked;
 import com.arcanc.pulselib.content.animatable.PAnimatable;
 import com.arcanc.pulselib.content.animatable.PAnimationController;
 import com.arcanc.pulselib.content.model.animation.PAnimation;
+import com.arcanc.pulselib.data.MolangParser;
 import com.arcanc.pulselib.content.renderer.modelData.PModelData;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.renderer.RenderType;
@@ -34,10 +35,24 @@ public record PBakedModel(List<PBakedBone> bones, Map<String, PAnimation> animat
 	                                                  int packedOverlay,
 	                                                  float partialTick)
 	{
+		instantDraw(poseStack, modelData, controllers, Map.of(), renderType, color, packedLight, packedOverlay, partialTick);
+	}
+
+	public <T extends PAnimatable<T>>void instantDraw(PoseStack poseStack,
+	                                                  PModelData modelData,
+	                                                  Collection<PAnimationController<T>> controllers,
+	                                                  Map<PAnimationController<T>, MolangParser.Context> molangContexts,
+	                                                  Function<ResourceLocation, RenderType> renderType,
+	                                                  int color,
+	                                                  int packedLight,
+	                                                  int packedOverlay,
+	                                                  float partialTick)
+	{
 		this.bones.forEach(bone -> bone.instantDraw(
 				poseStack,
 				modelData,
 				controllers,
+				molangContexts,
 				renderType,
 				color,
 				packedLight,
@@ -52,10 +67,22 @@ public record PBakedModel(List<PBakedBone> bones, Map<String, PAnimation> animat
 	                                                  PMeshRenderContext inherited,
 	                                                  float partialTick)
 	{
+		instantDraw(poseStack, modelData, controllers, Map.of(), resolver, inherited, partialTick);
+	}
+
+	public <T extends PAnimatable<T>>void instantDraw(PoseStack poseStack,
+	                                                  PModelData modelData,
+	                                                  Collection<PAnimationController<T>> controllers,
+	                                                  Map<PAnimationController<T>, MolangParser.Context> molangContexts,
+	                                                  PMeshRenderResolver resolver,
+	                                                  PMeshRenderContext inherited,
+	                                                  float partialTick)
+	{
 		this.bones.forEach(bone -> bone.instantDraw(
 				poseStack,
 				modelData,
 				controllers,
+				molangContexts,
 				resolver,
 				inherited,
 				partialTick));
