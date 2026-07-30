@@ -17,7 +17,6 @@ import net.minecraft.client.renderer.entity.player.AvatarRenderer;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.HumanoidArm;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
@@ -27,8 +26,6 @@ import java.util.Set;
 @Mixin(AvatarRenderer.class)
 public abstract class PlayerRendererMixin
 {
-	@Unique private boolean pulselib$firstPersonRootPushed;
-
 	@Inject(method = "renderHand", at = @At(
 			value = "INVOKE",
 			target = "Lnet/minecraft/client/renderer/SubmitNodeCollector;submitModelPart(Lnet/minecraft/client/model/geom/ModelPart;Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/rendertype/RenderType;IILnet/minecraft/client/renderer/texture/TextureAtlasSprite;)V",
@@ -44,19 +41,6 @@ public abstract class PlayerRendererMixin
 		ModelPart sleeve = arm == model.rightArm ? model.rightSleeve : model.leftSleeve;
 		sleeve.resetPose();
 		PPlayerAnimations.apply(player, model, partialTick, Set.of(playerPart));
-		poseStack.pushPose();
-		this.pulselib$firstPersonRootPushed = true;
-		PPlayerAnimations.applyRoot(player, poseStack, partialTick);
 		PHumanoidAttachmentLayer.renderFirstPersonArm(poseStack, packedLight, player, arm == model.rightArm ? HumanoidArm.RIGHT : HumanoidArm.LEFT, arm, partialTick);
-	}
-
-	@Inject(method = "renderHand", at = @At("RETURN"))
-	private void pulselib$restoreArmAnimations(PoseStack poseStack, SubmitNodeCollector submitNodeCollector, int packedLight, Identifier skinTexture, ModelPart arm, boolean hasSleeve, CallbackInfo ci)
-	{
-		if (this.pulselib$firstPersonRootPushed)
-		{
-			poseStack.popPose();
-			this.pulselib$firstPersonRootPushed = false;
-		}
 	}
 }
