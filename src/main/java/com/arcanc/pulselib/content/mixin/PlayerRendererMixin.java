@@ -41,6 +41,8 @@ public abstract class PlayerRendererMixin
 		PlayerModel model = (PlayerModel)(Object)((AvatarRenderer)(Object)this).getModel();
 		float partialTick = Minecraft.getInstance().isPaused() ? 0.0f : Minecraft.getInstance().getDeltaTracker().getGameTimeDeltaPartialTick(false);
 		PPlayerPart playerPart = arm == model.rightArm ? PPlayerPart.RIGHT_ARM : PPlayerPart.LEFT_ARM;
+		ModelPart sleeve = arm == model.rightArm ? model.rightSleeve : model.leftSleeve;
+		sleeve.resetPose();
 		PPlayerAnimations.apply(player, model, partialTick, Set.of(playerPart));
 		poseStack.pushPose();
 		this.pulselib$firstPersonRootPushed = true;
