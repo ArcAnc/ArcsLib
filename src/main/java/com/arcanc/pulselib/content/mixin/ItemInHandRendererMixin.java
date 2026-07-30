@@ -28,7 +28,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(ItemInHandRenderer.class)
 public abstract class ItemInHandRendererMixin
 {
-	@Inject(method = "renderArmWithItem", at = @At(
+	@Inject(method = "submitArmWithItem", at = @At(
 			value = "INVOKE",
 			target = "Lcom/mojang/blaze3d/vertex/PoseStack;pushPose()V",
 			shift = At.Shift.AFTER))
@@ -61,7 +61,7 @@ public abstract class ItemInHandRendererMixin
 				arm);
 	}
 
-	@ModifyVariable(method = "renderArmWithItem", at = @At(value = "STORE"), ordinal = 0)
+	@ModifyVariable(method = "submitArmWithItem", at = @At(value = "STORE"), ordinal = 0)
 	private boolean pulselib$renderAnimatedOffHand(boolean renderMainHand,
 	                                               AbstractClientPlayer player,
 	                                               float partialTick,
@@ -77,7 +77,7 @@ public abstract class ItemInHandRendererMixin
 		return PPlayerAnimations.isPartAnimating(player, offHandPart, partialTick);
 	}
 
-	@ModifyVariable(method = "renderArmWithItem", at = @At(value = "STORE"), ordinal = 0)
+	@ModifyVariable(method = "submitArmWithItem", at = @At(value = "STORE"), ordinal = 0)
 	private HumanoidArm pulselib$keepPhysicalArm(HumanoidArm arm,
 	                                             AbstractClientPlayer player,
 	                                             float partialTick,

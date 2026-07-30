@@ -41,8 +41,8 @@ import org.jspecify.annotations.Nullable;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.OptionalDouble;
-import java.util.OptionalInt;
 
 public class PRenderQueue
 {
@@ -97,7 +97,7 @@ public class PRenderQueue
 			return;
 		Minecraft mc = PLibRenderHelper.mc();
 		
-		Matrix4f modelView = RenderSystem.getModelViewMatrix();
+		Matrix4f modelView = RenderSystem.getModelViewMatrixCopy();
 		TextureAtlas atlas = PTextureCache.getTextureAtlas();
 		GpuTextureView lightTexture = mc.gameRenderer.levelLightmap();
 		OverlayTexture overlayTexture = mc.gameRenderer.overlayTexture();
@@ -138,7 +138,7 @@ public class PRenderQueue
 			
 				MappableRingBuffer instanceData = batch.upload(offset, count);
 				
-				try (RenderPass pass = RenderSystem.getDevice().createCommandEncoder().createRenderPass(mesh.uuid() :: toString, colorTexture, OptionalInt.empty(), depthTexture, OptionalDouble.empty()))
+				try (RenderPass pass = RenderSystem.getDevice().createCommandEncoder().createRenderPass(mesh.uuid() :: toString, colorTexture, Optional.empty(), depthTexture, OptionalDouble.empty()))
 				{
 					pass.setPipeline(type.pipeline());
 					RenderSystem.bindDefaultUniforms(pass);
@@ -148,10 +148,10 @@ public class PRenderQueue
 					pass.bindTexture("Sampler0", atlas.getTextureView(), atlas.getSampler());
 					pass.bindTexture("Sampler1", overlayTexture.getTextureView(), RenderSystem.getSamplerCache().getClampToEdge(FilterMode.LINEAR));
 					pass.bindTexture("Sampler2", lightTexture, RenderSystem.getSamplerCache().getClampToEdge(FilterMode.LINEAR));
-					pass.setVertexBuffer(0, mesh.vbo());
+					pass.setVertexBuffer(0, mesh.vbo().slice());
 					pass.setIndexBuffer(mesh.indices(), mesh.indexType());
 					
-					pass.drawIndexed(0, 0, mesh.indicesCount(), count);
+					pass.drawIndexed(mesh.indicesCount(), count, 0, 0, 0);
 				}
 				
 				offset += count;
@@ -255,9 +255,7 @@ public class PRenderQueue
 					GpuBuffer.USAGE_UNIFORM | GpuBuffer.USAGE_MAP_WRITE,
 					bufferSize);
 			
-			try (GpuBuffer.MappedView instanceDataMappedView = RenderSystem.getDevice().
-					createCommandEncoder().
-					mapBuffer(this.instanceData.currentBuffer(), false, true))
+			try (GpuBufferSlice.MappedView instanceDataMappedView = this.instanceData.currentBuffer().map(false, true))
 			{
 				Std140Builder builder = Std140Builder.intoBuffer(instanceDataMappedView.data());
 				for (int q = 0; q < count; q++)

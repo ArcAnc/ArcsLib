@@ -79,7 +79,7 @@ public class PLibArmorHandler
 	private static void renderFirstPersonArmor(final RenderArmEvent event)
 	{
 		Minecraft mc = PLibRenderHelper.mc();
-		EntityRenderer<?, ?> renderer = mc.getEntityRenderDispatcher().getRenderer(event.getPlayer());
+		EntityRenderer<?, ?> renderer = mc.getEntityRenderDispatcher().getRenderer(event.getAvatar());
 		if (!(renderer instanceof AvatarRenderer<?> playerRenderer))
 			return;
 		
@@ -88,8 +88,8 @@ public class PLibArmorHandler
 		
 		PHumanoidAttachmentLayer.renderFirstPersonArm(
 				event.getPoseStack(),
-				event.getPackedLight(),
-				event.getPlayer(),
+				event.getLightCoords(),
+				event.getAvatar(),
 				event.getArm(),
 				event.getArm() == HumanoidArm.RIGHT ? model.rightArm : model.leftArm,
 				partialTick);
