@@ -16,6 +16,7 @@
 	"ItemInHandRendererAccessor",
 	"ItemInHandRendererMixin",
 	"LivingEntityRendererMixin",
+	"PlayerRootTransformMixin",
 	"PlayerRendererMixin",
     "ItemModelResolverAccessor",
     "ItemStackRenderStateAccessor",

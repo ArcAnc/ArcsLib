@@ -14,8 +14,6 @@ import net.minecraft.client.model.player.PlayerModel;
 import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.entity.player.AvatarRenderer;
-import net.minecraft.client.renderer.entity.state.AvatarRenderState;
-import net.minecraft.client.renderer.state.level.CameraRenderState;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.HumanoidArm;
 import org.spongepowered.asm.mixin.Mixin;
@@ -29,29 +27,7 @@ import java.util.Set;
 @Mixin(AvatarRenderer.class)
 public abstract class PlayerRendererMixin
 {
-	@Unique private boolean pulselib$rootPushed;
 	@Unique private boolean pulselib$firstPersonRootPushed;
-
-	@Inject(method = "submit", at = @At("HEAD"))
-	private void pulselib$applyPlayerRoot(AvatarRenderState state, PoseStack poseStack, SubmitNodeCollector submitNodeCollector, CameraRenderState camera, CallbackInfo ci)
-	{
-		if (Minecraft.getInstance().level == null ||
-				!(Minecraft.getInstance().level.getEntity(state.id) instanceof AbstractClientPlayer player))
-			return;
-		poseStack.pushPose();
-		this.pulselib$rootPushed = true;
-		PPlayerAnimations.applyRoot(player, poseStack, state.partialTick);
-	}
-
-	@Inject(method = "submit", at = @At("RETURN"))
-	private void pulselib$restorePlayerRoot(AvatarRenderState state, PoseStack poseStack, SubmitNodeCollector submitNodeCollector, CameraRenderState camera, CallbackInfo ci)
-	{
-		if (this.pulselib$rootPushed)
-		{
-			poseStack.popPose();
-			this.pulselib$rootPushed = false;
-		}
-	}
 
 	@Inject(method = "renderHand", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/model/geom/ModelPart;resetPose()V", shift = At.Shift.AFTER))
 	private void pulselib$applyArmAnimation(PoseStack poseStack, SubmitNodeCollector submitNodeCollector, int packedLight, Identifier skinTexture, ModelPart arm, boolean hasSleeve, CallbackInfo ci)
