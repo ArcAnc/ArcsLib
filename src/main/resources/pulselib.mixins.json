@@ -11,6 +11,11 @@
     "requireAnnotations": true
   },
   "client": [
+	"CameraMixin",
+	"ItemInHandRendererAccessor",
+	"ItemInHandRendererMixin",
+    "LivingEntityRendererMixin",
+    "PlayerRendererMixin",
     "RenderTypeAccessor$CompositeRenderTypeAccessor",
     "RenderTypeAccessor$CompositeStateAccessor",
     "VertexBufferAccessor"

@@ -13,6 +13,7 @@ package com.arcanc.pulselib.content.model.baked;
 import com.arcanc.pulselib.content.animatable.PAnimatable;
 import com.arcanc.pulselib.content.animatable.PAnimationController;
 import com.arcanc.pulselib.content.model.animation.BoneFrame;
+import com.arcanc.pulselib.content.model.animation.PAnimationPoseResolver;
 import com.arcanc.pulselib.data.MolangParser;
 import com.arcanc.pulselib.content.renderer.modelData.PModelData;
 import com.arcanc.pulselib.util.PRenderTypes;
@@ -173,36 +174,17 @@ public record PBakedBone(String name,
 			Map<PAnimationController<T>, MolangParser.Context> molangContexts,
 			float partialTick)
 	{
-		Vector3f translation = new Vector3f(this.basePosition());
-		Quaternionf rotation = new Quaternionf(this.baseRotation());
-		Vector3f scale = new Vector3f(1, 1, 1);
-		
-		boolean hasTransform = false;
-		for (PAnimationController<T> controller : controllers)
-		{
-			MolangParser.Context molangContext = molangContexts.get(controller);
-			if (molangContext == null)
-				molangContext = new MolangParser.Context().
-						query("anim_time", controller.getInterpolatedTime(partialTick) / 20f).
-						randomSeed(0L);
-			BoneFrame frame = controller.calculateBoneTransformations(
-					this.name(),
-					model,
-					partialTick,
-					molangContext,
-					new BoneFrame(new Vector3f(translation), new Quaternionf(rotation), new Vector3f(scale)));
-			if (frame == null)
-				continue;
-			translation.add(frame.translation());
-			scale.mul(frame.scale());
-			rotation.premul(frame.rotation());
-			hasTransform = true;
-		}
-		
-		if (!hasTransform)
-			return null;
-		
-		return new BoneFrame(translation, rotation, scale);
+		PAnimationPoseResolver.LocalPose pose = PAnimationPoseResolver.resolveLocal(
+				this,
+				model,
+				controllers,
+				(controller, tick) ->
+				{
+					MolangParser.Context context = molangContexts.get(controller);
+					return context == null ? PAnimationPoseResolver.<T>defaultContexts().context(controller, tick) : context;
+				},
+				partialTick);
+		return pose.hasTranslation() || pose.hasRotation() || pose.hasScale() ? pose.localTransform() : null;
 	}
 	
 	public static final class PBakedBoneBuilder

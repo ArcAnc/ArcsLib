@@ -81,33 +81,17 @@ public class PLivingAttachmentLayer<T extends LivingEntity, M extends EntityMode
 	                                              ModelPart anchorPart,
 	                                              float partialTick)
 	{
-		float oldXRot = anchorPart.xRot;
-		float oldYRot = anchorPart.yRot;
-		float oldZRot = anchorPart.zRot;
-		try
+		for (EquipmentSlot slot : EQUIPMENT_SLOTS)
 		{
-			anchorPart.xRot = 0;
-			anchorPart.yRot = 0;
-			anchorPart.zRot = 0;
-			
-			for (EquipmentSlot slot : EQUIPMENT_SLOTS)
-			{
-				ItemStack stack = entity.getItemBySlot(slot);
-				for (PLivingAttachmentDefinition definition : PLivingAttachments.get(stack, slot, entity))
-					renderDefinition(poseStack, light, partialTick, entity, stack, definition,
-							binding -> binding.anchor().equals(targetAnchor) ? anchorPart : null);
-			}
-			
-			for (PLivingAttachmentDefinition definition : PLivingAttachments.getGlobal(entity))
-				renderDefinition(poseStack, light, partialTick, entity, ItemStack.EMPTY, definition,
+			ItemStack stack = entity.getItemBySlot(slot);
+			for (PLivingAttachmentDefinition definition : PLivingAttachments.get(stack, slot, entity))
+				renderDefinition(poseStack, light, partialTick, entity, stack, definition,
 						binding -> binding.anchor().equals(targetAnchor) ? anchorPart : null);
 		}
-		finally
-		{
-			anchorPart.xRot = oldXRot;
-			anchorPart.yRot = oldYRot;
-			anchorPart.zRot = oldZRot;
-		}
+
+		for (PLivingAttachmentDefinition definition : PLivingAttachments.getGlobal(entity))
+			renderDefinition(poseStack, light, partialTick, entity, ItemStack.EMPTY, definition,
+					binding -> binding.anchor().equals(targetAnchor) ? anchorPart : null);
 	}
 	
 	private static void renderDefinition(

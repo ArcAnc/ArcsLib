@@ -15,13 +15,16 @@ import com.arcanc.pulselib.content.animatable.PLibAnimationTicker;
 import com.arcanc.pulselib.content.animatable.instance.InstanceAnimationManager;
 import com.arcanc.pulselib.content.animatable.singleton.SingletonAnimationManager;
 import com.arcanc.pulselib.content.model.textures.atlas.RuntimeLoader;
+import com.arcanc.pulselib.content.player.animation.PPlayerAnimations;
 import com.arcanc.pulselib.content.renderer.PRenderQueue;
 import com.arcanc.pulselib.content.renderer.PRenderStagesHandler;
 import com.arcanc.pulselib.util.PLibDatabase;
 import com.arcanc.pulselib.util.PModelCache;
 import com.arcanc.pulselib.util.PRenderTypes;
 import com.arcanc.pulselib.util.PTextureCache;
-import com.arcanc.pulselib.util.attachments.*;
+import com.arcanc.pulselib.util.attachments.PAttachmentAnchor;
+import com.arcanc.pulselib.util.attachments.PAttachmentAnchorResolvers;
+import com.arcanc.pulselib.util.attachments.PLivingAttachments;
 import com.arcanc.pulselib.util.attachments.humanoid.armor.PArmorClientExtensions;
 import com.arcanc.pulselib.util.attachments.humanoid.armor.PLibArmorHandler;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -39,7 +42,7 @@ import net.neoforged.neoforge.event.level.LevelEvent;
 
 public class ClientEvents
 {
-	private static final PAttachmentAnchor TEST_COW_BODY = PAttachmentAnchor.of(PLibDatabase.rl("cow_body"));
+	//private static final PAttachmentAnchor TEST_COW_BODY = PAttachmentAnchor.of(PLibDatabase.rl("cow_body"));
 	private static boolean pulseClientContentRegistered;
 	
 	public static void registerClientEvents(final IEventBus modEventBus)
@@ -57,6 +60,7 @@ public class ClientEvents
 		PLibArmorHandler.register(modEventBus);
 		PRenderTypes.register(modEventBus);
 		PLibAnimationTicker.register(modEventBus);
+		//PPlayerFlipDemo.register(modEventBus);
 		PRenderStagesHandler.register(modEventBus);
 		PTextureCache.register(modEventBus);
 	}
@@ -84,6 +88,9 @@ public class ClientEvents
 		
 		PulseLibEvents.AttachmentRegistrationEvent registrationEvent = new PulseLibEvents.AttachmentRegistrationEvent();
 		ModLoader.postEvent(registrationEvent);
+
+		PulseLibEvents.PlayerAnimationRegistrationEvent playerAnimationRegistrationEvent = new PulseLibEvents.PlayerAnimationRegistrationEvent();
+		ModLoader.postEvent(playerAnimationRegistrationEvent);
 		
 		/*registrationEvent.registration().livingAttachment(Registration.ItemReg.TEST_HAT.get(),
 				new PLivingAttachmentDefinition(
@@ -110,6 +117,7 @@ public class ClientEvents
 						true));*/
 		
 		registrationEvent.registration().apply();
+		playerAnimationRegistrationEvent.registration().apply();
 		pulseClientContentRegistered = true;
 	}
 	
@@ -148,6 +156,7 @@ public class ClientEvents
 		PRenderQueue.cleanup();
 		InstanceAnimationManager.cleanUp();
 		SingletonAnimationManager.cleanUp();
+		PPlayerAnimations.cleanUp();
 	}
 	
 	private static void registerSpriteSources(final RegisterSpriteSourceTypesEvent event)

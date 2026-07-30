@@ -12,25 +12,20 @@ package com.arcanc.pulselib.util.attachments.humanoid.armor;
 
 import com.arcanc.pulselib.util.attachments.PLivingAttachmentLayer;
 import com.arcanc.pulselib.util.attachments.humanoid.PHumanoidAttachmentLayer;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.EntityModel;
 import net.minecraft.client.model.HumanoidModel;
 import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.client.renderer.entity.LivingEntityRenderer;
 import net.minecraft.client.renderer.entity.player.PlayerRenderer;
 import net.minecraft.client.resources.PlayerSkin;
-import net.minecraft.world.entity.HumanoidArm;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.client.event.EntityRenderersEvent;
-import net.neoforged.neoforge.client.event.RenderArmEvent;
-import net.neoforged.neoforge.common.NeoForge;
 
 public class PLibArmorHandler
 {
 	public static void register(IEventBus modEventBus)
 	{
 		modEventBus.addListener(PLibArmorHandler :: addArmorLayers);
-		NeoForge.EVENT_BUS.addListener(PLibArmorHandler :: renderFirstPersonArmor);
 	}
 	
 	@SuppressWarnings({"rawtypes", "unchecked"})
@@ -55,22 +50,4 @@ public class PLibArmorHandler
 		}
 	}
 	
-	private static void renderFirstPersonArmor(final RenderArmEvent event)
-	{
-		Minecraft mc = Minecraft.getInstance();
-		EntityRenderer<?> renderer = mc.getEntityRenderDispatcher().getRenderer(event.getPlayer());
-		if (!(renderer instanceof PlayerRenderer playerRenderer))
-			return;
-		
-		HumanoidModel<?> model = playerRenderer.getModel();
-		float partialTick = mc.isPaused() ? 0 : mc.getTimer().getGameTimeDeltaPartialTick(false);
-		
-		PHumanoidAttachmentLayer.renderFirstPersonArm(
-				event.getPoseStack(),
-				event.getPackedLight(),
-				event.getPlayer(),
-				event.getArm(),
-				event.getArm() == HumanoidArm.RIGHT ? model.rightArm : model.leftArm,
-				partialTick);
-	}
 }
