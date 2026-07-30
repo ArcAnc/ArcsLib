@@ -11,7 +11,7 @@ package com.arcanc.pulselib.content.registration;
 
 public final class PPlayerFlipDemo
 {
-/*	private static final ResourceLocation ID = PLibDatabase.rl("demo/player_flip");
+/*	private static final Identifier ID = PLibDatabase.rl("demo/player_flip");
 	private static final PModelData MODEL_DATA = new PModelData.Builder(
 			PLibDatabase.rl("geckolib/models/player/demo/player_flip.geo.json"),
 			"",
@@ -21,7 +21,7 @@ public final class PPlayerFlipDemo
 			"key.pulselib.player_flip",
 			InputConstants.Type.KEYSYM,
 			GLFW.GLFW_KEY_G,
-			"key.categories.pulselib");
+			KeyMapping.Category.MISC);
 
 	private PPlayerFlipDemo()
 	{
@@ -29,7 +29,7 @@ public final class PPlayerFlipDemo
 
 	public static void register(IEventBus modEventBus)
 	{
-		if (FMLLoader.isProduction())
+		if (FMLLoader.getCurrent().isProduction())
 			return;
 
 		PModelCache.registerModelLoader(PGeckoModelLoader.INSTANCE);

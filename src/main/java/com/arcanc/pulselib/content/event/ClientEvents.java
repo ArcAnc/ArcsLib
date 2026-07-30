@@ -60,6 +60,8 @@ public class ClientEvents
 		PRenderStagesHandler.register(modEventBus);
 		PTextureCache.register(modEventBus);
 		PLibArmorHandler.register(modEventBus);
+		
+//		PPlayerFlipDemo.register(modEventBus);
 	}
 	
 	private static void registerReloadListeners(final AddClientReloadListenersEvent event)
