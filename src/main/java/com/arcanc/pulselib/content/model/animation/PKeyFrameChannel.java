@@ -40,17 +40,70 @@ public sealed interface PKeyFrameChannel<T> permits PKeyFrameChannel.PositionKey
 		}
 	}
 
-	record RotationKeyFrame(float time, ValueProvider<Quaternionf> valueProvider) implements PKeyFrameChannel<Quaternionf>
+	final class RotationKeyFrame implements PKeyFrameChannel<Quaternionf>
 	{
+		private final float time;
+		private final ValueProvider<Quaternionf> valueProvider;
+		private final ValueProvider<Vector3f> eulerValueProvider;
+
 		public RotationKeyFrame(float time, Quaternionf value)
 		{
 			this(time, data -> value);
+		}
+
+		public RotationKeyFrame(float time, ValueProvider<Quaternionf> valueProvider)
+		{
+			this(time, valueProvider, null);
+		}
+
+		private RotationKeyFrame(float time,
+		                         ValueProvider<Quaternionf> valueProvider,
+		                         ValueProvider<Vector3f> eulerValueProvider)
+		{
+			this.time = time;
+			this.valueProvider = valueProvider;
+			this.eulerValueProvider = eulerValueProvider;
+		}
+
+		public RotationKeyFrame(float time, Vector3f eulerDegrees)
+		{
+			this(time,
+					data -> new Quaternionf().rotationXYZ(
+							(float)Math.toRadians(eulerDegrees.x),
+							(float)Math.toRadians(eulerDegrees.y),
+							(float)Math.toRadians(eulerDegrees.z)),
+					data -> eulerDegrees);
+		}
+
+		public static RotationKeyFrame euler(float time, ValueProvider<Vector3f> eulerValueProvider)
+		{
+			return new RotationKeyFrame(time,
+					data ->
+					{
+						Vector3f euler = eulerValueProvider.calculate(data);
+						return new Quaternionf().rotationXYZ(
+								(float)Math.toRadians(euler.x),
+								(float)Math.toRadians(euler.y),
+								(float)Math.toRadians(euler.z));
+					},
+					eulerValueProvider);
+		}
+
+		@Override
+		public float time()
+		{
+			return this.time;
 		}
 
 		@Override
 		public Quaternionf value(Object data)
 		{
 			return this.valueProvider.calculate(data);
+		}
+
+		public Vector3f euler(Object data)
+		{
+			return this.eulerValueProvider == null ? null : this.eulerValueProvider.calculate(data);
 		}
 	}
 

@@ -18,6 +18,7 @@ import com.arcanc.pulselib.content.model.baked.PBakedModel;
 import com.arcanc.pulselib.content.model.baked.PMeshRenderContext;
 import com.arcanc.pulselib.content.renderer.base.PEntityRenderState;
 import com.arcanc.pulselib.content.renderer.modelData.PModelData;
+import com.arcanc.pulselib.data.MolangParser;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.entity.state.EntityRenderState;
@@ -125,11 +126,12 @@ public abstract class PEntityRenderLayer<T extends Entity & PAnimatable<T>, RS e
 	                   SubmitNodeCollector submitNodeCollector,
 	                   CameraRenderState cameraRenderState,
 	                   Collection<PAnimationController<T>> controllers,
+	                   Map<PAnimationController<T>, MolangParser.Context> molangContexts,
 	                   int packedColor,
 	                   int packedLight,
 	                   int packedOverlay)
 	{
-		submit(renderer, renderState, poseStack, submitNodeCollector, cameraRenderState, controllers, packedColor, packedLight, packedOverlay, null, null);
+		submit(renderer, renderState, poseStack, submitNodeCollector, cameraRenderState, controllers, molangContexts, packedColor, packedLight, packedOverlay, null, null);
 	}
 
 	public void submit(PEntityRenderer<T, RS> renderer,
@@ -138,6 +140,7 @@ public abstract class PEntityRenderLayer<T extends Entity & PAnimatable<T>, RS e
 	                   SubmitNodeCollector submitNodeCollector,
 	                   CameraRenderState cameraRenderState,
 	                   Collection<PAnimationController<T>> controllers,
+	                   Map<PAnimationController<T>, MolangParser.Context> molangContexts,
 	                   int packedColor,
 	                   int packedLight,
 	                   int packedOverlay,
@@ -165,7 +168,8 @@ public abstract class PEntityRenderLayer<T extends Entity & PAnimatable<T>, RS e
 					cameraRenderState,
 					this,
 					entityBonePoses,
-					layerTransform);
+					layerTransform,
+					molangContexts);
 		}
 	}
 	

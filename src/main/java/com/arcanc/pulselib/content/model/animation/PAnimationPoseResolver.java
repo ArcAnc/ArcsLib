@@ -195,7 +195,7 @@ public final class PAnimationPoseResolver<T extends PAnimatable<T>>
 	public static <T extends PAnimatable<T>> MolangContextProvider<T> defaultContexts()
 	{
 		return (controller, partialTick) -> new MolangParser.Context().
-				query("anim_time", controller.getInterpolatedTime(partialTick)).
+				query("anim_time", controller.getInterpolatedTime(partialTick) / 20.0f).
 				randomSeed(0L);
 	}
 

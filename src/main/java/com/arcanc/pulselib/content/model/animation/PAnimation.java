@@ -160,10 +160,22 @@ public record PAnimation(String name,
 		
 		float alpha = transformAlpha(previous, next, time, interpolationType);
 		
-		Quaternionf q1 = new Quaternionf(previous.value(data));
-		Quaternionf q2 = new Quaternionf(next.value(data));
-		
-		return q1.slerp(q2, alpha);
+		if (previous instanceof PKeyFrameChannel.RotationKeyFrame previousRotation &&
+				next instanceof PKeyFrameChannel.RotationKeyFrame nextRotation)
+		{
+			Vector3f previousEuler = previousRotation.euler(data);
+			Vector3f nextEuler = nextRotation.euler(data);
+			if (previousEuler != null && nextEuler != null)
+			{
+				Vector3f euler = new Vector3f(previousEuler).lerp(nextEuler, alpha);
+				return new Quaternionf().rotationXYZ(
+						(float)Math.toRadians(euler.x),
+						(float)Math.toRadians(euler.y),
+						(float)Math.toRadians(euler.z));
+			}
+		}
+
+		return new Quaternionf(previous.value(data)).slerp(next.value(data), alpha);
 	}
 
 	private static void setThisValue(Object data, Vector3f value)

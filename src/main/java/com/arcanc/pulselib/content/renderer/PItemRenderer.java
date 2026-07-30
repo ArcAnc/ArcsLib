@@ -21,6 +21,7 @@ import com.arcanc.pulselib.content.model.baked.PBakedModel;
 import com.arcanc.pulselib.content.model.baked.PMeshRenderContext;
 import com.arcanc.pulselib.content.renderer.base.PItemRenderState;
 import com.arcanc.pulselib.content.renderer.modelData.PModelData;
+import com.arcanc.pulselib.data.MolangParser;
 import com.arcanc.pulselib.util.PRenderTypes;
 import com.arcanc.pulselib.util.PTextureCache;
 import com.mojang.blaze3d.vertex.PoseStack;
@@ -40,6 +41,7 @@ import org.joml.Vector3fc;
 import org.jspecify.annotations.Nullable;
 
 import java.util.Collection;
+import java.util.Map;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -127,18 +129,20 @@ public abstract class PItemRenderer<T extends Item & PAnimatable<T>, RS extends 
 		manager.bindModel(model);
 		
 		Collection<PAnimationController<T>> controllers = manager.getControllers().values();
+		Map<PAnimationController<T>, MolangParser.Context> molangContexts = prepareMolangContexts(
+				renderState.getAnimatable(), manager, controllers, renderState.partialTick());
 		
 		ItemDisplayContext context = ((ItemStackRenderStateAccessor)renderState.itemRenderState()).pulselib$getDisplayContext();
 		if (context == ItemDisplayContext.GUI)
 		{
-			model.bones().forEach(bone -> perBoneSubmit(renderState, poseStack, bone, controllers, renderType, -1, renderState.lightCoords(), renderState.overlayCoords(), context));
+			model.bones().forEach(bone -> perBoneSubmit(renderState, poseStack, bone, controllers, molangContexts, renderType, -1, renderState.lightCoords(), renderState.overlayCoords(), context));
 			submitNodeCollector.submitCustomGeometry(
 					poseStack,
 					this.renderType.apply(PTextureCache.ATLAS_LOCATION),
 					(_, _) -> PRenderQueue.flush(PRenderQueue.RenderStage.GUI));
 			return;
 		}
-		model.bones().forEach(bone -> perBoneSubmit(renderState, poseStack, bone, controllers, renderType, -1, renderState.lightCoords(), renderState.overlayCoords(), context));
+		model.bones().forEach(bone -> perBoneSubmit(renderState, poseStack, bone, controllers, molangContexts, renderType, -1, renderState.lightCoords(), renderState.overlayCoords(), context));
 	}
 	
 	@Override
@@ -146,13 +150,13 @@ public abstract class PItemRenderer<T extends Item & PAnimatable<T>, RS extends 
 	{
 	}
 	
-	protected void perBoneSubmit(RS renderState, PoseStack poseStack, PBakedBone bone, Collection<PAnimationController<T>> controllers, Function<Identifier, RenderType> renderType, int packedColor, int packedLight, int packedOverlay, ItemDisplayContext context)
+	protected void perBoneSubmit(RS renderState, PoseStack poseStack, PBakedBone bone, Collection<PAnimationController<T>> controllers, Map<PAnimationController<T>, MolangParser.Context> molangContexts, Function<Identifier, RenderType> renderType, int packedColor, int packedLight, int packedOverlay, ItemDisplayContext context)
 	{
 		PModelData data = this.getModelData(renderState);
 		PBakedModel model = data.getModel();
 		if (model == null)
 			return;
-		BoneFrame frame = bone.mixBone(model, controllers, renderState.partialTick());
+		BoneFrame frame = bone.mixBone(model, controllers, molangContexts, renderState.partialTick());
 		poseStack.pushPose();
 		if (frame != null)
 		{
@@ -169,9 +173,33 @@ public abstract class PItemRenderer<T extends Item & PAnimatable<T>, RS extends 
 		this.submitBone(renderState, bone, poseStack, data, controllers, renderType, packedColor, packedLight, packedOverlay, context);
 		
 		if (!bone.children().isEmpty())
-			bone.children().forEach(child -> perBoneSubmit(renderState, poseStack, child, controllers, renderType, packedColor, packedLight, packedOverlay, context));
+			bone.children().forEach(child -> perBoneSubmit(renderState, poseStack, child, controllers, molangContexts, renderType, packedColor, packedLight, packedOverlay, context));
 		
 		poseStack.popPose();
+	}
+
+	private Map<PAnimationController<T>, MolangParser.Context> prepareMolangContexts(T animatable,
+	                                                                                   PAnimationManager<T> manager,
+	                                                                                   Collection<PAnimationController<T>> controllers,
+	                                                                                   float partialTick)
+	{
+		Map<PAnimationController<T>, MolangParser.Context> contexts = new java.util.IdentityHashMap<>();
+		for (PAnimationController<T> controller : controllers)
+		{
+			MolangParser.Context context = new MolangParser.Context().
+					query("anim_time", controller.getInterpolatedTime(partialTick) / 20.0f).
+					randomSeed(manager.key().key());
+			populateMolangContext(animatable, controller, context, partialTick);
+			contexts.put(controller, context);
+		}
+		return contexts;
+	}
+
+	protected void populateMolangContext(T animatable,
+	                                    PAnimationController<T> controller,
+	                                    MolangParser.Context context,
+	                                    float partialTick)
+	{
 	}
 	
 	protected void submitBone(RS renderState,

@@ -14,6 +14,7 @@ import com.arcanc.pulselib.content.animatable.PAnimatable;
 import com.arcanc.pulselib.content.animatable.PAnimationController;
 import com.arcanc.pulselib.content.model.animation.BoneFrame;
 import com.arcanc.pulselib.content.model.animation.PAnimationPoseResolver;
+import com.arcanc.pulselib.data.MolangParser;
 import com.arcanc.pulselib.content.renderer.modelData.PModelData;
 import com.arcanc.pulselib.util.PLibDatabase;
 import com.arcanc.pulselib.util.PRenderTypes;
@@ -213,8 +214,20 @@ public class PBakedBone
 			Collection<PAnimationController<T>> controllers,
 			float partialTick)
 	{
+		return mixBone(model, controllers, Map.of(), partialTick);
+	}
+
+	public <T extends PAnimatable<T>>@Nullable BoneFrame mixBone(
+			PBakedModel model,
+			Collection<PAnimationController<T>> controllers,
+			Map<PAnimationController<T>, MolangParser.Context> molangContexts,
+			float partialTick)
+	{
 		PAnimationPoseResolver.LocalPose pose = PAnimationPoseResolver.resolveLocal(
-				this, model, controllers, PAnimationPoseResolver.defaultContexts(), partialTick);
+				this, model, controllers,
+				(controller, tick) -> molangContexts.getOrDefault(controller,
+						PAnimationPoseResolver.<T>defaultContexts().context(controller, tick)),
+				partialTick);
 		return pose.hasTranslation() || pose.hasRotation() || pose.hasScale() ? pose.localTransform() : null;
 	}
 	

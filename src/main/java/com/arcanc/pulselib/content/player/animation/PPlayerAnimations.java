@@ -9,6 +9,8 @@
 
 package com.arcanc.pulselib.content.player.animation;
 
+import com.arcanc.pulselib.content.animatable.PAnimationController;
+import com.arcanc.pulselib.data.MolangParser;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.model.player.PlayerModel;
 import net.minecraft.client.model.geom.ModelPart;
@@ -156,6 +158,7 @@ public final class PPlayerAnimations
 				continue;
 
 			PPlayerAnimationInstance instance = instance(player, entry.getKey(), definition);
+			Map<PAnimationController<PPlayerAnimationInstance>, MolangParser.Context> molangContexts = instance.createMolangContexts(partialTick);
 			for (Map.Entry<PPlayerPart, String> binding : definition.bindings().entrySet())
 			{
 				PPlayerPart part = binding.getKey();
@@ -166,7 +169,7 @@ public final class PPlayerAnimations
 				if (weight <= 0.0f)
 					continue;
 
-				PPlayerAnimationInstance.PPlayerBonePose pose = instance.sample(binding.getValue(), partialTick);
+				PPlayerAnimationInstance.PPlayerBonePose pose = instance.sample(binding.getValue(), partialTick, molangContexts);
 				if (pose == null)
 					continue;
 

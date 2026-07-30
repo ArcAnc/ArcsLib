@@ -22,6 +22,8 @@ import net.minecraft.world.entity.player.Player;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
+import java.util.IdentityHashMap;
+import java.util.Map;
 import java.util.Objects;
 
 public final class PPlayerAnimationInstance implements PAnimatable<PPlayerAnimationInstance>
@@ -94,6 +96,27 @@ public final class PPlayerAnimationInstance implements PAnimatable<PPlayerAnimat
 
 	@Nullable PPlayerBonePose sample(String boneName, float partialTick)
 	{
+		return sample(boneName, partialTick, createMolangContexts(partialTick));
+	}
+
+	Map<PAnimationController<PPlayerAnimationInstance>, MolangParser.Context> createMolangContexts(float partialTick)
+	{
+		Map<PAnimationController<PPlayerAnimationInstance>, MolangParser.Context> contexts = new IdentityHashMap<>();
+		for (PAnimationController<PPlayerAnimationInstance> controller : this.animationManager.getControllers().values())
+		{
+			MolangParser.Context context = new MolangParser.Context().
+					query("anim_time", controller.getInterpolatedTime(partialTick) / 20.0f).
+					randomSeed(this.animationManager.key().key());
+			this.definition.populateMolangContext(this.player, this, controller, context, partialTick);
+			contexts.put(controller, context);
+		}
+		return contexts;
+	}
+
+	@Nullable PPlayerBonePose sample(String boneName,
+	                                float partialTick,
+	                                Map<PAnimationController<PPlayerAnimationInstance>, MolangParser.Context> molangContexts)
+	{
 		PBakedModel model = this.definition.modelData().getModel();
 		if (model == null)
 			return null;
@@ -101,14 +124,8 @@ public final class PPlayerAnimationInstance implements PAnimatable<PPlayerAnimat
 		PAnimationPoseResolver<PPlayerAnimationInstance> resolver = new PAnimationPoseResolver<>(
 				model,
 				this.animationManager.getControllers().values(),
-				(controller, tick) ->
-				{
-					MolangParser.Context context = new MolangParser.Context().
-							query("anim_time", controller.getInterpolatedTime(tick)).
-							randomSeed(this.animationManager.key().key());
-					this.definition.populateMolangContext(this.player, this, controller, context, tick);
-					return context;
-				},
+				(controller, tick) -> molangContexts.getOrDefault(controller,
+						PAnimationPoseResolver.<PPlayerAnimationInstance>defaultContexts().context(controller, tick)),
 				partialTick);
 		PAnimationPoseResolver.AnimationDelta pose = resolver.animationDelta(
 				boneName,

@@ -334,7 +334,7 @@ public class PGeckoModelParser
 		return switch (channel)
 		{
 			case POSITION -> new PKeyFrameChannel.PositionKeyFrame(time, (Vector3f) value);
-			case ROTATION -> new PKeyFrameChannel.RotationKeyFrame(time, (Quaternionf) value);
+			case ROTATION -> new PKeyFrameChannel.RotationKeyFrame(time, vector3f(valueNode, new Vector3f()));
 			case SCALE -> new PKeyFrameChannel.ScaleKeyFrame(time, (Vector3f) value);
 		};
 	}
@@ -345,7 +345,7 @@ public class PGeckoModelParser
 		return switch (channel)
 		{
 			case POSITION -> new PKeyFrameChannel.PositionKeyFrame(time, data -> scale(vector.evaluate(data)));
-			case ROTATION -> new PKeyFrameChannel.RotationKeyFrame(time, data -> eulerDegreesToQuaternion(vector.evaluate(data)));
+			case ROTATION -> PKeyFrameChannel.RotationKeyFrame.euler(time, vector :: evaluate);
 			case SCALE -> new PKeyFrameChannel.ScaleKeyFrame(time, vector :: evaluate);
 		};
 	}
