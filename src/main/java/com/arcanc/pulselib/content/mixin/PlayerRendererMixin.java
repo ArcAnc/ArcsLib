@@ -29,7 +29,10 @@ public abstract class PlayerRendererMixin
 {
 	@Unique private boolean pulselib$firstPersonRootPushed;
 
-	@Inject(method = "renderHand", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/model/geom/ModelPart;resetPose()V", shift = At.Shift.AFTER))
+	@Inject(method = "renderHand", at = @At(
+			value = "INVOKE",
+			target = "Lnet/minecraft/client/renderer/SubmitNodeCollector;submitModelPart(Lnet/minecraft/client/model/geom/ModelPart;Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/rendertype/RenderType;IILnet/minecraft/client/renderer/texture/TextureAtlasSprite;)V",
+			shift = At.Shift.BEFORE))
 	private void pulselib$applyArmAnimation(PoseStack poseStack, SubmitNodeCollector submitNodeCollector, int packedLight, Identifier skinTexture, ModelPart arm, boolean hasSleeve, CallbackInfo ci)
 	{
 		AbstractClientPlayer player = Minecraft.getInstance().player;
@@ -38,6 +41,8 @@ public abstract class PlayerRendererMixin
 		PlayerModel model = (PlayerModel)(Object)((AvatarRenderer)(Object)this).getModel();
 		float partialTick = Minecraft.getInstance().isPaused() ? 0.0f : Minecraft.getInstance().getDeltaTracker().getGameTimeDeltaPartialTick(false);
 		PPlayerPart playerPart = arm == model.rightArm ? PPlayerPart.RIGHT_ARM : PPlayerPart.LEFT_ARM;
+		ModelPart sleeve = arm == model.rightArm ? model.rightSleeve : model.leftSleeve;
+		sleeve.resetPose();
 		PPlayerAnimations.apply(player, model, partialTick, Set.of(playerPart));
 		poseStack.pushPose();
 		this.pulselib$firstPersonRootPushed = true;
