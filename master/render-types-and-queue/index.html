@@ -1327,14 +1327,14 @@
 <p>Emissive texture metadata is described on <a href="Textures-and-Emissive">Textures and Emissive</a>.</p>
 <h2 id="why-vanilla-rendertype-is-not-enough">Why vanilla RenderType is not enough<a class="headerlink" href="#why-vanilla-rendertype-is-not-enough" title="Permanent link">&para;</a></h2>
 <p>PulseLib's baked meshes use <a href="https://github.com/ArcAnc/PulseLib/blob/master/src/main/java/com/arcanc/pulselib/util/PRenderTypes.java"><code>PRenderTypes.VertexFormatProvider.POSITION_TEX_NORMAL</code></a>. The shaders also expect per-instance data: transform matrix, color, light, and overlay. A vanilla render type may compile and still render incorrectly because its shader and vertex format do not match the data PulseLib sends.</p>
-<p>If you create a custom render type, keep these requirements:</p>
+<p>Minecraft 26.2 uses the GPU rendering API for this pipeline. If you create a custom render type, keep these requirements:</p>
 <ul>
-<li><code>VertexFormat.Mode.TRIANGLES</code></li>
+<li><code>PrimitiveTopology.TRIANGLES</code></li>
 <li><code>PRenderTypes.VertexFormatProvider.POSITION_TEX_NORMAL</code></li>
 <li>a shader that understands PulseLib's uniforms and instance attributes</li>
 <li>a transparency state that matches how the queue should sort the mesh</li>
 </ul>
-<p>For most mods, it is safer to start from PulseLib's existing render types and only add a new one when you need a genuinely different shader state.</p>
+<p>Custom pipelines must use the 26.2-style vertex binding and primitive topology (<code>withVertexBinding(...)</code> and <code>withPrimitiveTopology(...)</code>); <code>VertexFormat.Mode</code> is no longer used. For most mods, it is safer to start from PulseLib's existing render types and only add a new one when you need a genuinely different shader state.</p>
 <h2 id="what-the-queue-does">What the queue does<a class="headerlink" href="#what-the-queue-does" title="Permanent link">&para;</a></h2>
 <p><a href="https://github.com/ArcAnc/PulseLib/blob/master/src/main/java/com/arcanc/pulselib/content/renderer/PRenderQueue.java"><code>PRenderQueue</code></a> batches identical meshes together and renders many instances with one instanced draw call. That is important for animated block entities and entities: every object can have its own transform and animation pose, but the GPU can still draw repeated mesh buffers efficiently.</p>
 <p>The queue has a few stages:</p>

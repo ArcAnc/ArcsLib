@@ -1242,7 +1242,7 @@
 
   <h1>Installation</h1>
 
-<p>PulseLib is lightweight and easy to install — requiring only a few changes to your build.gradle file.</p>
+<p>PulseLib 1.1.2 targets Minecraft 26.2 with NeoForge 26.2.0.40-beta and requires Java 25. Add the dependency to a NeoForge 26.2 project, then refresh Gradle.</p>
 <p>Currently, the project does not have its own hosting, so you can use CurseMaven or Modrinth as your dependency source, but I highly recommend using Modrinth.</p>
 <h2 id="using-curseforge-cursemaven">Using CurseForge (CurseMaven)<a class="headerlink" href="#using-curseforge-cursemaven" title="Permanent link">&para;</a></h2>
 <p>Add the repository and dependency:</p>
@@ -1254,7 +1254,7 @@
 <a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>}
 <a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>
 <a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>dependencies {
-<a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a>    // Example: minecraft: 1.21.1, pulselib: 1.0.7
+<a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a>    // Current example: minecraft: 26.2, pulselib: 1.1.2
 <a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a>    // Visit https://www.curseforge.com/minecraft/mc-mods/pulselib/files/all to get the latest version
 <a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a>    implementation &quot;curse.maven:pulselib-${minecraft_version}-${pulselib_version}&quot;
 <a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a>}
@@ -1269,13 +1269,12 @@
 <a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a>
 <a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a>
 <a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a>dependencies {
-<a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a>  // Example: minecraft: 1.21.1, pulselib: 1.0.7
+<a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a>  // Current example: minecraft: 26.2, pulselib: 1.1.2
 <a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a>  // Visit https://modrinth.com/mod/pulselib/versions to get the latest version
 <a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a>  implementation &quot;maven.modrinth:pulselib:${minecraft_version}-${pulselib_version}&quot;
 <a id="__codelineno-1-12" name="__codelineno-1-12" href="#__codelineno-1-12"></a>}
 </code></pre></div>
-<p>Final Step</p>
-<p>After adding the repository and dependency, refresh Gradle, and PulseLib will be ready to use in your project!</p>
+<p>After adding the repository and dependency, refresh Gradle. Keep the Minecraft and PulseLib version segments aligned with a published PulseLib release.</p>
 
 
 
