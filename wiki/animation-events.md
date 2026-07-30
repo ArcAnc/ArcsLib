@@ -2,12 +2,12 @@ PulseLib supports sound and particle events inside animations.
 
 Public event classes:
 
-* [`PAnimationEvent`](https://github.com/ArcAnc/PulseLib/blob/master/src/main/java/com/arcanc/pulselib/content/model/animation/PAnimationEvent.java)
-* [`PAnimationEventDispatcher`](https://github.com/ArcAnc/PulseLib/blob/master/src/main/java/com/arcanc/pulselib/content/animatable/PAnimationEventDispatcher.java)
-* [`PGltfAnimationEventSidecarParser`](https://github.com/ArcAnc/PulseLib/blob/master/src/main/java/com/arcanc/pulselib/data/PGltfAnimationEventSidecarParser.java)
-* [`PGeckoAnimationEventParser`](https://github.com/ArcAnc/PulseLib/blob/master/src/main/java/com/arcanc/pulselib/data/PGeckoAnimationEventParser.java)
+* [`PAnimationEvent`](https://github.com/ArcAnc/ArcsLib/blob/26.1/src/main/java/com/arcanc/pulselib/content/model/animation/PAnimationEvent.java)
+* [`PAnimationEventDispatcher`](https://github.com/ArcAnc/ArcsLib/blob/26.1/src/main/java/com/arcanc/pulselib/content/animatable/PAnimationEventDispatcher.java)
+* [`PGltfAnimationEventSidecarParser`](https://github.com/ArcAnc/ArcsLib/blob/26.1/src/main/java/com/arcanc/pulselib/data/PGltfAnimationEventSidecarParser.java)
+* [`PGeckoAnimationEventParser`](https://github.com/ArcAnc/ArcsLib/blob/26.1/src/main/java/com/arcanc/pulselib/data/PGeckoAnimationEventParser.java)
 
-Events are stored in [`PAnimation`](https://github.com/ArcAnc/PulseLib/blob/master/src/main/java/com/arcanc/pulselib/content/model/animation/PAnimation.java). A controller fires all events between the previous and current animation time while the controller is ticking.
+Events are stored in [`PAnimation`](https://github.com/ArcAnc/ArcsLib/blob/26.1/src/main/java/com/arcanc/pulselib/content/model/animation/PAnimation.java). A controller fires all events between the previous and current animation time while the controller is ticking.
 
 ## glTF sidecar files
 
