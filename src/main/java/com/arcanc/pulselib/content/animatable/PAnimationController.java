@@ -11,6 +11,7 @@ package com.arcanc.pulselib.content.animatable;
 
 
 import com.arcanc.pulselib.content.model.animation.BoneFrame;
+import com.arcanc.pulselib.data.MolangParser;
 import com.arcanc.pulselib.content.model.animation.PAnimation;
 import com.arcanc.pulselib.content.model.animation.PAnimationType;
 import com.arcanc.pulselib.content.model.animation.PRawAnimation;
@@ -104,7 +105,11 @@ public class PAnimationController<T extends PAnimatable<T>>
 		return this.state == ControllerState.STOP;
 	}
 	
-	public @Nullable BoneFrame calculateBoneTransformations(String boneName, PBakedModel model, float partialTick)
+	public @Nullable BoneFrame calculateBoneTransformations(String boneName,
+	                                                        PBakedModel model,
+	                                                        float partialTick,
+	                                                        MolangParser.Context molangContext,
+	                                                        @Nullable BoneFrame accumulatedFrame)
 	{
 		if (this.state == ControllerState.STOP)
 			return null;
@@ -118,9 +123,15 @@ public class PAnimationController<T extends PAnimatable<T>>
 		if (animation == null)
 			return null;
 		
-		return animation.calculateBoneTransformations(boneName, this.getInterpolatedTime(partialTick), stage.interpolationType());
+		float animationTime = this.getInterpolatedTime(partialTick);
+		return animation.calculateBoneTransformations(
+				boneName,
+				animationTime,
+				stage.interpolationType(),
+				molangContext,
+				accumulatedFrame);
 	}
-	
+
 	public void tick(T animatable, float tickCount, PBakedModel model)
 	{
 		tick(animatable, tickCount, model, List.of(this));
@@ -265,7 +276,7 @@ public class PAnimationController<T extends PAnimatable<T>>
 	{
 		ControllerState handle(AnimatableState<T> state);
 	}
-	
+
 	public String name()
 	{
 		return this.name;

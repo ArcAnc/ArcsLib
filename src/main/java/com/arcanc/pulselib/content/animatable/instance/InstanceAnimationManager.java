@@ -11,6 +11,7 @@ package com.arcanc.pulselib.content.animatable.instance;
 
 
 import com.arcanc.pulselib.content.animatable.PAnimatable;
+import com.arcanc.pulselib.content.animatable.AnimManagerKey;
 import com.arcanc.pulselib.content.animatable.PAnimationController;
 import com.arcanc.pulselib.content.animatable.PAnimationManager;
 import com.arcanc.pulselib.util.PLibDatabase;
@@ -37,8 +38,14 @@ public class InstanceAnimationManager<T extends PAnimatable<T>> extends PAnimati
 	
 	public InstanceAnimationManager(T animatable)
 	{
-		super(animatable);
-		this.factories.forEach((name, supplier) -> this.controllers.put(name, new PAnimationController<>(name, supplier.get())));
+		this(animatable, AnimManagerKey.ofObject(animatable));
+	}
+
+	public InstanceAnimationManager(T animatable, AnimManagerKey key)
+	{
+		super(animatable, key);
+		this.factories.forEach((name, supplier) -> this.controllers.put(name,
+				new PAnimationController<>(name, supplier.get())));
 	}
 	
 	public static void tickAll()

@@ -53,6 +53,8 @@ PModelData data = new DefaultEntityModelData.DefaultEntityModelDataBuilder(
 
 The parser is [`PGeckoModelParser`](https://github.com/ArcAnc/PulseLib/blob/master/src/main/java/com/arcanc/pulselib/data/PGeckoModelParser.java).
 
+Gecko animation vector components may be Molang expressions. See [Molang animations](molang-animations.md) for the supported language, context values, renderer hooks, and current limitations.
+
 ## Custom loader
 
 ```java

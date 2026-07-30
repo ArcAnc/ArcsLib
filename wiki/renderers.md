@@ -10,6 +10,10 @@ The current renderer API is render-state based. `PBlockRenderer`, `PItemRenderer
 
 Most custom renderers only need a constructor and `createRenderState()`. Override `preSubmit`, `resolveMeshRender`, or `postSubmit` when you need to draw something extra around the PulseLib model or change mesh color/light/overlay.
 
+## Molang context
+
+The built-in entity, block entity, and item renderers prepare a Molang context once per controller and render pass, then reuse it for all mixed bones. Override `populateMolangContext(...)` to add renderer-specific `query.*` values. The full API and the current `variable.*` lifetime limitation are documented in [Molang animations](molang-animations.md).
+
 ## Block renderer
 
 Use [`PBlockRenderer`](https://github.com/ArcAnc/PulseLib/blob/master/src/main/java/com/arcanc/pulselib/content/renderer/PBlockRenderer.java) for block entities. The block itself should hide vanilla rendering; the block entity renderer becomes the visible model.
