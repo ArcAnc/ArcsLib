@@ -1,4 +1,4 @@
-PulseLib is lightweight and easy to install — requiring only a few changes to your build.gradle file.
+PulseLib 1.1.2 targets Minecraft 26.2 with NeoForge 26.2.0.40-beta and requires Java 25. Add the dependency to a NeoForge 26.2 project, then refresh Gradle.
 
 Currently, the project does not have its own hosting, so you can use CurseMaven or Modrinth as your dependency source, but I highly recommend using Modrinth.
 
@@ -15,7 +15,7 @@ repositories {
 }
 
 dependencies {
-    // Example: minecraft: 1.21.1, pulselib: 1.0.7
+    // Current example: minecraft: 26.2, pulselib: 1.1.2
     // Visit https://www.curseforge.com/minecraft/mc-mods/pulselib/files/all to get the latest version
     implementation "curse.maven:pulselib-${minecraft_version}-${pulselib_version}"
 }
@@ -33,12 +33,10 @@ repositories {
 
 
 dependencies {
-  // Example: minecraft: 1.21.1, pulselib: 1.0.7
+  // Current example: minecraft: 26.2, pulselib: 1.1.2
   // Visit https://modrinth.com/mod/pulselib/versions to get the latest version
   implementation "maven.modrinth:pulselib:${minecraft_version}-${pulselib_version}"
 }
 ```
 
-Final Step
-
-After adding the repository and dependency, refresh Gradle, and PulseLib will be ready to use in your project!
+After adding the repository and dependency, refresh Gradle. Keep the Minecraft and PulseLib version segments aligned with a published PulseLib release.

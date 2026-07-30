@@ -15,6 +15,7 @@ uniform sampler2D Sampler2;
 
 layout(std140) uniform ColorOverlay {
     vec4 Color;
+    vec2 Light;
     ivec2 Overlay;
 };
 

@@ -27,14 +27,14 @@ Emissive texture metadata is described on [Textures and Emissive](Textures-and-E
 
 PulseLib's baked meshes use [`PRenderTypes.VertexFormatProvider.POSITION_TEX_NORMAL`](https://github.com/ArcAnc/PulseLib/blob/master/src/main/java/com/arcanc/pulselib/util/PRenderTypes.java). The shaders also expect per-instance data: transform matrix, color, light, and overlay. A vanilla render type may compile and still render incorrectly because its shader and vertex format do not match the data PulseLib sends.
 
-If you create a custom render type, keep these requirements:
+Minecraft 26.2 uses the GPU rendering API for this pipeline. If you create a custom render type, keep these requirements:
 
-* `VertexFormat.Mode.TRIANGLES`
+* `PrimitiveTopology.TRIANGLES`
 * `PRenderTypes.VertexFormatProvider.POSITION_TEX_NORMAL`
 * a shader that understands PulseLib's uniforms and instance attributes
 * a transparency state that matches how the queue should sort the mesh
 
-For most mods, it is safer to start from PulseLib's existing render types and only add a new one when you need a genuinely different shader state.
+Custom pipelines must use the 26.2-style vertex binding and primitive topology (`withVertexBinding(...)` and `withPrimitiveTopology(...)`); `VertexFormat.Mode` is no longer used. For most mods, it is safer to start from PulseLib's existing render types and only add a new one when you need a genuinely different shader state.
 
 ## What the queue does
 
