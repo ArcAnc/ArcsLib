@@ -10,13 +10,9 @@
       
       
       
-        <link rel="canonical" href="https://arcanc.github.io/PulseLib/master/gui-rendering/">
+        <link rel="canonical" href="https://arcanc.github.io/PulseLib/master/molang-animations/">
       
       
-        <link rel="prev" href="../player-animations/">
-      
-      
-        <link rel="next" href="../model-loaders/">
       
       
         
@@ -27,7 +23,7 @@
     
     
       
-        <title>GUI Rendering - PulseLib</title>
+        <title>Molang animations - PulseLib</title>
       
     
     
@@ -78,7 +74,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#direct-model-drawing" class="md-skip">
+        <a href="#molang-animations" class="md-skip">
           Skip to content
         </a>
       
@@ -116,7 +112,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              GUI Rendering
+              Molang animations
             
           </span>
         </div>
@@ -253,12 +249,10 @@
   
   
   
-    
-  
   
     
     
-      <li class="md-tabs__item md-tabs__item--active">
+      <li class="md-tabs__item">
         <a href="../pulselib-entities/" class="md-tabs__link">
           
   
@@ -738,31 +732,26 @@
       
   
   
-    
   
   
-  
     
     
     
     
-      
-        
-        
       
       
         
       
     
     
-    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" checked>
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
         
           
-          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="">
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
             
   
   
@@ -780,7 +769,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="true">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
           <label class="md-nav__title" for="__nav_3">
             <span class="md-nav__icon md-icon"></span>
             
@@ -963,35 +952,10 @@
                 
   
   
-    
   
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    GUI Rendering
-  
-
-    
-  </span>
-  
-  
-
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../gui-rendering/" class="md-nav__link">
         
   
   
@@ -1007,35 +971,6 @@
   
 
       </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#direct-model-drawing" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Direct model drawing
-      
-    </span>
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
     </li>
   
 
@@ -1180,6 +1115,8 @@
   
   
   
+    
+  
   
     <label class="md-nav__title" for="__toc">
       <span class="md-nav__icon md-icon"></span>
@@ -1188,10 +1125,43 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#direct-model-drawing" class="md-nav__link">
+  <a href="#context-and-evaluation" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Direct model drawing
+        Context and evaluation
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#providing-custom-queries" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Providing custom queries
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#language-surface" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Language surface
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#current-limitation-variable-lifetime" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Current limitation: variable.* lifetime
       
     </span>
   </a>
@@ -1218,46 +1188,48 @@
   
 
 
-  <h1>GUI Rendering</h1>
-
-<p>PulseLib no longer exposes a <code>PLibHelper.renderModelInGui</code> helper. GUI item rendering goes through <a href="https://github.com/ArcAnc/PulseLib/blob/master/src/main/java/com/arcanc/pulselib/content/renderer/PItemRenderer.java"><code>PItemRenderer</code></a>.</p>
-<p>When Minecraft renders a PulseLib item with <code>ItemDisplayContext.GUI</code>, <code>PItemRenderer</code>:</p>
-<ul>
-<li>extracts the item render state through <code>PItemRenderState</code>;</li>
-<li>submits posed meshes to <code>PRenderQueue.RenderStage.GUI</code>;</li>
-<li>flushes the GUI stage immediately through the supplied <code>SubmitNodeCollector</code>.</li>
-</ul>
-<p>That means normal animated items do not need separate GUI drawing code. Use the same item renderer and model data described on <a href="PulseLib-Items">PulseLib Items</a>.</p>
-<h2 id="direct-model-drawing">Direct model drawing<a class="headerlink" href="#direct-model-drawing" title="Permanent link">&para;</a></h2>
-<p>For advanced screens that are not item rendering, draw the baked model bones directly with <a href="https://github.com/ArcAnc/PulseLib/blob/master/src/main/java/com/arcanc/pulselib/content/model/baked/PBakedBone.java"><code>PBakedBone.instantDraw</code></a>:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="n">PBakedModel</span><span class="w"> </span><span class="n">model</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">modelData</span><span class="p">.</span><span class="na">getModel</span><span class="p">();</span>
-<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">model</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="kc">null</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
-<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="w">    </span><span class="n">poseStack</span><span class="p">.</span><span class="na">pushPose</span><span class="p">();</span>
-<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="w">    </span><span class="n">poseStack</span><span class="p">.</span><span class="na">translate</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="w"> </span><span class="n">y</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">);</span>
-<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="w">    </span><span class="n">poseStack</span><span class="p">.</span><span class="na">scale</span><span class="p">(</span><span class="n">scale</span><span class="p">,</span><span class="w"> </span><span class="n">scale</span><span class="p">,</span><span class="w"> </span><span class="n">scale</span><span class="p">);</span>
-<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>
-<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a><span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="n">PBakedBone</span><span class="w"> </span><span class="n">bone</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="n">model</span><span class="p">.</span><span class="na">bones</span><span class="p">())</span><span class="w"> </span><span class="p">{</span>
-<a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a><span class="w">        </span><span class="n">bone</span><span class="p">.</span><span class="na">instantDraw</span><span class="p">(</span>
-<a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a><span class="w">                </span><span class="n">poseStack</span><span class="p">,</span>
-<a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a><span class="w">                </span><span class="n">modelData</span><span class="p">,</span>
-<a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a><span class="w">                </span><span class="n">manager</span><span class="p">.</span><span class="na">getControllers</span><span class="p">().</span><span class="na">values</span><span class="p">(),</span>
-<a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a><span class="w">                </span><span class="n">PRenderTypes</span><span class="p">.</span><span class="na">RenderTypeProvider</span><span class="p">::</span><span class="n">trianglesGui</span><span class="p">,</span>
-<a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a><span class="w">                </span><span class="mh">0xFFFFFFFF</span><span class="p">,</span>
-<a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a><span class="w">                </span><span class="n">LightTexture</span><span class="p">.</span><span class="na">FULL_BRIGHT</span><span class="p">,</span>
-<a id="__codelineno-0-15" name="__codelineno-0-15" href="#__codelineno-0-15"></a><span class="w">                </span><span class="n">OverlayTexture</span><span class="p">.</span><span class="na">NO_OVERLAY</span><span class="p">,</span>
-<a id="__codelineno-0-16" name="__codelineno-0-16" href="#__codelineno-0-16"></a><span class="w">                </span><span class="n">partialTick</span><span class="p">);</span>
-<a id="__codelineno-0-17" name="__codelineno-0-17" href="#__codelineno-0-17"></a><span class="w">    </span><span class="p">}</span>
-<a id="__codelineno-0-18" name="__codelineno-0-18" href="#__codelineno-0-18"></a>
-<a id="__codelineno-0-19" name="__codelineno-0-19" href="#__codelineno-0-19"></a><span class="w">    </span><span class="n">poseStack</span><span class="p">.</span><span class="na">popPose</span><span class="p">();</span>
-<a id="__codelineno-0-20" name="__codelineno-0-20" href="#__codelineno-0-20"></a><span class="p">}</span>
+<h1 id="molang-animations">Molang animations<a class="headerlink" href="#molang-animations" title="Permanent link">&para;</a></h1>
+<p>PulseLib evaluates Molang expressions in Gecko animation vectors. A numeric vector component may therefore be written either as a JSON number or as a Molang string:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="p">{</span>
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="w">  </span><span class="nt">&quot;bones&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="w">    </span><span class="nt">&quot;head&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="w">      </span><span class="nt">&quot;rotation&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;math.sin(query.anim_time * 180) * 15&quot;</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">],</span>
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="w">      </span><span class="nt">&quot;position&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;query.vertical_offset&quot;</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">]</span>
+<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="w">    </span><span class="p">}</span>
+<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a><span class="w">  </span><span class="p">}</span>
+<a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a><span class="p">}</span>
 </code></pre></div>
-<p>Classes used:</p>
+<p>The Gecko parser compiles each string into a <code>MolangParser.Expression</code> while the model is loaded. It does not parse the source again every tick or for every bone. The compiled expression is evaluated when the current animation pose is mixed.</p>
+<h2 id="context-and-evaluation">Context and evaluation<a class="headerlink" href="#context-and-evaluation" title="Permanent link">&para;</a></h2>
+<p>Each built-in renderer creates one <code>MolangParser.Context</code> per animation controller for a render pass and passes that context to every bone mixed by that controller. This applies to entity, block entity, item, and item GUI rendering, including recursive GUI drawing.</p>
+<p>The renderer supplies these values by default:</p>
 <ul>
-<li><a href="https://github.com/ArcAnc/PulseLib/blob/master/src/main/java/com/arcanc/pulselib/content/renderer/PItemRenderer.java"><code>PItemRenderer</code></a></li>
-<li><a href="https://github.com/ArcAnc/PulseLib/blob/master/src/main/java/com/arcanc/pulselib/content/renderer/base/PItemRenderState.java"><code>PItemRenderState</code></a></li>
-<li><a href="https://github.com/ArcAnc/PulseLib/blob/master/src/main/java/com/arcanc/pulselib/content/model/baked/PBakedBone.java"><code>PBakedBone</code></a></li>
-<li><a href="https://github.com/ArcAnc/PulseLib/blob/master/src/main/java/com/arcanc/pulselib/content/renderer/PRenderQueue.java"><code>PRenderQueue</code></a></li>
+<li><code>query.anim_time</code> (also available as <code>q.anim_time</code>) is the controller's interpolated animation time in seconds.</li>
+<li><code>this</code> is supplied by the animation mixer from the accumulated value of the vector component currently being evaluated.</li>
+<li>The random generator is reset from <code>PAnimationManager.key()</code> for every prepared context. <code>math.random</code>, <code>math.random_integer</code>, <code>math.die_roll</code>, and <code>math.die_roll_integer</code> are therefore deterministic for the same animation-manager key and evaluation order.</li>
 </ul>
+<p>The context is deliberately prepared outside <code>PAnimationController</code>. A controller only mixes an animation with the ready context; it does not retain an animatable, a query provider, or a random seed.</p>
+<h2 id="providing-custom-queries">Providing custom queries<a class="headerlink" href="#providing-custom-queries" title="Permanent link">&para;</a></h2>
+<p>Override <code>populateMolangContext</code> in the renderer for the animatable type. The hook exists in <code>PEntityRenderer</code>, <code>PBlockRenderer</code>, and <code>PItemRenderer</code>.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="nd">@Override</span>
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="kd">protected</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">populateMolangContext</span><span class="p">(</span><span class="n">RobotEntity</span><span class="w"> </span><span class="n">robot</span><span class="p">,</span>
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="w">                                     </span><span class="n">PAnimationController</span><span class="o">&lt;</span><span class="n">RobotEntity</span><span class="o">&gt;</span><span class="w"> </span><span class="n">controller</span><span class="p">,</span>
+<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="w">                                     </span><span class="n">MolangParser</span><span class="p">.</span><span class="na">Context</span><span class="w"> </span><span class="n">context</span><span class="p">,</span>
+<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a><span class="w">                                     </span><span class="kt">float</span><span class="w"> </span><span class="n">partialTick</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a><span class="w">    </span><span class="n">context</span><span class="p">.</span><span class="na">query</span><span class="p">(</span><span class="s">&quot;ground_speed&quot;</span><span class="p">,</span><span class="w"> </span><span class="p">(</span><span class="kt">float</span><span class="p">)</span><span class="w"> </span><span class="n">robot</span><span class="p">.</span><span class="na">getDeltaMovement</span><span class="p">().</span><span class="na">horizontalDistance</span><span class="p">());</span>
+<a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a><span class="w">    </span><span class="n">context</span><span class="p">.</span><span class="na">query</span><span class="p">(</span><span class="s">&quot;is_active&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">robot</span><span class="p">.</span><span class="na">isActive</span><span class="p">()</span><span class="w"> </span><span class="o">?</span><span class="w"> </span><span class="mf">1f</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="mf">0f</span><span class="p">);</span>
+<a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a><span class="p">}</span>
+</code></pre></div>
+<p>The model can then use <code>q.ground_speed</code> and <code>query.is_active</code>. Query names are not globally predefined by PulseLib: a renderer exposes only the values appropriate for its animatable.</p>
+<p><code>MolangParser.Context</code> also exposes <code>query(...)</code>, <code>variable(...)</code>, <code>context(...)</code>, <code>thisValue(...)</code>, and <code>queryResolver(...)</code> for custom rendering paths that construct their own context.</p>
+<h2 id="language-surface">Language surface<a class="headerlink" href="#language-surface" title="Permanent link">&para;</a></h2>
+<p>The parser supports numeric literals, arithmetic, comparisons, logical operators, ternary expressions, statements, assignments to <code>temp.*</code> and <code>variable.*</code>, <code>return</code>, <code>loop</code>, and <code>break</code>. It resolves the <code>query.*</code>, <code>variable.*</code>, <code>temp.*</code>, and <code>context.*</code> namespaces and their usual short aliases (<code>q</code>, <code>v</code>, <code>t</code>, and <code>c</code>).</p>
+<p>Supported math functions include trigonometry, interpolation, clamping, rounding, powers, min/max, random and die-roll functions, plus the implemented <code>math.ease_*</code> variants. An unsupported function is reported as an error instead of silently evaluating to an arbitrary value.</p>
+<h2 id="current-limitation-variable-lifetime">Current limitation: <code>variable.*</code> lifetime<a class="headerlink" href="#current-limitation-variable-lifetime" title="Permanent link">&para;</a></h2>
+<blockquote>
+<p>TODO: move the per-controller <code>MolangParser.Context</code> ownership to <code>PAnimationManager</code> (or an equivalent animation-instance store).</p>
+</blockquote>
+<p>At present, renderers create a fresh context for each render pass. Consequently, an assignment to <code>variable.*</code> is available while that context is being evaluated, but does not persist into the next frame. This is intentionally documented as incomplete Molang behavior and must be addressed before relying on <code>variable.*</code> as long-lived animation state.</p>
 
 
 

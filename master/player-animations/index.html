@@ -10,13 +10,13 @@
       
       
       
-        <link rel="canonical" href="https://arcanc.github.io/PulseLib/master/entity-render-layers/">
+        <link rel="canonical" href="https://arcanc.github.io/PulseLib/master/player-animations/">
       
       
-        <link rel="prev" href="../pulselib-items/">
+        <link rel="prev" href="../armor-and-attachments/">
       
       
-        <link rel="next" href="../armor-and-attachments/">
+        <link rel="next" href="../gui-rendering/">
       
       
         
@@ -27,7 +27,7 @@
     
     
       
-        <title>Entity Render Layers - PulseLib</title>
+        <title>Player Animations - PulseLib</title>
       
     
     
@@ -78,7 +78,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#layer-class" class="md-skip">
+        <a href="#player-animations" class="md-skip">
           Skip to content
         </a>
       
@@ -116,7 +116,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Entity Render Layers
+              Player Animations
             
           </span>
         </div>
@@ -879,35 +879,10 @@
                 
   
   
-    
   
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Entity Render Layers
-  
-
-    
-  </span>
-  
-  
-
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../entity-render-layers/" class="md-nav__link">
         
   
   
@@ -923,68 +898,6 @@
   
 
       </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#layer-class" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Layer class
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#add-layer-to-renderer" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Add layer to renderer
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#bone-bindings" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Bone bindings
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#transform-and-appearance-hooks" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Transform and appearance hooks
-      
-    </span>
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
     </li>
   
 
@@ -1022,10 +935,37 @@
                 
   
   
+    
   
   
-    <li class="md-nav__item">
-      <a href="../player-animations/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Player Animations
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         
   
   
@@ -1041,6 +981,59 @@
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#bindings-and-masks" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Bindings and masks
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#blending-and-weights" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Blending and weights
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#model-conventions-and-limitations" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Model conventions and limitations
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -1213,6 +1206,8 @@
   
   
   
+    
+  
   
     <label class="md-nav__title" for="__toc">
       <span class="md-nav__icon md-icon"></span>
@@ -1221,10 +1216,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#layer-class" class="md-nav__link">
+  <a href="#bindings-and-masks" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Layer class
+        Bindings and masks
       
     </span>
   </a>
@@ -1232,10 +1227,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#add-layer-to-renderer" class="md-nav__link">
+  <a href="#blending-and-weights" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Add layer to renderer
+        Blending and weights
       
     </span>
   </a>
@@ -1243,21 +1238,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#bone-bindings" class="md-nav__link">
+  <a href="#model-conventions-and-limitations" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Bone bindings
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#transform-and-appearance-hooks" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Transform and appearance hooks
+        Model conventions and limitations
       
     </span>
   </a>
@@ -1284,74 +1268,85 @@
   
 
 
-  <h1>Entity Render Layers</h1>
-
-<p><a href="https://github.com/ArcAnc/PulseLib/blob/master/src/main/java/com/arcanc/pulselib/content/renderer/PEntityRenderLayer.java"><code>PEntityRenderLayer</code></a> renders an additional PulseLib model on top of a <a href="https://github.com/ArcAnc/PulseLib/blob/master/src/main/java/com/arcanc/pulselib/content/renderer/PEntityRenderer.java"><code>PEntityRenderer</code></a>.</p>
-<p>Layers are useful for armor pieces, equipment, accessories, conditional attachments, or model variants.</p>
-<h2 id="layer-class">Layer class<a class="headerlink" href="#layer-class" title="Permanent link">&para;</a></h2>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="kd">public</span><span class="w"> </span><span class="kd">class</span> <span class="nc">RobotChestLayer</span><span class="w"> </span><span class="kd">extends</span><span class="w"> </span><span class="n">PEntityRenderLayer</span><span class="o">&lt;</span><span class="n">RobotEntity</span><span class="p">,</span><span class="w"> </span><span class="n">PEntityRenderState</span><span class="p">.</span><span class="na">LivingImpl</span><span class="o">&lt;</span><span class="n">RobotEntity</span><span class="o">&gt;&gt;</span><span class="w"> </span><span class="p">{</span>
-<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="nf">RobotChestLayer</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
-<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="w">        </span><span class="kd">super</span><span class="p">(</span><span class="k">new</span><span class="w"> </span><span class="n">DefaultEntityLayerModelData</span><span class="p">.</span><span class="na">DefaultEntityLayerModelDataBuilder</span><span class="p">(</span>
-<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="w">                        </span><span class="n">MyEntities</span><span class="p">.</span><span class="na">ROBOT</span><span class="p">.</span><span class="na">getId</span><span class="p">(),</span>
-<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="w">                        </span><span class="n">Identifier</span><span class="p">.</span><span class="na">fromNamespaceAndPath</span><span class="p">(</span><span class="s">&quot;examplemod&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;armor&quot;</span><span class="p">))</span>
-<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="w">                        </span><span class="p">.</span><span class="na">build</span><span class="p">(),</span>
-<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a><span class="w">                </span><span class="n">PRenderTypes</span><span class="p">.</span><span class="na">RenderTypeProvider</span><span class="p">::</span><span class="n">trianglesSolid</span><span class="p">);</span>
-<a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a><span class="w">    </span><span class="p">}</span>
+<h1 id="player-animations">Player animations<a class="headerlink" href="#player-animations" title="Permanent link">&para;</a></h1>
+<p>Player animations modify the vanilla player model after Minecraft has prepared its normal walk, swim, crouch, and item-use pose. They work for both classic and slim skins, including hats, jackets, sleeves, and pants layers.</p>
+<p>The API is client-only. Register definitions on the mod event bus through <code>PulseLibEvents.PlayerAnimationRegistrationEvent</code>:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nd">@Mod.EventBusSubscriber</span><span class="p">(</span><span class="n">modid</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ExampleMod</span><span class="p">.</span><span class="na">MOD_ID</span><span class="p">,</span>
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="w">        </span><span class="n">bus</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Mod</span><span class="p">.</span><span class="na">EventBusSubscriber</span><span class="p">.</span><span class="na">Bus</span><span class="p">.</span><span class="na">MOD</span><span class="p">,</span>
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="w">        </span><span class="n">value</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Dist</span><span class="p">.</span><span class="na">CLIENT</span><span class="p">)</span>
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="kd">public</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="kd">class</span> <span class="nc">ExamplePlayerAnimations</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">PModelData</span><span class="w"> </span><span class="n">COMBAT_MODEL</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">PModelData</span><span class="p">.</span><span class="na">Builder</span><span class="p">(</span>
+<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="w">            </span><span class="n">ResourceLocation</span><span class="p">.</span><span class="na">fromNamespaceAndPath</span><span class="p">(</span><span class="n">ExampleMod</span><span class="p">.</span><span class="na">MOD_ID</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;player/combat&quot;</span><span class="p">),</span>
+<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a><span class="w">            </span><span class="s">&quot;player&quot;</span><span class="p">,</span>
+<a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a><span class="w">            </span><span class="n">PGeckoModelLoader</span><span class="p">.</span><span class="na">INSTANCE</span><span class="p">.</span><span class="na">id</span><span class="p">()).</span><span class="na">build</span><span class="p">();</span>
 <a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a>
-<a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a><span class="w">    </span><span class="nd">@Override</span>
-<a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a><span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kt">boolean</span><span class="w"> </span><span class="nf">shouldRender</span><span class="p">(</span><span class="n">PEntityRenderState</span><span class="p">.</span><span class="na">LivingImpl</span><span class="o">&lt;</span><span class="n">RobotEntity</span><span class="o">&gt;</span><span class="w"> </span><span class="n">renderState</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
-<a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a><span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">renderState</span><span class="p">.</span><span class="na">getAnimatable</span><span class="p">().</span><span class="na">hasChestPlate</span><span class="p">();</span>
-<a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a><span class="w">    </span><span class="p">}</span>
-<a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a><span class="p">}</span>
+<a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a><span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">PRawAnimation</span><span class="w"> </span><span class="n">IDLE</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">PRawAnimation</span><span class="p">.</span><span class="na">begin</span><span class="p">()</span>
+<a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a><span class="w">            </span><span class="p">.</span><span class="na">thenLoop</span><span class="p">(</span><span class="s">&quot;animation.combat.idle&quot;</span><span class="p">)</span>
+<a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a><span class="w">            </span><span class="p">.</span><span class="na">build</span><span class="p">();</span>
+<a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a>
+<a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a><span class="w">    </span><span class="nd">@SubscribeEvent</span>
+<a id="__codelineno-0-15" name="__codelineno-0-15" href="#__codelineno-0-15"></a><span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">register</span><span class="p">(</span><span class="n">PulseLibEvents</span><span class="p">.</span><span class="na">PlayerAnimationRegistrationEvent</span><span class="w"> </span><span class="n">event</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-0-16" name="__codelineno-0-16" href="#__codelineno-0-16"></a><span class="w">        </span><span class="n">event</span><span class="p">.</span><span class="na">registration</span><span class="p">().</span><span class="na">register</span><span class="p">(</span>
+<a id="__codelineno-0-17" name="__codelineno-0-17" href="#__codelineno-0-17"></a><span class="w">                </span><span class="n">ResourceLocation</span><span class="p">.</span><span class="na">fromNamespaceAndPath</span><span class="p">(</span><span class="n">ExampleMod</span><span class="p">.</span><span class="na">MOD_ID</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;combat_pose&quot;</span><span class="p">),</span>
+<a id="__codelineno-0-18" name="__codelineno-0-18" href="#__codelineno-0-18"></a><span class="w">                </span><span class="n">PPlayerAnimationDefinition</span><span class="p">.</span><span class="na">builder</span><span class="p">(</span><span class="n">COMBAT_MODEL</span><span class="p">)</span>
+<a id="__codelineno-0-19" name="__codelineno-0-19" href="#__codelineno-0-19"></a><span class="w">                        </span><span class="p">.</span><span class="na">when</span><span class="p">(</span><span class="n">player</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">player</span><span class="p">.</span><span class="na">getMainHandItem</span><span class="p">().</span><span class="na">is</span><span class="p">(</span><span class="n">MyItems</span><span class="p">.</span><span class="na">KATANA</span><span class="p">.</span><span class="na">get</span><span class="p">()))</span>
+<a id="__codelineno-0-20" name="__codelineno-0-20" href="#__codelineno-0-20"></a><span class="w">                        </span><span class="p">.</span><span class="na">bind</span><span class="p">(</span><span class="n">PPlayerPart</span><span class="p">.</span><span class="na">BODY</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;body&quot;</span><span class="p">)</span>
+<a id="__codelineno-0-21" name="__codelineno-0-21" href="#__codelineno-0-21"></a><span class="w">                        </span><span class="p">.</span><span class="na">bind</span><span class="p">(</span><span class="n">PPlayerPart</span><span class="p">.</span><span class="na">RIGHT_ARM</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;right_arm&quot;</span><span class="p">)</span>
+<a id="__codelineno-0-22" name="__codelineno-0-22" href="#__codelineno-0-22"></a><span class="w">                        </span><span class="p">.</span><span class="na">mask</span><span class="p">(</span><span class="n">PPlayerPart</span><span class="p">.</span><span class="na">BODY</span><span class="p">,</span><span class="w"> </span><span class="n">PPlayerPart</span><span class="p">.</span><span class="na">RIGHT_ARM</span><span class="p">)</span>
+<a id="__codelineno-0-23" name="__codelineno-0-23" href="#__codelineno-0-23"></a><span class="w">                        </span><span class="p">.</span><span class="na">blendMode</span><span class="p">(</span><span class="n">PPlayerAnimationBlendMode</span><span class="p">.</span><span class="na">ADDITIVE</span><span class="p">)</span>
+<a id="__codelineno-0-24" name="__codelineno-0-24" href="#__codelineno-0-24"></a><span class="w">                        </span><span class="p">.</span><span class="na">weight</span><span class="p">(</span><span class="mf">0.75f</span><span class="p">)</span>
+<a id="__codelineno-0-25" name="__codelineno-0-25" href="#__codelineno-0-25"></a><span class="w">                        </span><span class="p">.</span><span class="na">controllers</span><span class="p">(</span><span class="n">registrar</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">registrar</span><span class="p">.</span><span class="na">add</span><span class="p">(</span><span class="s">&quot;combat&quot;</span><span class="p">,</span><span class="w"> </span><span class="p">()</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">state</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-0-26" name="__codelineno-0-26" href="#__codelineno-0-26"></a><span class="w">                            </span><span class="n">state</span><span class="p">.</span><span class="na">controller</span><span class="p">().</span><span class="na">play</span><span class="p">(</span><span class="n">IDLE</span><span class="p">);</span>
+<a id="__codelineno-0-27" name="__codelineno-0-27" href="#__codelineno-0-27"></a><span class="w">                            </span><span class="k">return</span><span class="w"> </span><span class="n">ControllerState</span><span class="p">.</span><span class="na">PLAY</span><span class="p">;</span>
+<a id="__codelineno-0-28" name="__codelineno-0-28" href="#__codelineno-0-28"></a><span class="w">                        </span><span class="p">}))</span>
+<a id="__codelineno-0-29" name="__codelineno-0-29" href="#__codelineno-0-29"></a><span class="w">                        </span><span class="p">.</span><span class="na">build</span><span class="p">());</span>
+<a id="__codelineno-0-30" name="__codelineno-0-30" href="#__codelineno-0-30"></a><span class="w">    </span><span class="p">}</span>
+<a id="__codelineno-0-31" name="__codelineno-0-31" href="#__codelineno-0-31"></a><span class="p">}</span>
 </code></pre></div>
-<h2 id="add-layer-to-renderer">Add layer to renderer<a class="headerlink" href="#add-layer-to-renderer" title="Permanent link">&para;</a></h2>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="kd">public</span><span class="w"> </span><span class="kd">class</span> <span class="nc">RobotRenderer</span><span class="w"> </span><span class="kd">extends</span><span class="w"> </span><span class="n">PEntityRenderer</span><span class="o">&lt;</span><span class="n">RobotEntity</span><span class="p">,</span><span class="w"> </span><span class="n">PEntityRenderState</span><span class="p">.</span><span class="na">LivingImpl</span><span class="o">&lt;</span><span class="n">RobotEntity</span><span class="o">&gt;&gt;</span><span class="w"> </span><span class="p">{</span>
-<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="nf">RobotRenderer</span><span class="p">(</span><span class="n">EntityRendererProvider</span><span class="p">.</span><span class="na">Context</span><span class="w"> </span><span class="n">context</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
-<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="w">        </span><span class="kd">super</span><span class="p">(</span><span class="n">context</span><span class="p">,</span><span class="w"> </span><span class="n">ROBOT_MODEL_DATA</span><span class="p">,</span><span class="w"> </span><span class="n">PRenderTypes</span><span class="p">.</span><span class="na">RenderTypeProvider</span><span class="p">::</span><span class="n">trianglesSolid</span><span class="p">);</span>
-<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>
-<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a><span class="w">        </span><span class="n">addRenderLayer</span><span class="p">(</span><span class="s">&quot;body&quot;</span><span class="p">,</span>
-<a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a><span class="w">                </span><span class="k">new</span><span class="w"> </span><span class="n">RobotChestLayer</span><span class="p">()</span>
-<a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a><span class="w">                        </span><span class="p">.</span><span class="na">bindBone</span><span class="p">(</span><span class="s">&quot;armor_body&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;body&quot;</span><span class="p">)</span>
-<a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a><span class="w">                        </span><span class="p">.</span><span class="na">bindBone</span><span class="p">(</span><span class="s">&quot;armor_head&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;head&quot;</span><span class="p">));</span>
-<a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a><span class="w">    </span><span class="p">}</span>
-<a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a><span class="p">}</span>
+<p>The example uses the Gecko loader. Register <code>PGeckoModelLoader.INSTANCE</code> with <code>PModelCache</code> before the first client resource reload, as described in <a href="../model-loaders/">Model loaders</a>, or use a glTF skeleton instead.</p>
+<p>Controllers receive a <code>PPlayerAnimationInstance</code> as their animatable. Use <code>state.animatable().player()</code> to read the current player. PulseLib creates one instance for every <code>(player UUID, definition id)</code> pair, so remote players and multiple definitions never share a controller timeline.</p>
+<p>Only players currently tracked by the client are ticked. A player visible merely in the multiplayer tab list has no client entity and does not allocate animation state.</p>
+<p>For a client packet handler or another explicit client action, use a runtime handle instead of reaching into an animation manager:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="n">PPlayerAnimationHandle</span><span class="w"> </span><span class="n">animation</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">PPlayerAnimations</span><span class="p">.</span><span class="na">getHandle</span><span class="p">(</span><span class="n">player</span><span class="p">,</span><span class="w"> </span><span class="n">COMBAT_POSE_ID</span><span class="p">);</span>
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">animation</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="kc">null</span><span class="p">)</span>
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="w">    </span><span class="n">animation</span><span class="p">.</span><span class="na">play</span><span class="p">(</span><span class="s">&quot;combat&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">ATTACK</span><span class="p">);</span>
 </code></pre></div>
-<p><code>addRenderLayer(anchorBoneName, layer)</code> attaches the layer at the named bone on the base model.</p>
-<h2 id="bone-bindings">Bone bindings<a class="headerlink" href="#bone-bindings" title="Permanent link">&para;</a></h2>
-<p>Layer bone bindings copy base entity bone poses into layer bones:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="k">new</span><span class="w"> </span><span class="n">RobotChestLayer</span><span class="p">()</span>
-<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="w">        </span><span class="p">.</span><span class="na">bindBone</span><span class="p">(</span><span class="s">&quot;layer_right_arm&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;right_arm&quot;</span><span class="p">)</span>
-<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="w">        </span><span class="p">.</span><span class="na">bindMatchingBone</span><span class="p">(</span><span class="s">&quot;head&quot;</span><span class="p">)</span>
-<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="w">        </span><span class="p">.</span><span class="na">bindMatchingBones</span><span class="p">(</span><span class="s">&quot;left_leg&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;right_leg&quot;</span><span class="p">);</span>
+<p><code>play</code>, <code>stop</code>, <code>pause</code>, <code>resume</code>, <code>stopAll</code>, and state checks address a named controller. <code>controller(name)</code> is available for advanced controller-specific operations without exposing an <code>AnimManagerKey</code>. Game-state synchronization itself remains the owning mod's responsibility.</p>
+<h2 id="bindings-and-masks">Bindings and masks<a class="headerlink" href="#bindings-and-masks" title="Permanent link">&para;</a></h2>
+<p><code>bind(part, boneName)</code> maps a bone in the animation model to a semantic player part. <code>PPlayerPart</code> values are <code>ROOT</code>, <code>HEAD</code>, <code>BODY</code>, <code>RIGHT_ARM</code>, <code>LEFT_ARM</code>, <code>RIGHT_LEG</code>, and <code>LEFT_LEG</code>.</p>
+<p><code>ROOT</code> applies the bone transform to the complete third-person player render, including its feature layers. Use it for an emote that moves or rotates the whole player, such as a flip. <code>rootPivot(x, y, z)</code> selects its rotation pivot in model-space blocks; a value close to <code>(0, 0.9, 0)</code> rotates around the centre of a standing player. In first person, <code>ROOT</code> and <code>HEAD</code> also drive the local camera. An empty off-hand is rendered when its <code>LEFT_ARM</code> or <code>RIGHT_ARM</code> binding has an active sampled transform.</p>
+<p>Each semantic part applies to both the base part and the matching outer skin layer. For example, <code>RIGHT_ARM</code> transforms <code>rightArm</code> and <code>rightSleeve</code> together.</p>
+<p><code>mask(...)</code> is an explicit allow-list. It is useful when one skeleton contains more animated bones than a particular definition should own. If it is not supplied, every bound part is enabled. A dynamic mask can decide independently for every part and render frame:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="p">.</span><span class="na">mask</span><span class="p">((</span><span class="n">player</span><span class="p">,</span><span class="w"> </span><span class="n">part</span><span class="p">,</span><span class="w"> </span><span class="n">partialTick</span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span>
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="w">        </span><span class="n">part</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="n">PPlayerPart</span><span class="p">.</span><span class="na">HEAD</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="o">!</span><span class="n">player</span><span class="p">.</span><span class="na">isUsingItem</span><span class="p">())</span>
 </code></pre></div>
-<p>Use this when the layer model should follow animated limbs from the base model.</p>
-<h2 id="transform-and-appearance-hooks">Transform and appearance hooks<a class="headerlink" href="#transform-and-appearance-hooks" title="Permanent link">&para;</a></h2>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="n">RobotChestLayer</span><span class="w"> </span><span class="n">layer</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">RobotChestLayer</span><span class="p">();</span>
-<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="n">layer</span><span class="p">.</span><span class="na">setOffset</span><span class="p">(</span><span class="k">new</span><span class="w"> </span><span class="n">Vector3f</span><span class="p">(</span><span class="mf">0.0f</span><span class="p">,</span><span class="w"> </span><span class="mf">0.05f</span><span class="p">,</span><span class="w"> </span><span class="mf">0.0f</span><span class="p">));</span>
-<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="n">layer</span><span class="p">.</span><span class="na">setRotation</span><span class="p">(</span><span class="k">new</span><span class="w"> </span><span class="n">Quaternionf</span><span class="p">().</span><span class="na">rotationXYZ</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">));</span>
-<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="n">layer</span><span class="p">.</span><span class="na">setScale</span><span class="p">(</span><span class="k">new</span><span class="w"> </span><span class="n">Vector3f</span><span class="p">(</span><span class="mf">1.05f</span><span class="p">,</span><span class="w"> </span><span class="mf">1.05f</span><span class="p">,</span><span class="w"> </span><span class="mf">1.05f</span><span class="p">));</span>
-</code></pre></div>
-<p>Override appearance hooks:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="nd">@Override</span>
-<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="kd">public</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="nf">getColor</span><span class="p">(</span><span class="n">PEntityRenderState</span><span class="p">.</span><span class="na">LivingImpl</span><span class="o">&lt;</span><span class="n">RobotEntity</span><span class="o">&gt;</span><span class="w"> </span><span class="n">renderState</span><span class="p">,</span>
-<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="w">                    </span><span class="n">PBakedBone</span><span class="w"> </span><span class="n">bone</span><span class="p">,</span>
-<a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a><span class="w">                    </span><span class="n">PBakedMesh</span><span class="w"> </span><span class="n">mesh</span><span class="p">,</span>
-<a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a><span class="w">                    </span><span class="kt">int</span><span class="w"> </span><span class="n">packedColor</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
-<a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a><span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">renderState</span><span class="p">.</span><span class="na">getAnimatable</span><span class="p">().</span><span class="na">isPowered</span><span class="p">()</span><span class="w"> </span><span class="o">?</span><span class="w"> </span><span class="mh">0xFF80FFFF</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="n">packedColor</span><span class="p">;</span>
-<a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a><span class="p">}</span>
-<a id="__codelineno-4-8" name="__codelineno-4-8" href="#__codelineno-4-8"></a>
-<a id="__codelineno-4-9" name="__codelineno-4-9" href="#__codelineno-4-9"></a><span class="nd">@Override</span>
-<a id="__codelineno-4-10" name="__codelineno-4-10" href="#__codelineno-4-10"></a><span class="kd">public</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="nf">getPackedLight</span><span class="p">(</span><span class="n">PEntityRenderState</span><span class="p">.</span><span class="na">LivingImpl</span><span class="o">&lt;</span><span class="n">RobotEntity</span><span class="o">&gt;</span><span class="w"> </span><span class="n">renderState</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">packedLight</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
-<a id="__codelineno-4-11" name="__codelineno-4-11" href="#__codelineno-4-11"></a><span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">renderState</span><span class="p">.</span><span class="na">getAnimatable</span><span class="p">().</span><span class="na">isPowered</span><span class="p">()</span><span class="w"> </span><span class="o">?</span><span class="w"> </span><span class="n">LightTexture</span><span class="p">.</span><span class="na">FULL_BRIGHT</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="n">packedLight</span><span class="p">;</span>
-<a id="__codelineno-4-12" name="__codelineno-4-12" href="#__codelineno-4-12"></a><span class="p">}</span>
-</code></pre></div>
-<p>Classes used:</p>
+<h2 id="blending-and-weights">Blending and weights<a class="headerlink" href="#blending-and-weights" title="Permanent link">&para;</a></h2>
+<p>Definitions run in ascending <code>priority</code>; registrations with the same priority are ordered by their id.</p>
 <ul>
-<li><a href="https://github.com/ArcAnc/PulseLib/blob/master/src/main/java/com/arcanc/pulselib/content/renderer/PEntityRenderLayer.java"><code>PEntityRenderLayer</code></a></li>
-<li><a href="https://github.com/ArcAnc/PulseLib/blob/master/src/main/java/com/arcanc/pulselib/content/renderer/modelData/DefaultEntityLayerModelData.java"><code>DefaultEntityLayerModelData</code></a></li>
-<li><a href="https://github.com/ArcAnc/PulseLib/blob/master/src/main/java/com/arcanc/pulselib/content/model/baked/PBakedBone.java"><code>PBakedBone</code></a></li>
-<li><a href="https://github.com/ArcAnc/PulseLib/blob/master/src/main/java/com/arcanc/pulselib/content/model/baked/PBakedMesh.java"><code>PBakedMesh</code></a></li>
+<li><code>ADDITIVE</code> adds the sampled position and rotation to the pose already produced by vanilla and earlier definitions. This is the default and works well for recoil, breathing, and gestures.</li>
+<li><code>REPLACE</code> blends from the original vanilla pose to the sampled pose. It is suitable for emotes or stances that should override vanilla limb motion.</li>
 </ul>
+<p>The definition weight is clamped to <code>[0, 1]</code>. A constant weight is sufficient for most cases:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="p">.</span><span class="na">weight</span><span class="p">(</span><span class="mf">0.4f</span><span class="p">)</span>
+</code></pre></div>
+<p>For a dynamic blend, provide a function evaluated every render pass:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="p">.</span><span class="na">weight</span><span class="p">((</span><span class="n">player</span><span class="p">,</span><span class="w"> </span><span class="n">partialTick</span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">player</span><span class="p">.</span><span class="na">isCrouching</span><span class="p">()</span><span class="w"> </span><span class="o">?</span><span class="w"> </span><span class="mf">1.0f</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="mf">0.25f</span><span class="p">)</span>
+</code></pre></div>
+<p><code>partWeight(...)</code> multiplies that definition weight only for the selected part. It accepts either a constant or the same dynamic weight function:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="p">.</span><span class="na">weight</span><span class="p">(</span><span class="mf">0.8f</span><span class="p">)</span>
+<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a><span class="p">.</span><span class="na">partWeight</span><span class="p">(</span><span class="n">PPlayerPart</span><span class="p">.</span><span class="na">HEAD</span><span class="p">,</span><span class="w"> </span><span class="mf">0.25f</span><span class="p">)</span>
+<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a><span class="p">.</span><span class="na">partWeight</span><span class="p">(</span><span class="n">PPlayerPart</span><span class="p">.</span><span class="na">RIGHT_ARM</span><span class="p">,</span>
+<a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a><span class="w">        </span><span class="p">(</span><span class="n">player</span><span class="p">,</span><span class="w"> </span><span class="n">partialTick</span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">player</span><span class="p">.</span><span class="na">isUsingItem</span><span class="p">()</span><span class="w"> </span><span class="o">?</span><span class="w"> </span><span class="mf">1.0f</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="mf">0.0f</span><span class="p">)</span>
+</code></pre></div>
+<p>Layer several definitions with different masks, priorities, modes, definition weights, and part weights to combine independent actions.</p>
+<h2 id="model-conventions-and-limitations">Model conventions and limitations<a class="headerlink" href="#model-conventions-and-limitations" title="Permanent link">&para;</a></h2>
+<p>The model only needs a skeleton and animations; mesh data is optional. Bone positions from Gecko animations are converted from blocks to vanilla model pixels automatically. Rotation, position, and scale channels are supported. The skeleton resolver evaluates bind pose and parent transforms; a bound child therefore inherits transforms of intermediate animation bones. A bound <code>ROOT</code> is applied once to the render stack and is excluded from child deltas.</p>
+<p>The API affects the whole player model in third person and arms in first person. It restores position, rotation, and scale immediately after every draw, preventing a pose from leaking into a different player or another render layer.</p>
+<p><code>populateMolangContext(...)</code> can add player-specific Molang queries:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="p">.</span><span class="na">populateMolangContext</span><span class="p">((</span><span class="n">player</span><span class="p">,</span><span class="w"> </span><span class="n">instance</span><span class="p">,</span><span class="w"> </span><span class="n">controller</span><span class="p">,</span><span class="w"> </span><span class="n">context</span><span class="p">,</span><span class="w"> </span><span class="n">partialTick</span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span>
+<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a><span class="w">        </span><span class="n">context</span><span class="p">.</span><span class="na">query</span><span class="p">(</span><span class="s">&quot;is_sneaking&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">player</span><span class="p">.</span><span class="na">isCrouching</span><span class="p">()</span><span class="w"> </span><span class="o">?</span><span class="w"> </span><span class="mf">1.0f</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="mf">0.0f</span><span class="p">))</span>
+</code></pre></div>
+<p>As with other client-side animation state, multiplayer gameplay events are the owning mod's responsibility to synchronize. The animation definition observes only state available on that client.</p>
 
 
 
