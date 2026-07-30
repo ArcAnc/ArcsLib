@@ -10,13 +10,9 @@
       
       
       
-        <link rel="canonical" href="https://arcanc.github.io/PulseLib/1.21.1/renderers/">
+        <link rel="canonical" href="https://arcanc.github.io/PulseLib/1.21.1/molang-animations/">
       
       
-        <link rel="prev" href="../animation-events/">
-      
-      
-        <link rel="next" href="../render-types-and-queue/">
       
       
         
@@ -27,7 +23,7 @@
     
     
       
-        <title>Renderers - PulseLib</title>
+        <title>Molang animations - PulseLib</title>
       
     
     
@@ -78,7 +74,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#molang-context" class="md-skip">
+        <a href="#molang-animations" class="md-skip">
           Skip to content
         </a>
       
@@ -116,7 +112,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Renderers
+              Molang animations
             
           </span>
         </div>
@@ -233,12 +229,10 @@
   
   
   
-    
-  
   
     
     
-      <li class="md-tabs__item md-tabs__item--active">
+      <li class="md-tabs__item">
         <a href="../modeldata/" class="md-tabs__link">
           
   
@@ -511,31 +505,26 @@
       
   
   
-    
   
   
-  
     
     
     
     
-      
-        
-        
       
       
         
       
     
     
-    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" checked>
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
         
           
-          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="">
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
             
   
   
@@ -553,7 +542,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="true">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
           <label class="md-nav__title" for="__nav_2">
             <span class="md-nav__icon md-icon"></span>
             
@@ -652,35 +641,10 @@
                 
   
   
-    
   
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Renderers
-  
-
-    
-  </span>
-  
-  
-
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../renderers/" class="md-nav__link">
         
   
   
@@ -696,79 +660,6 @@
   
 
       </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#molang-context" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Molang context
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#block-renderer" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Block renderer
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#item-renderer" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Item renderer
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#entity-renderer" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Entity renderer
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#render-type-requirement" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Render type requirement
-      
-    </span>
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
     </li>
   
 
@@ -1196,6 +1087,8 @@
   
   
   
+    
+  
   
     <label class="md-nav__title" for="__toc">
       <span class="md-nav__icon md-icon"></span>
@@ -1204,10 +1097,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#molang-context" class="md-nav__link">
+  <a href="#context-and-evaluation" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Molang context
+        Context and evaluation
       
     </span>
   </a>
@@ -1215,10 +1108,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#block-renderer" class="md-nav__link">
+  <a href="#providing-custom-queries" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Block renderer
+        Providing custom queries
       
     </span>
   </a>
@@ -1226,10 +1119,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#item-renderer" class="md-nav__link">
+  <a href="#language-surface" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Item renderer
+        Language surface
       
     </span>
   </a>
@@ -1237,21 +1130,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#entity-renderer" class="md-nav__link">
+  <a href="#current-limitation-variable-lifetime" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Entity renderer
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#render-type-requirement" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Render type requirement
+        Current limitation: variable.* lifetime
       
     </span>
   </a>
@@ -1278,70 +1160,48 @@
   
 
 
-  <h1>Renderers</h1>
-
-<p>A PulseLib renderer is the bridge between Minecraft's render call and PulseLib's baked animated model. It gets the current animatable, asks for model data, binds the animation manager to the baked model, and submits every posed bone to the render queue.</p>
-<p>All built-in renderers implement <a href="https://github.com/ArcAnc/PulseLib/blob/master/src/main/java/com/arcanc/pulselib/content/renderer/PRenderer.java"><code>PRenderer</code></a> and use the same submit lifecycle:</p>
-<ul>
-<li><code>preSubmit(...)</code> - hook before PulseLib submits model meshes.</li>
-<li><code>trueSubmit(...)</code> - default PulseLib model submission.</li>
-<li><code>postSubmit(...)</code> - hook after model submission.</li>
-</ul>
-<p>Most custom renderers only need a constructor. Override <code>preSubmit</code> or <code>postSubmit</code> when you need to draw something extra around the PulseLib model.</p>
-<h2 id="molang-context">Molang context<a class="headerlink" href="#molang-context" title="Permanent link">&para;</a></h2>
-<p>The built-in entity, block entity, and item renderers prepare a Molang context once per controller and render pass, then reuse it for all mixed bones. Override <code>populateMolangContext(...)</code> to add renderer-specific <code>query.*</code> values. The full API and the current <code>variable.*</code> lifetime limitation are documented in <a href="../molang-animations/">Molang animations</a>.</p>
-<h2 id="block-renderer">Block renderer<a class="headerlink" href="#block-renderer" title="Permanent link">&para;</a></h2>
-<p>Use <a href="https://github.com/ArcAnc/PulseLib/blob/master/src/main/java/com/arcanc/pulselib/content/renderer/PBlockRenderer.java"><code>PBlockRenderer</code></a> for block entities. The block itself should hide vanilla rendering; the block entity renderer becomes the visible model.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="kd">public</span><span class="w"> </span><span class="kd">class</span> <span class="nc">CrusherRenderer</span><span class="w"> </span><span class="kd">extends</span><span class="w"> </span><span class="n">PBlockRenderer</span><span class="o">&lt;</span><span class="n">CrusherBlockEntity</span><span class="o">&gt;</span><span class="w"> </span><span class="p">{</span>
-<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="nf">CrusherRenderer</span><span class="p">(</span><span class="n">BlockEntityRendererProvider</span><span class="p">.</span><span class="na">Context</span><span class="w"> </span><span class="n">context</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
-<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="w">        </span><span class="kd">super</span><span class="p">(</span><span class="k">new</span><span class="w"> </span><span class="n">DefaultBlockModelData</span><span class="p">.</span><span class="na">DefaultBlockModelDataBuilder</span><span class="p">(</span>
-<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="w">                        </span><span class="n">ResourceLocation</span><span class="p">.</span><span class="na">fromNamespaceAndPath</span><span class="p">(</span><span class="s">&quot;examplemod&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;crusher&quot;</span><span class="p">))</span>
-<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="w">                        </span><span class="p">.</span><span class="na">build</span><span class="p">(),</span>
-<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="w">                </span><span class="n">PRenderTypes</span><span class="p">.</span><span class="na">RenderTypeProvider</span><span class="p">::</span><span class="n">trianglesCutout</span><span class="p">);</span>
-<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a><span class="w">    </span><span class="p">}</span>
+<h1 id="molang-animations">Molang animations<a class="headerlink" href="#molang-animations" title="Permanent link">&para;</a></h1>
+<p>PulseLib evaluates Molang expressions in Gecko animation vectors. A numeric vector component may therefore be written either as a JSON number or as a Molang string:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="p">{</span>
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="w">  </span><span class="nt">&quot;bones&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="w">    </span><span class="nt">&quot;head&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="w">      </span><span class="nt">&quot;rotation&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;math.sin(query.anim_time * 180) * 15&quot;</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">],</span>
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="w">      </span><span class="nt">&quot;position&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;query.vertical_offset&quot;</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">]</span>
+<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="w">    </span><span class="p">}</span>
+<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a><span class="w">  </span><span class="p">}</span>
 <a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a><span class="p">}</span>
 </code></pre></div>
-<p>Register it through NeoForge:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="nd">@SubscribeEvent</span>
-<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="kd">public</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">registerRenderers</span><span class="p">(</span><span class="n">EntityRenderersEvent</span><span class="p">.</span><span class="na">RegisterRenderers</span><span class="w"> </span><span class="n">event</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
-<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="w">    </span><span class="n">event</span><span class="p">.</span><span class="na">registerBlockEntityRenderer</span><span class="p">(</span><span class="n">MyBlockEntities</span><span class="p">.</span><span class="na">CRUSHER</span><span class="p">.</span><span class="na">get</span><span class="p">(),</span><span class="w"> </span><span class="n">CrusherRenderer</span><span class="p">::</span><span class="k">new</span><span class="p">);</span>
-<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="p">}</span>
+<p>The Gecko parser compiles each string into a <code>MolangParser.Expression</code> while the model is loaded. It does not parse the source again every tick or for every bone. The compiled expression is evaluated when the current animation pose is mixed.</p>
+<h2 id="context-and-evaluation">Context and evaluation<a class="headerlink" href="#context-and-evaluation" title="Permanent link">&para;</a></h2>
+<p>Each built-in renderer creates one <code>MolangParser.Context</code> per animation controller for a render pass and passes that context to every bone mixed by that controller. This applies to entity, block entity, item, and item GUI rendering, including recursive GUI drawing.</p>
+<p>The renderer supplies these values by default:</p>
+<ul>
+<li><code>query.anim_time</code> (also available as <code>q.anim_time</code>) is the controller's interpolated animation time in seconds.</li>
+<li><code>this</code> is supplied by the animation mixer from the accumulated value of the vector component currently being evaluated.</li>
+<li>The random generator is reset from <code>PAnimationManager.key()</code> for every prepared context. <code>math.random</code>, <code>math.random_integer</code>, <code>math.die_roll</code>, and <code>math.die_roll_integer</code> are therefore deterministic for the same animation-manager key and evaluation order.</li>
+</ul>
+<p>The context is deliberately prepared outside <code>PAnimationController</code>. A controller only mixes an animation with the ready context; it does not retain an animatable, a query provider, or a random seed.</p>
+<h2 id="providing-custom-queries">Providing custom queries<a class="headerlink" href="#providing-custom-queries" title="Permanent link">&para;</a></h2>
+<p>Override <code>populateMolangContext</code> in the renderer for the animatable type. The hook exists in <code>PEntityRenderer</code>, <code>PBlockRenderer</code>, and <code>PItemRenderer</code>.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="nd">@Override</span>
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="kd">protected</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">populateMolangContext</span><span class="p">(</span><span class="n">RobotEntity</span><span class="w"> </span><span class="n">robot</span><span class="p">,</span>
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="w">                                     </span><span class="n">PAnimationController</span><span class="o">&lt;</span><span class="n">RobotEntity</span><span class="o">&gt;</span><span class="w"> </span><span class="n">controller</span><span class="p">,</span>
+<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="w">                                     </span><span class="n">MolangParser</span><span class="p">.</span><span class="na">Context</span><span class="w"> </span><span class="n">context</span><span class="p">,</span>
+<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a><span class="w">                                     </span><span class="kt">float</span><span class="w"> </span><span class="n">partialTick</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a><span class="w">    </span><span class="n">context</span><span class="p">.</span><span class="na">query</span><span class="p">(</span><span class="s">&quot;ground_speed&quot;</span><span class="p">,</span><span class="w"> </span><span class="p">(</span><span class="kt">float</span><span class="p">)</span><span class="w"> </span><span class="n">robot</span><span class="p">.</span><span class="na">getDeltaMovement</span><span class="p">().</span><span class="na">horizontalDistance</span><span class="p">());</span>
+<a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a><span class="w">    </span><span class="n">context</span><span class="p">.</span><span class="na">query</span><span class="p">(</span><span class="s">&quot;is_active&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">robot</span><span class="p">.</span><span class="na">isActive</span><span class="p">()</span><span class="w"> </span><span class="o">?</span><span class="w"> </span><span class="mf">1f</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="mf">0f</span><span class="p">);</span>
+<a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a><span class="p">}</span>
 </code></pre></div>
-<h2 id="item-renderer">Item renderer<a class="headerlink" href="#item-renderer" title="Permanent link">&para;</a></h2>
-<p>Use <a href="https://github.com/ArcAnc/PulseLib/blob/master/src/main/java/com/arcanc/pulselib/content/renderer/PItemRenderer.java"><code>PItemRenderer</code></a> when the item model needs real animation instead of a static baked item JSON. The item must implement <a href="https://github.com/ArcAnc/PulseLib/blob/master/src/main/java/com/arcanc/pulselib/content/animatable/PItemAnimatable.java"><code>PItemAnimatable</code></a> and return client extensions.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="kd">public</span><span class="w"> </span><span class="kd">class</span> <span class="nc">WandRenderer</span><span class="w"> </span><span class="kd">extends</span><span class="w"> </span><span class="n">PItemRenderer</span><span class="o">&lt;</span><span class="n">WandItem</span><span class="o">&gt;</span><span class="w"> </span><span class="p">{</span>
-<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="nf">WandRenderer</span><span class="p">(</span><span class="n">BlockEntityRenderDispatcher</span><span class="w"> </span><span class="n">blockEntityRenderDispatcher</span><span class="p">,</span><span class="w"> </span><span class="n">EntityModelSet</span><span class="w"> </span><span class="n">entityModelSet</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
-<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="w">        </span><span class="kd">super</span><span class="p">(</span><span class="k">new</span><span class="w"> </span><span class="n">DefaultItemModelData</span><span class="p">.</span><span class="na">DefaultItemModelDataBuilder</span><span class="p">(</span>
-<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="w">                        </span><span class="n">ResourceLocation</span><span class="p">.</span><span class="na">fromNamespaceAndPath</span><span class="p">(</span><span class="s">&quot;examplemod&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;wand&quot;</span><span class="p">))</span>
-<a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a><span class="w">                        </span><span class="p">.</span><span class="na">build</span><span class="p">(),</span>
-<a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a><span class="w">                </span><span class="n">PRenderTypes</span><span class="p">.</span><span class="na">RenderTypeProvider</span><span class="p">::</span><span class="n">trianglesSolid</span><span class="p">,</span>
-<a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a><span class="w">                </span><span class="n">blockEntityRenderDispatcher</span><span class="p">,</span>
-<a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a><span class="w">                </span><span class="n">entityModelSet</span><span class="p">);</span>
-<a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a><span class="w">    </span><span class="p">}</span>
-<a id="__codelineno-2-10" name="__codelineno-2-10" href="#__codelineno-2-10"></a><span class="p">}</span>
-</code></pre></div>
-<p>In GUI context, <code>PItemRenderer</code> uses <code>trianglesGui</code> and immediate drawing. That avoids sending GUI item poses into the normal world/entity queue.</p>
-<h2 id="entity-renderer">Entity renderer<a class="headerlink" href="#entity-renderer" title="Permanent link">&para;</a></h2>
-<p>Use <a href="https://github.com/ArcAnc/PulseLib/blob/master/src/main/java/com/arcanc/pulselib/content/renderer/PEntityRenderer.java"><code>PEntityRenderer</code></a> when the entire entity model is a PulseLib model.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="kd">public</span><span class="w"> </span><span class="kd">class</span> <span class="nc">RobotRenderer</span><span class="w"> </span><span class="kd">extends</span><span class="w"> </span><span class="n">PEntityRenderer</span><span class="o">&lt;</span><span class="n">RobotEntity</span><span class="o">&gt;</span><span class="w"> </span><span class="p">{</span>
-<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="nf">RobotRenderer</span><span class="p">(</span><span class="n">EntityRendererProvider</span><span class="p">.</span><span class="na">Context</span><span class="w"> </span><span class="n">context</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
-<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="w">        </span><span class="kd">super</span><span class="p">(</span><span class="n">context</span><span class="p">,</span>
-<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="w">                </span><span class="k">new</span><span class="w"> </span><span class="n">DefaultEntityModelData</span><span class="p">.</span><span class="na">DefaultEntityModelDataBuilder</span><span class="p">(</span>
-<a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a><span class="w">                        </span><span class="n">ResourceLocation</span><span class="p">.</span><span class="na">fromNamespaceAndPath</span><span class="p">(</span><span class="s">&quot;examplemod&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;robot&quot;</span><span class="p">)).</span><span class="na">build</span><span class="p">(),</span>
-<a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a><span class="w">                </span><span class="n">PRenderTypes</span><span class="p">.</span><span class="na">RenderTypeProvider</span><span class="p">::</span><span class="n">trianglesSolid</span><span class="p">);</span>
-<a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a><span class="w">    </span><span class="p">}</span>
-<a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a><span class="p">}</span>
-</code></pre></div>
-<p>For <code>LivingEntity</code> subclasses, <code>PEntityRenderer</code> applies vanilla body rotation, sleeping/death/spin transforms, entity scale, and head yaw/pitch for a bone named <code>head</code>.</p>
-<h2 id="render-type-requirement">Render type requirement<a class="headerlink" href="#render-type-requirement" title="Permanent link">&para;</a></h2>
-<p>PulseLib models are triangle meshes. Use <a href="https://github.com/ArcAnc/PulseLib/blob/master/src/main/java/com/arcanc/pulselib/util/PRenderTypes.java"><code>PRenderTypes.RenderTypeProvider</code></a>:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="n">PRenderTypes</span><span class="p">.</span><span class="na">RenderTypeProvider</span><span class="p">::</span><span class="n">trianglesSolid</span>
-<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="n">PRenderTypes</span><span class="p">.</span><span class="na">RenderTypeProvider</span><span class="p">::</span><span class="n">trianglesCutout</span>
-<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="n">PRenderTypes</span><span class="p">.</span><span class="na">RenderTypeProvider</span><span class="p">::</span><span class="n">trianglesTranslucent</span>
-<a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a><span class="n">PRenderTypes</span><span class="p">.</span><span class="na">RenderTypeProvider</span><span class="p">::</span><span class="n">trianglesGui</span>
-<a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a><span class="n">PRenderTypes</span><span class="p">.</span><span class="na">RenderTypeProvider</span><span class="p">::</span><span class="n">trianglesLit</span>
-</code></pre></div>
-<p>Do not pass vanilla entity/block <code>RenderType</code> values unless they use a compatible triangle vertex format and shader setup.</p>
+<p>The model can then use <code>q.ground_speed</code> and <code>query.is_active</code>. Query names are not globally predefined by PulseLib: a renderer exposes only the values appropriate for its animatable.</p>
+<p><code>MolangParser.Context</code> also exposes <code>query(...)</code>, <code>variable(...)</code>, <code>context(...)</code>, <code>thisValue(...)</code>, and <code>queryResolver(...)</code> for custom rendering paths that construct their own context.</p>
+<h2 id="language-surface">Language surface<a class="headerlink" href="#language-surface" title="Permanent link">&para;</a></h2>
+<p>The parser supports numeric literals, arithmetic, comparisons, logical operators, ternary expressions, statements, assignments to <code>temp.*</code> and <code>variable.*</code>, <code>return</code>, <code>loop</code>, and <code>break</code>. It resolves the <code>query.*</code>, <code>variable.*</code>, <code>temp.*</code>, and <code>context.*</code> namespaces and their usual short aliases (<code>q</code>, <code>v</code>, <code>t</code>, and <code>c</code>).</p>
+<p>Supported math functions include trigonometry, interpolation, clamping, rounding, powers, min/max, random and die-roll functions, plus the implemented <code>math.ease_*</code> variants. An unsupported function is reported as an error instead of silently evaluating to an arbitrary value.</p>
+<h2 id="current-limitation-variable-lifetime">Current limitation: <code>variable.*</code> lifetime<a class="headerlink" href="#current-limitation-variable-lifetime" title="Permanent link">&para;</a></h2>
+<blockquote>
+<p>TODO: move the per-controller <code>MolangParser.Context</code> ownership to <code>PAnimationManager</code> (or an equivalent animation-instance store).</p>
+</blockquote>
+<p>At present, renderers create a fresh context for each render pass. Consequently, an assignment to <code>variable.*</code> is available while that context is being evaluated, but does not persist into the next frame. This is intentionally documented as incomplete Molang behavior and must be addressed before relying on <code>variable.*</code> as long-lived animation state.</p>
 
 
 
