@@ -35,6 +35,7 @@ base {
 java{
     toolchain.languageVersion = JavaLanguageVersion.of(21)
     withSourcesJar()
+    withJavadocJar()
 }
 
 neoForge {
@@ -190,16 +191,56 @@ sourceSets.main.resources.srcDir generateModMetadata
 // To avoid having to run "generateModMetadata" manually, make it run on every project reload
 neoForge.ideSyncTask generateModMetadata
 
-// Example configuration to allow publishing using the maven-publish plugin
+
+def mavenArtifactId = "${mod_id}-${mod_loader}"
+def mavenVersion = "${minecraft_version}-${mod_version}"
+
+def mavenRepositoryUrl =
+        providers.gradleProperty("mavenRepoDir").
+                map { file(it).toURI() }.
+                orElse(layout.buildDirectory.dir("maven-repository").map { it.asFile.toURI() })
+
 publishing {
     publications {
         register('mavenJava', MavenPublication) {
             from components.java
+
+            groupId = group
+            artifactId = mavenArtifactId
+            version = mavenVersion
+
+            pom {
+                name = mod_name
+                description = "Neoforge library for animation and rendering"
+                url = "https://github.com/ArcAnc/PulseLib"
+
+                licenses {
+                    license {
+                        name = mod_license
+                        url = "https://github.com/ArcAnc/PulseLib/blob/1.21.1/LICENSE.txt"
+                        distribution = "repo"
+                    }
+                }
+
+                developers {
+                    developer {
+                        id = "arcanc"
+                        name = "ArcAnc"
+                    }
+                }
+
+                scm {
+                    url = "https://github.com/ArcAnc/PulseLib"
+                    connection = "scm:git:https://github.com/ArcAnc/PulseLib.git"
+                    developerConnection = "scm:git:ssh://git@github.com/ArcAnc/PulseLib.git"
+                }
+            }
         }
     }
     repositories {
         maven {
-            url "file://${project.projectDir}/repo"
+            name = "localMavenRepository"
+            url = mavenRepositoryUrl.get()
         }
     }
 }
@@ -241,8 +282,17 @@ tasks.register("publishCurseForge", net.darkhax.curseforgegradle.TaskPublishCurs
 }
 
 tasks.register("publishMods") {
+    group = "publishing"
     dependsOn "modrinth"
     dependsOn "publishCurseForge"
+}
+
+tasks.register("publishAll") {
+    group = "publishing"
+
+    dependsOn tasks.named("publish")
+    dependsOn tasks.named("modrinth")
+    dependsOn tasks.named("publishCurseForge")
 }
 
 tasks.withType(JavaCompile).configureEach {
