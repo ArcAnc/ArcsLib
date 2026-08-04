@@ -1,0 +1,51 @@
+name: Publish Maven
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: ${{ github.event.release.tag_name || github.ref }}
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "25"
+
+      - uses: gradle/actions/setup-gradle@017a9effdb900e5b5b2fddfb590a105619dca3c3 # v4.4.2
+
+      - uses: actions/checkout@v6
+        with:
+          repository: ArcAnc/Maven
+          ref: main
+          path: maven-repository
+          token: ${{ secrets.MAVEN_REPO_TOKEN }}
+
+      - name: Build and test
+        run: |
+          chmod +x gradlew
+          ./gradlew check --no-daemon
+
+      - name: Publish into Pages repository
+        run: |
+          ./gradlew publish --no-daemon \
+            -PmavenRepoDir="$GITHUB_WORKSPACE/maven-repository"
+
+      - name: Commit Maven artifacts
+        run: |
+          git -C maven-repository config user.name "ArcAnc Maven Bot"
+          git -C maven-repository config user.email "actions@users.noreply.github.com"
+          git -C maven-repository add -A
+          git -C maven-repository diff --cached --quiet || \
+            git -C maven-repository commit -m "Publish PulseLib ${{ github.event.release.tag_name }}"
+          git -C maven-repository push origin HEAD:main
