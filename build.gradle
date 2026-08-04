@@ -211,7 +211,7 @@ publishing {
                 licenses {
                     license {
                         name = mod_license
-                        url = "https://github.com/ArcAnc/PulseLib/blob/1.21.1/LICENSE.txt"
+                        url = "https://github.com/ArcAnc/PulseLib/blob/26.1/LICENSE.txt"
                         distribution = "repo"
                     }
                 }
