@@ -34,6 +34,7 @@ public class PLibAnimationTicker
 			return;
 		SingletonAnimationManager.tickAll();
 		InstanceAnimationManager.tickAll();
+		PAnimationCameraShake.tick();
 		Minecraft mc = PLibRenderHelper.mc();
 		if (mc.level != null)
 			PPlayerAnimations.tick(mc.level);

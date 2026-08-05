@@ -10,6 +10,7 @@
 package com.arcanc.pulselib.content.mixin;
 
 import com.arcanc.pulselib.content.player.animation.PPlayerAnimations;
+import com.arcanc.pulselib.content.animatable.PAnimationCameraShake;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
@@ -44,8 +45,15 @@ public abstract class CameraMixin
 			return;
 
 		PPlayerAnimations.PPlayerCameraPose pose = PPlayerAnimations.cameraPose(player, partialTick);
-		if (pose == null)
+		float shake = PAnimationCameraShake.sample(partialTick);
+		if (pose == null && shake == 0.0f)
 			return;
+		if (pose == null)
+		{
+			Camera camera = (Camera)(Object)this;
+			this.setRotation(camera.getYRot() + shake, camera.getXRot() + shake * 0.5f, 0.0f);
+			return;
+		}
 
 		Camera camera = (Camera)(Object)this;
 		Quaternionf bodyRotation = new Quaternionf().rotationY((float)Math.toRadians(180.0f - Mth.rotLerp(partialTick, player.yBodyRotO, player.yBodyRot)));
@@ -62,8 +70,8 @@ public abstract class CameraMixin
 		Quaternionf cameraRotation = worldRotation.mul(new Quaternionf(camera.rotation()));
 		Vector3f euler = cameraRotation.getEulerAnglesYXZ(new Vector3f());
 		this.setRotation(
-				180.0f - (float)Math.toDegrees(euler.y),
-				-(float)Math.toDegrees(euler.x),
+				180.0f - (float)Math.toDegrees(euler.y) + shake,
+				-(float)Math.toDegrees(euler.x) + shake * 0.5f,
 				-(float)Math.toDegrees(euler.z));
 	}
 }

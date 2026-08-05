@@ -63,16 +63,19 @@ public final class PAnimationGraphRuntime
 		this.overlays.clear();
 	}
 	
-	public void tick(@Nullable PBakedModel model, float delta)
+	public List<EventTrack> tick(@Nullable PBakedModel model, float delta)
 	{
+		if (!Float.isFinite(delta))
+			throw new IllegalArgumentException("Animation graph tick delta must be finite");
+		List<EventTrack> eventTracks = new ArrayList<>();
 		float elapsed = Math.max(delta, 0.0f);
 		if (this.transition == null)
-			advance(this.current, elapsed);
+			advance(this.current, elapsed, eventTracks);
 		else
 		{
 			for (WeightedPlayback source : this.transition.sources)
-				advance(source.playback, elapsed);
-			advance(this.transition.target, elapsed);
+				advance(source.playback, elapsed, eventTracks);
+			advance(this.transition.target, elapsed, eventTracks);
 			this.transition.elapsed += elapsed;
 			if (this.transition.elapsed >= this.transition.duration)
 			{
@@ -81,7 +84,7 @@ public final class PAnimationGraphRuntime
 			}
 		}
 		for (OverlayPlayback overlay : this.overlays)
-			advance(overlay.playback, elapsed);
+			advance(overlay.playback, elapsed, eventTracks);
 		this.overlays.removeIf(overlay -> overlayFinished(overlay, model));
 
 		triggerOverlays();
@@ -91,6 +94,7 @@ public final class PAnimationGraphRuntime
 			candidate.condition().consume(this.parameters);
 			beginTransition(candidate, model);
 		}
+		return List.copyOf(eventTracks);
 	}
 	
 	public List<Layer> layers(PBakedModel model)
@@ -272,15 +276,25 @@ public final class PAnimationGraphRuntime
 		return weight;
 	}
 
-	private static void advance(Playback playback, float delta)
+	private void advance(Playback playback, float delta, List<EventTrack> tracks)
 	{
+		PAnimationState state = this.graph.states().get(playback.stateIndex);
 		playback.previousTime = playback.time;
 		playback.time += delta;
+		if (state.speed() == 0.0f)
+			return;
+		float from = playback.previousTime * state.speed();
+		float to = playback.time * state.speed();
+		for (PAnimationSample sample : state.samples(this.parameters))
+			if (sample.weight() > 0.0f)
+				tracks.add(new EventTrack(sample.animation(), from, to, state.animationType()));
 	}
 
 	public record Layer(String animation, float time, PInterpolationType interpolation, float weight, boolean overlay)
 	{
 	}
+	
+	public record EventTrack(String animation, float from, float to, PAnimationType animationType) { }
 
 	private static final class Playback
 	{

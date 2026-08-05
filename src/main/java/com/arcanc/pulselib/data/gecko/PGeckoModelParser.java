@@ -177,7 +177,7 @@ public class PGeckoModelParser
 			JsonElement animationNode = animationEntry.getValue();
 			Map<String, PBoneAnimation> boneAnimations = new LinkedHashMap<>();
 			float maxTime = secondsToTicks(floatValue(member(animationNode, "animation_length"), 0f));
-			List<PAnimationEvent> events = PGeckoAnimationEventParser.parseAnimationEvents(animationNode);
+			List<PAnimationEvent<?>> events = PGeckoAnimationEventParser.parseAnimationEvents(animationNode);
 			maxTime = Math.max(maxTime, PGeckoAnimationEventParser.maxEventTime(events));
 			
 			JsonElement bonesNode = member(animationNode, "bones");

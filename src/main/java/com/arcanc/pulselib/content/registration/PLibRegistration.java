@@ -11,6 +11,8 @@ package com.arcanc.pulselib.content.registration;
 
 import com.arcanc.pulselib.content.model.animation.PAnimationChannel;
 import com.arcanc.pulselib.content.model.animation.PAnimationChannelType;
+import com.arcanc.pulselib.content.model.animation.PAnimationEventType;
+import com.arcanc.pulselib.content.model.animation.PAnimationEventTypes;
 import com.arcanc.pulselib.content.registration.block.TestBlock;
 import com.arcanc.pulselib.content.registration.block.block_entity.TestBlockEntity;
 import com.arcanc.pulselib.content.registration.entity.TestEntity;
@@ -62,6 +64,32 @@ public class PLibRegistration
 			CHANNEL_TYPE_REGISTRY = CHANNEL_TYPES.makeRegistry(builder ->
 					builder.maxId(Integer.MAX_VALUE - 1).sync(false));
 			CHANNEL_TYPES.register(bus);
+		}
+	}
+
+	public static class AnimationEventReg
+	{
+		public static final ResourceKey<Registry<PAnimationEventType<?>>> REGISTRY_KEY =
+				ResourceKey.createRegistryKey(PLibDatabase.rl("animation_event_type"));
+		public static final DeferredRegister<PAnimationEventType<?>> EVENT_TYPES =
+				DeferredRegister.create(REGISTRY_KEY, PLibDatabase.MOD_ID);
+		public static Registry<PAnimationEventType<?>> EVENT_TYPE_REGISTRY;
+
+		public static final DeferredHolder<PAnimationEventType<?>, PAnimationEventType<PAnimationEventTypes.SoundData>> SOUND =
+				EVENT_TYPES.register("sound", () -> PAnimationEventTypes.SOUND);
+		public static final DeferredHolder<PAnimationEventType<?>, PAnimationEventType<PAnimationEventTypes.ParticleData>> PARTICLE =
+				EVENT_TYPES.register("particle", () -> PAnimationEventTypes.PARTICLE);
+		public static final DeferredHolder<PAnimationEventType<?>, PAnimationEventType<PAnimationEventTypes.CameraShakeData>> CAMERA_SHAKE =
+				EVENT_TYPES.register("camera_shake", () -> PAnimationEventTypes.CAMERA_SHAKE);
+		public static final DeferredHolder<PAnimationEventType<?>, PAnimationEventType<PAnimationEventTypes.LocatorCallbackData>> LOCATOR_CALLBACK =
+				EVENT_TYPES.register("locator_callback", () -> PAnimationEventTypes.LOCATOR_CALLBACK);
+		public static final DeferredHolder<PAnimationEventType<?>, PAnimationEventType<PAnimationEventTypes.AnimationParameterData>> ANIMATION_PARAMETER =
+				EVENT_TYPES.register("animation_parameter", () -> PAnimationEventTypes.ANIMATION_PARAMETER);
+
+		private static void init(@NotNull final IEventBus bus)
+		{
+			EVENT_TYPE_REGISTRY = EVENT_TYPES.makeRegistry(builder -> builder.maxId(Integer.MAX_VALUE - 1).sync(false));
+			EVENT_TYPES.register(bus);
 		}
 	}
 
@@ -143,6 +171,7 @@ public class PLibRegistration
 	public static void init(@NotNull final IEventBus bus)
 	{
 		AnimationChannelReg.init(bus);
+		AnimationEventReg.init(bus);
 		EntityTypeReg.init(bus);
 		/*
 		BlockReg.init(bus);
