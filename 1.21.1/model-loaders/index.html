@@ -1264,9 +1264,9 @@
 
   <h1>Model Loaders</h1>
 
-<p>PulseLib model loading is extensible through <a href="https://github.com/ArcAnc/PulseLib/blob/master/src/main/java/com/arcanc/pulselib/data/PModelLoader.java"><code>PModelLoader</code></a>. Loaded raw models are baked into <a href="https://github.com/ArcAnc/PulseLib/blob/master/src/main/java/com/arcanc/pulselib/content/model/baked/PBakedModel.java"><code>PBakedModel</code></a> by <a href="https://github.com/ArcAnc/PulseLib/blob/master/src/main/java/com/arcanc/pulselib/util/PModelCache.java"><code>PModelCache</code></a>.</p>
+<p>PulseLib model loading is extensible through <a href="https://github.com/ArcAnc/PulseLib/blob/1.21.1/src/main/java/com/arcanc/pulselib/data/PModelLoader.java"><code>PModelLoader</code></a>. Loaded raw models are baked into <a href="https://github.com/ArcAnc/PulseLib/blob/1.21.1/src/main/java/com/arcanc/pulselib/content/model/baked/PBakedModel.java"><code>PBakedModel</code></a> by <a href="https://github.com/ArcAnc/PulseLib/blob/1.21.1/src/main/java/com/arcanc/pulselib/util/PModelCache.java"><code>PModelCache</code></a>.</p>
 <h2 id="built-in-gltf-loader">Built-in glTF loader<a class="headerlink" href="#built-in-gltf-loader" title="Permanent link">&para;</a></h2>
-<p><a href="https://github.com/ArcAnc/PulseLib/blob/master/src/main/java/com/arcanc/pulselib/data/gltf/PGltfModelLoader.java"><code>PGltfModelLoader</code></a> is registered by default.</p>
+<p><a href="https://github.com/ArcAnc/PulseLib/blob/1.21.1/src/main/java/com/arcanc/pulselib/data/gltf/PGltfModelLoader.java"><code>PGltfModelLoader</code></a> is registered by default.</p>
 <p>Supported roots and extensions:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>assets/&lt;modid&gt;/glmodels/**/*.glb
 <a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>assets/&lt;modid&gt;/glmodels/**/*.gltf
@@ -1277,9 +1277,9 @@
 <p>resolves to:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>assets/&lt;namespace&gt;/glmodels/entity/&lt;path&gt;.glb
 </code></pre></div>
-<p>The parser is <a href="https://github.com/ArcAnc/PulseLib/blob/master/src/main/java/com/arcanc/pulselib/data/gltf/PGltfModelParser.java"><code>PGltfModelParser</code></a>. glTF channels are decoded through the registered position, rotation, and scale channel types, so the loaded animation data now uses the same generic track API as other formats.</p>
+<p>The parser is <a href="https://github.com/ArcAnc/PulseLib/blob/1.21.1/src/main/java/com/arcanc/pulselib/data/gltf/PGltfModelParser.java"><code>PGltfModelParser</code></a>. glTF channels are decoded through the registered position, rotation, and scale channel types, so the loaded animation data now uses the same generic track API as other formats.</p>
 <h2 id="gecko-loader">Gecko loader<a class="headerlink" href="#gecko-loader" title="Permanent link">&para;</a></h2>
-<p><a href="https://github.com/ArcAnc/PulseLib/blob/master/src/main/java/com/arcanc/pulselib/data/gecko/PGeckoModelLoader.java"><code>PGeckoModelLoader</code></a> supports:</p>
+<p><a href="https://github.com/ArcAnc/PulseLib/blob/1.21.1/src/main/java/com/arcanc/pulselib/data/gecko/PGeckoModelLoader.java"><code>PGeckoModelLoader</code></a> supports:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>assets/&lt;modid&gt;/geckolib/models/**/*.geo.json
 <a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>assets/&lt;modid&gt;/geckolib/models/**/*.json
 <a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>assets/&lt;modid&gt;/geckolib/animations/**/*.animation.json
@@ -1294,7 +1294,7 @@
 <a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a><span class="w">        </span><span class="n">PGeckoModelLoader</span><span class="p">.</span><span class="na">INSTANCE</span><span class="p">.</span><span class="na">id</span><span class="p">())</span>
 <a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a><span class="w">        </span><span class="p">.</span><span class="na">build</span><span class="p">();</span>
 </code></pre></div>
-<p>The parser is <a href="https://github.com/ArcAnc/PulseLib/blob/master/src/main/java/com/arcanc/pulselib/data/gecko/PGeckoModelParser.java"><code>PGeckoModelParser</code></a>.</p>
+<p>The parser is <a href="https://github.com/ArcAnc/PulseLib/blob/1.21.1/src/main/java/com/arcanc/pulselib/data/gecko/PGeckoModelParser.java"><code>PGeckoModelParser</code></a>.</p>
 <p>Gecko animation vector components may be Molang expressions. See <a href="../molang-animations/">Molang animations</a> for the supported language, context values, renderer hooks, and persistence rules.</p>
 <h2 id="custom-loader">Custom loader<a class="headerlink" href="#custom-loader" title="Permanent link">&para;</a></h2>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="kd">public</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="kd">class</span> <span class="nc">MyModelLoader</span><span class="w"> </span><span class="kd">implements</span><span class="w"> </span><span class="n">PModelLoader</span><span class="w"> </span><span class="p">{</span>

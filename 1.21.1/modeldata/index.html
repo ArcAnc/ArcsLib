@@ -1286,7 +1286,7 @@
 
   <h1>ModelData</h1>
 
-<p><a href="https://github.com/ArcAnc/PulseLib/blob/master/src/main/java/com/arcanc/pulselib/content/renderer/modelData/PModelData.java"><code>PModelData</code></a> is the small object that tells a renderer, "this is the model file, and these are the textures the model should use."</p>
+<p><a href="https://github.com/ArcAnc/PulseLib/blob/1.21.1/src/main/java/com/arcanc/pulselib/content/renderer/modelData/PModelData.java"><code>PModelData</code></a> is the small object that tells a renderer, "this is the model file, and these are the textures the model should use."</p>
 <p>It is deliberately separate from the renderer. That lets the same renderer logic stay simple while different blocks, items, entities, or layers point at different files. If a PulseLib model is invisible or has missing textures, <code>PModelData</code> is one of the first things to inspect.</p>
 <h2 id="direct-builder">Direct builder<a class="headerlink" href="#direct-builder" title="Permanent link">&para;</a></h2>
 <p>Use the direct builder when you already know the exact model path, or when you are using a folder layout that does not match PulseLib's default conventions.</p>
@@ -1313,16 +1313,16 @@
 </code></pre></div>
 <p>Available default builders:</p>
 <ul>
-<li><a href="https://github.com/ArcAnc/PulseLib/blob/master/src/main/java/com/arcanc/pulselib/content/renderer/modelData/DefaultBlockModelData.java"><code>DefaultBlockModelData</code></a></li>
-<li><a href="https://github.com/ArcAnc/PulseLib/blob/master/src/main/java/com/arcanc/pulselib/content/renderer/modelData/DefaultItemModelData.java"><code>DefaultItemModelData</code></a></li>
-<li><a href="https://github.com/ArcAnc/PulseLib/blob/master/src/main/java/com/arcanc/pulselib/content/renderer/modelData/DefaultEntityModelData.java"><code>DefaultEntityModelData</code></a></li>
-<li><a href="https://github.com/ArcAnc/PulseLib/blob/master/src/main/java/com/arcanc/pulselib/content/renderer/modelData/DefaultEntityLayerModelData.java"><code>DefaultEntityLayerModelData</code></a></li>
+<li><a href="https://github.com/ArcAnc/PulseLib/blob/1.21.1/src/main/java/com/arcanc/pulselib/content/renderer/modelData/DefaultBlockModelData.java"><code>DefaultBlockModelData</code></a></li>
+<li><a href="https://github.com/ArcAnc/PulseLib/blob/1.21.1/src/main/java/com/arcanc/pulselib/content/renderer/modelData/DefaultItemModelData.java"><code>DefaultItemModelData</code></a></li>
+<li><a href="https://github.com/ArcAnc/PulseLib/blob/1.21.1/src/main/java/com/arcanc/pulselib/content/renderer/modelData/DefaultEntityModelData.java"><code>DefaultEntityModelData</code></a></li>
+<li><a href="https://github.com/ArcAnc/PulseLib/blob/1.21.1/src/main/java/com/arcanc/pulselib/content/renderer/modelData/DefaultEntityLayerModelData.java"><code>DefaultEntityLayerModelData</code></a></li>
 </ul>
 <h2 id="texture-name-resolution">Texture name resolution<a class="headerlink" href="#texture-name-resolution" title="Permanent link">&para;</a></h2>
-<p><code>PModelData.getTextureByName(name)</code> first checks explicit mappings added with <code>addTexture</code>. If a texture was not registered explicitly, PulseLib asks <a href="https://github.com/ArcAnc/PulseLib/blob/master/src/main/java/com/arcanc/pulselib/util/PModelCache.java"><code>PModelCache.resolveTextureLocation</code></a> to infer a path from the model path and texture name.</p>
+<p><code>PModelData.getTextureByName(name)</code> first checks explicit mappings added with <code>addTexture</code>. If a texture was not registered explicitly, PulseLib asks <a href="https://github.com/ArcAnc/PulseLib/blob/1.21.1/src/main/java/com/arcanc/pulselib/util/PModelCache.java"><code>PModelCache.resolveTextureLocation</code></a> to infer a path from the model path and texture name.</p>
 <p>That fallback is useful, but explicit names are easier to debug. Keep Blockbench/glTF texture names aligned with the names you add through <code>PModelData</code>, especially on models with several materials.</p>
 <h2 id="gecko-model-data">Gecko model data<a class="headerlink" href="#gecko-model-data" title="Permanent link">&para;</a></h2>
-<p>PulseLib can load Gecko-style JSON models through <a href="https://github.com/ArcAnc/PulseLib/blob/master/src/main/java/com/arcanc/pulselib/data/gecko/PGeckoModelLoader.java"><code>PGeckoModelLoader</code></a>, but the default registered loader in <code>PModelCache</code> is glTF. Register the Gecko loader before client resources reload if your mod needs Gecko paths:</p>
+<p>PulseLib can load Gecko-style JSON models through <a href="https://github.com/ArcAnc/PulseLib/blob/1.21.1/src/main/java/com/arcanc/pulselib/data/gecko/PGeckoModelLoader.java"><code>PGeckoModelLoader</code></a>, but the default registered loader in <code>PModelCache</code> is glTF. Register the Gecko loader before client resources reload if your mod needs Gecko paths:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="n">PModelCache</span><span class="p">.</span><span class="na">registerModelLoader</span><span class="p">(</span><span class="n">PGeckoModelLoader</span><span class="p">.</span><span class="na">INSTANCE</span><span class="p">);</span>
 <a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>
 <a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="n">PModelData</span><span class="w"> </span><span class="n">data</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">DefaultEntityModelData</span><span class="p">.</span><span class="na">DefaultEntityModelDataBuilder</span><span class="p">(</span>
@@ -1332,10 +1332,10 @@
 </code></pre></div>
 <p>Classes used:</p>
 <ul>
-<li><a href="https://github.com/ArcAnc/PulseLib/blob/master/src/main/java/com/arcanc/pulselib/content/renderer/modelData/PModelData.java"><code>PModelData</code></a></li>
-<li><a href="https://github.com/ArcAnc/PulseLib/blob/master/src/main/java/com/arcanc/pulselib/util/PModelCache.java"><code>PModelCache</code></a></li>
-<li><a href="https://github.com/ArcAnc/PulseLib/blob/master/src/main/java/com/arcanc/pulselib/data/gltf/PGltfModelLoader.java"><code>PGltfModelLoader</code></a></li>
-<li><a href="https://github.com/ArcAnc/PulseLib/blob/master/src/main/java/com/arcanc/pulselib/data/gecko/PGeckoModelLoader.java"><code>PGeckoModelLoader</code></a></li>
+<li><a href="https://github.com/ArcAnc/PulseLib/blob/1.21.1/src/main/java/com/arcanc/pulselib/content/renderer/modelData/PModelData.java"><code>PModelData</code></a></li>
+<li><a href="https://github.com/ArcAnc/PulseLib/blob/1.21.1/src/main/java/com/arcanc/pulselib/util/PModelCache.java"><code>PModelCache</code></a></li>
+<li><a href="https://github.com/ArcAnc/PulseLib/blob/1.21.1/src/main/java/com/arcanc/pulselib/data/gltf/PGltfModelLoader.java"><code>PGltfModelLoader</code></a></li>
+<li><a href="https://github.com/ArcAnc/PulseLib/blob/1.21.1/src/main/java/com/arcanc/pulselib/data/gecko/PGeckoModelLoader.java"><code>PGeckoModelLoader</code></a></li>
 </ul>
 
 

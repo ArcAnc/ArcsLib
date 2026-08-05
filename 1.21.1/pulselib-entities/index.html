@@ -1286,7 +1286,7 @@
 
   <h1>PulseLib Entities</h1>
 
-<p>Entities are the most natural fit for PulseLib: each entity already has its own lifetime, position, rotation, and tick state. The entity implements <a href="https://github.com/ArcAnc/PulseLib/blob/master/src/main/java/com/arcanc/pulselib/content/animatable/PAnimatable.java"><code>PAnimatable</code></a>, and <a href="https://github.com/ArcAnc/PulseLib/blob/master/src/main/java/com/arcanc/pulselib/content/renderer/PEntityRenderer.java"><code>PEntityRenderer</code></a> renders the animated model.</p>
+<p>Entities are the most natural fit for PulseLib: each entity already has its own lifetime, position, rotation, and tick state. The entity implements <a href="https://github.com/ArcAnc/PulseLib/blob/1.21.1/src/main/java/com/arcanc/pulselib/content/animatable/PAnimatable.java"><code>PAnimatable</code></a>, and <a href="https://github.com/ArcAnc/PulseLib/blob/1.21.1/src/main/java/com/arcanc/pulselib/content/renderer/PEntityRenderer.java"><code>PEntityRenderer</code></a> renders the animated model.</p>
 <p>Use entity controllers to translate gameplay state into animation state. Do not put rendering decisions into the AI goals or renderer when a controller can express the same rule cleanly.</p>
 <h2 id="entity-class">Entity class<a class="headerlink" href="#entity-class" title="Permanent link">&para;</a></h2>
 <p>This example chooses attack, walk, or idle from normal entity state. The animation names must exist in the exported model.</p>
@@ -1346,12 +1346,12 @@
 <li>If the model has a bone named <code>head</code>, head yaw and pitch are applied to it.</li>
 </ul>
 <h2 id="layers">Layers<a class="headerlink" href="#layers" title="Permanent link">&para;</a></h2>
-<p>Use <a href="https://github.com/ArcAnc/PulseLib/blob/master/src/main/java/com/arcanc/pulselib/content/renderer/PEntityRenderLayer.java"><code>PEntityRenderLayer</code></a> for extra model parts attached to entity bones: armor plates, backpacks, equipment, or conditional body parts. See <a href="Entity-Render-Layers">Entity Render Layers</a>.</p>
+<p>Use <a href="https://github.com/ArcAnc/PulseLib/blob/1.21.1/src/main/java/com/arcanc/pulselib/content/renderer/PEntityRenderLayer.java"><code>PEntityRenderLayer</code></a> for extra model parts attached to entity bones: armor plates, backpacks, equipment, or conditional body parts. See <a href="Entity-Render-Layers">Entity Render Layers</a>.</p>
 <p>Classes used:</p>
 <ul>
-<li><a href="https://github.com/ArcAnc/PulseLib/blob/master/src/main/java/com/arcanc/pulselib/content/renderer/PEntityRenderer.java"><code>PEntityRenderer</code></a></li>
-<li><a href="https://github.com/ArcAnc/PulseLib/blob/master/src/main/java/com/arcanc/pulselib/content/renderer/modelData/DefaultEntityModelData.java"><code>DefaultEntityModelData</code></a></li>
-<li><a href="https://github.com/ArcAnc/PulseLib/blob/master/src/main/java/com/arcanc/pulselib/content/animatable/PAnimationController.java"><code>PAnimationController</code></a></li>
+<li><a href="https://github.com/ArcAnc/PulseLib/blob/1.21.1/src/main/java/com/arcanc/pulselib/content/renderer/PEntityRenderer.java"><code>PEntityRenderer</code></a></li>
+<li><a href="https://github.com/ArcAnc/PulseLib/blob/1.21.1/src/main/java/com/arcanc/pulselib/content/renderer/modelData/DefaultEntityModelData.java"><code>DefaultEntityModelData</code></a></li>
+<li><a href="https://github.com/ArcAnc/PulseLib/blob/1.21.1/src/main/java/com/arcanc/pulselib/content/animatable/PAnimationController.java"><code>PAnimationController</code></a></li>
 </ul>
 
 
