@@ -1,4 +1,4 @@
-PulseLib can draw a baked model directly in a GUI through [`PLibHelper.renderModelInGui`](https://github.com/ArcAnc/PulseLib/blob/master/src/main/java/com/arcanc/pulselib/util/helpers/PLibHelper.java).
+PulseLib can draw a baked model directly in a GUI through [`PLibHelper.renderModelInGui`](https://github.com/ArcAnc/PulseLib/blob/1.21.1/src/main/java/com/arcanc/pulselib/util/helpers/PLibHelper.java).
 
 ```java
 PLibHelper.renderModelInGui(
@@ -27,10 +27,10 @@ Parameters:
 * `packedLight` and `packedOverlay` - standard Minecraft packed values.
 * `partialTick` - interpolation time.
 
-For item rendering in GUI, [`PItemRenderer`](https://github.com/ArcAnc/PulseLib/blob/master/src/main/java/com/arcanc/pulselib/content/renderer/PItemRenderer.java) already switches to immediate GUI drawing internally.
+For item rendering in GUI, [`PItemRenderer`](https://github.com/ArcAnc/PulseLib/blob/1.21.1/src/main/java/com/arcanc/pulselib/content/renderer/PItemRenderer.java) already switches to immediate GUI drawing internally.
 
 Classes used:
 
-* [`PLibHelper`](https://github.com/ArcAnc/PulseLib/blob/master/src/main/java/com/arcanc/pulselib/util/helpers/PLibHelper.java)
-* [`PBakedModel`](https://github.com/ArcAnc/PulseLib/blob/master/src/main/java/com/arcanc/pulselib/content/model/baked/PBakedModel.java)
-* [`PRenderTypes`](https://github.com/ArcAnc/PulseLib/blob/master/src/main/java/com/arcanc/pulselib/util/PRenderTypes.java)
+* [`PLibHelper`](https://github.com/ArcAnc/PulseLib/blob/1.21.1/src/main/java/com/arcanc/pulselib/util/helpers/PLibHelper.java)
+* [`PBakedModel`](https://github.com/ArcAnc/PulseLib/blob/1.21.1/src/main/java/com/arcanc/pulselib/content/model/baked/PBakedModel.java)
+* [`PRenderTypes`](https://github.com/ArcAnc/PulseLib/blob/1.21.1/src/main/java/com/arcanc/pulselib/util/PRenderTypes.java)

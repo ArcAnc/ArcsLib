@@ -1,4 +1,4 @@
-[`PEntityRenderLayer`](https://github.com/ArcAnc/PulseLib/blob/master/src/main/java/com/arcanc/pulselib/content/renderer/PEntityRenderLayer.java) renders an additional PulseLib model on top of a [`PEntityRenderer`](https://github.com/ArcAnc/PulseLib/blob/master/src/main/java/com/arcanc/pulselib/content/renderer/PEntityRenderer.java).
+[`PEntityRenderLayer`](https://github.com/ArcAnc/PulseLib/blob/1.21.1/src/main/java/com/arcanc/pulselib/content/renderer/PEntityRenderLayer.java) renders an additional PulseLib model on top of a [`PEntityRenderer`](https://github.com/ArcAnc/PulseLib/blob/1.21.1/src/main/java/com/arcanc/pulselib/content/renderer/PEntityRenderer.java).
 
 Layers are useful for armor pieces, equipment, accessories, conditional attachments, or model variants.
 
@@ -76,7 +76,7 @@ public int getPackedLight(RobotEntity entity, int packedLight) {
 
 Classes used:
 
-* [`PEntityRenderLayer`](https://github.com/ArcAnc/PulseLib/blob/master/src/main/java/com/arcanc/pulselib/content/renderer/PEntityRenderLayer.java)
-* [`DefaultEntityLayerModelData`](https://github.com/ArcAnc/PulseLib/blob/master/src/main/java/com/arcanc/pulselib/content/renderer/modelData/DefaultEntityLayerModelData.java)
-* [`PBakedBone`](https://github.com/ArcAnc/PulseLib/blob/master/src/main/java/com/arcanc/pulselib/content/model/baked/PBakedBone.java)
-* [`PBakedMesh`](https://github.com/ArcAnc/PulseLib/blob/master/src/main/java/com/arcanc/pulselib/content/model/baked/PBakedMesh.java)
+* [`PEntityRenderLayer`](https://github.com/ArcAnc/PulseLib/blob/1.21.1/src/main/java/com/arcanc/pulselib/content/renderer/PEntityRenderLayer.java)
+* [`DefaultEntityLayerModelData`](https://github.com/ArcAnc/PulseLib/blob/1.21.1/src/main/java/com/arcanc/pulselib/content/renderer/modelData/DefaultEntityLayerModelData.java)
+* [`PBakedBone`](https://github.com/ArcAnc/PulseLib/blob/1.21.1/src/main/java/com/arcanc/pulselib/content/model/baked/PBakedBone.java)
+* [`PBakedMesh`](https://github.com/ArcAnc/PulseLib/blob/1.21.1/src/main/java/com/arcanc/pulselib/content/model/baked/PBakedMesh.java)

@@ -1,6 +1,6 @@
 Most mods can use PulseLib's renderers without touching the render queue directly. This page exists for the cases where you need to understand why PulseLib does not use vanilla `RenderType` values and where custom rendering should be inserted.
 
-PulseLib models are triangle meshes loaded from glTF/GLB or another model loader. Vanilla baked block models are mostly quad-based, so PulseLib provides its own triangle render types, shaders, vertex format, and instanced queue. That is why examples use [`PRenderTypes`](https://github.com/ArcAnc/PulseLib/blob/master/src/main/java/com/arcanc/pulselib/util/PRenderTypes.java) instead of `RenderType.entityCutout` or block render types.
+PulseLib models are triangle meshes loaded from glTF/GLB or another model loader. Vanilla baked block models are mostly quad-based, so PulseLib provides its own triangle render types, shaders, vertex format, and instanced queue. That is why examples use [`PRenderTypes`](https://github.com/ArcAnc/PulseLib/blob/1.21.1/src/main/java/com/arcanc/pulselib/util/PRenderTypes.java) instead of `RenderType.entityCutout` or block render types.
 
 ## Which render type should I choose?
 
@@ -25,7 +25,7 @@ Emissive texture metadata is described on [Textures and Emissive](Textures-and-E
 
 ## Why vanilla RenderType is not enough
 
-PulseLib's baked meshes use [`PRenderTypes.VertexFormatProvider.POSITION_TEX_NORMAL`](https://github.com/ArcAnc/PulseLib/blob/master/src/main/java/com/arcanc/pulselib/util/PRenderTypes.java). The shaders also expect per-instance data: transform matrix, color, light, and overlay. A vanilla render type may compile and still render incorrectly because its shader and vertex format do not match the data PulseLib sends.
+PulseLib's baked meshes use [`PRenderTypes.VertexFormatProvider.POSITION_TEX_NORMAL`](https://github.com/ArcAnc/PulseLib/blob/1.21.1/src/main/java/com/arcanc/pulselib/util/PRenderTypes.java). The shaders also expect per-instance data: transform matrix, color, light, and overlay. A vanilla render type may compile and still render incorrectly because its shader and vertex format do not match the data PulseLib sends.
 
 If you create a custom render type, keep these requirements:
 
@@ -38,7 +38,7 @@ For most mods, it is safer to start from PulseLib's existing render types and on
 
 ## What the queue does
 
-[`PRenderQueue`](https://github.com/ArcAnc/PulseLib/blob/master/src/main/java/com/arcanc/pulselib/content/renderer/PRenderQueue.java) batches identical meshes together and renders many instances with one instanced draw call. That is important for animated block entities and entities: every object can have its own transform and animation pose, but the GPU can still draw repeated mesh buffers efficiently.
+[`PRenderQueue`](https://github.com/ArcAnc/PulseLib/blob/1.21.1/src/main/java/com/arcanc/pulselib/content/renderer/PRenderQueue.java) batches identical meshes together and renders many instances with one instanced draw call. That is important for animated block entities and entities: every object can have its own transform and animation pose, but the GPU can still draw repeated mesh buffers efficiently.
 
 The queue has a few stages:
 
@@ -47,7 +47,7 @@ The queue has a few stages:
 * `ENTITIES` for entity and hand-held item rendering.
 * `GUI` for GUI rendering.
 
-Normal renderers submit into these stages for you. [`PRenderStagesHandler`](https://github.com/ArcAnc/PulseLib/blob/master/src/main/java/com/arcanc/pulselib/content/renderer/PRenderStagesHandler.java) handles flushing them at the right time.
+Normal renderers submit into these stages for you. [`PRenderStagesHandler`](https://github.com/ArcAnc/PulseLib/blob/1.21.1/src/main/java/com/arcanc/pulselib/content/renderer/PRenderStagesHandler.java) handles flushing them at the right time.
 
 ## When to submit manually
 
@@ -89,6 +89,6 @@ public void postSubmit(PoseStack poseStack,
 
 Classes used:
 
-* [`PRenderTypes`](https://github.com/ArcAnc/PulseLib/blob/master/src/main/java/com/arcanc/pulselib/util/PRenderTypes.java)
-* [`PRenderQueue`](https://github.com/ArcAnc/PulseLib/blob/master/src/main/java/com/arcanc/pulselib/content/renderer/PRenderQueue.java)
-* [`PRenderStagesHandler`](https://github.com/ArcAnc/PulseLib/blob/master/src/main/java/com/arcanc/pulselib/content/renderer/PRenderStagesHandler.java)
+* [`PRenderTypes`](https://github.com/ArcAnc/PulseLib/blob/1.21.1/src/main/java/com/arcanc/pulselib/util/PRenderTypes.java)
+* [`PRenderQueue`](https://github.com/ArcAnc/PulseLib/blob/1.21.1/src/main/java/com/arcanc/pulselib/content/renderer/PRenderQueue.java)
+* [`PRenderStagesHandler`](https://github.com/ArcAnc/PulseLib/blob/1.21.1/src/main/java/com/arcanc/pulselib/content/renderer/PRenderStagesHandler.java)
