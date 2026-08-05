@@ -9,19 +9,26 @@
 
 package com.arcanc.pulselib.content.model.animation;
 
+<<<<<<< HEAD
 
 import com.arcanc.pulselib.data.MolangParser;
+=======
+import com.arcanc.pulselib.content.registration.PLibRegistration;
+import com.arcanc.pulselib.data.gecko.MolangParser;
+import org.jetbrains.annotations.Nullable;
+>>>>>>> e194067 (Tons of e)
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
 import org.jspecify.annotations.Nullable;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 
 public record PAnimation(String name,
                          float length,
                          Map<String, PBoneAnimation> boneAnimations,
-                         List<PAnimationEvent> events)
+                         List<PAnimationEvent<?>> events)
 {
 	public PAnimation(String name, float length, Map<String, PBoneAnimation> boneAnimations)
 	{
@@ -33,20 +40,53 @@ public record PAnimation(String name,
 		events = List.copyOf(events);
 	}
 	
-	public @Nullable BoneFrame calculateBoneTransformations(String boneName, float time, PInterpolationType interpolationType)
+	public PRootMotionRuntime rootMotion(String rootBoneName, PInterpolationType interpolation)
 	{
+<<<<<<< HEAD
 		return calculateBoneTransformations(boneName, time, interpolationType, null, null);
+=======
+		return new PRootMotionRuntime(this, rootBoneName, interpolation);
+	}
+	
+	public PRootMotionRuntime rootMotion(String rootBoneName, PInterpolationType interpolation, Object data)
+	{
+		return new PRootMotionRuntime(this, rootBoneName, interpolation, data);
+	}
+
+	public @Nullable BoneFrame calculateBoneTransformations(String boneName, float time, PInterpolationType interpolation)
+	{
+		return calculateBoneTransformations(boneName, time, interpolation, null, null);
+	}
+
+	public @Nullable BoneFrame calculateBoneTransformations(String boneName, float time, PInterpolationType interpolation, Object data)
+	{
+		return calculateBoneTransformations(boneName, time, interpolation, data, null);
+>>>>>>> e194067 (Tons of e)
 	}
 
 	public @Nullable BoneFrame calculateBoneTransformations(String boneName,
 	                                                        float time,
+<<<<<<< HEAD
 	                                                        PInterpolationType interpolationType,
+=======
+	                                                        PInterpolationType interpolation,
+>>>>>>> e194067 (Tons of e)
 	                                                        Object data,
 	                                                        @Nullable BoneFrame accumulatedFrame)
 	{
 		PBoneAnimation boneAnimation = this.boneAnimations.get(boneName);
+		return calculateBoneTransformations(boneAnimation, time, interpolation, data, accumulatedFrame);
+	}
+
+	public @Nullable BoneFrame calculateBoneTransformations(@Nullable PBoneAnimation boneAnimation,
+	                                                        float time,
+	                                                        PInterpolationType interpolation,
+	                                                        Object data,
+	                                                        @Nullable BoneFrame accumulatedFrame)
+	{
 		if (boneAnimation == null)
 			return null;
+<<<<<<< HEAD
 		
 		Vector3f accumulatedTranslation = accumulatedFrame == null ? new Vector3f() : accumulatedFrame.translation();
 		Vector3f accumulatedScale = accumulatedFrame == null ? new Vector3f(1f, 1f, 1f) : accumulatedFrame.scale();
@@ -59,29 +99,34 @@ public record PAnimation(String name,
 		Quaternionf rotation = sampleRotationChannel(boneAnimation, time, interpolationType, data, accumulatedRotation);
 		
 		if (translation == null && rotation == null && scale == null)
+=======
+
+		PAnimationEvaluationContext context = new PAnimationEvaluationContext(
+				data instanceof MolangParser.Context molang ? molang : new MolangParser.Context(), time);
+		Vector3f accumulatedTranslation = accumulatedFrame == null ? new Vector3f() : accumulatedFrame.translation();
+		Vector3f accumulatedScale = accumulatedFrame == null ? new Vector3f(1f) : accumulatedFrame.scale();
+		Vector3f accumulatedRotation = accumulatedFrame == null ? new Vector3f() :
+				accumulatedFrame.rotation().getEulerAnglesXYZ(new Vector3f()).mul((float) (180d / Math.PI));
+
+		Vector3f translation = sample(boneAnimation, PLibRegistration.AnimationChannelReg.POSITION.get(), time, context, accumulatedTranslation);
+		Vector3f scale = sample(boneAnimation, PLibRegistration.AnimationChannelReg.SCALE.get(), time, context, accumulatedScale);
+		Quaternionf rotation = sample(boneAnimation, PLibRegistration.AnimationChannelReg.ROTATION.get(), time, context, accumulatedRotation);
+		if (translation == null && scale == null && rotation == null)
+>>>>>>> e194067 (Tons of e)
 			return null;
-		
-		if (translation == null)
-			translation = new Vector3f();
-		
-		if (scale == null)
-			scale = new Vector3f(1f, 1f, 1f);
-		
-		if (rotation == null)
-			rotation = new Quaternionf();
-		
-		return new BoneFrame(translation, rotation, scale);
+		return new BoneFrame(
+				translation == null ? new Vector3f() : translation,
+				rotation == null ? new Quaternionf() : rotation,
+				scale == null ? new Vector3f(1f) : scale);
 	}
-	
-	public List<PAnimationEvent> eventsBetween(float from, float to)
+
+	public List<PAnimationEvent<?>> eventsBetween(float from, float to)
 	{
 		if (this.events.isEmpty() || to < from)
 			return List.of();
-		
-		return this.events.stream().
-				filter(event -> (event.time() > from || (from == 0f && event.time() == 0f)) && event.time() <= to).
-				toList();
+		return this.events.stream().filter(event -> (event.time() > from || (from == 0f && event.time() == 0f)) && event.time() <= to).toList();
 	}
+<<<<<<< HEAD
 	
 	@SuppressWarnings("unchecked")
 	private @Nullable Vector3f sampleVectorChannel(PBoneAnimation boneAnimation, PAnimationChannel channel, float time, PInterpolationType interpolationType, Object data, Vector3f thisValue)
@@ -93,30 +138,47 @@ public record PAnimation(String name,
 		List<PKeyFrameChannel<Vector3f>> keyframes = (List<PKeyFrameChannel<Vector3f>>) boneAnimation.channels().get(channel);
 		
 		if (keyframes == null || keyframes.isEmpty())
+=======
+
+	public List<PAnimationEvent<?>> eventsBetweenReverse(float from, float to)
+	{
+		if (this.events.isEmpty() || to > from)
+			return List.of();
+		return this.events.stream().filter(event -> event.time() >= to && event.time() < from).
+			sorted(Comparator.comparingDouble((PAnimationEvent<?> event) -> event.time()).reversed()).toList();
+	}
+
+	private static <T> @Nullable T sample(PBoneAnimation boneAnimation,
+	                                      PAnimationChannelType<T> channel,
+	                                      float time,
+	                                      PAnimationEvaluationContext context,
+	                                      Vector3f thisValue)
+	{
+		PAnimationTrack<T> track = boneAnimation.track(channel);
+		if (track == null || track.keyframes().isEmpty())
+>>>>>>> e194067 (Tons of e)
 			return null;
-		
+		context.thisValues(thisValue);
+		List<PKeyframe<T>> keyframes = track.keyframes();
 		if (keyframes.size() == 1)
-			return new Vector3f(keyframes.getFirst().value(data));
-		
-		PKeyFrameChannel<Vector3f> previous = null;
-		PKeyFrameChannel<Vector3f> next = null;
-		
-		for (PKeyFrameChannel<Vector3f> kf : keyframes)
+			return evaluate(keyframes.getFirst().post(), channel, context);
+
+		PKeyframe<T> previous = null;
+		PKeyframe<T> next = null;
+		for (PKeyframe<T> keyframe : keyframes)
 		{
-			if (kf.time() <= time)
-				previous = kf;
-			
-			if (kf.time() > time)
+			if (keyframe.time() <= time)
+				previous = keyframe;
+			if (keyframe.time() > time)
 			{
-				next = kf;
+				next = keyframe;
 				break;
 			}
 		}
-		
 		if (previous == null)
-			return new Vector3f(keyframes.getFirst().value(data));
-		
+			return evaluate(keyframes.getFirst().pre(), channel, context);
 		if (next == null)
+<<<<<<< HEAD
 			return new Vector3f(previous.value(data));
 		
 		float alpha = transformAlpha(previous, next, time, interpolationType);
@@ -176,10 +238,21 @@ public record PAnimation(String name,
 		}
 
 		return new Quaternionf(previous.value(data)).slerp(next.value(data), alpha);
+=======
+			return evaluate(previous.post(), channel, context);
+
+		T from = evaluate(previous.post(), channel, context);
+		T to = evaluate(next.pre(), channel, context);
+		T destination = channel.defaultValue();
+		float alpha = (time - previous.time()) / (next.time() - previous.time());
+		channel.interpolate(from, to, Math.clamp(alpha, 0f, 1f), previous.interpolation(), destination);
+		return destination;
+>>>>>>> e194067 (Tons of e)
 	}
 
-	private static void setThisValue(Object data, Vector3f value)
+	private static <T> T evaluate(PAnimationValue<T> value, PAnimationChannelType<T> channel, PAnimationEvaluationContext context)
 	{
+<<<<<<< HEAD
 		if (data instanceof MolangParser.Context context)
 			context.thisValues(value.x(), value.y(), value.z());
 	}
@@ -197,5 +270,10 @@ public record PAnimation(String name,
 		rawAlpha = Math.clamp(rawAlpha, 0.0f, 1.0f);
 		
 		return (float) interpolationType.buildTransformer(rawAlpha);
+=======
+		T destination = channel.defaultValue();
+		value.evaluate(context, destination);
+		return destination;
+>>>>>>> e194067 (Tons of e)
 	}
 }
