@@ -20,7 +20,7 @@ import java.util.Map;
  * <p>Modified by ArcAnc</p>
  */
 @FunctionalInterface
-public interface PInterpolationType
+public interface PInterpolationType extends PInterpolation
 {
 	Map<String, PInterpolationType> INTERPOLATION_TYPES = new Object2ObjectOpenHashMap<>();
 	

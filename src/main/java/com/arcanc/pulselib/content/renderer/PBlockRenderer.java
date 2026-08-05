@@ -15,13 +15,13 @@ import com.arcanc.pulselib.content.animatable.PAnimatable;
 import com.arcanc.pulselib.content.animatable.PAnimationController;
 import com.arcanc.pulselib.content.animatable.PAnimationManager;
 import com.arcanc.pulselib.content.animatable.instance.InstanceAnimationManager;
-import com.arcanc.pulselib.content.model.animation.BoneFrame;
+import com.arcanc.pulselib.content.model.animation.PPose;
 import com.arcanc.pulselib.content.model.baked.PBakedBone;
 import com.arcanc.pulselib.content.model.baked.PBakedMesh;
 import com.arcanc.pulselib.content.model.baked.PBakedModel;
 import com.arcanc.pulselib.content.model.baked.PMeshRenderContext;
 import com.arcanc.pulselib.content.renderer.modelData.PModelData;
-import com.arcanc.pulselib.data.MolangParser;
+import com.arcanc.pulselib.data.gecko.MolangParser;
 import com.arcanc.pulselib.util.PRenderTypes;
 import com.arcanc.pulselib.util.PTextureCache;
 import com.mojang.blaze3d.vertex.PoseStack;
@@ -104,7 +104,8 @@ public abstract class PBlockRenderer<T extends BlockEntity & PAnimatable<T>>
 		Map<PAnimationController<T>, MolangParser.Context> molangContexts = prepareMolangContexts(animatable, manager.key(), controllers, partialTick);
 		InstanceAnimationManager.addManager(manager);
 		
-		model.bones().forEach(bone -> perBoneSubmit(animatable, poseStack, bone, controllers, molangContexts, renderType, -1, packedLight, packedOverlay, partialTick));
+		PPose pose = model.evaluate(controllers, molangContexts, partialTick);
+		model.bones().forEach(bone -> perBoneSubmit(animatable, poseStack, bone, pose, controllers, molangContexts, renderType, -1, packedLight, packedOverlay, partialTick));
 	}
 	
 	@Override
@@ -113,27 +114,19 @@ public abstract class PBlockRenderer<T extends BlockEntity & PAnimatable<T>>
 	
 	}
 	
-	protected void perBoneSubmit(T animatable, PoseStack poseStack, PBakedBone bone, Collection<PAnimationController<T>> controllers, Map<PAnimationController<T>, MolangParser.Context> molangContexts, Function<ResourceLocation, RenderType> renderType, int packedColor, int packedLight, int packedOverlay, float partialTick)
+	protected void perBoneSubmit(T animatable, PoseStack poseStack, PBakedBone bone, PPose pose, Collection<PAnimationController<T>> controllers, Map<PAnimationController<T>, MolangParser.Context> molangContexts, Function<ResourceLocation, RenderType> renderType, int packedColor, int packedLight, int packedOverlay, float partialTick)
 	{
 		PModelData data = this.getModelData(animatable);
-		BoneFrame frame = bone.mixBone(data.getModel(), controllers, molangContexts, partialTick);
+		int boneIndex = data.getModel().boneIndex(bone);
 		poseStack.pushPose();
-		if (frame != null)
-		{
-			poseStack.translate(frame.translation().x(), frame.translation().y(), frame.translation().z());
-			poseStack.mulPose(frame.rotation());
-			poseStack.scale(frame.scale().x(), frame.scale().y(), frame.scale().z());
-		}
-		else
-		{
-			poseStack.translate(bone.basePosition().x(), bone.basePosition().y(), bone.basePosition().z());
-			poseStack.mulPose(bone.baseRotation());
-		}
+		poseStack.translate(pose.translation(boneIndex).x(), pose.translation(boneIndex).y(), pose.translation(boneIndex).z());
+		poseStack.mulPose(pose.rotation(boneIndex));
+		poseStack.scale(pose.scale(boneIndex).x(), pose.scale(boneIndex).y(), pose.scale(boneIndex).z());
 		
 		this.submitBone(animatable, bone, poseStack, data, controllers, renderType, packedColor, packedLight, packedOverlay, partialTick);
 		
 		if (!bone.children().isEmpty())
-			bone.children().forEach(child -> perBoneSubmit(animatable, poseStack, child, controllers, molangContexts, renderType, packedColor, packedLight, packedOverlay, partialTick));
+			bone.children().forEach(child -> perBoneSubmit(animatable, poseStack, child, pose, controllers, molangContexts, renderType, packedColor, packedLight, packedOverlay, partialTick));
 
 		poseStack.popPose();
 	}

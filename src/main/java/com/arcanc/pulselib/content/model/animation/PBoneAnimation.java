@@ -10,10 +10,24 @@
 package com.arcanc.pulselib.content.model.animation;
 
 
-import java.util.List;
+import org.jetbrains.annotations.Nullable;
+
 import java.util.Map;
 import java.util.UUID;
 
-public record PBoneAnimation(UUID boneUuid, Map<PAnimationChannel, List<? extends PKeyFrameChannel<?>>> channels)
+public record PBoneAnimation(UUID boneUuid, Map<String, PAnimationTrack<?>> tracks)
 {
+	@SuppressWarnings("unchecked")
+	public @Nullable <T> PAnimationTrack<T> track(PAnimationChannelType<T> type)
+	{
+		for (PAnimationTrack<?> track : this.tracks.values())
+			if (track.channel() == type)
+				return (PAnimationTrack<T>) track;
+		return null;
+	}
+
+	public boolean hasChannel(PAnimationChannelType<?> type)
+	{
+		return track(type) != null;
+	}
 }

@@ -81,7 +81,8 @@ PRenderTypes.RenderTypeProvider::trianglesSolid
 PRenderTypes.RenderTypeProvider::trianglesCutout
 PRenderTypes.RenderTypeProvider::trianglesTranslucent
 PRenderTypes.RenderTypeProvider::trianglesGui
-PRenderTypes.RenderTypeProvider::trianglesLit
 ```
 
 Do not pass vanilla entity/block `RenderType` values unless they use a compatible triangle vertex format and shader setup.
+
+`trianglesLit` is retained for source compatibility, but it no longer has a separate shader and should not be chosen for new renderers.

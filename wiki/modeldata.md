@@ -52,7 +52,7 @@ That fallback is useful, but explicit names are easier to debug. Keep Blockbench
 
 ## Gecko model data
 
-PulseLib can load Gecko-style JSON models through [`PGeckoModelLoader`](https://github.com/ArcAnc/PulseLib/blob/master/src/main/java/com/arcanc/pulselib/data/PGeckoModelLoader.java), but the default registered loader in `PModelCache` is glTF. Register the Gecko loader before client resources reload if your mod needs Gecko paths:
+PulseLib can load Gecko-style JSON models through [`PGeckoModelLoader`](https://github.com/ArcAnc/PulseLib/blob/master/src/main/java/com/arcanc/pulselib/data/gecko/PGeckoModelLoader.java), but the default registered loader in `PModelCache` is glTF. Register the Gecko loader before client resources reload if your mod needs Gecko paths:
 
 ```java
 PModelCache.registerModelLoader(PGeckoModelLoader.INSTANCE);
@@ -67,5 +67,5 @@ Classes used:
 
 * [`PModelData`](https://github.com/ArcAnc/PulseLib/blob/master/src/main/java/com/arcanc/pulselib/content/renderer/modelData/PModelData.java)
 * [`PModelCache`](https://github.com/ArcAnc/PulseLib/blob/master/src/main/java/com/arcanc/pulselib/util/PModelCache.java)
-* [`PGltfModelLoader`](https://github.com/ArcAnc/PulseLib/blob/master/src/main/java/com/arcanc/pulselib/data/PGltfModelLoader.java)
-* [`PGeckoModelLoader`](https://github.com/ArcAnc/PulseLib/blob/master/src/main/java/com/arcanc/pulselib/data/PGeckoModelLoader.java)
+* [`PGltfModelLoader`](https://github.com/ArcAnc/PulseLib/blob/master/src/main/java/com/arcanc/pulselib/data/gltf/PGltfModelLoader.java)
+* [`PGeckoModelLoader`](https://github.com/ArcAnc/PulseLib/blob/master/src/main/java/com/arcanc/pulselib/data/gecko/PGeckoModelLoader.java)

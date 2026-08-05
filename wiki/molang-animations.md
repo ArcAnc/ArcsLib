@@ -17,15 +17,15 @@ The Gecko parser compiles each string into a `MolangParser.Expression` while the
 
 ## Context and evaluation
 
-Each built-in renderer creates one `MolangParser.Context` per animation controller for a render pass and passes that context to every bone mixed by that controller. This applies to entity, block entity, item, and item GUI rendering, including recursive GUI drawing.
+Each built-in renderer prepares one frame context per animation controller and render pass. The controller copies its frame-specific query and context values into its own persistent `MolangParser.Context` before it mixes the pose. This applies to entity, block entity, item, and item GUI rendering, including recursive GUI drawing.
 
 The renderer supplies these values by default:
 
 * `query.anim_time` (also available as `q.anim_time`) is the controller's interpolated animation time in seconds.
 * `this` is supplied by the animation mixer from the accumulated value of the vector component currently being evaluated.
-* The random generator is reset from `PAnimationManager.key()` for every prepared context. `math.random`, `math.random_integer`, `math.die_roll`, and `math.die_roll_integer` are therefore deterministic for the same animation-manager key and evaluation order.
+* `math.random`, `math.random_integer`, `math.die_roll`, and `math.die_roll_integer` use the controller's persistent random state. If deterministic results are required for custom code, seed it through `controller.persistentMolangContext().randomSeed(...)`.
 
-The context is deliberately prepared outside `PAnimationController`. A controller only mixes an animation with the ready context; it does not retain an animatable, a query provider, or a random seed.
+This split keeps render-specific queries fresh without sharing Molang variables or random sequences between different controllers.
 
 ## Providing custom queries
 
@@ -52,9 +52,6 @@ The parser supports numeric literals, arithmetic, comparisons, logical operators
 
 Supported math functions include trigonometry, interpolation, clamping, rounding, powers, min/max, random and die-roll functions, plus the implemented `math.ease_*` variants. An unsupported function is reported as an error instead of silently evaluating to an arbitrary value.
 
-## Current limitation: `variable.*` lifetime
+## `variable.*` lifetime
 
-> TODO: move the per-controller `MolangParser.Context` ownership to `PAnimationManager` (or an equivalent animation-instance store).
-
-At present, renderers create a fresh context for each render pass. Consequently, an assignment to `variable.*` is available while that context is being evaluated, but does not persist into the next frame. This is intentionally documented as incomplete Molang behavior and must be addressed before relying on `variable.*` as long-lived animation state.
-
+`variable.*` assignments persist for the lifetime of a `PAnimationController`, including across render frames. They are private to that controller, so two controllers do not overwrite each other's variables. `temp.*` remains local to one expression evaluation.

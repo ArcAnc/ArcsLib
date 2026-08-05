@@ -11,7 +11,7 @@ package com.arcanc.pulselib.content.renderer.modelData;
 
 
 import com.arcanc.pulselib.content.model.baked.PBakedModel;
-import com.arcanc.pulselib.data.PGltfModelLoader;
+import com.arcanc.pulselib.data.gltf.PGltfModelLoader;
 import com.arcanc.pulselib.util.PModelCache;
 import com.mojang.datafixers.util.Pair;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;

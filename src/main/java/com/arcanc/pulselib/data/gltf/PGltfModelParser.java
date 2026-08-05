@@ -1,0 +1,422 @@
+/**
+ * @author ArcAnc
+ * Created at: 26.01.2026
+ * Copyright (c) 2026
+ * <p>
+ * This code is licensed under "Arc's License of Common Sense"
+ * Details can be found in the license file in the root folder of this project
+ */
+
+package com.arcanc.pulselib.data.gltf;
+
+
+import com.arcanc.pulselib.content.model.PBone;
+import com.arcanc.pulselib.content.model.PMesh;
+import com.arcanc.pulselib.content.model.PModel;
+import com.arcanc.pulselib.content.model.animation.*;
+import com.arcanc.pulselib.content.registration.PLibRegistration;
+import com.arcanc.pulselib.util.helpers.PLibParserHelper;
+import com.mojang.datafixers.util.Pair;
+import de.javagl.jgltf.model.*;
+import de.javagl.jgltf.model.io.GltfModelReader;
+import org.joml.Matrix3f;
+import org.joml.Matrix4f;
+import org.joml.Quaternionf;
+import org.joml.Vector3f;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.ByteBuffer;
+import java.nio.FloatBuffer;
+import java.util.*;
+import java.util.stream.Collectors;
+
+public class PGltfModelParser
+{
+	private static final List<PGltfChannelDecoder<?>> CHANNEL_DECODERS = List.of(
+			new PGltfChannelDecoder<Vector3f>()
+			{
+				@Override
+				public Set<String> fieldNames()
+				{
+					return Set.of("translation");
+				}
+
+				@Override
+				public PAnimationChannelType<Vector3f> channel()
+				{
+					return PLibRegistration.AnimationChannelReg.POSITION.get();
+				}
+
+				@Override
+				public PAnimationValue<Vector3f> decodeValue(ByteBuffer values, int keyframeIndex, PGltfDecodeContext context)
+				{
+					int offset = keyframeIndex * 12;
+					Vector3f value = new Vector3f(values.getFloat(offset), values.getFloat(offset + 4), values.getFloat(offset + 8)).sub(context.bone().pivot());
+					return constantVector(value);
+				}
+			},
+			new PGltfChannelDecoder<Quaternionf>()
+			{
+				@Override
+				public Set<String> fieldNames()
+				{
+					return Set.of("rotation");
+				}
+
+				@Override
+				public PAnimationChannelType<Quaternionf> channel()
+				{
+					return PLibRegistration.AnimationChannelReg.ROTATION.get();
+				}
+
+				@Override
+				public PAnimationValue<Quaternionf> decodeValue(ByteBuffer values, int keyframeIndex, PGltfDecodeContext context)
+				{
+					int offset = keyframeIndex * 16;
+					return constantQuaternion(new Quaternionf(values.getFloat(offset), values.getFloat(offset + 4), values.getFloat(offset + 8), values.getFloat(offset + 12)));
+				}
+			},
+			new PGltfChannelDecoder<Vector3f>()
+			{
+				@Override
+				public Set<String> fieldNames()
+				{
+					return Set.of("scale");
+				}
+
+				@Override
+				public PAnimationChannelType<Vector3f> channel()
+				{
+					return PLibRegistration.AnimationChannelReg.SCALE.get();
+				}
+
+				@Override
+				public PAnimationValue<Vector3f> decodeValue(ByteBuffer values, int keyframeIndex, PGltfDecodeContext context)
+				{
+					int offset = keyframeIndex * 12;
+					return constantVector(new Vector3f(values.getFloat(offset), values.getFloat(offset + 4), values.getFloat(offset + 8)));
+				}
+			});
+
+	public static PModel parse(InputStream stream) throws IOException
+	{
+		GltfModel model = new GltfModelReader().readWithoutReferences(stream);
+		
+		PModel pModel = new PModel();
+		
+		Map<UUID, PBone> uuidToBone = new HashMap<>();
+		Map<UUID, PMesh> uuidToMesh = new HashMap<>();
+		Map<NodeModel, PBone> nodeToBone = parseBones(model, uuidToBone, uuidToMesh);
+		Map<String, PAnimation> animations = parseAnimations(model, nodeToBone);
+		
+		pModel.bones.putAll(uuidToBone);
+		pModel.meshes.putAll(uuidToMesh);
+		pModel.boneMeshes.putAll(uuidToBone.values().stream().
+				collect(Collectors.toMap(PBone :: uuid, pBone -> Pair.of(pBone.uuid(), pBone.meshUUIDS().stream().toList()))));
+		pModel.animations.putAll(animations);
+		
+		return pModel;
+		
+	}
+	
+	private static Map<NodeModel, PBone> parseBones(GltfModel model, Map<UUID, PBone> uuidToBone, Map<UUID, PMesh> uuidToMesh)
+	{
+		List<NodeModel> nodes = model.getNodeModels();
+		final Map<NodeModel, PBone> nodeToBone = new HashMap<>();
+		
+		if (nodes == null || nodes.isEmpty())
+			return nodeToBone;
+		
+		List<NodeModel> joints = nodes.stream().
+				filter(PGltfModelParser :: isBoneNode).
+				toList();
+		
+		for (NodeModel node : joints)
+			parseBone(node, nodeToBone);
+		
+		for (NodeModel node : joints)
+		{
+			PBone bone = nodeToBone.get(node);
+			PBone parent = nearestBone(node.getParent(), nodeToBone);
+			if (parent != null)
+			{
+				bone.setParent(parent);
+				parent.children().add(bone);
+			}
+		}
+
+		// Blockbench exports every cube as a mesh node below its group/bone.
+		// Mesh nodes are not joints: bake their local transform into the geometry
+		// and attach the result to the nearest actual bone.
+		for (NodeModel node : nodes)
+		{
+			if (nodeToBone.containsKey(node))
+				continue;
+			PBone bone = nearestBone(node.getParent(), nodeToBone);
+			if (bone == null)
+				continue;
+			List<MeshModel> meshes = node.getMeshModels();
+			if (meshes != null)
+				for (MeshModel mesh : meshes)
+					bone.meshUUIDS().add(parseMesh(mesh, node, uuidToMesh));
+		}
+		
+		nodeToBone.forEach((nodeModel, pBone) ->
+				uuidToBone.put(pBone.uuid(), pBone));
+		
+		return nodeToBone;
+	}
+	
+	private static void parseBone(NodeModel node, Map<NodeModel, PBone> nodeToBone)
+	{
+		float[] rawTranslation = node.getTranslation();
+		Vector3f pivot = new Vector3f();
+		if (rawTranslation != null && rawTranslation.length == 3)
+			pivot.add(rawTranslation[0], rawTranslation[1], rawTranslation[2]);
+		float[] rawRotation = node.getRotation();
+		Quaternionf baseRotation = new Quaternionf();
+		if (rawRotation != null && rawRotation.length == 4)
+			baseRotation.set(rawRotation[0], rawRotation[1], rawRotation[2], rawRotation[3]);
+		
+		UUID boneUUID = UUID.randomUUID();
+		String name = node.getName();
+		if (name == null)
+			name = boneUUID.toString();
+		
+		PBone bone = new PBone(
+				boneUUID,
+				name,
+				pivot,
+				baseRotation);
+		
+		nodeToBone.put(node, bone);
+	}
+
+	private static boolean isBoneNode(NodeModel node)
+	{
+		if (isBlockbenchLocatorMarker(node))
+			return false;
+		List<MeshModel> meshes = node.getMeshModels();
+		// A root mesh has no bone that could own it, so it remains a render bone.
+		return meshes == null || meshes.isEmpty() || node.getParent() == null;
+	}
+
+	private static PBone nearestBone(NodeModel node, Map<NodeModel, PBone> nodeToBone)
+	{
+		for (NodeModel current = node; current != null; current = current.getParent())
+		{
+			PBone bone = nodeToBone.get(current);
+			if (bone != null)
+				return bone;
+		}
+		return null;
+	}
+	
+	private static boolean isBlockbenchLocatorMarker(NodeModel node)
+	{
+		NodeModel parent = node.getParent();
+		if (parent == null)
+			return false;
+		
+		String nodeName = node.getName();
+		if (nodeName == null || !nodeName.equals(parent.getName()))
+			return false;
+		
+		List<MeshModel> meshes = node.getMeshModels();
+		if (meshes != null && !meshes.isEmpty())
+			return false;
+		
+		List<NodeModel> children = node.getChildren();
+		if (children != null && !children.isEmpty())
+			return false;
+		
+		float[] scale = node.getScale();
+		return scale != null && scale.length == 3 && scale[0] < 0.1f && scale[1] < 0.1f && scale[2] < 0.1f;
+	}
+	
+	private static UUID parseMesh(MeshModel mesh, NodeModel node, Map<UUID, PMesh> uuidToMesh)
+	{
+		//Only one primitive per mesh. At least for BBmodel
+		MeshPrimitiveModel primitive = mesh.getMeshPrimitiveModels().getFirst();
+		AccessorModel positionsAccessor = primitive.getAttributes().get("POSITION");
+		AccessorModel normalsAccessor = primitive.getAttributes().get("NORMAL");
+		AccessorModel uvsAccessor = primitive.getAttributes().get("TEXCOORD_0");
+		
+		FloatBuffer positions = transformPositions(PLibParserHelper.getFloatBuffer(positionsAccessor), node);
+		FloatBuffer normals = transformNormals(PLibParserHelper.getFloatBuffer(normalsAccessor), node);
+		FloatBuffer uvs = PLibParserHelper.getFloatBuffer(uvsAccessor);
+		
+		int vertexCount = positionsAccessor.getCount();
+		
+		AccessorModel indicesAccessor = primitive.getIndices();
+		ByteBuffer indices = PLibParserHelper.getByteBuffer(indicesAccessor);
+		int indicesCount = indicesAccessor.getCount();
+		int indicesType = indicesAccessor.getComponentType();
+		
+		MaterialModel material = primitive.getMaterialModel();
+		String textureName = PLibParserHelper.extractTextureName(material);
+		PMesh pMesh = new PMesh(
+				UUID.randomUUID(),
+				vertexCount,
+				positions,
+				normals,
+				uvs,
+				indicesCount,
+				indices,
+				indicesType,
+				textureName
+		);
+		
+		uuidToMesh.put(pMesh.uuid(), pMesh);
+		return pMesh.uuid();
+	}
+
+	private static FloatBuffer transformPositions(FloatBuffer source, NodeModel node)
+	{
+		Matrix4f transform = localTransform(node);
+		FloatBuffer result = FloatBuffer.allocate(source.limit());
+		for (int offset = 0; offset < source.limit(); offset += 3)
+		{
+			Vector3f position = new Vector3f(source.get(offset), source.get(offset + 1), source.get(offset + 2));
+			transform.transformPosition(position);
+			result.put(position.x).put(position.y).put(position.z);
+		}
+		return result.flip();
+	}
+
+	private static FloatBuffer transformNormals(FloatBuffer source, NodeModel node)
+	{
+		Matrix3f transform = new Matrix3f().set(localTransform(node)).invert().transpose();
+		FloatBuffer result = FloatBuffer.allocate(source.limit());
+		for (int offset = 0; offset < source.limit(); offset += 3)
+		{
+			Vector3f normal = new Vector3f(source.get(offset), source.get(offset + 1), source.get(offset + 2));
+			transform.transform(normal).normalize();
+			result.put(normal.x).put(normal.y).put(normal.z);
+		}
+		return result.flip();
+	}
+
+	private static Matrix4f localTransform(NodeModel node)
+	{
+		Matrix4f transform = new Matrix4f();
+		float[] translation = node.getTranslation();
+		if (translation != null && translation.length == 3)
+			transform.translate(translation[0], translation[1], translation[2]);
+		float[] rotation = node.getRotation();
+		if (rotation != null && rotation.length == 4)
+			transform.rotate(new Quaternionf(rotation[0], rotation[1], rotation[2], rotation[3]));
+		float[] scale = node.getScale();
+		if (scale != null && scale.length == 3)
+			transform.scale(scale[0], scale[1], scale[2]);
+		return transform;
+	}
+	
+	private static Map<String, PAnimation> parseAnimations(GltfModel model, Map<NodeModel, PBone> nodeToBone)
+	{
+		Map<String, PAnimation> animations = new HashMap<>();
+		
+		for (int q = 0; q < model.getAnimationModels().size(); q++)
+		{
+			AnimationModel animationModel = model.getAnimationModels().get(q);
+			
+			String animationName = animationModel.getName() != null ? animationModel.getName() : "anim_" + q;
+			Map<String, PBoneAnimation> boneAnimations = new HashMap<>();
+			float maxTime = 0f;
+			
+			for (AnimationModel.Channel channel : animationModel.getChannels())
+			{
+				NodeModel node = channel.getNodeModel();
+				
+				if (node == null)
+					continue;
+				
+				PBone bone = nodeToBone.get(node);
+				if (bone == null)
+					continue;
+				
+				UUID boneUuid = bone.uuid();
+				
+				PGltfChannelDecoder<?> decoder = decoder(channel.getPath());
+				if (decoder == null)
+					continue;
+				
+				AnimationModel.Sampler sampler = channel.getSampler();
+				if (sampler == null)
+					continue;
+				
+				FloatBuffer inputTimes = PLibParserHelper.getFloatBuffer(sampler.getInput());
+				maxTime = Math.max(maxTime, inputTimes.limit() > 0 ? inputTimes.get(inputTimes.limit() - 1) : 0L);
+				AccessorModel outputAccessor = sampler.getOutput();
+				if (outputAccessor == null)
+					continue;
+				ByteBuffer bb = outputAccessor.getAccessorData().createByteBuffer();
+				PBoneAnimation boneAnimation = boneAnimations.computeIfAbsent(bone.name(), k -> new PBoneAnimation(boneUuid, new HashMap<>()));
+				PAnimationTrack<?> track = decodeTrack(decoder, inputTimes, bb, new PGltfDecodeContext(bone));
+				boneAnimation.tracks().put(track.channel().id().toString(), track);
+			}
+			animations.put(animationName, new PAnimation(animationName, maxTime * 20, boneAnimations));
+		}
+		
+		return animations;
+	}
+	
+	private static PGltfChannelDecoder<?> decoder(String path)
+	{
+		for (PGltfChannelDecoder<?> decoder : CHANNEL_DECODERS)
+			if (decoder.fieldNames().contains(path))
+				return decoder;
+		return null;
+	}
+
+	private static <T> PAnimationTrack<T> decodeTrack(PGltfChannelDecoder<T> decoder,
+	                                                  FloatBuffer times,
+	                                                  ByteBuffer values,
+	                                                  PGltfDecodeContext context)
+	{
+		List<PKeyframe<T>> keyframes = new ArrayList<>();
+		for (int index = 0; index < times.limit(); index++)
+		{
+			PAnimationValue<T> value = decoder.decodeValue(values, index, context);
+			keyframes.add(new PKeyframe<>(times.get(index) * 20, value, value, PInterpolationType.LINEAR));
+		}
+		return new PAnimationTrack<>(decoder.channel(), keyframes);
+	}
+
+	private static PAnimationValue<Vector3f> constantVector(Vector3f value)
+	{
+		return new PAnimationValue<>()
+		{
+			@Override
+			public void evaluate(PAnimationEvaluationContext context, Vector3f destination)
+			{
+				destination.set(value);
+			}
+
+			@Override
+			public boolean isConstant()
+			{
+				return true;
+			}
+		};
+	}
+
+	private static PAnimationValue<Quaternionf> constantQuaternion(Quaternionf value)
+	{
+		return new PAnimationValue<>()
+		{
+			@Override
+			public void evaluate(PAnimationEvaluationContext context, Quaternionf destination)
+			{
+				destination.set(value);
+			}
+
+			@Override
+			public boolean isConstant()
+			{
+				return true;
+			}
+		};
+	}
+}

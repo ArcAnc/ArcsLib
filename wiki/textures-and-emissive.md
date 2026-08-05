@@ -80,8 +80,9 @@ PRenderTypes.RenderTypeProvider::trianglesSolidEmissive
 PRenderTypes.RenderTypeProvider::trianglesCutoutEmissive
 PRenderTypes.RenderTypeProvider::trianglesTranslucentEmissive
 PRenderTypes.RenderTypeProvider::trianglesGuiEmissive
-PRenderTypes.RenderTypeProvider::trianglesLitEmissive
 ```
+
+`trianglesLitEmissive` remains only as the compatibility counterpart of `trianglesLit`; it is not a distinct shader variant for new rendering code.
 
 Classes used:
 

@@ -54,8 +54,7 @@ public class SingletonAnimationManager<T extends PAnimatable<T>> extends PAnimat
 			if (container == null)
 			{
 				SingletonAnimationManager<T> man = new SingletonAnimationManager<>(animatable, key);
-				man.factories.forEach((name, supplier) -> man.controllers.put(name,
-						new PAnimationController<>(name, supplier.get())));
+				man.createControllers();
 				return new AnimationManagerContainer<>(Util.getEpochMillis(), man);
 			}
 			container.lastUsedTick = Util.getEpochMillis();

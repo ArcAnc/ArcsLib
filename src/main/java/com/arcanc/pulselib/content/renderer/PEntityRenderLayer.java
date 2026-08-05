@@ -12,12 +12,13 @@ package com.arcanc.pulselib.content.renderer;
 
 import com.arcanc.pulselib.content.animatable.PAnimatable;
 import com.arcanc.pulselib.content.animatable.PAnimationController;
+import com.arcanc.pulselib.content.model.animation.PPose;
 import com.arcanc.pulselib.content.model.baked.PBakedBone;
 import com.arcanc.pulselib.content.model.baked.PBakedMesh;
 import com.arcanc.pulselib.content.model.baked.PBakedModel;
 import com.arcanc.pulselib.content.model.baked.PMeshRenderContext;
 import com.arcanc.pulselib.content.renderer.modelData.PModelData;
-import com.arcanc.pulselib.data.MolangParser;
+import com.arcanc.pulselib.data.gecko.MolangParser;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.resources.ResourceLocation;
@@ -136,12 +137,14 @@ public abstract class PEntityRenderLayer<T extends Entity & PAnimatable<T>>
 			return;
 		
 		PModelData data = getModelData(animatable);
+		PPose pose = model.evaluate(controllers, molangContexts, partialTick);
 		for (PBakedBone bone : model.bones())
 		{
 			renderer.perBoneSubmit(
 					animatable,
 					poseStack,
 					bone,
+					pose,
 					controllers,
 					data,
 					this :: getRenderType,

@@ -27,7 +27,7 @@ public final class ExamplePlayerAnimations {
                         .bind(PPlayerPart.BODY, "body")
                         .bind(PPlayerPart.RIGHT_ARM, "right_arm")
                         .mask(PPlayerPart.BODY, PPlayerPart.RIGHT_ARM)
-                        .blendMode(PPlayerAnimationBlendMode.ADDITIVE)
+                        .blendMode(PPlayerAnimationBlendMode.ADDITIVE_LOCAL)
                         .weight(0.75f)
                         .controllers(registrar -> registrar.add("combat", () -> state -> {
                             state.controller().play(IDLE);
@@ -71,10 +71,16 @@ Each semantic part applies to both the base part and the matching outer skin lay
 
 ## Blending and weights
 
-Definitions run in ascending `priority`; registrations with the same priority are ordered by their id.
+Definitions run in ascending `priority`; registrations with the same priority are ordered by their id. The default is `ADDITIVE_LOCAL`, which adds the sampled position and rotation to the pose already produced by vanilla and earlier definitions. It is a good default for recoil, breathing, and gestures.
 
-* `ADDITIVE` adds the sampled position and rotation to the pose already produced by vanilla and earlier definitions. This is the default and works well for recoil, breathing, and gestures.
-* `REPLACE` blends from the original vanilla pose to the sampled pose. It is suitable for emotes or stances that should override vanilla limb motion.
+The available modes are:
+
+* `OVERRIDE` blends from the original vanilla pose to the sampled pose.
+* `ADDITIVE_LOCAL` and `ADDITIVE_MESH_SPACE` add sampled transforms to the existing pose.
+* `MULTIPLY_SCALE` affects scale only.
+* `DIFFERENCE` subtracts translation and applies inverse rotation/scale.
+
+Use `OVERRIDE` for emotes or stances that should replace vanilla limb motion.
 
 The definition weight is clamped to `[0, 1]`. A constant weight is sufficient for most cases:
 
@@ -98,6 +104,24 @@ For a dynamic blend, provide a function evaluated every render pass:
 ```
 
 Layer several definitions with different masks, priorities, modes, definition weights, and part weights to combine independent actions.
+
+## Activation crossfades and cycle synchronization
+
+By default a definition starts and stops immediately when its `when(...)` predicate changes. Add `crossfade` to blend that activation in ticks:
+
+```java
+.crossfade(4.0f, PPoseEasing.LINEAR, PTransitionInterruptionPolicy.FROM_CURRENT)
+```
+
+`FROM_CURRENT` reverses smoothly from the current fade amount, `RESTART` starts the new fade from its endpoint, and `COMPLETE_CURRENT` lets the current fade finish before accepting a new predicate change.
+
+Definitions with the same non-empty `syncGroup` keep similarly named looping controllers at the same normalized cycle phase for each player:
+
+```java
+.syncGroup("combat")
+```
+
+Use this for layered models whose walk, idle, or other cyclic animations must stay aligned. `boneWeight(boneName, weight)` can additionally scale one bound bone independently of its semantic player-part weight.
 
 ## Model conventions and limitations
 

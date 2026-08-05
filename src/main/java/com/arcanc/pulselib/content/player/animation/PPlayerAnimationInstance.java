@@ -15,13 +15,17 @@ import com.arcanc.pulselib.content.animatable.PAnimationController;
 import com.arcanc.pulselib.content.animatable.PAnimationManager;
 import com.arcanc.pulselib.content.animatable.instance.InstanceAnimationManager;
 import com.arcanc.pulselib.content.model.animation.PAnimationPoseResolver;
+import com.arcanc.pulselib.content.model.animation.PTransitionInterruptionPolicy;
 import com.arcanc.pulselib.content.model.baked.PBakedModel;
-import com.arcanc.pulselib.data.MolangParser;
+import com.arcanc.pulselib.data.gecko.MolangParser;
+import net.minecraft.util.Mth;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
+import java.util.Map;
+import java.util.List;
 import java.util.Objects;
 
 public final class PPlayerAnimationInstance implements PAnimatable<PPlayerAnimationInstance>
@@ -30,6 +34,12 @@ public final class PPlayerAnimationInstance implements PAnimatable<PPlayerAnimat
 	private final ResourceLocation id;
 	private final PPlayerAnimationDefinition definition;
 	private final PAnimationManager<PPlayerAnimationInstance> animationManager;
+	private boolean targetActive;
+	private float activation;
+	private float previousActivation;
+	private float transitionStart;
+	private float transitionTarget;
+	private float transitionElapsed;
 
 	PPlayerAnimationInstance(Player player, ResourceLocation id, PPlayerAnimationDefinition definition)
 	{
@@ -82,14 +92,78 @@ public final class PPlayerAnimationInstance implements PAnimatable<PPlayerAnimat
 		this.animationManager.getControllers().values().forEach(PAnimationController :: stop);
 	}
 
-	void tick()
+	static void synchronize(List<PPlayerAnimationInstance> instances)
+	{
+		PPlayerAnimationInstance leader = instances.getFirst();
+		PBakedModel leaderModel = leader.definition.modelData().getModel();
+		if (leaderModel == null)
+			return;
+		for (Map.Entry<String, PAnimationController<PPlayerAnimationInstance>> entry : leader.animationManager.getControllers().entrySet())
+		{
+			float phase = entry.getValue().cyclePhase(leaderModel);
+			if (Float.isNaN(phase))
+				continue;
+			for (int index = 1; index < instances.size(); index++)
+			{
+				PPlayerAnimationInstance follower = instances.get(index);
+				PBakedModel followerModel = follower.definition.modelData().getModel();
+				PAnimationController<PPlayerAnimationInstance> controller = follower.animationManager.getControllers().get(entry.getKey());
+				if (followerModel != null && controller != null)
+					controller.syncCycle(followerModel, phase);
+			}
+		}
+	}
+
+	void tick(boolean shouldApply)
 	{
 		PBakedModel model = this.definition.modelData().getModel();
 		if (model == null)
 			return;
 
 		this.animationManager.bindModel(model);
-		this.animationManager.tick();
+		updateActivation(shouldApply);
+		if (shouldApply || this.activation > 0.0f)
+			this.animationManager.tick();
+	}
+
+	boolean isContributing()
+	{
+		return this.activation > 0.0f || this.previousActivation > 0.0f || this.targetActive;
+	}
+
+	float activationWeight(float partialTick)
+	{
+		return Mth.lerp(partialTick, this.previousActivation, this.activation);
+	}
+
+	private void updateActivation(boolean shouldApply)
+	{
+		this.previousActivation = this.activation;
+		if (shouldApply != this.targetActive)
+		{
+			if (this.transitionElapsed < this.definition.crossfadeDuration() &&
+					this.definition.transitionInterruptionPolicy() == PTransitionInterruptionPolicy.COMPLETE_CURRENT)
+			{
+				// The current fade is allowed to finish; the new request is sampled next tick.
+			}
+			else
+			{
+			this.transitionStart = this.definition.transitionInterruptionPolicy() == PTransitionInterruptionPolicy.RESTART ?
+						(this.targetActive ? 1.0f : 0.0f) : this.activation;
+				this.transitionTarget = shouldApply ? 1.0f : 0.0f;
+				this.transitionElapsed = 0.0f;
+				this.targetActive = shouldApply;
+			}
+		}
+		float duration = this.definition.crossfadeDuration();
+		if (duration <= 0.0f)
+		{
+			this.activation = this.targetActive ? 1.0f : 0.0f;
+			return;
+		}
+		this.transitionElapsed = Math.min(this.transitionElapsed + 1.0f, duration);
+		float alpha = this.definition.crossfadeEasing().transform(this.transitionElapsed / duration);
+		this.activation = Mth.lerp(alpha, this.transitionStart, this.transitionTarget);
 	}
 
 	@Nullable PPlayerBonePose sample(String boneName, float partialTick)

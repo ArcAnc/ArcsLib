@@ -324,12 +324,12 @@ public class PRenderTypes
 			private static final RenderStateShard.ShaderStateShard TRIANGLES_CUTOUT_STATE_SHARD = new RenderStateShard.ShaderStateShard(() -> ShadersProvider.TRIANGLES_CUTOUT_SHADER);
 			private static final RenderStateShard.ShaderStateShard TRIANGLES_TRANSLUCENT_STATE_SHARD = new RenderStateShard.ShaderStateShard(() -> ShadersProvider.TRIANGLES_TRANSLUCENT_SHADER);
 			private static final RenderStateShard.ShaderStateShard TRIANGLES_GUI_STATE_SHARD = new RenderStateShard.ShaderStateShard(() -> ShadersProvider.TRIANGLES_GUI_SHADER);
-			private static final RenderStateShard.ShaderStateShard TRIANGLES_LIT_STATE_SHARD = new RenderStateShard.ShaderStateShard(() -> ShadersProvider.TRIANGLES_LIT_SHADER);
+			private static final RenderStateShard.ShaderStateShard TRIANGLES_LIT_STATE_SHARD = new RenderStateShard.ShaderStateShard(() -> ShadersProvider.TRIANGLES_GUI_SHADER);
 			private static final RenderStateShard.ShaderStateShard TRIANGLES_EMISSIVE_STATE_SHARD = new RenderStateShard.ShaderStateShard(() -> ShadersProvider.TRIANGLES_EMISSIVE_SHADER);
 			private static final RenderStateShard.ShaderStateShard TRIANGLES_CUTOUT_EMISSIVE_STATE_SHARD = new RenderStateShard.ShaderStateShard(() -> ShadersProvider.TRIANGLES_CUTOUT_EMISSIVE_SHADER);
 			private static final RenderStateShard.ShaderStateShard TRIANGLES_TRANSLUCENT_EMISSIVE_STATE_SHARD = new RenderStateShard.ShaderStateShard(() -> ShadersProvider.TRIANGLES_TRANSLUCENT_EMISSIVE_SHADER);
 			private static final RenderStateShard.ShaderStateShard TRIANGLES_GUI_EMISSIVE_STATE_SHARD = new RenderStateShard.ShaderStateShard(() -> ShadersProvider.TRIANGLES_GUI_EMISSIVE_SHADER);
-			private static final RenderStateShard.ShaderStateShard TRIANGLES_LIT_EMISSIVE_STATE_SHARD = new RenderStateShard.ShaderStateShard(() -> ShadersProvider.TRIANGLES_LIT_EMISSIVE_SHADER);
+			private static final RenderStateShard.ShaderStateShard TRIANGLES_LIT_EMISSIVE_STATE_SHARD = new RenderStateShard.ShaderStateShard(() -> ShadersProvider.TRIANGLES_GUI_EMISSIVE_SHADER);
 		}
 		
 		@Nullable
@@ -341,8 +341,6 @@ public class PRenderTypes
 		@Nullable
 		public static ShaderInstance TRIANGLES_GUI_SHADER;
 		@Nullable
-		public static ShaderInstance TRIANGLES_LIT_SHADER;
-		@Nullable
 		public static ShaderInstance TRIANGLES_EMISSIVE_SHADER;
 		@Nullable
 		public static ShaderInstance TRIANGLES_CUTOUT_EMISSIVE_SHADER;
@@ -350,8 +348,6 @@ public class PRenderTypes
 		public static ShaderInstance TRIANGLES_TRANSLUCENT_EMISSIVE_SHADER;
 		@Nullable
 		public static ShaderInstance TRIANGLES_GUI_EMISSIVE_SHADER;
-		@Nullable
-		public static ShaderInstance TRIANGLES_LIT_EMISSIVE_SHADER;
 		
 		public static @Nullable ShaderInstance trianglesSolid()
 		{
@@ -371,7 +367,7 @@ public class PRenderTypes
 		}
 		public static @Nullable ShaderInstance trianglesLit()
 		{
-			return TRIANGLES_LIT_SHADER;
+			return TRIANGLES_GUI_SHADER;
 		}
 		public static @Nullable ShaderInstance trianglesEmissive()
 		{
@@ -391,7 +387,7 @@ public class PRenderTypes
 		}
 		public static @Nullable ShaderInstance trianglesLitEmissive()
 		{
-			return TRIANGLES_LIT_EMISSIVE_SHADER;
+			return TRIANGLES_GUI_EMISSIVE_SHADER;
 		}
 		
 		private static void registerShaders(final RegisterShadersEvent event)
@@ -420,11 +416,6 @@ public class PRenderTypes
 						shaderInstance -> TRIANGLES_GUI_SHADER = shaderInstance);
 				event.registerShader(new ShaderInstance(
 								event.getResourceProvider(),
-								PLibDatabase.rl("triangles_lit"),
-								VertexFormatProvider.POSITION_TEX_NORMAL),
-						shaderInstance -> TRIANGLES_LIT_SHADER = shaderInstance);
-				event.registerShader(new ShaderInstance(
-								event.getResourceProvider(),
 								PLibDatabase.rl("triangles_emissive"),
 								VertexFormatProvider.POSITION_TEX_NORMAL),
 						shaderInstance -> TRIANGLES_EMISSIVE_SHADER = shaderInstance);
@@ -443,11 +434,6 @@ public class PRenderTypes
 								PLibDatabase.rl("triangles_gui_emissive"),
 								VertexFormatProvider.POSITION_TEX_NORMAL),
 						shaderInstance -> TRIANGLES_GUI_EMISSIVE_SHADER = shaderInstance);
-				event.registerShader(new ShaderInstance(
-								event.getResourceProvider(),
-								PLibDatabase.rl("triangles_lit_emissive"),
-								VertexFormatProvider.POSITION_TEX_NORMAL),
-						shaderInstance -> TRIANGLES_LIT_EMISSIVE_SHADER = shaderInstance);
 			}
 			catch (IOException e)
 			{

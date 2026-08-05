@@ -44,8 +44,7 @@ public class InstanceAnimationManager<T extends PAnimatable<T>> extends PAnimati
 	public InstanceAnimationManager(T animatable, AnimManagerKey key)
 	{
 		super(animatable, key);
-		this.factories.forEach((name, supplier) -> this.controllers.put(name,
-				new PAnimationController<>(name, supplier.get())));
+		createControllers();
 	}
 	
 	public static void tickAll()

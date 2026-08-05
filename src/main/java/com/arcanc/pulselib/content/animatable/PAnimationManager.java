@@ -11,6 +11,7 @@ package com.arcanc.pulselib.content.animatable;
 
 
 import com.arcanc.pulselib.content.model.baked.PBakedModel;
+import com.arcanc.pulselib.content.model.animation.PAnimationGraph;
 import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 
@@ -31,6 +32,7 @@ public class PAnimationManager<T extends PAnimatable<T>>
 	protected final AnimManagerKey key;
 	protected PBakedModel model;
 	protected final Map<String, Supplier<PAnimationController.StateHandler<T>>> factories = new Object2ObjectArrayMap<>();
+	protected final Map<String, Supplier<PAnimationGraph>> graphFactories = new Object2ObjectArrayMap<>();
 	protected final Map<String, PAnimationController<T>> controllers = new Object2ObjectArrayMap<>();
 	
 	public Map<String, PAnimationController<T>> getControllers()
@@ -58,6 +60,15 @@ public class PAnimationManager<T extends PAnimatable<T>>
 		this.animatable.registerAnimationControllers(registrar);
 		
 		registrar.entries.forEach(entry -> this.factories.put(entry.name(), entry.factory()));
+		registrar.graphEntries.forEach(entry -> this.graphFactories.put(entry.name(), entry.factory()));
+	}
+
+	protected final void createControllers()
+	{
+		this.factories.forEach((name, supplier) -> this.controllers.put(name,
+				new PAnimationController<>(name, supplier.get())));
+		this.graphFactories.forEach((name, supplier) -> this.controllers.put(name,
+				new PAnimationController<>(name, supplier.get())));
 	}
 
 	public AnimManagerKey key()
@@ -77,8 +88,13 @@ public class PAnimationManager<T extends PAnimatable<T>>
 			controller.tick(this.animatable, 1, this.model, this.controllers.values());
 	}
 	
-	public record PAnimationRegistrar<T extends PAnimatable<T>>(List<Entry<T>> entries)
+	public record PAnimationRegistrar<T extends PAnimatable<T>>(List<Entry<T>> entries, List<GraphEntry> graphEntries)
 	{
+		public PAnimationRegistrar(List<Entry<T>> entries)
+		{
+			this(entries, new ObjectArrayList<>());
+		}
+
 		public PAnimationRegistrar<T> add(Supplier<PAnimationController.StateHandler<T>> factory)
 		{
 			return add("default", factory);
@@ -89,10 +105,30 @@ public class PAnimationManager<T extends PAnimatable<T>>
 			this.entries.add(new Entry<>(name, factory));
 			return this;
 		}
+
+		public PAnimationRegistrar<T> addGraph(PAnimationGraph graph)
+		{
+			return addGraph("default", () -> graph);
+		}
+
+		public PAnimationRegistrar<T> addGraph(String name, PAnimationGraph graph)
+		{
+			return addGraph(name, () -> graph);
+		}
+
+		public PAnimationRegistrar<T> addGraph(String name, Supplier<PAnimationGraph> factory)
+		{
+			this.graphEntries.add(new GraphEntry(name, factory));
+			return this;
+		}
 		
 		public record Entry<T extends PAnimatable<T>>(String name, Supplier<PAnimationController.StateHandler<T>> factory)
 		{
 		
+		}
+
+		public record GraphEntry(String name, Supplier<PAnimationGraph> factory)
+		{
 		}
 	}
 }

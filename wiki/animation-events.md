@@ -4,8 +4,8 @@ Public event classes:
 
 * [`PAnimationEvent`](https://github.com/ArcAnc/PulseLib/blob/master/src/main/java/com/arcanc/pulselib/content/model/animation/PAnimationEvent.java)
 * [`PAnimationEventDispatcher`](https://github.com/ArcAnc/PulseLib/blob/master/src/main/java/com/arcanc/pulselib/content/animatable/PAnimationEventDispatcher.java)
-* [`PGltfAnimationEventSidecarParser`](https://github.com/ArcAnc/PulseLib/blob/master/src/main/java/com/arcanc/pulselib/data/PGltfAnimationEventSidecarParser.java)
-* [`PGeckoAnimationEventParser`](https://github.com/ArcAnc/PulseLib/blob/master/src/main/java/com/arcanc/pulselib/data/PGeckoAnimationEventParser.java)
+* [`PGltfAnimationEventSidecarParser`](https://github.com/ArcAnc/PulseLib/blob/master/src/main/java/com/arcanc/pulselib/data/gltf/PGltfAnimationEventSidecarParser.java)
+* [`PGeckoAnimationEventParser`](https://github.com/ArcAnc/PulseLib/blob/master/src/main/java/com/arcanc/pulselib/data/gecko/PGeckoAnimationEventParser.java)
 
 Events are stored in [`PAnimation`](https://github.com/ArcAnc/PulseLib/blob/master/src/main/java/com/arcanc/pulselib/content/model/animation/PAnimation.java). A controller fires all events between the previous and current animation time while the controller is ticking.
 

@@ -10,7 +10,8 @@ Use the simplest type that matches the visual result:
 * `trianglesCutout` for hard alpha cutouts, like holes or masked pixels.
 * `trianglesTranslucent` for glass-like transparency.
 * `trianglesGui` for direct GUI drawing.
-* `trianglesLit` for attachments that should follow normal light and overlay behavior.
+
+`trianglesLit` no longer has its own shader. It remains as a compatibility render type backed by the GUI shader, so do not select it for new world rendering; use `trianglesSolid`, `trianglesCutout`, or `trianglesTranslucent` according to the material instead.
 
 In a renderer constructor this usually looks like:
 

@@ -1,44 +1,24 @@
-PulseLib is lightweight and easy to install — requiring only a few changes to your build.gradle file.
+# Installation
 
-Currently, the project does not have its own hosting, so you can use CurseMaven or Modrinth as your dependency source, but I highly recommend using Modrinth.
+## For developers
 
-## Using CurseForge (CurseMaven)
-
-Add the repository and dependency:
+Add the official ArcAnc Maven repository and PulseLib dependency to your `build.gradle`:
 
 ```gradle
 repositories {
     maven {
-        name = 'CurseMaven'
-        url "https://beta.cursemaven.com"
+        url = "https://arcanc.github.io/Maven/"
     }
 }
 
 dependencies {
-    // Example: minecraft: 1.21.1, pulselib: 1.0.7
-    // Visit https://www.curseforge.com/minecraft/mc-mods/pulselib/files/all to get the latest version
-    implementation "curse.maven:pulselib-${minecraft_version}-${pulselib_version}"
-}
-```
-## Using Modrinth
-
-Add the repository and dependency:
-
-```gradle
-repositories {
-   maven { 
-       url = "https://api.modrinth.com/maven" 
-   }
-}
-
-
-dependencies {
-  // Example: minecraft: 1.21.1, pulselib: 1.0.7
-  // Visit https://modrinth.com/mod/pulselib/versions to get the latest version
-  implementation "maven.modrinth:pulselib:${minecraft_version}-${pulselib_version}"
+    // Example: Minecraft 1.21.1, PulseLib 1.1.2
+    implementation "com.arcanc.pulselib:pulselib-neoforge:1.21.1-1.1.2"
 }
 ```
 
-Final Step
+Replace the version with the PulseLib release that matches your Minecraft version, then refresh Gradle.
 
-After adding the repository and dependency, refresh Gradle, and PulseLib will be ready to use in your project!
+## For players
+
+Download PulseLib from [CurseForge](https://www.curseforge.com/minecraft/mc-mods/pulselib) or [Modrinth](https://modrinth.com/mod/pulselib).
