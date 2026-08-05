@@ -93,6 +93,8 @@ public class PRawAnimation
 		
 		public Builder withSpeed(float speed)
 		{
+			if (!Float.isFinite(speed))
+				throw new IllegalArgumentException("Animation stage speed must be finite");
 			AnimationStage last = lastStage();
 			
 			replaceLast(new AnimationStage(

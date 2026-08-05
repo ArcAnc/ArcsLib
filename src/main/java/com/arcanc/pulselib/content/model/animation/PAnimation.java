@@ -21,13 +21,14 @@ import org.joml.Quaternionf;
 import org.joml.Vector3f;
 import org.jspecify.annotations.Nullable;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 
 public record PAnimation(String name,
                          float length,
                          Map<String, PBoneAnimation> boneAnimations,
-                         List<PAnimationEvent> events)
+                         List<PAnimationEvent<?>> events)
 {
 	public PAnimation(String name, float length, Map<String, PBoneAnimation> boneAnimations)
 	{
@@ -119,7 +120,7 @@ public record PAnimation(String name,
 				scale == null ? new Vector3f(1f) : scale);
 	}
 
-	public List<PAnimationEvent> eventsBetween(float from, float to)
+	public List<PAnimationEvent<?>> eventsBetween(float from, float to)
 	{
 		if (this.events.isEmpty() || to < from)
 			return List.of();
@@ -138,6 +139,14 @@ public record PAnimation(String name,
 		
 		if (keyframes == null || keyframes.isEmpty())
 =======
+
+	public List<PAnimationEvent<?>> eventsBetweenReverse(float from, float to)
+	{
+		if (this.events.isEmpty() || to > from)
+			return List.of();
+		return this.events.stream().filter(event -> event.time() >= to && event.time() < from).
+			sorted(Comparator.comparingDouble((PAnimationEvent<?> event) -> event.time()).reversed()).toList();
+	}
 
 	private static <T> @Nullable T sample(PBoneAnimation boneAnimation,
 	                                      PAnimationChannelType<T> channel,

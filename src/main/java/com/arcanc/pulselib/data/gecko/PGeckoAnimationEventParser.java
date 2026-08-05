@@ -11,6 +11,7 @@ package com.arcanc.pulselib.data.gecko;
 
 
 import com.arcanc.pulselib.content.model.animation.PAnimationEvent;
+import com.arcanc.pulselib.content.model.animation.PAnimationEventTypes;
 import com.arcanc.pulselib.util.PLibDatabase;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonNull;
@@ -27,34 +28,34 @@ public class PGeckoAnimationEventParser
 {
 	private static final float SECONDS_TO_TICKS = 20f;
 	
-	public static List<PAnimationEvent> parseAnimationEvents(JsonElement animationNode)
+	public static List<PAnimationEvent<?>> parseAnimationEvents(JsonElement animationNode)
 	{
-		List<PAnimationEvent> events = new ArrayList<>();
+		List<PAnimationEvent<?>> events = new ArrayList<>();
 		parseSoundEffects(member(animationNode, "sound_effects"), events);
 		parseParticleEffects(member(animationNode, "particle_effects"), events);
-		events.sort(Comparator.comparing(PAnimationEvent :: time));
+		events.sort(Comparator.comparingDouble(PAnimationEvent::time));
 		return events;
 	}
 	
-	public static float maxEventTime(List<PAnimationEvent> events)
+	public static float maxEventTime(List<PAnimationEvent<?>> events)
 	{
 		float maxTime = 0f;
-		for (PAnimationEvent event : events)
+		for (PAnimationEvent<?> event : events)
 			maxTime = Math.max(maxTime, event.time());
 		return maxTime;
 	}
 	
-	private static void parseSoundEffects(JsonElement node, List<PAnimationEvent> events)
+	private static void parseSoundEffects(JsonElement node, List<PAnimationEvent<?>> events)
 	{
 		parseEventMap(node, events, PGeckoAnimationEventParser :: soundEvent);
 	}
 	
-	private static void parseParticleEffects(JsonElement node, List<PAnimationEvent> events)
+	private static void parseParticleEffects(JsonElement node, List<PAnimationEvent<?>> events)
 	{
 		parseEventMap(node, events, PGeckoAnimationEventParser :: particleEvent);
 	}
 	
-	private static void parseEventMap(JsonElement node, List<PAnimationEvent> events, EventFactory factory)
+	private static void parseEventMap(JsonElement node, List<PAnimationEvent<?>> events, EventFactory factory)
 	{
 		if (!isObject(node))
 			return;
@@ -73,17 +74,17 @@ public class PGeckoAnimationEventParser
 		}
 	}
 	
-	private static void addMappedEvent(float time, JsonElement node, List<PAnimationEvent> events, EventFactory factory)
+	private static void addMappedEvent(float time, JsonElement node, List<PAnimationEvent<?>> events, EventFactory factory)
 	{
 		if (!isObject(node))
 			return;
 		
-		PAnimationEvent event = factory.create(time, node);
+		PAnimationEvent<?> event = factory.create(time, node);
 		if (event != null)
 			events.add(event);
 	}
 	
-	private static PAnimationEvent.Sound soundEvent(float time, JsonElement node)
+	private static PAnimationEvent<PAnimationEventTypes.SoundData> soundEvent(float time, JsonElement node)
 	{
 		Identifier sound = identifier(
 				stringValue(member(node, "sound"),
@@ -93,12 +94,9 @@ public class PGeckoAnimationEventParser
 		if (sound == null)
 			return null;
 		
-		return new PAnimationEvent.Sound(
-				time,
-				sound,
-				stringValue(member(node, "locator"), ""),
-				floatValue(member(node, "volume"), 1f),
-				floatValue(member(node, "pitch"), 1f));
+		return new PAnimationEvent<>(time, PAnimationEventTypes.SOUND, new PAnimationEventTypes.SoundData(
+				sound, stringValue(member(node, "locator"), ""), floatValue(member(node, "volume"), 1f),
+				floatValue(member(node, "pitch"), 1f)));
 	}
 	
 	private static String stringValueFromFileOrEffect(JsonElement node)
@@ -109,18 +107,15 @@ public class PGeckoAnimationEventParser
 		return stringValue(member(node, "effect"), "");
 	}
 	
-	private static PAnimationEvent.Particle particleEvent(float time, JsonElement node)
+	private static PAnimationEvent<PAnimationEventTypes.ParticleData> particleEvent(float time, JsonElement node)
 	{
 		Identifier particle = identifier(stringValue(member(node, "particle"), stringValue(member(node, "effect"), "")));
 		if (particle == null)
 			return null;
 		
-		return new PAnimationEvent.Particle(
-				time,
-				particle,
-				stringValue(member(node, "locator"), ""),
-				vector3f(member(node, "offset"), new Vector3f()),
-				vector3f(member(node, "motion"), new Vector3f()));
+		return new PAnimationEvent<>(time, PAnimationEventTypes.PARTICLE, new PAnimationEventTypes.ParticleData(
+				particle, stringValue(member(node, "locator"), ""), vector3f(member(node, "offset"), new Vector3f()),
+				vector3f(member(node, "motion"), new Vector3f())));
 	}
 	
 	private static Identifier identifier(String value)
@@ -222,6 +217,6 @@ public class PGeckoAnimationEventParser
 	
 	private interface EventFactory
 	{
-		PAnimationEvent create(float time, JsonElement node);
+		PAnimationEvent<?> create(float time, JsonElement node);
 	}
 }

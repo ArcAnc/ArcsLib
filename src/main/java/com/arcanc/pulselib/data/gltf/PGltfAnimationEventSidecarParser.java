@@ -1,6 +1,6 @@
 /**
  * @author ArcAnc
- * Created at: 25.05.2026
+ * Created at: 27.05.2026
  * Copyright (c) 2026
  * <p>
  * This code is licensed under "Arc's License of Common Sense"
@@ -12,14 +12,16 @@ package com.arcanc.pulselib.data.gltf;
 
 import com.arcanc.pulselib.content.model.animation.PAnimation;
 import com.arcanc.pulselib.content.model.animation.PAnimationEvent;
+import com.arcanc.pulselib.content.model.animation.PAnimationEventType;
+import com.arcanc.pulselib.content.registration.PLibRegistration;
 import com.arcanc.pulselib.util.PLibDatabase;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonNull;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import net.minecraft.resources.Identifier;
-import org.joml.Vector3f;
-import org.jspecify.annotations.Nullable;
+import com.mojang.serialization.JsonOps;
+import net.minecraft.resources.ResourceLocation;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -57,9 +59,9 @@ public class PGltfAnimationEventSidecarParser
 			if (animation == null)
 				continue;
 			
-			List<PAnimationEvent> events = new ArrayList<>(animation.events());
+			List<PAnimationEvent<?>> events = new ArrayList<>(animation.events());
 			events.addAll(parseAnimationEvents(entry.getValue()));
-			events.sort(Comparator.comparing(PAnimationEvent :: time));
+			events.sort(Comparator.comparingDouble(PAnimationEvent::time));
 			animations.put(entry.getKey(), new PAnimation(
 					animation.name(),
 					Math.max(animation.length(), maxEventTime(events)),
@@ -68,23 +70,23 @@ public class PGltfAnimationEventSidecarParser
 		}
 	}
 	
-	private static List<PAnimationEvent> parseAnimationEvents(JsonElement animationNode)
+	private static List<PAnimationEvent<?>> parseAnimationEvents(JsonElement animationNode)
 	{
-		List<PAnimationEvent> events = new ArrayList<>();
+		List<PAnimationEvent<?>> events = new ArrayList<>();
 		parseEventArray(member(animationNode, "events"), events);
-		events.sort(Comparator.comparing(PAnimationEvent :: time));
+		events.sort(Comparator.comparingDouble(PAnimationEvent::time));
 		return events;
 	}
 	
-	private static float maxEventTime(List<PAnimationEvent> events)
+	private static float maxEventTime(List<PAnimationEvent<?>> events)
 	{
 		float maxTime = 0f;
-		for (PAnimationEvent event : events)
+		for (PAnimationEvent<?> event : events)
 			maxTime = Math.max(maxTime, event.time());
 		return maxTime;
 	}
 	
-	private static void parseEventArray(JsonElement node, List<PAnimationEvent> events)
+	private static void parseEventArray(JsonElement node, List<PAnimationEvent<?>> events)
 	{
 		if (!isArray(node))
 			return;
@@ -93,77 +95,40 @@ public class PGltfAnimationEventSidecarParser
 		{
 			String type = stringValue(member(eventNode, "type"), "");
 			float time = secondsToTicks(floatValue(member(eventNode, "time"), 0f));
-			PAnimationEvent event = switch (type)
-			{
-				case "sound" -> soundEvent(time, eventNode);
-				case "particle" -> particleEvent(time, eventNode);
-				default -> null;
-			};
+			PAnimationEvent<?> event = typedEvent(time, type, eventNode);
 			if (event != null)
 				events.add(event);
 		}
 	}
 	
-	private static PAnimationEvent.@Nullable Sound soundEvent(float time, JsonElement node)
+	private static @Nullable PAnimationEvent<?> typedEvent(float time, String rawType, JsonElement node)
 	{
-		Identifier sound = identifier(stringValue(member(node, "sound"), stringValue(member(node, "id"), "")));
-		if (sound == null)
+		if (rawType.isBlank())
 			return null;
-		
-		return new PAnimationEvent.Sound(
-				time,
-				sound,
-				stringValue(member(node, "locator"), ""),
-				floatValue(member(node, "volume"), 1f),
-				floatValue(member(node, "pitch"), 1f));
-	}
-	
-	private static PAnimationEvent.@Nullable Particle particleEvent(float time, JsonElement node)
-	{
-		Identifier particle = identifier(stringValue(member(node, "particle"), stringValue(member(node, "id"), "")));
-		if (particle == null)
+		var id = rawType.indexOf(':') >= 0 ? ResourceLocation.tryParse(rawType) : PLibDatabase.rl(rawType);
+		if (id == null || PLibRegistration.AnimationEventReg.EVENT_TYPE_REGISTRY == null)
+		{
+			PLibDatabase.LOGGER.warn("Unknown GLTF animation event type: {}", rawType);
 			return null;
-		
-		return new PAnimationEvent.Particle(
-				time,
-				particle,
-				stringValue(member(node, "locator"), ""),
-				vector3f(member(node, "offset"), new Vector3f()),
-				vector3f(member(node, "motion"), new Vector3f()));
-	}
-	
-	private static @Nullable Identifier identifier(String value)
-	{
-		if (value.isBlank())
+		}
+		PAnimationEventType<?> type = PLibRegistration.AnimationEventReg.EVENT_TYPE_REGISTRY.get(id);
+		if (type == null)
+		{
+			PLibDatabase.LOGGER.warn("Unregistered GLTF animation event type: {}", id);
 			return null;
-		
-		Identifier id = Identifier.tryParse(value);
-		if (id == null)
-			PLibDatabase.LOGGER.warn("Invalid GLTF animation sidecar event identifier: {}", value);
-		return id;
+		}
+		return decode(time, type, node);
 	}
-	
-	private static Vector3f vector3f(JsonElement node, Vector3f fallback)
+
+	private static <T> @Nullable PAnimationEvent<T> decode(float time, PAnimationEventType<T> type, JsonElement node)
 	{
-		if (!isArray(node) || node.getAsJsonArray().size() < 3)
-			return new Vector3f(fallback);
-		
-		return new Vector3f(
-				floatAt(node, 0, fallback.x()),
-				floatAt(node, 1, fallback.y()),
-				floatAt(node, 2, fallback.z()));
+		return type.codec().codec().parse(JsonOps.INSTANCE, node).resultOrPartial(error ->
+				PLibDatabase.LOGGER.warn("Invalid animation event {}: {}", type.id(), error)).map(data -> new PAnimationEvent<>(time, type, data)).orElse(null);
 	}
 	
 	private static float secondsToTicks(float seconds)
 	{
 		return seconds * SECONDS_TO_TICKS;
-	}
-	
-	private static float floatAt(JsonElement node, int index, float fallback)
-	{
-		if (!isArray(node) || node.getAsJsonArray().size() <= index)
-			return fallback;
-		return floatValue(node.getAsJsonArray().get(index), fallback);
 	}
 	
 	private static float floatValue(JsonElement node, float fallback)
@@ -172,7 +137,7 @@ public class PGltfAnimationEventSidecarParser
 			return fallback;
 		return node.getAsFloat();
 	}
-	
+
 	private static String stringValue(JsonElement node, String fallback)
 	{
 		if (isMissing(node) || !node.isJsonPrimitive() || !node.getAsJsonPrimitive().isString())
@@ -199,7 +164,7 @@ public class PGltfAnimationEventSidecarParser
 	{
 		return element != null && element.isJsonObject();
 	}
-	
+
 	private static boolean isArray(@Nullable JsonElement element)
 	{
 		return element != null && element.isJsonArray();

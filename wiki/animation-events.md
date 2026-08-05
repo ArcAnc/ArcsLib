@@ -1,24 +1,24 @@
-PulseLib supports sound and particle events inside animations.
+Animation events are timestamped typed payloads stored in `PAnimation`. Time is expressed in ticks internally; glTF sidecars and Gecko JSON use seconds and are converted with `seconds * 20`.
 
-Public event classes:
+The public API is `PAnimationEvent<T>` and `PAnimationEventType<T>`. Event types supply a `ResourceLocation`, a `MapCodec<T>`, a side policy, and the execution function. Built-in type instances are registered in the `pulselib:animation_event_type` registry, so an add-on can register its own typed event type in the same registry.
 
-<<<<<<< HEAD
-* [`PAnimationEvent`](https://github.com/ArcAnc/ArcsLib/blob/26.1/src/main/java/com/arcanc/pulselib/content/model/animation/PAnimationEvent.java)
-* [`PAnimationEventDispatcher`](https://github.com/ArcAnc/ArcsLib/blob/26.1/src/main/java/com/arcanc/pulselib/content/animatable/PAnimationEventDispatcher.java)
-* [`PGltfAnimationEventSidecarParser`](https://github.com/ArcAnc/ArcsLib/blob/26.1/src/main/java/com/arcanc/pulselib/data/PGltfAnimationEventSidecarParser.java)
-* [`PGeckoAnimationEventParser`](https://github.com/ArcAnc/ArcsLib/blob/26.1/src/main/java/com/arcanc/pulselib/data/PGeckoAnimationEventParser.java)
-=======
-* [`PAnimationEvent`](https://github.com/ArcAnc/PulseLib/blob/master/src/main/java/com/arcanc/pulselib/content/model/animation/PAnimationEvent.java)
-* [`PAnimationEventDispatcher`](https://github.com/ArcAnc/PulseLib/blob/master/src/main/java/com/arcanc/pulselib/content/animatable/PAnimationEventDispatcher.java)
-* [`PGltfAnimationEventSidecarParser`](https://github.com/ArcAnc/PulseLib/blob/master/src/main/java/com/arcanc/pulselib/data/gltf/PGltfAnimationEventSidecarParser.java)
-* [`PGeckoAnimationEventParser`](https://github.com/ArcAnc/PulseLib/blob/master/src/main/java/com/arcanc/pulselib/data/gecko/PGeckoAnimationEventParser.java)
->>>>>>> e194067 (Tons of e)
+## Built-in types
 
-Events are stored in [`PAnimation`](https://github.com/ArcAnc/ArcsLib/blob/26.1/src/main/java/com/arcanc/pulselib/content/model/animation/PAnimation.java). A controller fires all events between the previous and current animation time while the controller is ticking.
+| Type | Side | Payload |
+| --- | --- | --- |
+| `sound` | `PRESENTATION_ONLY` | `sound`, optional `locator`, `volume`, `pitch` |
+| `particle` | `PRESENTATION_ONLY` | `particle`, optional `locator`, `offset`, `motion` |
+| `camera_shake` | `PRESENTATION_ONLY` | `strength`, optional `duration` (ticks), `frequency` |
+| `locator_callback` | `BOTH` | `callback`, optional `locator` |
+| `animation_parameter` | `BOTH` | optional `controller`, `parameter`, optional `value`, `trigger` |
+
+`PRESENTATION_ONLY` means client-only and non-authoritative. `CLIENT` and `SERVER` run only on that physical side; `BOTH` runs on either side when the controller is ticked there. A server event therefore needs a server-ticked animation manager; the standard singleton/instance managers are client ticked.
+
+`locator_callback` invokes a callback registered with `PAnimationEventCallbacks.register(id, callback)`. The callback receives the event context and the resolved locator position (or `null` when the animatable has no world position). `animation_parameter` targets the current graph controller when `controller` is blank; otherwise it targets a controller by name. `trigger: true` calls `trigger(parameter)`, otherwise `value` is assigned to the parameter.
 
 ## glTF sidecar files
 
-For `.glb` and `.gltf` models, PulseLib looks for sidecar files in these locations:
+For `.glb` and `.gltf` models, PulseLib looks for sidecars in these locations:
 
 ```text
 glmodels/<model>.events.json
@@ -27,7 +27,7 @@ glmodels/events/<model>.events.json
 glmodels/events/<fileName>.events.json
 ```
 
-Example:
+The `type` may be a built-in short name or a fully qualified registry id. Event fields are decoded with the selected type's codec.
 
 ```json
 {
@@ -38,17 +38,21 @@ Example:
           "type": "sound",
           "time": 0.25,
           "sound": "minecraft:entity.player.attack.strong",
-          "locator": "hand_right",
-          "volume": 1.0,
-          "pitch": 1.0
+          "locator": "hand_right"
         },
         {
-          "type": "particle",
+          "type": "camera_shake",
+          "time": 0.25,
+          "strength": 1.5,
+          "duration": 5,
+          "frequency": 10
+        },
+        {
+          "type": "animation_parameter",
           "time": 0.35,
-          "particle": "minecraft:crit",
-          "locator": "blade_tip",
-          "offset": [0.0, 0.0, 0.0],
-          "motion": [0.0, 0.02, 0.0]
+          "controller": "locomotion",
+          "parameter": "attack_done",
+          "trigger": true
         }
       ]
     }
@@ -56,55 +60,15 @@ Example:
 }
 ```
 
-`time` is written in seconds in the sidecar and converted to ticks internally with `seconds * 20`.
+Gecko `sound_effects` and `particle_effects` retain their native format and are converted to the corresponding typed built-ins.
 
-## Gecko animation events
+## Delivery rules
 
-The Gecko parser reads `sound_effects` and `particle_effects` from animation JSON. Time keys are seconds and are also converted to ticks.
+- A forward move delivers events in `(previousTime, currentTime]`; the initial move from zero also delivers time-zero events.
+- A reverse move delivers `[currentTime, previousTime)` in reverse timestamp order. Negative `AnimationStage.speed()` starts a stage at its final frame, so it does not need a one-tick forward setup.
+- A cyclic stage is treated as an unwrapped timeline. Every wrap crossed by a tick is traversed in order, including multiple wraps caused by speed changes or a large delta. Events at `0` and at the animation length are distinct and retain their order at the wrap.
+- A missed tick and a large positive delta use the same traversal rules: every crossed event is delivered once per crossed loop. Content authors should avoid expensive event handlers in very short loops.
+- Graph states and transition source/target layers report their own traversals; events from every contributing clip are therefore delivered. This is intentional—put gameplay effects in an unblended clip when duplicate blended effects are undesirable.
+- `seek(model, time)` and `syncCycle(model, phase)` change both previous and current cursors and never replay events. They are the required operations for a seek, late instance creation, and network re-synchronization.
 
-```json
-{
-  "animations": {
-    "animation.example.attack": {
-      "sound_effects": {
-        "0.25": {
-          "sound": "minecraft:entity.player.attack.strong",
-          "locator": "hand_right"
-        }
-      },
-      "particle_effects": {
-        "0.35": {
-          "particle": "minecraft:crit",
-          "locator": "blade_tip",
-          "offset": [0, 0, 0],
-          "motion": [0, 0.02, 0]
-        }
-      }
-    }
-  }
-}
-```
-
-## Locator behavior
-
-If an event has a non-empty `locator`, `PAnimationEventDispatcher` tries to resolve a bone with that name using the current model and controllers. If it succeeds, the sound or particle is spawned at that animated bone position. If it fails, the event falls back to the animatable's base position.
-
-Supported base positions:
-
-* `Entity`: entity coordinates, rotated by body yaw for locator offsets.
-* `BlockEntity`: block center, rotated from `HORIZONTAL_FACING` or `FACING` when present.
-
-Dispatch only runs on the client side.
-
-Manual dispatch:
-
-```java
-PAnimationEvent event = new PAnimationEvent.Sound(
-        0,
-        Identifier.withDefaultNamespace("block.note_block.pling"),
-        "",
-        1.0f,
-        1.0f);
-
-PAnimationEventDispatcher.dispatch(animatable, event);
-```
+Locator resolution uses the current posed bone. It falls back to the entity origin or block-entity centre if the named locator cannot be found.
