@@ -1,6 +1,10 @@
 /**
  * @author ArcAnc
+<<<<<<< HEAD
  * Created at: 05.04.2026
+=======
+ * Created at: 05.08.2026
+>>>>>>> e194067 (Tons of e)
  * Copyright (c) 2026
  * <p>
  * This code is licensed under "Arc's License of Common Sense"
@@ -11,6 +15,7 @@ package com.arcanc.pulselib.util.helpers;
 
 
 import com.mojang.serialization.Codec;
+<<<<<<< HEAD
 import com.mojang.serialization.MapCodec;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.core.UUIDUtil;
@@ -23,4 +28,28 @@ public class PLibCodecs
 	public static final Codec<UUID> UUID_CODEC = UUIDUtil.CODEC;
 	public static final MapCodec<UUID> UUID_MAP_CODEC = UUID_CODEC.fieldOf("uuid");
 	public static final StreamCodec<ByteBuf, UUID> STREAM_CODEC = UUIDUtil.STREAM_CODEC;
+=======
+import com.mojang.serialization.DataResult;
+import org.joml.Quaternionf;
+import org.joml.Vector3f;
+
+import java.util.List;
+
+public class PLibCodecs
+{
+	public static final Codec<Vector3f> VECTOR3F_CODEC = fixedSizeFloatListCodec(3).xmap(
+			values -> new Vector3f(values.getFirst(), values.get(1), values.get(2)),
+			value -> List.of(value.x(), value.y(), value.z()));
+	public static final Codec<Quaternionf> QUATERNION_CODEC = fixedSizeFloatListCodec(4).xmap(
+			values -> new Quaternionf(values.getFirst(), values.get(1), values.get(2), values.get(3)),
+			value -> List.of(value.x(), value.y(), value.z(), value.w()));
+	
+	private static Codec<List<Float>> fixedSizeFloatListCodec(int size)
+	{
+		return Codec.FLOAT.listOf().comapFlatMap(values -> values.size() == size ?
+						DataResult.success(values) :
+						DataResult.error(() -> "Expected " + size + " floats, got " + values.size()),
+				values -> values);
+	}
+>>>>>>> e194067 (Tons of e)
 }

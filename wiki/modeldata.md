@@ -52,7 +52,11 @@ That fallback is useful, but explicit names are easier to debug. Keep Blockbench
 
 ## Gecko model data
 
+<<<<<<< HEAD
 PulseLib can load Gecko-style JSON models through [`PGeckoModelLoader`](https://github.com/ArcAnc/ArcsLib/blob/26.1/src/main/java/com/arcanc/pulselib/data/PGeckoModelLoader.java), but the default registered loader in `PModelCache` is glTF. Register the Gecko loader before client resources reload if your mod needs Gecko paths:
+=======
+PulseLib can load Gecko-style JSON models through [`PGeckoModelLoader`](https://github.com/ArcAnc/PulseLib/blob/master/src/main/java/com/arcanc/pulselib/data/gecko/PGeckoModelLoader.java), but the default registered loader in `PModelCache` is glTF. Register the Gecko loader before client resources reload if your mod needs Gecko paths:
+>>>>>>> e194067 (Tons of e)
 
 ```java
 PModelCache.registerModelLoader(PGeckoModelLoader.INSTANCE);
@@ -65,7 +69,14 @@ PModelData data = new DefaultEntityModelData.DefaultEntityModelDataBuilder(
 
 Classes used:
 
+<<<<<<< HEAD
 * [`PModelData`](https://github.com/ArcAnc/ArcsLib/blob/26.1/src/main/java/com/arcanc/pulselib/content/renderer/modelData/PModelData.java)
 * [`PModelCache`](https://github.com/ArcAnc/ArcsLib/blob/26.1/src/main/java/com/arcanc/pulselib/util/PModelCache.java)
 * [`PGltfModelLoader`](https://github.com/ArcAnc/ArcsLib/blob/26.1/src/main/java/com/arcanc/pulselib/data/PGltfModelLoader.java)
 * [`PGeckoModelLoader`](https://github.com/ArcAnc/ArcsLib/blob/26.1/src/main/java/com/arcanc/pulselib/data/PGeckoModelLoader.java)
+=======
+* [`PModelData`](https://github.com/ArcAnc/PulseLib/blob/master/src/main/java/com/arcanc/pulselib/content/renderer/modelData/PModelData.java)
+* [`PModelCache`](https://github.com/ArcAnc/PulseLib/blob/master/src/main/java/com/arcanc/pulselib/util/PModelCache.java)
+* [`PGltfModelLoader`](https://github.com/ArcAnc/PulseLib/blob/master/src/main/java/com/arcanc/pulselib/data/gltf/PGltfModelLoader.java)
+* [`PGeckoModelLoader`](https://github.com/ArcAnc/PulseLib/blob/master/src/main/java/com/arcanc/pulselib/data/gecko/PGeckoModelLoader.java)
+>>>>>>> e194067 (Tons of e)

@@ -12,7 +12,9 @@ package com.arcanc.pulselib.content.player.animation;
 import com.arcanc.pulselib.content.animatable.PAnimationController;
 import com.arcanc.pulselib.content.animatable.PAnimationManager;
 import com.arcanc.pulselib.content.renderer.modelData.PModelData;
-import com.arcanc.pulselib.data.MolangParser;
+import com.arcanc.pulselib.content.model.animation.PPoseEasing;
+import com.arcanc.pulselib.content.model.animation.PTransitionInterruptionPolicy;
+import com.arcanc.pulselib.data.gecko.MolangParser;
 import net.minecraft.world.entity.player.Player;
 import org.joml.Vector3f;
 
@@ -33,8 +35,13 @@ public final class PPlayerAnimationDefinition
 	private final PPlayerAnimationBlendMode blendMode;
 	private final PPlayerAnimationWeight weight;
 	private final Map<PPlayerPart, PPlayerAnimationWeight> partWeights;
+	private final Map<String, PPlayerAnimationWeight> boneWeights;
 	private final Vector3f rootPivot;
 	private final int priority;
+	private final float crossfadeDuration;
+	private final PPoseEasing crossfadeEasing;
+	private final PTransitionInterruptionPolicy transitionInterruptionPolicy;
+	private final String syncGroup;
 	private final ControllerRegistrar controllerRegistrar;
 	private final MolangContextProvider molangContextProvider;
 
@@ -48,8 +55,13 @@ public final class PPlayerAnimationDefinition
 		this.blendMode = builder.blendMode;
 		this.weight = builder.weight;
 		this.partWeights = Map.copyOf(builder.partWeights);
+		this.boneWeights = Map.copyOf(builder.boneWeights);
 		this.rootPivot = new Vector3f(builder.rootPivot);
 		this.priority = builder.priority;
+		this.crossfadeDuration = builder.crossfadeDuration;
+		this.crossfadeEasing = builder.crossfadeEasing;
+		this.transitionInterruptionPolicy = builder.transitionInterruptionPolicy;
+		this.syncGroup = builder.syncGroup;
 		this.controllerRegistrar = builder.controllerRegistrar;
 		this.molangContextProvider = builder.molangContextProvider;
 	}
@@ -104,6 +116,12 @@ public final class PPlayerAnimationDefinition
 		PPlayerAnimationWeight partWeight = this.partWeights.getOrDefault(part, PPlayerAnimationWeight.FULL);
 		return Math.clamp(partWeight.weight(player, partialTick), 0.0f, 1.0f);
 	}
+
+	public float boneWeight(Player player, String boneName, float partialTick)
+	{
+		PPlayerAnimationWeight boneWeight = this.boneWeights.getOrDefault(boneName, PPlayerAnimationWeight.FULL);
+		return Math.clamp(boneWeight.weight(player, partialTick), 0.0f, 1.0f);
+	}
 	
 	public Vector3f rootPivot()
 	{
@@ -113,6 +131,26 @@ public final class PPlayerAnimationDefinition
 	public int priority()
 	{
 		return this.priority;
+	}
+
+	public float crossfadeDuration()
+	{
+		return this.crossfadeDuration;
+	}
+
+	public PPoseEasing crossfadeEasing()
+	{
+		return this.crossfadeEasing;
+	}
+
+	public PTransitionInterruptionPolicy transitionInterruptionPolicy()
+	{
+		return this.transitionInterruptionPolicy;
+	}
+
+	public String syncGroup()
+	{
+		return this.syncGroup;
 	}
 
 	void registerControllers(PAnimationManager.PAnimationRegistrar<PPlayerAnimationInstance> registrar)
@@ -156,11 +194,16 @@ public final class PPlayerAnimationDefinition
 		private final Map<PPlayerPart, String> bindings = new LinkedHashMap<>();
 		private final EnumSet<PPlayerPart> mask = EnumSet.noneOf(PPlayerPart.class);
 		private PPlayerAnimationMask partMask;
-		private PPlayerAnimationBlendMode blendMode = PPlayerAnimationBlendMode.ADDITIVE;
+		private PPlayerAnimationBlendMode blendMode = PPlayerAnimationBlendMode.ADDITIVE_LOCAL;
 		private PPlayerAnimationWeight weight = PPlayerAnimationWeight.FULL;
 		private final Map<PPlayerPart, PPlayerAnimationWeight> partWeights = new LinkedHashMap<>();
+		private final Map<String, PPlayerAnimationWeight> boneWeights = new LinkedHashMap<>();
 		private Vector3f rootPivot = new Vector3f();
 		private int priority;
+		private float crossfadeDuration;
+		private PPoseEasing crossfadeEasing = PPoseEasing.LINEAR;
+		private PTransitionInterruptionPolicy transitionInterruptionPolicy = PTransitionInterruptionPolicy.FROM_CURRENT;
+		private String syncGroup = "";
 		private ControllerRegistrar controllerRegistrar = ControllerRegistrar.EMPTY;
 		private MolangContextProvider molangContextProvider = MolangContextProvider.EMPTY;
 
@@ -226,6 +269,19 @@ public final class PPlayerAnimationDefinition
 			this.partWeights.put(Objects.requireNonNull(part), Objects.requireNonNull(weight));
 			return this;
 		}
+
+		public Builder boneWeight(String boneName, float weight)
+		{
+			return boneWeight(boneName, (player, partialTick) -> weight);
+		}
+
+		public Builder boneWeight(String boneName, PPlayerAnimationWeight weight)
+		{
+			if (boneName == null || boneName.isBlank())
+				throw new IllegalArgumentException("Player animation bone name cannot be blank");
+			this.boneWeights.put(boneName, Objects.requireNonNull(weight));
+			return this;
+		}
 		
 		public Builder rootPivot(Vector3f rootPivot)
 		{
@@ -241,6 +297,23 @@ public final class PPlayerAnimationDefinition
 		public Builder priority(int priority)
 		{
 			this.priority = priority;
+			return this;
+		}
+
+		/** Duration is measured in game ticks. */
+		public Builder crossfade(float duration, PPoseEasing easing, PTransitionInterruptionPolicy interruptionPolicy)
+		{
+			if (duration < 0.0f)
+				throw new IllegalArgumentException("Crossfade duration must be non-negative");
+			this.crossfadeDuration = duration;
+			this.crossfadeEasing = Objects.requireNonNull(easing);
+			this.transitionInterruptionPolicy = Objects.requireNonNull(interruptionPolicy);
+			return this;
+		}
+
+		public Builder syncGroup(String syncGroup)
+		{
+			this.syncGroup = syncGroup == null ? "" : syncGroup;
 			return this;
 		}
 

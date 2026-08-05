@@ -103,6 +103,7 @@ registrar.add("attack", () -> state -> {
 Useful controller methods:
 
 * `play(PRawAnimation animation)`
+* `play(PAnimationGraph graph)`
 * `pause()`
 * `resume()`
 * `stop()`
@@ -112,7 +113,49 @@ Useful controller methods:
 * `isStopped()`
 * `getTime()`
 * `getCurrentStage()`
+* `cyclePhase(model)` / `syncCycle(model, phase)` for looping animation synchronization
 
 Multiple controllers are mixed on the same bones in renderer order. Register broad base pose controllers first and specific overrides later. A common pattern is one movement controller for idle/walk/run and another controller for attacks or short actions.
 
-For expressions embedded in Gecko animation vectors, see [Molang animations](molang-animations.md). Molang context creation belongs to the renderer; `PAnimationController` only consumes the prepared context while mixing a pose.
+For expressions embedded in Gecko animation vectors, see [Molang animations](molang-animations.md). The renderer supplies frame-specific Molang queries, while each controller keeps its own persistent Molang context for variables and random state.
+
+## Animation graphs
+
+`PAnimationGraph` is a controller-driven state machine. Register it with `addGraph`; the resulting named controller owns the graph runtime and its parameters.
+
+```java
+private static final PAnimationGraph MOVEMENT = new PAnimationGraph(
+        List.of(
+                new PAnimationState.BlendSpace1D("locomotion", "speed", List.of(
+                        new PAnimationState.BlendSpace1D.Point(0.0f, "idle"),
+                        new PAnimationState.BlendSpace1D.Point(0.1f, "walk"),
+                        new PAnimationState.BlendSpace1D.Point(0.3f, "run"))),
+                new PAnimationState.Clip("jump", "jump", PAnimationType.PLAY_ONCE,
+                        PInterpolationType.LINEAR, 1.0f, false),
+                new PAnimationState.OneShotOverlay("attack", "attack", "attack")),
+        List.of(
+                new PAnimationTransition(0, 1, PCondition.parameter("jump"), 0.08f, 10,
+                        PInterruptionPolicy.FROM_CURRENT),
+                new PAnimationTransition(1, 0, PCondition.ALWAYS, 1.0f, 0.1f, 0,
+                        PInterruptionPolicy.FROM_CURRENT)));
+
+@Override
+public void registerAnimationControllers(PAnimationManager.PAnimationRegistrar<ExampleEntity> registrar) {
+    registrar.addGraph("movement", MOVEMENT);
+}
+```
+
+The first non-overlay state is the initial state. A transition with the seven-argument constructor has an `exitTime` in normalized `[0, 1]`; the six-argument constructor has no exit-time gate. When multiple transitions are valid, the greatest `priority` wins. `COMPLETE_CURRENT` prevents interruption, `FROM_CURRENT` crossfades from the current mixed pose, and `RESTART` fades the new target in from the bind pose.
+
+Set graph inputs from gameplay code through the controller:
+
+```java
+PAnimationController<ExampleEntity> controller = manager.getControllers().get("movement");
+controller.setParameter("speed", entity.getDeltaMovement().horizontalDistance());
+controller.setParameter("jump", entity.isInWater());
+controller.trigger("attack");
+```
+
+`PCondition.parameter(name)` treats a non-zero boolean or numeric parameter as true. Use `PCondition.triggered(name)` for a one-use transition: it consumes the trigger once selected. `trigger(name)` starts a `OneShotOverlay` with the matching trigger name. Use separate trigger names when both are needed, because overlays consume their triggers before transitions are tested.
+
+`BlendSpace2D` takes independent X and Y parameter names (for example speed and direction) and blends its points by inverse distance. Set `synchronizedCycle` to `true` on a looping clip or blend space to preserve its normalized phase when entering that state; controller `cyclePhase` / `syncCycle` also work with graph controllers.

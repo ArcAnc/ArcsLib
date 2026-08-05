@@ -13,15 +13,19 @@ package com.arcanc.pulselib.content.renderer;
 import com.arcanc.pulselib.content.animatable.PAnimatable;
 import com.arcanc.pulselib.content.animatable.PAnimationController;
 import com.arcanc.pulselib.content.animatable.PAnimationManager;
+<<<<<<< HEAD
 import com.arcanc.pulselib.content.mixin.ItemStackRenderStateAccessor;
 import com.arcanc.pulselib.content.model.animation.BoneFrame;
+=======
+import com.arcanc.pulselib.content.model.animation.PPose;
+>>>>>>> e194067 (Tons of e)
 import com.arcanc.pulselib.content.model.baked.PBakedBone;
 import com.arcanc.pulselib.content.model.baked.PBakedMesh;
 import com.arcanc.pulselib.content.model.baked.PBakedModel;
 import com.arcanc.pulselib.content.model.baked.PMeshRenderContext;
 import com.arcanc.pulselib.content.renderer.base.PItemRenderState;
 import com.arcanc.pulselib.content.renderer.modelData.PModelData;
-import com.arcanc.pulselib.data.MolangParser;
+import com.arcanc.pulselib.data.gecko.MolangParser;
 import com.arcanc.pulselib.util.PRenderTypes;
 import com.arcanc.pulselib.util.PTextureCache;
 import com.mojang.blaze3d.vertex.PoseStack;
@@ -142,7 +146,12 @@ public abstract class PItemRenderer<T extends Item & PAnimatable<T>, RS extends 
 					(_, _) -> PRenderQueue.flush(PRenderQueue.RenderStage.GUI));
 			return;
 		}
+<<<<<<< HEAD
 		model.bones().forEach(bone -> perBoneSubmit(renderState, poseStack, bone, controllers, molangContexts, renderType, -1, renderState.lightCoords(), renderState.overlayCoords(), context));
+=======
+		PPose pose = model.evaluate(controllers, molangContexts, partialTick);
+		model.bones().forEach(bone -> perBoneSubmit(animatable, stack, poseStack, bone, pose, controllers, molangContexts, renderType, -1, packedLight, packedOverlay, partialTick, context));
+>>>>>>> e194067 (Tons of e)
 	}
 	
 	@Override
@@ -150,6 +159,7 @@ public abstract class PItemRenderer<T extends Item & PAnimatable<T>, RS extends 
 	{
 	}
 	
+<<<<<<< HEAD
 	protected void perBoneSubmit(RS renderState, PoseStack poseStack, PBakedBone bone, Collection<PAnimationController<T>> controllers, Map<PAnimationController<T>, MolangParser.Context> molangContexts, Function<Identifier, RenderType> renderType, int packedColor, int packedLight, int packedOverlay, ItemDisplayContext context)
 	{
 		PModelData data = this.getModelData(renderState);
@@ -157,23 +167,25 @@ public abstract class PItemRenderer<T extends Item & PAnimatable<T>, RS extends 
 		if (model == null)
 			return;
 		BoneFrame frame = bone.mixBone(model, controllers, molangContexts, renderState.partialTick());
+=======
+	protected void perBoneSubmit(T animatable, ItemStack stack, PoseStack poseStack, PBakedBone bone, PPose pose, Collection<PAnimationController<T>> controllers, Map<PAnimationController<T>, MolangParser.Context> molangContexts, Function<ResourceLocation, RenderType> renderType, int packedColor, int packedLight, int packedOverlay, float partialTick, ItemDisplayContext context)
+	{
+		PModelData data = this.getModelData(animatable);
+		int boneIndex = data.getModel().boneIndex(bone);
+>>>>>>> e194067 (Tons of e)
 		poseStack.pushPose();
-		if (frame != null)
-		{
-			poseStack.translate(frame.translation().x(), frame.translation().y(), frame.translation().z());
-			poseStack.mulPose(frame.rotation());
-			poseStack.scale(frame.scale().x(), frame.scale().y(), frame.scale().z());
-		}
-		else
-		{
-			poseStack.translate(bone.basePosition().x(), bone.basePosition().y(), bone.basePosition().z());
-			poseStack.mulPose(bone.baseRotation());
-		}
+		poseStack.translate(pose.translation(boneIndex).x(), pose.translation(boneIndex).y(), pose.translation(boneIndex).z());
+		poseStack.mulPose(pose.rotation(boneIndex));
+		poseStack.scale(pose.scale(boneIndex).x(), pose.scale(boneIndex).y(), pose.scale(boneIndex).z());
 		
 		this.submitBone(renderState, bone, poseStack, data, controllers, renderType, packedColor, packedLight, packedOverlay, context);
 		
 		if (!bone.children().isEmpty())
+<<<<<<< HEAD
 			bone.children().forEach(child -> perBoneSubmit(renderState, poseStack, child, controllers, molangContexts, renderType, packedColor, packedLight, packedOverlay, context));
+=======
+		bone.children().forEach(child -> perBoneSubmit(animatable, stack, poseStack, child, pose, controllers, molangContexts, renderType, packedColor, packedLight, packedOverlay, partialTick, context));
+>>>>>>> e194067 (Tons of e)
 		
 		poseStack.popPose();
 	}

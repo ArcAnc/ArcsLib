@@ -2,7 +2,11 @@ PulseLib model loading is extensible through [`PModelLoader`](https://github.com
 
 ## Built-in glTF loader
 
+<<<<<<< HEAD
 [`PGltfModelLoader`](https://github.com/ArcAnc/ArcsLib/blob/26.1/src/main/java/com/arcanc/pulselib/data/PGltfModelLoader.java) is registered by default.
+=======
+[`PGltfModelLoader`](https://github.com/ArcAnc/PulseLib/blob/master/src/main/java/com/arcanc/pulselib/data/gltf/PGltfModelLoader.java) is registered by default.
+>>>>>>> e194067 (Tons of e)
 
 Supported roots and extensions:
 
@@ -23,11 +27,19 @@ resolves to:
 assets/<namespace>/glmodels/entity/<path>.glb
 ```
 
+<<<<<<< HEAD
 The parser is [`PGltfModelParser`](https://github.com/ArcAnc/ArcsLib/blob/26.1/src/main/java/com/arcanc/pulselib/data/PGltfModelParser.java).
 
 ## Gecko loader
 
 [`PGeckoModelLoader`](https://github.com/ArcAnc/ArcsLib/blob/26.1/src/main/java/com/arcanc/pulselib/data/PGeckoModelLoader.java) supports:
+=======
+The parser is [`PGltfModelParser`](https://github.com/ArcAnc/PulseLib/blob/master/src/main/java/com/arcanc/pulselib/data/gltf/PGltfModelParser.java). glTF channels are decoded through the registered position, rotation, and scale channel types, so the loaded animation data now uses the same generic track API as other formats.
+
+## Gecko loader
+
+[`PGeckoModelLoader`](https://github.com/ArcAnc/PulseLib/blob/master/src/main/java/com/arcanc/pulselib/data/gecko/PGeckoModelLoader.java) supports:
+>>>>>>> e194067 (Tons of e)
 
 ```text
 assets/<modid>/geckolib/models/**/*.geo.json
@@ -51,9 +63,13 @@ PModelData data = new DefaultEntityModelData.DefaultEntityModelDataBuilder(
         .build();
 ```
 
+<<<<<<< HEAD
 The parser is [`PGeckoModelParser`](https://github.com/ArcAnc/ArcsLib/blob/26.1/src/main/java/com/arcanc/pulselib/data/PGeckoModelParser.java).
+=======
+The parser is [`PGeckoModelParser`](https://github.com/ArcAnc/PulseLib/blob/master/src/main/java/com/arcanc/pulselib/data/gecko/PGeckoModelParser.java).
+>>>>>>> e194067 (Tons of e)
 
-Gecko animation vector components may be Molang expressions. See [Molang animations](molang-animations.md) for the supported language, context values, renderer hooks, and current limitations.
+Gecko animation vector components may be Molang expressions. See [Molang animations](molang-animations.md) for the supported language, context values, renderer hooks, and persistence rules.
 
 ## Custom loader
 

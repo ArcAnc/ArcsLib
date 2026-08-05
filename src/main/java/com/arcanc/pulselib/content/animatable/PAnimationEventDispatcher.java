@@ -10,9 +10,9 @@
 package com.arcanc.pulselib.content.animatable;
 
 
-import com.arcanc.pulselib.content.model.animation.BoneFrame;
 import com.arcanc.pulselib.content.model.animation.PAnimationEvent;
-import com.arcanc.pulselib.content.model.baked.PBakedBone;
+import com.arcanc.pulselib.content.model.animation.PModelPose;
+import com.arcanc.pulselib.content.model.animation.PPose;
 import com.arcanc.pulselib.content.model.baked.PBakedModel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -22,11 +22,16 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
+<<<<<<< HEAD
 import org.joml.Matrix4f;
+=======
+import org.jetbrains.annotations.Nullable;
+>>>>>>> e194067 (Tons of e)
 import org.joml.Vector3f;
 import org.jspecify.annotations.Nullable;
 
 import java.util.Collection;
+import java.util.Map;
 
 public class PAnimationEventDispatcher
 {
@@ -109,44 +114,14 @@ public class PAnimationEventDispatcher
 	                                                                   String boneName,
 	                                                                   Vector3f result)
 	{
-		for (PBakedBone bone : model.bones())
-			if (findBonePosition(model, controllers, bone, boneName, new Matrix4f(), result))
-				return true;
-		return false;
-	}
-	
-	private static <T extends PAnimatable<T>> boolean findBonePosition(PBakedModel model,
-	                                                                   Collection<PAnimationController<T>> controllers,
-	                                                                   PBakedBone bone,
-	                                                                   String boneName,
-	                                                                   Matrix4f parentTransform,
-	                                                                   Vector3f result)
-	{
-		Matrix4f transform = new Matrix4f(parentTransform);
-		BoneFrame frame = bone.mixBone(model, controllers, 1f);
-		if (frame != null)
-		{
-			transform.translate(frame.translation());
-			transform.rotate(frame.rotation());
-			transform.scale(frame.scale());
-		}
-		else
-		{
-			transform.translate(bone.basePosition());
-			transform.rotate(bone.baseRotation());
-		}
-		
-		if (bone.name().equals(boneName))
-		{
-			transform.getTranslation(result);
-			return true;
-		}
-		
-		for (PBakedBone child : bone.children())
-			if (findBonePosition(model, controllers, child, boneName, transform, result))
-				return true;
-		
-		return false;
+		int boneIndex = model.boneIndex(boneName);
+		if (boneIndex < 0)
+			return false;
+		PPose localPose = model.evaluate(controllers, Map.of(), 1f);
+		PModelPose modelPose = new PModelPose(model.boneCount());
+		modelPose.update(model, localPose);
+		modelPose.transform(boneIndex).getTranslation(result);
+		return true;
 	}
 	
 	private static @Nullable PositionContext position(PAnimatable<?> animatable)

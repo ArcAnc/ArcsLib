@@ -63,7 +63,7 @@ public final class PPlayerFlipDemo
 							PPlayerPart.RIGHT_LEG,
 							PPlayerPart.LEFT_LEG).
 						rootPivot(0.0f, 0.5f, 0.0f).
-						blendMode(PPlayerAnimationBlendMode.REPLACE).
+						blendMode(PPlayerAnimationBlendMode.OVERRIDE).
 						weight(1.0f).
 						controllers(registrar -> registrar.
 								add("flip", () -> state ->

@@ -9,12 +9,15 @@
 
 package com.arcanc.pulselib.content.registration;
 
+import com.arcanc.pulselib.content.model.animation.PAnimationChannel;
+import com.arcanc.pulselib.content.model.animation.PAnimationChannelType;
 import com.arcanc.pulselib.content.registration.block.TestBlock;
 import com.arcanc.pulselib.content.registration.block.block_entity.TestBlockEntity;
 import com.arcanc.pulselib.content.registration.entity.TestEntity;
 import com.arcanc.pulselib.content.registration.item.TestArmorItem;
 import com.arcanc.pulselib.content.registration.item.TestBlockItem;
 import com.arcanc.pulselib.util.PLibDatabase;
+import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
@@ -31,9 +34,34 @@ import net.neoforged.neoforge.registries.DeferredHolder;
 import net.neoforged.neoforge.registries.DeferredItem;
 import net.neoforged.neoforge.registries.DeferredRegister;
 import org.jetbrains.annotations.NotNull;
+import org.joml.Quaternionf;
+import org.joml.Vector3f;
 
 public class PLibRegistration
 {
+	public static class AnimationChannelReg
+	{
+		public static final ResourceKey<Registry<PAnimationChannelType<?>>> REGISTRY_KEY =
+				ResourceKey.createRegistryKey(PLibDatabase.rl("animation_channel_type"));
+		public static final DeferredRegister<PAnimationChannelType<?>> CHANNEL_TYPES =
+				DeferredRegister.create(REGISTRY_KEY, PLibDatabase.MOD_ID);
+		public static Registry<PAnimationChannelType<?>> CHANNEL_TYPE_REGISTRY;
+
+		public static final DeferredHolder<PAnimationChannelType<?>, PAnimationChannelType<Vector3f>> POSITION =
+				CHANNEL_TYPES.register("position", id -> new PAnimationChannel.Vector3fChannelType(id, new Vector3f(), false));
+		public static final DeferredHolder<PAnimationChannelType<?>, PAnimationChannelType<Quaternionf>> ROTATION =
+				CHANNEL_TYPES.register("rotation", PAnimationChannel.QuaternionChannelType :: new);
+		public static final DeferredHolder<PAnimationChannelType<?>, PAnimationChannelType<Vector3f>> SCALE =
+				CHANNEL_TYPES.register("scale", id -> new PAnimationChannel.Vector3fChannelType(id, new Vector3f(1f), true));
+
+		private static void init(@NotNull final IEventBus bus)
+		{
+			CHANNEL_TYPE_REGISTRY = CHANNEL_TYPES.makeRegistry(builder ->
+					builder.maxId(Integer.MAX_VALUE - 1).sync(false));
+			CHANNEL_TYPES.register(bus);
+		}
+	}
+
 	public static class BlockReg
 	{
 		public static final DeferredRegister.Blocks BLOCKS = DeferredRegister.createBlocks(PLibDatabase.MOD_ID);
@@ -109,7 +137,9 @@ public class PLibRegistration
 
 	public static void init(@NotNull final IEventBus bus)
 	{
-		/*EntityTypeReg.init(bus);
+		AnimationChannelReg.init(bus);
+		EntityTypeReg.init(bus);
+		/*
 		BlockReg.init(bus);
 		BETypeReg.init(bus);
 		ItemReg.init(bus);*/

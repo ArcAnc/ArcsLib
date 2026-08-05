@@ -76,11 +76,20 @@ PRenderTypes.RenderTypeProvider.emissiveVariant(baseType, PTextureCache.ATLAS_LO
 You can also choose an emissive render type directly in custom rendering code:
 
 ```java
+<<<<<<< HEAD
 PRenderTypes.RenderTypeProvider::trianglesEmissiveCutout
 PRenderTypes.RenderTypeProvider::trianglesEmissiveTranslucent
 PRenderTypes.RenderTypeProvider::trianglesInstantEmissiveCutout
 PRenderTypes.RenderTypeProvider::trianglesInstantEmissiveTranslucent
+=======
+PRenderTypes.RenderTypeProvider::trianglesSolidEmissive
+PRenderTypes.RenderTypeProvider::trianglesCutoutEmissive
+PRenderTypes.RenderTypeProvider::trianglesTranslucentEmissive
+PRenderTypes.RenderTypeProvider::trianglesGuiEmissive
+>>>>>>> e194067 (Tons of e)
 ```
+
+`trianglesLitEmissive` remains only as the compatibility counterpart of `trianglesLit`; it is not a distinct shader variant for new rendering code.
 
 Classes used:
 
