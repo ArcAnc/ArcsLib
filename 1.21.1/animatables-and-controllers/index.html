@@ -698,6 +698,17 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#animation-graphs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Animation graphs
+      
+    </span>
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -1264,6 +1275,17 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#animation-graphs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Animation graphs
+      
+    </span>
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -1366,6 +1388,7 @@
 <p>Useful controller methods:</p>
 <ul>
 <li><code>play(PRawAnimation animation)</code></li>
+<li><code>play(PAnimationGraph graph)</code></li>
 <li><code>pause()</code></li>
 <li><code>resume()</code></li>
 <li><code>stop()</code></li>
@@ -1375,9 +1398,41 @@
 <li><code>isStopped()</code></li>
 <li><code>getTime()</code></li>
 <li><code>getCurrentStage()</code></li>
+<li><code>cyclePhase(model)</code> / <code>syncCycle(model, phase)</code> for looping animation synchronization</li>
 </ul>
 <p>Multiple controllers are mixed on the same bones in renderer order. Register broad base pose controllers first and specific overrides later. A common pattern is one movement controller for idle/walk/run and another controller for attacks or short actions.</p>
-<p>For expressions embedded in Gecko animation vectors, see <a href="../molang-animations/">Molang animations</a>. Molang context creation belongs to the renderer; <code>PAnimationController</code> only consumes the prepared context while mixing a pose.</p>
+<p>For expressions embedded in Gecko animation vectors, see <a href="../molang-animations/">Molang animations</a>. The renderer supplies frame-specific Molang queries, while each controller keeps its own persistent Molang context for variables and random state.</p>
+<h2 id="animation-graphs">Animation graphs<a class="headerlink" href="#animation-graphs" title="Permanent link">&para;</a></h2>
+<p><code>PAnimationGraph</code> is a controller-driven state machine. Register it with <code>addGraph</code>; the resulting named controller owns the graph runtime and its parameters.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="kd">private</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">PAnimationGraph</span><span class="w"> </span><span class="n">MOVEMENT</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">PAnimationGraph</span><span class="p">(</span>
+<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a><span class="w">        </span><span class="n">List</span><span class="p">.</span><span class="na">of</span><span class="p">(</span>
+<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a><span class="w">                </span><span class="k">new</span><span class="w"> </span><span class="n">PAnimationState</span><span class="p">.</span><span class="na">BlendSpace1D</span><span class="p">(</span><span class="s">&quot;locomotion&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;speed&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">List</span><span class="p">.</span><span class="na">of</span><span class="p">(</span>
+<a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a><span class="w">                        </span><span class="k">new</span><span class="w"> </span><span class="n">PAnimationState</span><span class="p">.</span><span class="na">BlendSpace1D</span><span class="p">.</span><span class="na">Point</span><span class="p">(</span><span class="mf">0.0f</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;idle&quot;</span><span class="p">),</span>
+<a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a><span class="w">                        </span><span class="k">new</span><span class="w"> </span><span class="n">PAnimationState</span><span class="p">.</span><span class="na">BlendSpace1D</span><span class="p">.</span><span class="na">Point</span><span class="p">(</span><span class="mf">0.1f</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;walk&quot;</span><span class="p">),</span>
+<a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a><span class="w">                        </span><span class="k">new</span><span class="w"> </span><span class="n">PAnimationState</span><span class="p">.</span><span class="na">BlendSpace1D</span><span class="p">.</span><span class="na">Point</span><span class="p">(</span><span class="mf">0.3f</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;run&quot;</span><span class="p">))),</span>
+<a id="__codelineno-5-7" name="__codelineno-5-7" href="#__codelineno-5-7"></a><span class="w">                </span><span class="k">new</span><span class="w"> </span><span class="n">PAnimationState</span><span class="p">.</span><span class="na">Clip</span><span class="p">(</span><span class="s">&quot;jump&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;jump&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">PAnimationType</span><span class="p">.</span><span class="na">PLAY_ONCE</span><span class="p">,</span>
+<a id="__codelineno-5-8" name="__codelineno-5-8" href="#__codelineno-5-8"></a><span class="w">                        </span><span class="n">PInterpolationType</span><span class="p">.</span><span class="na">LINEAR</span><span class="p">,</span><span class="w"> </span><span class="mf">1.0f</span><span class="p">,</span><span class="w"> </span><span class="kc">false</span><span class="p">),</span>
+<a id="__codelineno-5-9" name="__codelineno-5-9" href="#__codelineno-5-9"></a><span class="w">                </span><span class="k">new</span><span class="w"> </span><span class="n">PAnimationState</span><span class="p">.</span><span class="na">OneShotOverlay</span><span class="p">(</span><span class="s">&quot;attack&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;attack&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;attack&quot;</span><span class="p">)),</span>
+<a id="__codelineno-5-10" name="__codelineno-5-10" href="#__codelineno-5-10"></a><span class="w">        </span><span class="n">List</span><span class="p">.</span><span class="na">of</span><span class="p">(</span>
+<a id="__codelineno-5-11" name="__codelineno-5-11" href="#__codelineno-5-11"></a><span class="w">                </span><span class="k">new</span><span class="w"> </span><span class="n">PAnimationTransition</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="n">PCondition</span><span class="p">.</span><span class="na">parameter</span><span class="p">(</span><span class="s">&quot;jump&quot;</span><span class="p">),</span><span class="w"> </span><span class="mf">0.08f</span><span class="p">,</span><span class="w"> </span><span class="mi">10</span><span class="p">,</span>
+<a id="__codelineno-5-12" name="__codelineno-5-12" href="#__codelineno-5-12"></a><span class="w">                        </span><span class="n">PInterruptionPolicy</span><span class="p">.</span><span class="na">FROM_CURRENT</span><span class="p">),</span>
+<a id="__codelineno-5-13" name="__codelineno-5-13" href="#__codelineno-5-13"></a><span class="w">                </span><span class="k">new</span><span class="w"> </span><span class="n">PAnimationTransition</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="n">PCondition</span><span class="p">.</span><span class="na">ALWAYS</span><span class="p">,</span><span class="w"> </span><span class="mf">1.0f</span><span class="p">,</span><span class="w"> </span><span class="mf">0.1f</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span>
+<a id="__codelineno-5-14" name="__codelineno-5-14" href="#__codelineno-5-14"></a><span class="w">                        </span><span class="n">PInterruptionPolicy</span><span class="p">.</span><span class="na">FROM_CURRENT</span><span class="p">)));</span>
+<a id="__codelineno-5-15" name="__codelineno-5-15" href="#__codelineno-5-15"></a>
+<a id="__codelineno-5-16" name="__codelineno-5-16" href="#__codelineno-5-16"></a><span class="nd">@Override</span>
+<a id="__codelineno-5-17" name="__codelineno-5-17" href="#__codelineno-5-17"></a><span class="kd">public</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">registerAnimationControllers</span><span class="p">(</span><span class="n">PAnimationManager</span><span class="p">.</span><span class="na">PAnimationRegistrar</span><span class="o">&lt;</span><span class="n">ExampleEntity</span><span class="o">&gt;</span><span class="w"> </span><span class="n">registrar</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-5-18" name="__codelineno-5-18" href="#__codelineno-5-18"></a><span class="w">    </span><span class="n">registrar</span><span class="p">.</span><span class="na">addGraph</span><span class="p">(</span><span class="s">&quot;movement&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">MOVEMENT</span><span class="p">);</span>
+<a id="__codelineno-5-19" name="__codelineno-5-19" href="#__codelineno-5-19"></a><span class="p">}</span>
+</code></pre></div>
+<p>The first non-overlay state is the initial state. A transition with the seven-argument constructor has an <code>exitTime</code> in normalized <code>[0, 1]</code>; the six-argument constructor has no exit-time gate. When multiple transitions are valid, the greatest <code>priority</code> wins. <code>COMPLETE_CURRENT</code> prevents interruption, <code>FROM_CURRENT</code> crossfades from the current mixed pose, and <code>RESTART</code> fades the new target in from the bind pose.</p>
+<p>Set graph inputs from gameplay code through the controller:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="n">PAnimationController</span><span class="o">&lt;</span><span class="n">ExampleEntity</span><span class="o">&gt;</span><span class="w"> </span><span class="n">controller</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">manager</span><span class="p">.</span><span class="na">getControllers</span><span class="p">().</span><span class="na">get</span><span class="p">(</span><span class="s">&quot;movement&quot;</span><span class="p">);</span>
+<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a><span class="n">controller</span><span class="p">.</span><span class="na">setParameter</span><span class="p">(</span><span class="s">&quot;speed&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">entity</span><span class="p">.</span><span class="na">getDeltaMovement</span><span class="p">().</span><span class="na">horizontalDistance</span><span class="p">());</span>
+<a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a><span class="n">controller</span><span class="p">.</span><span class="na">setParameter</span><span class="p">(</span><span class="s">&quot;jump&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">entity</span><span class="p">.</span><span class="na">isInWater</span><span class="p">());</span>
+<a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a><span class="n">controller</span><span class="p">.</span><span class="na">trigger</span><span class="p">(</span><span class="s">&quot;attack&quot;</span><span class="p">);</span>
+</code></pre></div>
+<p><code>PCondition.parameter(name)</code> treats a non-zero boolean or numeric parameter as true. Use <code>PCondition.triggered(name)</code> for a one-use transition: it consumes the trigger once selected. <code>trigger(name)</code> starts a <code>OneShotOverlay</code> with the matching trigger name. Use separate trigger names when both are needed, because overlays consume their triggers before transitions are tested.</p>
+<p><code>BlendSpace2D</code> takes independent X and Y parameter names (for example speed and direction) and blends its points by inverse distance. Set <code>synchronizedCycle</code> to <code>true</code> on a looping clip or blend space to preserve its normalized phase when entering that state; controller <code>cyclePhase</code> / <code>syncCycle</code> also work with graph controllers.</p>
 
 
 

@@ -1317,8 +1317,8 @@
 <li><code>trianglesCutout</code> for hard alpha cutouts, like holes or masked pixels.</li>
 <li><code>trianglesTranslucent</code> for glass-like transparency.</li>
 <li><code>trianglesGui</code> for direct GUI drawing.</li>
-<li><code>trianglesLit</code> for attachments that should follow normal light and overlay behavior.</li>
 </ul>
+<p><code>trianglesLit</code> no longer has its own shader. It remains as a compatibility render type backed by the GUI shader, so do not select it for new world rendering; use <code>trianglesSolid</code>, <code>trianglesCutout</code>, or <code>trianglesTranslucent</code> according to the material instead.</p>
 <p>In a renderer constructor this usually looks like:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="kd">super</span><span class="p">(</span><span class="n">modelData</span><span class="p">,</span><span class="w"> </span><span class="n">PRenderTypes</span><span class="p">.</span><span class="na">RenderTypeProvider</span><span class="p">::</span><span class="n">trianglesSolid</span><span class="p">);</span>
 </code></pre></div>

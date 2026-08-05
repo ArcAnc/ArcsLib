@@ -1020,6 +1020,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#activation-crossfades-and-cycle-synchronization" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Activation crossfades and cycle synchronization
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#model-conventions-and-limitations" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1238,6 +1249,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#activation-crossfades-and-cycle-synchronization" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Activation crossfades and cycle synchronization
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#model-conventions-and-limitations" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1293,7 +1315,7 @@
 <a id="__codelineno-0-20" name="__codelineno-0-20" href="#__codelineno-0-20"></a><span class="w">                        </span><span class="p">.</span><span class="na">bind</span><span class="p">(</span><span class="n">PPlayerPart</span><span class="p">.</span><span class="na">BODY</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;body&quot;</span><span class="p">)</span>
 <a id="__codelineno-0-21" name="__codelineno-0-21" href="#__codelineno-0-21"></a><span class="w">                        </span><span class="p">.</span><span class="na">bind</span><span class="p">(</span><span class="n">PPlayerPart</span><span class="p">.</span><span class="na">RIGHT_ARM</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;right_arm&quot;</span><span class="p">)</span>
 <a id="__codelineno-0-22" name="__codelineno-0-22" href="#__codelineno-0-22"></a><span class="w">                        </span><span class="p">.</span><span class="na">mask</span><span class="p">(</span><span class="n">PPlayerPart</span><span class="p">.</span><span class="na">BODY</span><span class="p">,</span><span class="w"> </span><span class="n">PPlayerPart</span><span class="p">.</span><span class="na">RIGHT_ARM</span><span class="p">)</span>
-<a id="__codelineno-0-23" name="__codelineno-0-23" href="#__codelineno-0-23"></a><span class="w">                        </span><span class="p">.</span><span class="na">blendMode</span><span class="p">(</span><span class="n">PPlayerAnimationBlendMode</span><span class="p">.</span><span class="na">ADDITIVE</span><span class="p">)</span>
+<a id="__codelineno-0-23" name="__codelineno-0-23" href="#__codelineno-0-23"></a><span class="w">                        </span><span class="p">.</span><span class="na">blendMode</span><span class="p">(</span><span class="n">PPlayerAnimationBlendMode</span><span class="p">.</span><span class="na">ADDITIVE_LOCAL</span><span class="p">)</span>
 <a id="__codelineno-0-24" name="__codelineno-0-24" href="#__codelineno-0-24"></a><span class="w">                        </span><span class="p">.</span><span class="na">weight</span><span class="p">(</span><span class="mf">0.75f</span><span class="p">)</span>
 <a id="__codelineno-0-25" name="__codelineno-0-25" href="#__codelineno-0-25"></a><span class="w">                        </span><span class="p">.</span><span class="na">controllers</span><span class="p">(</span><span class="n">registrar</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">registrar</span><span class="p">.</span><span class="na">add</span><span class="p">(</span><span class="s">&quot;combat&quot;</span><span class="p">,</span><span class="w"> </span><span class="p">()</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">state</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="p">{</span>
 <a id="__codelineno-0-26" name="__codelineno-0-26" href="#__codelineno-0-26"></a><span class="w">                            </span><span class="n">state</span><span class="p">.</span><span class="na">controller</span><span class="p">().</span><span class="na">play</span><span class="p">(</span><span class="n">IDLE</span><span class="p">);</span>
@@ -1321,11 +1343,15 @@
 <a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="w">        </span><span class="n">part</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="n">PPlayerPart</span><span class="p">.</span><span class="na">HEAD</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="o">!</span><span class="n">player</span><span class="p">.</span><span class="na">isUsingItem</span><span class="p">())</span>
 </code></pre></div>
 <h2 id="blending-and-weights">Blending and weights<a class="headerlink" href="#blending-and-weights" title="Permanent link">&para;</a></h2>
-<p>Definitions run in ascending <code>priority</code>; registrations with the same priority are ordered by their id.</p>
+<p>Definitions run in ascending <code>priority</code>; registrations with the same priority are ordered by their id. The default is <code>ADDITIVE_LOCAL</code>, which adds the sampled position and rotation to the pose already produced by vanilla and earlier definitions. It is a good default for recoil, breathing, and gestures.</p>
+<p>The available modes are:</p>
 <ul>
-<li><code>ADDITIVE</code> adds the sampled position and rotation to the pose already produced by vanilla and earlier definitions. This is the default and works well for recoil, breathing, and gestures.</li>
-<li><code>REPLACE</code> blends from the original vanilla pose to the sampled pose. It is suitable for emotes or stances that should override vanilla limb motion.</li>
+<li><code>OVERRIDE</code> blends from the original vanilla pose to the sampled pose.</li>
+<li><code>ADDITIVE_LOCAL</code> and <code>ADDITIVE_MESH_SPACE</code> add sampled transforms to the existing pose.</li>
+<li><code>MULTIPLY_SCALE</code> affects scale only.</li>
+<li><code>DIFFERENCE</code> subtracts translation and applies inverse rotation/scale.</li>
 </ul>
+<p>Use <code>OVERRIDE</code> for emotes or stances that should replace vanilla limb motion.</p>
 <p>The definition weight is clamped to <code>[0, 1]</code>. A constant weight is sufficient for most cases:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="p">.</span><span class="na">weight</span><span class="p">(</span><span class="mf">0.4f</span><span class="p">)</span>
 </code></pre></div>
@@ -1339,12 +1365,21 @@
 <a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a><span class="w">        </span><span class="p">(</span><span class="n">player</span><span class="p">,</span><span class="w"> </span><span class="n">partialTick</span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">player</span><span class="p">.</span><span class="na">isUsingItem</span><span class="p">()</span><span class="w"> </span><span class="o">?</span><span class="w"> </span><span class="mf">1.0f</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="mf">0.0f</span><span class="p">)</span>
 </code></pre></div>
 <p>Layer several definitions with different masks, priorities, modes, definition weights, and part weights to combine independent actions.</p>
+<h2 id="activation-crossfades-and-cycle-synchronization">Activation crossfades and cycle synchronization<a class="headerlink" href="#activation-crossfades-and-cycle-synchronization" title="Permanent link">&para;</a></h2>
+<p>By default a definition starts and stops immediately when its <code>when(...)</code> predicate changes. Add <code>crossfade</code> to blend that activation in ticks:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="p">.</span><span class="na">crossfade</span><span class="p">(</span><span class="mf">4.0f</span><span class="p">,</span><span class="w"> </span><span class="n">PPoseEasing</span><span class="p">.</span><span class="na">LINEAR</span><span class="p">,</span><span class="w"> </span><span class="n">PTransitionInterruptionPolicy</span><span class="p">.</span><span class="na">FROM_CURRENT</span><span class="p">)</span>
+</code></pre></div>
+<p><code>FROM_CURRENT</code> reverses smoothly from the current fade amount, <code>RESTART</code> starts the new fade from its endpoint, and <code>COMPLETE_CURRENT</code> lets the current fade finish before accepting a new predicate change.</p>
+<p>Definitions with the same non-empty <code>syncGroup</code> keep similarly named looping controllers at the same normalized cycle phase for each player:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="p">.</span><span class="na">syncGroup</span><span class="p">(</span><span class="s">&quot;combat&quot;</span><span class="p">)</span>
+</code></pre></div>
+<p>Use this for layered models whose walk, idle, or other cyclic animations must stay aligned. <code>boneWeight(boneName, weight)</code> can additionally scale one bound bone independently of its semantic player-part weight.</p>
 <h2 id="model-conventions-and-limitations">Model conventions and limitations<a class="headerlink" href="#model-conventions-and-limitations" title="Permanent link">&para;</a></h2>
 <p>The model only needs a skeleton and animations; mesh data is optional. Bone positions from Gecko animations are converted from blocks to vanilla model pixels automatically. Rotation, position, and scale channels are supported. The skeleton resolver evaluates bind pose and parent transforms; a bound child therefore inherits transforms of intermediate animation bones. A bound <code>ROOT</code> is applied once to the render stack and is excluded from child deltas.</p>
 <p>The API affects the whole player model in third person and arms in first person. It restores position, rotation, and scale immediately after every draw, preventing a pose from leaking into a different player or another render layer.</p>
 <p><code>populateMolangContext(...)</code> can add player-specific Molang queries:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="p">.</span><span class="na">populateMolangContext</span><span class="p">((</span><span class="n">player</span><span class="p">,</span><span class="w"> </span><span class="n">instance</span><span class="p">,</span><span class="w"> </span><span class="n">controller</span><span class="p">,</span><span class="w"> </span><span class="n">context</span><span class="p">,</span><span class="w"> </span><span class="n">partialTick</span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span>
-<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a><span class="w">        </span><span class="n">context</span><span class="p">.</span><span class="na">query</span><span class="p">(</span><span class="s">&quot;is_sneaking&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">player</span><span class="p">.</span><span class="na">isCrouching</span><span class="p">()</span><span class="w"> </span><span class="o">?</span><span class="w"> </span><span class="mf">1.0f</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="mf">0.0f</span><span class="p">))</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="p">.</span><span class="na">populateMolangContext</span><span class="p">((</span><span class="n">player</span><span class="p">,</span><span class="w"> </span><span class="n">instance</span><span class="p">,</span><span class="w"> </span><span class="n">controller</span><span class="p">,</span><span class="w"> </span><span class="n">context</span><span class="p">,</span><span class="w"> </span><span class="n">partialTick</span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span>
+<a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a><span class="w">        </span><span class="n">context</span><span class="p">.</span><span class="na">query</span><span class="p">(</span><span class="s">&quot;is_sneaking&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">player</span><span class="p">.</span><span class="na">isCrouching</span><span class="p">()</span><span class="w"> </span><span class="o">?</span><span class="w"> </span><span class="mf">1.0f</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="mf">0.0f</span><span class="p">))</span>
 </code></pre></div>
 <p>As with other client-side animation state, multiplayer gameplay events are the owning mod's responsibility to synchronize. The animation definition observes only state available on that client.</p>
 

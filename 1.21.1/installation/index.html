@@ -78,7 +78,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#using-curseforge-cursemaven" class="md-skip">
+        <a href="#installation" class="md-skip">
           Skip to content
         </a>
       
@@ -434,6 +434,8 @@
       <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
       
       
+        
+      
       
         <label class="md-nav__link md-nav__link--active" for="__toc">
           
@@ -476,6 +478,8 @@
   
   
   
+    
+  
   
     <label class="md-nav__title" for="__toc">
       <span class="md-nav__icon md-icon"></span>
@@ -484,10 +488,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#using-curseforge-cursemaven" class="md-nav__link">
+  <a href="#for-developers" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Using CurseForge (CurseMaven)
+        For developers
       
     </span>
   </a>
@@ -495,10 +499,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#using-modrinth" class="md-nav__link">
+  <a href="#for-players" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Using Modrinth
+        For players
       
     </span>
   </a>
@@ -1191,6 +1195,8 @@
   
   
   
+    
+  
   
     <label class="md-nav__title" for="__toc">
       <span class="md-nav__icon md-icon"></span>
@@ -1199,10 +1205,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#using-curseforge-cursemaven" class="md-nav__link">
+  <a href="#for-developers" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Using CurseForge (CurseMaven)
+        For developers
       
     </span>
   </a>
@@ -1210,10 +1216,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#using-modrinth" class="md-nav__link">
+  <a href="#for-players" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Using Modrinth
+        For players
       
     </span>
   </a>
@@ -1240,42 +1246,23 @@
   
 
 
-  <h1>Installation</h1>
-
-<p>PulseLib is lightweight and easy to install — requiring only a few changes to your build.gradle file.</p>
-<p>Currently, the project does not have its own hosting, so you can use CurseMaven or Modrinth as your dependency source, but I highly recommend using Modrinth.</p>
-<h2 id="using-curseforge-cursemaven">Using CurseForge (CurseMaven)<a class="headerlink" href="#using-curseforge-cursemaven" title="Permanent link">&para;</a></h2>
-<p>Add the repository and dependency:</p>
+<h1 id="installation">Installation<a class="headerlink" href="#installation" title="Permanent link">&para;</a></h1>
+<h2 id="for-developers">For developers<a class="headerlink" href="#for-developers" title="Permanent link">&para;</a></h2>
+<p>Add the official ArcAnc Maven repository and PulseLib dependency to your <code>build.gradle</code>:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>repositories {
 <a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>    maven {
-<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>        name = &#39;CurseMaven&#39;
-<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>        url &quot;https://beta.cursemaven.com&quot;
-<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>    }
-<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>}
-<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>
-<a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>dependencies {
-<a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a>    // Example: minecraft: 1.21.1, pulselib: 1.0.7
-<a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a>    // Visit https://www.curseforge.com/minecraft/mc-mods/pulselib/files/all to get the latest version
-<a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a>    implementation &quot;curse.maven:pulselib-${minecraft_version}-${pulselib_version}&quot;
-<a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a>}
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>        url = &quot;https://arcanc.github.io/Maven/&quot;
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>    }
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>}
+<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>
+<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>dependencies {
+<a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>    // Example: Minecraft 1.21.1, PulseLib 1.1.2
+<a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a>    implementation &quot;com.arcanc.pulselib:pulselib-neoforge:1.21.1-1.1.2&quot;
+<a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a>}
 </code></pre></div>
-<h2 id="using-modrinth">Using Modrinth<a class="headerlink" href="#using-modrinth" title="Permanent link">&para;</a></h2>
-<p>Add the repository and dependency:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>repositories {
-<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>   maven { 
-<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>       url = &quot;https://api.modrinth.com/maven&quot; 
-<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>   }
-<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>}
-<a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a>
-<a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a>
-<a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a>dependencies {
-<a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a>  // Example: minecraft: 1.21.1, pulselib: 1.0.7
-<a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a>  // Visit https://modrinth.com/mod/pulselib/versions to get the latest version
-<a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a>  implementation &quot;maven.modrinth:pulselib:${minecraft_version}-${pulselib_version}&quot;
-<a id="__codelineno-1-12" name="__codelineno-1-12" href="#__codelineno-1-12"></a>}
-</code></pre></div>
-<p>Final Step</p>
-<p>After adding the repository and dependency, refresh Gradle, and PulseLib will be ready to use in your project!</p>
+<p>Replace the version with the PulseLib release that matches your Minecraft version, then refresh Gradle.</p>
+<h2 id="for-players">For players<a class="headerlink" href="#for-players" title="Permanent link">&para;</a></h2>
+<p>Download PulseLib from <a href="https://www.curseforge.com/minecraft/mc-mods/pulselib">CurseForge</a> or <a href="https://modrinth.com/mod/pulselib">Modrinth</a>.</p>
 
 
 
