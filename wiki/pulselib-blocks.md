@@ -1,6 +1,6 @@
 Animated blocks in Minecraft are really animated block entities. The block still handles placement, collision, interaction, redstone behavior, and blockstate data. The visible animated model is rendered by the block entity renderer.
 
-That split is important: implement [`PAnimatable`](https://github.com/ArcAnc/ArcsLib/blob/26.1/src/main/java/com/arcanc/pulselib/content/animatable/PAnimatable.java) on the `BlockEntity`, not on the `Block`.
+That split is important: implement [`PAnimatable`](https://github.com/ArcAnc/PulseLib/blob/1.21.1/src/main/java/com/arcanc/pulselib/content/animatable/PAnimatable.java) on the `BlockEntity`, not on the `Block`.
 
 ## Block class
 
@@ -68,17 +68,12 @@ public class CrusherBlockEntity extends BlockEntity implements PAnimatable<Crush
 The renderer is intentionally small. It only needs model data and a PulseLib render type unless you want extra custom drawing.
 
 ```java
-public class CrusherRenderer extends PBlockRenderer<CrusherBlockEntity, PBlockRenderState.Impl<CrusherBlockEntity>> {
+public class CrusherRenderer extends PBlockRenderer<CrusherBlockEntity> {
     public CrusherRenderer(BlockEntityRendererProvider.Context context) {
         super(new DefaultBlockModelData.DefaultBlockModelDataBuilder(
-                        Identifier.fromNamespaceAndPath("examplemod", "crusher"))
+                        ResourceLocation.fromNamespaceAndPath("examplemod", "crusher"))
                         .build(),
                 PRenderTypes.RenderTypeProvider::trianglesSolid);
-    }
-
-    @Override
-    public PBlockRenderState.Impl<CrusherBlockEntity> createRenderState() {
-        return new PBlockRenderState.Impl<>();
     }
 }
 ```
@@ -90,16 +85,20 @@ Use hooks when the model is not the whole visual. For example, a machine might r
 ```java
 @Override
 public void postSubmit(PoseStack poseStack,
-                       PBlockRenderState.Impl<CrusherBlockEntity> renderState,
-                       CameraRenderState cameraRenderState,
-                       SubmitNodeCollector submitNodeCollector) {
-    // Add custom submit nodes or extra PulseLib queue submissions here.
+                       CrusherBlockEntity animatable,
+                       Function<ResourceLocation, RenderType> renderType,
+                       MultiBufferSource bufferSource,
+                       int packedLight,
+                       int packedOverlay,
+                       float partialTick,
+                       Object... additionalData) {
+    // Add vanilla buffer rendering or extra PulseLib queue submissions here.
 }
 ```
 
 Classes used:
 
-* [`PBlockRenderer`](https://github.com/ArcAnc/ArcsLib/blob/26.1/src/main/java/com/arcanc/pulselib/content/renderer/PBlockRenderer.java)
-* [`DefaultBlockModelData`](https://github.com/ArcAnc/ArcsLib/blob/26.1/src/main/java/com/arcanc/pulselib/content/renderer/modelData/DefaultBlockModelData.java)
-* [`PAnimatable`](https://github.com/ArcAnc/ArcsLib/blob/26.1/src/main/java/com/arcanc/pulselib/content/animatable/PAnimatable.java)
-* [`PLibHelper`](https://github.com/ArcAnc/ArcsLib/blob/26.1/src/main/java/com/arcanc/pulselib/util/helpers/PLibHelper.java)
+* [`PBlockRenderer`](https://github.com/ArcAnc/PulseLib/blob/1.21.1/src/main/java/com/arcanc/pulselib/content/renderer/PBlockRenderer.java)
+* [`DefaultBlockModelData`](https://github.com/ArcAnc/PulseLib/blob/1.21.1/src/main/java/com/arcanc/pulselib/content/renderer/modelData/DefaultBlockModelData.java)
+* [`PAnimatable`](https://github.com/ArcAnc/PulseLib/blob/1.21.1/src/main/java/com/arcanc/pulselib/content/animatable/PAnimatable.java)
+* [`PLibHelper`](https://github.com/ArcAnc/PulseLib/blob/1.21.1/src/main/java/com/arcanc/pulselib/util/helpers/PLibHelper.java)
