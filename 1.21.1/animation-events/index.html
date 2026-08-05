@@ -78,7 +78,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#gltf-sidecar-files" class="md-skip">
+        <a href="#built-in-types" class="md-skip">
           Skip to content
         </a>
       
@@ -683,6 +683,17 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#built-in-types" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Built-in types
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#gltf-sidecar-files" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -694,21 +705,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#gecko-animation-events" class="md-nav__link">
+  <a href="#delivery-rules" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Gecko animation events
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#locator-behavior" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Locator behavior
+        Delivery rules
       
     </span>
   </a>
@@ -1210,6 +1210,17 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#built-in-types" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Built-in types
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#gltf-sidecar-files" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1221,21 +1232,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#gecko-animation-events" class="md-nav__link">
+  <a href="#delivery-rules" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Gecko animation events
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#locator-behavior" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Locator behavior
+        Delivery rules
       
     </span>
   </a>
@@ -1264,23 +1264,55 @@
 
   <h1>Animation Events</h1>
 
-<p>PulseLib supports sound and particle events inside animations.</p>
-<p>Public event classes:</p>
-<ul>
-<li><a href="https://github.com/ArcAnc/PulseLib/blob/master/src/main/java/com/arcanc/pulselib/content/model/animation/PAnimationEvent.java"><code>PAnimationEvent</code></a></li>
-<li><a href="https://github.com/ArcAnc/PulseLib/blob/master/src/main/java/com/arcanc/pulselib/content/animatable/PAnimationEventDispatcher.java"><code>PAnimationEventDispatcher</code></a></li>
-<li><a href="https://github.com/ArcAnc/PulseLib/blob/master/src/main/java/com/arcanc/pulselib/data/gltf/PGltfAnimationEventSidecarParser.java"><code>PGltfAnimationEventSidecarParser</code></a></li>
-<li><a href="https://github.com/ArcAnc/PulseLib/blob/master/src/main/java/com/arcanc/pulselib/data/gecko/PGeckoAnimationEventParser.java"><code>PGeckoAnimationEventParser</code></a></li>
-</ul>
-<p>Events are stored in <a href="https://github.com/ArcAnc/PulseLib/blob/master/src/main/java/com/arcanc/pulselib/content/model/animation/PAnimation.java"><code>PAnimation</code></a>. A controller fires all events between the previous and current animation time while the controller is ticking.</p>
+<p>Animation events are timestamped typed payloads stored in <code>PAnimation</code>. Time is expressed in ticks internally; glTF sidecars and Gecko JSON use seconds and are converted with <code>seconds * 20</code>.</p>
+<p>The public API is <code>PAnimationEvent&lt;T&gt;</code> and <code>PAnimationEventType&lt;T&gt;</code>. Event types supply a <code>ResourceLocation</code>, a <code>MapCodec&lt;T&gt;</code>, a side policy, and the execution function. Built-in type instances are registered in the <code>pulselib:animation_event_type</code> registry, so an add-on can register its own typed event type in the same registry.</p>
+<h2 id="built-in-types">Built-in types<a class="headerlink" href="#built-in-types" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>Type</th>
+<th>Side</th>
+<th>Payload</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>sound</code></td>
+<td><code>PRESENTATION_ONLY</code></td>
+<td><code>sound</code>, optional <code>locator</code>, <code>volume</code>, <code>pitch</code></td>
+</tr>
+<tr>
+<td><code>particle</code></td>
+<td><code>PRESENTATION_ONLY</code></td>
+<td><code>particle</code>, optional <code>locator</code>, <code>offset</code>, <code>motion</code></td>
+</tr>
+<tr>
+<td><code>camera_shake</code></td>
+<td><code>PRESENTATION_ONLY</code></td>
+<td><code>strength</code>, optional <code>duration</code> (ticks), <code>frequency</code></td>
+</tr>
+<tr>
+<td><code>locator_callback</code></td>
+<td><code>BOTH</code></td>
+<td><code>callback</code>, optional <code>locator</code></td>
+</tr>
+<tr>
+<td><code>animation_parameter</code></td>
+<td><code>BOTH</code></td>
+<td>optional <code>controller</code>, <code>parameter</code>, optional <code>value</code>, <code>trigger</code></td>
+</tr>
+</tbody>
+</table>
+<p><code>PRESENTATION_ONLY</code> means client-only and non-authoritative. <code>CLIENT</code> and <code>SERVER</code> run only on that physical side; <code>BOTH</code> runs on either side when the controller is ticked there. A server event therefore needs a server-ticked animation manager; the standard singleton/instance managers are client ticked.</p>
+<p><code>locator_callback</code> invokes a callback registered with <code>PAnimationEventCallbacks.register(id, callback)</code>. The callback receives the event context and the resolved locator position (or <code>null</code> when the animatable has no world position). <code>animation_parameter</code> targets the current graph controller when <code>controller</code> is blank; otherwise it targets a controller by name. <code>trigger: true</code> calls <code>trigger(parameter)</code>, otherwise <code>value</code> is assigned to the parameter.</p>
 <h2 id="gltf-sidecar-files">glTF sidecar files<a class="headerlink" href="#gltf-sidecar-files" title="Permanent link">&para;</a></h2>
-<p>For <code>.glb</code> and <code>.gltf</code> models, PulseLib looks for sidecar files in these locations:</p>
+<p>For <code>.glb</code> and <code>.gltf</code> models, PulseLib looks for sidecars in these locations:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>glmodels/&lt;model&gt;.events.json
 <a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>glmodels/&lt;model&gt;.animation_events.json
 <a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>glmodels/events/&lt;model&gt;.events.json
 <a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>glmodels/events/&lt;fileName&gt;.events.json
 </code></pre></div>
-<p>Example:</p>
+<p>The <code>type</code> may be a built-in short name or a fully qualified registry id. Event fields are decoded with the selected type's codec.</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="p">{</span>
 <a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="w">  </span><span class="nt">&quot;animations&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
 <a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="w">    </span><span class="nt">&quot;attack&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
@@ -1289,65 +1321,38 @@
 <a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a><span class="w">          </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;sound&quot;</span><span class="p">,</span>
 <a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a><span class="w">          </span><span class="nt">&quot;time&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">0.25</span><span class="p">,</span>
 <a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a><span class="w">          </span><span class="nt">&quot;sound&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;minecraft:entity.player.attack.strong&quot;</span><span class="p">,</span>
-<a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a><span class="w">          </span><span class="nt">&quot;locator&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;hand_right&quot;</span><span class="p">,</span>
-<a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a><span class="w">          </span><span class="nt">&quot;volume&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">1.0</span><span class="p">,</span>
-<a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a><span class="w">          </span><span class="nt">&quot;pitch&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">1.0</span>
-<a id="__codelineno-1-12" name="__codelineno-1-12" href="#__codelineno-1-12"></a><span class="w">        </span><span class="p">},</span>
-<a id="__codelineno-1-13" name="__codelineno-1-13" href="#__codelineno-1-13"></a><span class="w">        </span><span class="p">{</span>
-<a id="__codelineno-1-14" name="__codelineno-1-14" href="#__codelineno-1-14"></a><span class="w">          </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;particle&quot;</span><span class="p">,</span>
-<a id="__codelineno-1-15" name="__codelineno-1-15" href="#__codelineno-1-15"></a><span class="w">          </span><span class="nt">&quot;time&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">0.35</span><span class="p">,</span>
-<a id="__codelineno-1-16" name="__codelineno-1-16" href="#__codelineno-1-16"></a><span class="w">          </span><span class="nt">&quot;particle&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;minecraft:crit&quot;</span><span class="p">,</span>
-<a id="__codelineno-1-17" name="__codelineno-1-17" href="#__codelineno-1-17"></a><span class="w">          </span><span class="nt">&quot;locator&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;blade_tip&quot;</span><span class="p">,</span>
-<a id="__codelineno-1-18" name="__codelineno-1-18" href="#__codelineno-1-18"></a><span class="w">          </span><span class="nt">&quot;offset&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="mf">0.0</span><span class="p">,</span><span class="w"> </span><span class="mf">0.0</span><span class="p">,</span><span class="w"> </span><span class="mf">0.0</span><span class="p">],</span>
-<a id="__codelineno-1-19" name="__codelineno-1-19" href="#__codelineno-1-19"></a><span class="w">          </span><span class="nt">&quot;motion&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="mf">0.0</span><span class="p">,</span><span class="w"> </span><span class="mf">0.02</span><span class="p">,</span><span class="w"> </span><span class="mf">0.0</span><span class="p">]</span>
-<a id="__codelineno-1-20" name="__codelineno-1-20" href="#__codelineno-1-20"></a><span class="w">        </span><span class="p">}</span>
-<a id="__codelineno-1-21" name="__codelineno-1-21" href="#__codelineno-1-21"></a><span class="w">      </span><span class="p">]</span>
-<a id="__codelineno-1-22" name="__codelineno-1-22" href="#__codelineno-1-22"></a><span class="w">    </span><span class="p">}</span>
-<a id="__codelineno-1-23" name="__codelineno-1-23" href="#__codelineno-1-23"></a><span class="w">  </span><span class="p">}</span>
-<a id="__codelineno-1-24" name="__codelineno-1-24" href="#__codelineno-1-24"></a><span class="p">}</span>
+<a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a><span class="w">          </span><span class="nt">&quot;locator&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;hand_right&quot;</span>
+<a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a><span class="w">        </span><span class="p">},</span>
+<a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a><span class="w">        </span><span class="p">{</span>
+<a id="__codelineno-1-12" name="__codelineno-1-12" href="#__codelineno-1-12"></a><span class="w">          </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;camera_shake&quot;</span><span class="p">,</span>
+<a id="__codelineno-1-13" name="__codelineno-1-13" href="#__codelineno-1-13"></a><span class="w">          </span><span class="nt">&quot;time&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">0.25</span><span class="p">,</span>
+<a id="__codelineno-1-14" name="__codelineno-1-14" href="#__codelineno-1-14"></a><span class="w">          </span><span class="nt">&quot;strength&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">1.5</span><span class="p">,</span>
+<a id="__codelineno-1-15" name="__codelineno-1-15" href="#__codelineno-1-15"></a><span class="w">          </span><span class="nt">&quot;duration&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">5</span><span class="p">,</span>
+<a id="__codelineno-1-16" name="__codelineno-1-16" href="#__codelineno-1-16"></a><span class="w">          </span><span class="nt">&quot;frequency&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">10</span>
+<a id="__codelineno-1-17" name="__codelineno-1-17" href="#__codelineno-1-17"></a><span class="w">        </span><span class="p">},</span>
+<a id="__codelineno-1-18" name="__codelineno-1-18" href="#__codelineno-1-18"></a><span class="w">        </span><span class="p">{</span>
+<a id="__codelineno-1-19" name="__codelineno-1-19" href="#__codelineno-1-19"></a><span class="w">          </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;animation_parameter&quot;</span><span class="p">,</span>
+<a id="__codelineno-1-20" name="__codelineno-1-20" href="#__codelineno-1-20"></a><span class="w">          </span><span class="nt">&quot;time&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">0.35</span><span class="p">,</span>
+<a id="__codelineno-1-21" name="__codelineno-1-21" href="#__codelineno-1-21"></a><span class="w">          </span><span class="nt">&quot;controller&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;locomotion&quot;</span><span class="p">,</span>
+<a id="__codelineno-1-22" name="__codelineno-1-22" href="#__codelineno-1-22"></a><span class="w">          </span><span class="nt">&quot;parameter&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;attack_done&quot;</span><span class="p">,</span>
+<a id="__codelineno-1-23" name="__codelineno-1-23" href="#__codelineno-1-23"></a><span class="w">          </span><span class="nt">&quot;trigger&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span>
+<a id="__codelineno-1-24" name="__codelineno-1-24" href="#__codelineno-1-24"></a><span class="w">        </span><span class="p">}</span>
+<a id="__codelineno-1-25" name="__codelineno-1-25" href="#__codelineno-1-25"></a><span class="w">      </span><span class="p">]</span>
+<a id="__codelineno-1-26" name="__codelineno-1-26" href="#__codelineno-1-26"></a><span class="w">    </span><span class="p">}</span>
+<a id="__codelineno-1-27" name="__codelineno-1-27" href="#__codelineno-1-27"></a><span class="w">  </span><span class="p">}</span>
+<a id="__codelineno-1-28" name="__codelineno-1-28" href="#__codelineno-1-28"></a><span class="p">}</span>
 </code></pre></div>
-<p><code>time</code> is written in seconds in the sidecar and converted to ticks internally with <code>seconds * 20</code>.</p>
-<h2 id="gecko-animation-events">Gecko animation events<a class="headerlink" href="#gecko-animation-events" title="Permanent link">&para;</a></h2>
-<p>The Gecko parser reads <code>sound_effects</code> and <code>particle_effects</code> from animation JSON. Time keys are seconds and are also converted to ticks.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="p">{</span>
-<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="w">  </span><span class="nt">&quot;animations&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="w">    </span><span class="nt">&quot;animation.example.attack&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="w">      </span><span class="nt">&quot;sound_effects&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a><span class="w">        </span><span class="nt">&quot;0.25&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a><span class="w">          </span><span class="nt">&quot;sound&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;minecraft:entity.player.attack.strong&quot;</span><span class="p">,</span>
-<a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a><span class="w">          </span><span class="nt">&quot;locator&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;hand_right&quot;</span>
-<a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a><span class="w">        </span><span class="p">}</span>
-<a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a><span class="w">      </span><span class="p">},</span>
-<a id="__codelineno-2-10" name="__codelineno-2-10" href="#__codelineno-2-10"></a><span class="w">      </span><span class="nt">&quot;particle_effects&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<a id="__codelineno-2-11" name="__codelineno-2-11" href="#__codelineno-2-11"></a><span class="w">        </span><span class="nt">&quot;0.35&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<a id="__codelineno-2-12" name="__codelineno-2-12" href="#__codelineno-2-12"></a><span class="w">          </span><span class="nt">&quot;particle&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;minecraft:crit&quot;</span><span class="p">,</span>
-<a id="__codelineno-2-13" name="__codelineno-2-13" href="#__codelineno-2-13"></a><span class="w">          </span><span class="nt">&quot;locator&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;blade_tip&quot;</span><span class="p">,</span>
-<a id="__codelineno-2-14" name="__codelineno-2-14" href="#__codelineno-2-14"></a><span class="w">          </span><span class="nt">&quot;offset&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">],</span>
-<a id="__codelineno-2-15" name="__codelineno-2-15" href="#__codelineno-2-15"></a><span class="w">          </span><span class="nt">&quot;motion&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mf">0.02</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">]</span>
-<a id="__codelineno-2-16" name="__codelineno-2-16" href="#__codelineno-2-16"></a><span class="w">        </span><span class="p">}</span>
-<a id="__codelineno-2-17" name="__codelineno-2-17" href="#__codelineno-2-17"></a><span class="w">      </span><span class="p">}</span>
-<a id="__codelineno-2-18" name="__codelineno-2-18" href="#__codelineno-2-18"></a><span class="w">    </span><span class="p">}</span>
-<a id="__codelineno-2-19" name="__codelineno-2-19" href="#__codelineno-2-19"></a><span class="w">  </span><span class="p">}</span>
-<a id="__codelineno-2-20" name="__codelineno-2-20" href="#__codelineno-2-20"></a><span class="p">}</span>
-</code></pre></div>
-<h2 id="locator-behavior">Locator behavior<a class="headerlink" href="#locator-behavior" title="Permanent link">&para;</a></h2>
-<p>If an event has a non-empty <code>locator</code>, <code>PAnimationEventDispatcher</code> tries to resolve a bone with that name using the current model and controllers. If it succeeds, the sound or particle is spawned at that animated bone position. If it fails, the event falls back to the animatable's base position.</p>
-<p>Supported base positions:</p>
+<p>Gecko <code>sound_effects</code> and <code>particle_effects</code> retain their native format and are converted to the corresponding typed built-ins.</p>
+<h2 id="delivery-rules">Delivery rules<a class="headerlink" href="#delivery-rules" title="Permanent link">&para;</a></h2>
 <ul>
-<li><code>Entity</code>: entity coordinates, rotated by body yaw for locator offsets.</li>
-<li><code>BlockEntity</code>: block center, rotated from <code>HORIZONTAL_FACING</code> or <code>FACING</code> when present.</li>
+<li>A forward move delivers events in <code>(previousTime, currentTime]</code>; the initial move from zero also delivers time-zero events.</li>
+<li>A reverse move delivers <code>[currentTime, previousTime)</code> in reverse timestamp order. Negative <code>AnimationStage.speed()</code> starts a stage at its final frame, so it does not need a one-tick forward setup.</li>
+<li>A cyclic stage is treated as an unwrapped timeline. Every wrap crossed by a tick is traversed in order, including multiple wraps caused by speed changes or a large delta. Events at <code>0</code> and at the animation length are distinct and retain their order at the wrap.</li>
+<li>A missed tick and a large positive delta use the same traversal rules: every crossed event is delivered once per crossed loop. Content authors should avoid expensive event handlers in very short loops.</li>
+<li>Graph states and transition source/target layers report their own traversals; events from every contributing clip are therefore delivered. This is intentional—put gameplay effects in an unblended clip when duplicate blended effects are undesirable.</li>
+<li><code>seek(model, time)</code> and <code>syncCycle(model, phase)</code> change both previous and current cursors and never replay events. They are the required operations for a seek, late instance creation, and network re-synchronization.</li>
 </ul>
-<p>Dispatch only runs on the client side.</p>
-<p>Manual dispatch:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="n">PAnimationEvent</span><span class="w"> </span><span class="n">event</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">PAnimationEvent</span><span class="p">.</span><span class="na">Sound</span><span class="p">(</span>
-<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="w">        </span><span class="mi">0</span><span class="p">,</span>
-<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="w">        </span><span class="n">ResourceLocation</span><span class="p">.</span><span class="na">withDefaultNamespace</span><span class="p">(</span><span class="s">&quot;block.note_block.pling&quot;</span><span class="p">),</span>
-<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="w">        </span><span class="s">&quot;&quot;</span><span class="p">,</span>
-<a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a><span class="w">        </span><span class="mf">1.0f</span><span class="p">,</span>
-<a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a><span class="w">        </span><span class="mf">1.0f</span><span class="p">);</span>
-<a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a>
-<a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a><span class="n">PAnimationEventDispatcher</span><span class="p">.</span><span class="na">dispatch</span><span class="p">(</span><span class="n">animatable</span><span class="p">,</span><span class="w"> </span><span class="n">event</span><span class="p">);</span>
-</code></pre></div>
+<p>Locator resolution uses the current posed bone. It falls back to the entity origin or block-entity centre if the named locator cannot be found.</p>
 
 
 
