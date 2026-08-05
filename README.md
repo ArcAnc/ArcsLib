@@ -24,7 +24,7 @@ Welcome to our [Wiki][wiki]
 
 ### Maven
 
-Atm there is no dedicated maven, you can use [Curse Maven](https://www.cursemaven.com/) or [Modrinth Maven](https://docs.modrinth.com/maven) to include the mod as a dependency.
+You can find Maven setup details in the [installation guide](https://arcanc.github.io/PulseLib/1.21.1/installation/).
 
 ### Contributing
 
@@ -35,4 +35,4 @@ If you need help feel free to [join our Discord][discord]
 
 [download]: https://www.curseforge.com/minecraft/mc-mods/pulselib
 [discord]: https://discord.gg/cwydhvYb2M
-[wiki]: https://github.com/ArcAnc/PulseLib/wiki
+[wiki]: https://arcanc.github.io/PulseLib/master/

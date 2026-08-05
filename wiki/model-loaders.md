@@ -1,8 +1,8 @@
-PulseLib model loading is extensible through [`PModelLoader`](https://github.com/ArcAnc/PulseLib/blob/master/src/main/java/com/arcanc/pulselib/data/PModelLoader.java). Loaded raw models are baked into [`PBakedModel`](https://github.com/ArcAnc/PulseLib/blob/master/src/main/java/com/arcanc/pulselib/content/model/baked/PBakedModel.java) by [`PModelCache`](https://github.com/ArcAnc/PulseLib/blob/master/src/main/java/com/arcanc/pulselib/util/PModelCache.java).
+PulseLib model loading is extensible through [`PModelLoader`](https://github.com/ArcAnc/PulseLib/blob/1.21.1/src/main/java/com/arcanc/pulselib/data/PModelLoader.java). Loaded raw models are baked into [`PBakedModel`](https://github.com/ArcAnc/PulseLib/blob/1.21.1/src/main/java/com/arcanc/pulselib/content/model/baked/PBakedModel.java) by [`PModelCache`](https://github.com/ArcAnc/PulseLib/blob/1.21.1/src/main/java/com/arcanc/pulselib/util/PModelCache.java).
 
 ## Built-in glTF loader
 
-[`PGltfModelLoader`](https://github.com/ArcAnc/PulseLib/blob/master/src/main/java/com/arcanc/pulselib/data/PGltfModelLoader.java) is registered by default.
+[`PGltfModelLoader`](https://github.com/ArcAnc/PulseLib/blob/1.21.1/src/main/java/com/arcanc/pulselib/data/gltf/PGltfModelLoader.java) is registered by default.
 
 Supported roots and extensions:
 
@@ -23,11 +23,11 @@ resolves to:
 assets/<namespace>/glmodels/entity/<path>.glb
 ```
 
-The parser is [`PGltfModelParser`](https://github.com/ArcAnc/PulseLib/blob/master/src/main/java/com/arcanc/pulselib/data/PGltfModelParser.java).
+The parser is [`PGltfModelParser`](https://github.com/ArcAnc/PulseLib/blob/1.21.1/src/main/java/com/arcanc/pulselib/data/gltf/PGltfModelParser.java). glTF channels are decoded through the registered position, rotation, and scale channel types, so the loaded animation data now uses the same generic track API as other formats.
 
 ## Gecko loader
 
-[`PGeckoModelLoader`](https://github.com/ArcAnc/PulseLib/blob/master/src/main/java/com/arcanc/pulselib/data/PGeckoModelLoader.java) supports:
+[`PGeckoModelLoader`](https://github.com/ArcAnc/PulseLib/blob/1.21.1/src/main/java/com/arcanc/pulselib/data/gecko/PGeckoModelLoader.java) supports:
 
 ```text
 assets/<modid>/geckolib/models/**/*.geo.json
@@ -46,48 +46,48 @@ Use it in model data:
 
 ```java
 PModelData data = new DefaultEntityModelData.DefaultEntityModelDataBuilder(
-        Identifier.fromNamespaceAndPath("examplemod", "robot"),
+        ResourceLocation.fromNamespaceAndPath("examplemod", "robot"),
         PGeckoModelLoader.INSTANCE.id())
         .build();
 ```
 
-The parser is [`PGeckoModelParser`](https://github.com/ArcAnc/PulseLib/blob/master/src/main/java/com/arcanc/pulselib/data/PGeckoModelParser.java).
+The parser is [`PGeckoModelParser`](https://github.com/ArcAnc/PulseLib/blob/1.21.1/src/main/java/com/arcanc/pulselib/data/gecko/PGeckoModelParser.java).
 
-Gecko animation vector components may be Molang expressions. See [Molang animations](molang-animations.md) for the supported language, context values, renderer hooks, and current limitations.
+Gecko animation vector components may be Molang expressions. See [Molang animations](molang-animations.md) for the supported language, context values, renderer hooks, and persistence rules.
 
 ## Custom loader
 
 ```java
 public final class MyModelLoader implements PModelLoader {
     public static final MyModelLoader INSTANCE = new MyModelLoader();
-    private static final Identifier ID =
-            Identifier.fromNamespaceAndPath("examplemod", "my_format");
+    private static final ResourceLocation ID =
+            ResourceLocation.fromNamespaceAndPath("examplemod", "my_format");
 
     @Override
-    public Identifier id() {
+    public ResourceLocation id() {
         return ID;
     }
 
     @Override
-    public boolean supports(Identifier modelPath) {
+    public boolean supports(ResourceLocation modelPath) {
         return modelPath.getPath().startsWith("mymodels/")
                 && modelPath.getPath().endsWith(".json");
     }
 
     @Override
-    public Identifier defaultModelLocation(Identifier modelLocation, String modelType) {
+    public ResourceLocation defaultModelLocation(ResourceLocation modelLocation, String modelType) {
         return modelLocation.withPrefix("mymodels/" + modelType + "/").withSuffix(".json");
     }
 
     @Override
-    public Identifier textureLocation(Identifier modelPath, String textureName) {
+    public ResourceLocation textureLocation(ResourceLocation modelPath, String textureName) {
         return modelPath.withPath("entity/" + textureName);
     }
 
     @Override
     public CompletableFuture<?> loadModels(Executor backgroundExecutor,
                                            ResourceManager resourceManager,
-                                           BiConsumer<Identifier, PModel> elementConsumer) {
+                                           BiConsumer<ResourceLocation, PModel> elementConsumer) {
         return CompletableFuture.runAsync(() -> {
             // Parse resources and call elementConsumer.accept(modelLocation, model).
         }, backgroundExecutor);
