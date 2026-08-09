@@ -25,12 +25,6 @@ import org.joml.Vector3f;
 import java.util.IdentityHashMap;
 import java.util.Map;
 
-/**
- * Lifecycle hook for temporary deformed mesh buffers.
- *
- * Minecraft 26.1 renders baked meshes through immutable {@code GpuBuffer}s,
- * so every changed deformation result replaces the previous GPU buffer.
- */
 public final class PDeformedMeshBuffers
 {
 	private PDeformedMeshBuffers()

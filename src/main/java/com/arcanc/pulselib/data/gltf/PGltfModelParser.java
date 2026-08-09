@@ -146,10 +146,7 @@ public class PGltfModelParser
 				parent.children().add(bone);
 			}
 		}
-
-		// Blockbench exports every cube as a mesh node below its group/bone.
-		// Mesh nodes are not joints: bake their local transform into the geometry
-		// and attach the result to the nearest actual bone.
+		
 		for (NodeModel node : nodes)
 		{
 			if (nodeToBone.containsKey(node))
@@ -199,7 +196,6 @@ public class PGltfModelParser
 		if (isBlockbenchLocatorMarker(node))
 			return false;
 		List<MeshModel> meshes = node.getMeshModels();
-		// A root mesh has no bone that could own it, so it remains a render bone.
 		return meshes == null || meshes.isEmpty() || node.getParent() == null;
 	}
 
@@ -352,9 +348,6 @@ public class PGltfModelParser
 				AccessorModel outputAccessor = sampler.getOutput();
 				if (outputAccessor == null)
 					continue;
-				// GLTF binary accessors are always little-endian.  The default byte
-				// order of a freshly-created ByteBuffer is big-endian, which made all
-				// animated translations and quaternions decode into unrelated values.
 				ByteBuffer bb = outputAccessor.getAccessorData().createByteBuffer().order(ByteOrder.LITTLE_ENDIAN);
 				PBoneAnimation boneAnimation = boneAnimations.computeIfAbsent(bone.name(), k -> new PBoneAnimation(boneUuid, new HashMap<>()));
 				PAnimationTrack<?> track = decodeTrack(decoder, inputTimes, bb, new PGltfDecodeContext(bone));

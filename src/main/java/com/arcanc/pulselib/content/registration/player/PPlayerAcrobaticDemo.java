@@ -26,7 +26,7 @@ public final class PPlayerAcrobaticDemo
 			"key.pulselib.player_acrobatic",
 			InputConstants.Type.KEYSYM,
 			GLFW.GLFW_KEY_V,
-			"key.categories.pulselib");
+			KeyMapping.Category.MISC);
 
 	private PPlayerAcrobaticDemo()
 	{
@@ -34,7 +34,7 @@ public final class PPlayerAcrobaticDemo
 
 	public static void register(IEventBus modEventBus)
 	{
-		if (FMLLoader.isProduction())
+		if (FMLLoader.getCurrent().isProduction())
 			return;
 		modEventBus.addListener(PPlayerAcrobaticDemo::registerKeyMapping);
 		modEventBus.addListener(PPlayerAcrobaticDemo::registerAnimation);
@@ -90,5 +90,5 @@ public final class PPlayerAcrobaticDemo
 	{
 		float clamped = Math.clamp(value, 0.0f, 1.0f);
 		return clamped * clamped * (3.0f - 2.0f * clamped);
-	}*/
-}
+	}
+*/}
