@@ -16,7 +16,7 @@ import net.minecraft.client.model.geom.builders.CubeDefinition;
 import net.minecraft.client.model.geom.builders.CubeDeformation;
 import net.minecraft.client.model.geom.builders.UVPair;
 import net.minecraft.core.Direction;
-import org.joml.Vector3f;
+import org.joml.Vector3fc;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -30,9 +30,9 @@ import java.util.Set;
 public class CubeDefinitionMixin
 {
 	@Shadow @Final
-	private Vector3f origin;
+	private Vector3fc origin;
 	@Shadow @Final
-	private Vector3f dimensions;
+	private Vector3fc dimensions;
 	@Shadow @Final
 	private CubeDeformation grow;
 	@Shadow @Final
