@@ -27,6 +27,7 @@ import org.joml.Vector3f;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -351,7 +352,10 @@ public class PGltfModelParser
 				AccessorModel outputAccessor = sampler.getOutput();
 				if (outputAccessor == null)
 					continue;
-				ByteBuffer bb = outputAccessor.getAccessorData().createByteBuffer();
+				// GLTF binary accessors are always little-endian.  The default byte
+				// order of a freshly-created ByteBuffer is big-endian, which made all
+				// animated translations and quaternions decode into unrelated values.
+				ByteBuffer bb = outputAccessor.getAccessorData().createByteBuffer().order(ByteOrder.LITTLE_ENDIAN);
 				PBoneAnimation boneAnimation = boneAnimations.computeIfAbsent(bone.name(), k -> new PBoneAnimation(boneUuid, new HashMap<>()));
 				PAnimationTrack<?> track = decodeTrack(decoder, inputTimes, bb, new PGltfDecodeContext(bone));
 				boneAnimation.tracks().put(track.channel().id().toString(), track);

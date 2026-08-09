@@ -17,6 +17,7 @@ import com.arcanc.pulselib.content.model.PModel;
 import com.arcanc.pulselib.content.model.baked.AtlasBufferBuilder;
 import com.arcanc.pulselib.content.model.baked.PBakedBone;
 import com.arcanc.pulselib.content.model.baked.PBakedMesh;
+import com.arcanc.pulselib.content.model.baked.PDeformedMeshBuffers;
 import com.arcanc.pulselib.content.model.baked.PBakedModel;
 import com.arcanc.pulselib.content.model.textures.atlas.PLibMetadata;
 import com.arcanc.pulselib.data.gltf.PGltfModelLoader;
@@ -120,6 +121,7 @@ public class PModelCache
 	{
 		bone.meshes().forEach(mesh ->
 		{
+			PDeformedMeshBuffers.close(mesh);
 			mesh.vertexBuffer().close();
 		});
 		bone.children().forEach(PModelCache :: clearBoneCache);
@@ -213,7 +215,9 @@ public class PModelCache
 								meshUUID,
 								vertexBuffer,
 								mesh.texture(),
-								isEmissive));
+								isEmissive,
+								mesh,
+								loc));
 					}
 				}
 			}

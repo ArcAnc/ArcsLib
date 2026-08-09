@@ -11,6 +11,7 @@ package com.arcanc.pulselib.content.mixin;
 
 import com.arcanc.pulselib.content.player.animation.PPlayerAnimations;
 import com.arcanc.pulselib.content.player.animation.PPlayerPart;
+import com.arcanc.pulselib.content.player.deformer.PPlayerMeshDeformers;
 import com.arcanc.pulselib.util.attachments.humanoid.PHumanoidAttachmentLayer;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Minecraft;
@@ -35,7 +36,6 @@ import java.util.Set;
 public abstract class PlayerRendererMixin
 {
 	@Unique private @Nullable PPlayerAnimations.PPlayerModelPose pulselib$armPose;
-	@Unique private boolean pulselib$firstPersonRootPushed;
 
 	@Inject(method = "renderHand", at = @At(
 			value = "FIELD",
@@ -56,10 +56,7 @@ public abstract class PlayerRendererMixin
 		float partialTick = Minecraft.getInstance().isPaused() ? 0.0f : Minecraft.getInstance().getTimer().getGameTimeDeltaPartialTick(false);
 		PPlayerPart playerPart = arm == model.rightArm ? PPlayerPart.RIGHT_ARM : PPlayerPart.LEFT_ARM;
 		this.pulselib$armPose = PPlayerAnimations.apply(player, model, partialTick, Set.of(playerPart));
-
-		poseStack.pushPose();
-		this.pulselib$firstPersonRootPushed = true;
-		PPlayerAnimations.applyRoot(player, poseStack, partialTick);
+		PPlayerMeshDeformers.apply(player, model, partialTick);
 
 		PHumanoidAttachmentLayer.renderFirstPersonArm(
 				poseStack,
@@ -92,11 +89,6 @@ public abstract class PlayerRendererMixin
 		{
 			this.pulselib$armPose.restore();
 			this.pulselib$armPose = null;
-		}
-		if (this.pulselib$firstPersonRootPushed)
-		{
-			poseStack.popPose();
-			this.pulselib$firstPersonRootPushed = false;
 		}
 	}
 }

@@ -20,6 +20,7 @@ import com.arcanc.pulselib.content.model.baked.PBakedBone;
 import com.arcanc.pulselib.content.model.baked.PBakedMesh;
 import com.arcanc.pulselib.content.model.baked.PBakedModel;
 import com.arcanc.pulselib.content.model.baked.PMeshRenderContext;
+import com.arcanc.pulselib.content.model.baked.PDeformedMeshBuffers;
 import com.arcanc.pulselib.content.renderer.modelData.PModelData;
 import com.arcanc.pulselib.data.gecko.MolangParser;
 import com.arcanc.pulselib.util.PRenderTypes;
@@ -210,9 +211,9 @@ public abstract class PBlockRenderer<T extends BlockEntity & PAnimatable<T>>
 			PRenderTypes.getTransparencyState(type).ifPresent(transparency ->
 			{
 				if (transparency == RenderStateShard.TransparencyStateShard.NO_TRANSPARENCY)
-					PRenderQueue.submitBlockEntityMesh(type, mesh.vertexBuffer(), new PRenderQueue.InstanceData(matrix4fstack, meshContext.color(), meshContext.packedLight(), meshContext.packedOverlay()));
+					PRenderQueue.submitBlockEntityMesh(type, PDeformedMeshBuffers.resolve(mesh, meshContext.deformation()), new PRenderQueue.InstanceData(matrix4fstack, meshContext.color(), meshContext.packedLight(), meshContext.packedOverlay()));
 				else
-					PRenderQueue.submitBlockEntityTranslucentMesh(type, mesh.vertexBuffer(), new PRenderQueue.InstanceData(matrix4fstack, meshContext.color(), meshContext.packedLight(), meshContext.packedOverlay()));
+					PRenderQueue.submitBlockEntityTranslucentMesh(type, PDeformedMeshBuffers.resolve(mesh, meshContext.deformation()), new PRenderQueue.InstanceData(matrix4fstack, meshContext.color(), meshContext.packedLight(), meshContext.packedOverlay()));
 			});
 		});
 	}

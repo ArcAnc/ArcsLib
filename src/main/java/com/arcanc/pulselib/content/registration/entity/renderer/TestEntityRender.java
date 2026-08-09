@@ -49,10 +49,11 @@ public class TestEntityRender extends PEntityRenderer<TestEntity>
 	                                               PMeshRenderContext inherited,
 	                                               float partialTick)
 	{
-		return new PMeshRenderContext(
+		PMeshRenderContext context = new PMeshRenderContext(
 				inherited.renderType(),
 				TestDayTimeColor.color(animatable.level(), partialTick),
 				inherited.packedLight(),
 				inherited.packedOverlay());
+		return context;
 	}
 }

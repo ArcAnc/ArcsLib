@@ -14,10 +14,9 @@ import com.arcanc.pulselib.content.animatable.PItemAnimatable;
 import com.arcanc.pulselib.content.animatable.PLibAnimationTicker;
 import com.arcanc.pulselib.content.animatable.instance.InstanceAnimationManager;
 import com.arcanc.pulselib.content.animatable.singleton.SingletonAnimationManager;
+import com.arcanc.pulselib.content.model.baked.PDeformedMeshBuffers;
 import com.arcanc.pulselib.content.model.textures.atlas.RuntimeLoader;
 import com.arcanc.pulselib.content.player.animation.PPlayerAnimations;
-import com.arcanc.pulselib.content.registration.PLibRegistration;
-import com.arcanc.pulselib.content.registration.entity.renderer.TestEntityRender;
 import com.arcanc.pulselib.content.renderer.PRenderQueue;
 import com.arcanc.pulselib.content.renderer.PRenderStagesHandler;
 import com.arcanc.pulselib.util.PLibDatabase;
@@ -34,7 +33,6 @@ import net.neoforged.bus.api.EventPriority;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.ModLoader;
 import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
-import net.neoforged.neoforge.client.event.EntityRenderersEvent;
 import net.neoforged.neoforge.client.event.RegisterClientReloadListenersEvent;
 import net.neoforged.neoforge.client.event.RegisterSpriteSourceTypesEvent;
 import net.neoforged.neoforge.client.extensions.common.IClientItemExtensions;
@@ -49,8 +47,8 @@ public class ClientEvents
 	
 	public static void registerClientEvents(final IEventBus modEventBus)
 	{
-		modEventBus.addListener(ClientEvents :: registerRenderers);
-		modEventBus.addListener(ClientEvents :: registerTextures);
+		//modEventBus.addListener(ClientEvents :: registerRenderers);
+		//modEventBus.addListener(ClientEvents :: registerTextures);
 		PAttachmentAnchorResolvers.init(modEventBus);
 		//registerTestCowTail();
 		
@@ -62,7 +60,7 @@ public class ClientEvents
 		PLibArmorHandler.register(modEventBus);
 		PRenderTypes.register(modEventBus);
 		PLibAnimationTicker.register(modEventBus);
-		//PPlayerFlipDemo.register(modEventBus);
+//		PPlayerAcrobaticDemo.register(modEventBus);
 		PRenderStagesHandler.register(modEventBus);
 		PTextureCache.register(modEventBus);
 	}
@@ -156,6 +154,7 @@ public class ClientEvents
 		if (!event.getLevel().isClientSide())
 			return;
 		PRenderQueue.cleanup();
+		PDeformedMeshBuffers.cleanup();
 		InstanceAnimationManager.cleanUp();
 		SingletonAnimationManager.cleanUp();
 		PPlayerAnimations.cleanUp();
@@ -166,19 +165,19 @@ public class ClientEvents
 		event.register(PLibDatabase.rl("runtime_loader"), RuntimeLoader.TYPE);
 	}
 	
-	private static void registerRenderers(final EntityRenderersEvent.RegisterRenderers event)
+/*	private static void registerRenderers(final EntityRenderersEvent.RegisterRenderers event)
 	{
 		event.registerEntityRenderer(PLibRegistration.EntityTypeReg.TEST_ENTITY.get(), TestEntityRender :: new);
 	}
-	
-	private static void registerTextures(final PulseLibEvents.RegisterTextureEvent event)
+*/
+/*	private static void registerTextures(final PulseLibEvents.RegisterTextureEvent event)
 	{
 		event.addTextureLocation(TestEntityRender.SPHERE).
 				addTextureLocation(TestEntityRender.TUBE).
 				addTextureLocation(TestEntityRender.TORUS).
 				addTextureLocation(TestEntityRender.ZERO).
 				addTextureLocation(TestEntityRender.ARMOR);
-		/*
+		
 		event.addTextureLocation(TestBlockEntityRenderer.CUBE).
 				addTextureLocation(TestBlockEntityRenderer.TORUS).
 				addTextureLocation(TestBlockEntityRenderer.TUBE).
@@ -187,6 +186,6 @@ public class ClientEvents
 				addTextureLocation(TestBlockItemRenderer.CIRCLE);
 		event.addTextureLocation(TestTailItem.TEXTURE);
 		event.addTextureLocation(TestArmor.TEXTURE);
-		*/
-	}
+		
+	}*/
 }

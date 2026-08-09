@@ -24,7 +24,7 @@ public enum PPlayerPart
 	RIGHT_LEG,
 	LEFT_LEG;
 
-	List<ModelPart> resolve(PlayerModel<?> model)
+	public List<ModelPart> resolve(PlayerModel<?> model)
 	{
 		return switch (this)
 		{

@@ -13,6 +13,7 @@ import com.arcanc.pulselib.content.model.animation.PAnimationChannel;
 import com.arcanc.pulselib.content.model.animation.PAnimationChannelType;
 import com.arcanc.pulselib.content.model.animation.PAnimationEventType;
 import com.arcanc.pulselib.content.model.animation.PAnimationEventTypes;
+import com.arcanc.pulselib.content.model.deformer.*;
 import com.arcanc.pulselib.content.registration.block.TestBlock;
 import com.arcanc.pulselib.content.registration.block.block_entity.TestBlockEntity;
 import com.arcanc.pulselib.content.registration.entity.TestEntity;
@@ -90,6 +91,34 @@ public class PLibRegistration
 		{
 			EVENT_TYPE_REGISTRY = EVENT_TYPES.makeRegistry(builder -> builder.maxId(Integer.MAX_VALUE - 1).sync(false));
 			EVENT_TYPES.register(bus);
+		}
+	}
+	
+	public static class MeshDeformerReg
+	{
+		public static final ResourceKey<Registry<PMeshDeformer<?>>> REGISTRY_KEY =
+				ResourceKey.createRegistryKey(PLibDatabase.rl("mesh_deformer"));
+		public static final DeferredRegister<PMeshDeformer<?>> DEFORMERS =
+				DeferredRegister.create(REGISTRY_KEY, PLibDatabase.MOD_ID);
+		public static Registry<PMeshDeformer<?>> REGISTRY;
+
+		public static final DeferredHolder<PMeshDeformer<?>, PMeshDeformer<PBendDefinition>> BEND =
+				DEFORMERS.register("bend", () -> PBendDeformer.INSTANCE);
+		public static final DeferredHolder<PMeshDeformer<?>, PMeshDeformer<PTwistDefinition>> TWIST =
+				DEFORMERS.register("twist", () -> PTwistDeformer.INSTANCE);
+		public static final DeferredHolder<PMeshDeformer<?>, PMeshDeformer<PStretchDefinition>> STRETCH =
+				DEFORMERS.register("stretch", () -> PStretchDeformer.INSTANCE);
+		public static final DeferredHolder<PMeshDeformer<?>, PMeshDeformer<PSquashDefinition>> SQUASH =
+				DEFORMERS.register("squash", () -> PSquashDeformer.INSTANCE);
+		public static final DeferredHolder<PMeshDeformer<?>, PMeshDeformer<PTaperDefinition>> TAPER =
+				DEFORMERS.register("taper", () -> PTaperDeformer.INSTANCE);
+		public static final DeferredHolder<PMeshDeformer<?>, PMeshDeformer<PWaveDefinition>> WAVE =
+				DEFORMERS.register("wave", () -> PWaveDeformer.INSTANCE);
+
+		private static void init(@NotNull final IEventBus bus)
+		{
+			REGISTRY = DEFORMERS.makeRegistry(builder -> builder.maxId(Integer.MAX_VALUE - 1).sync(false));
+			DEFORMERS.register(bus);
 		}
 	}
 
@@ -172,8 +201,9 @@ public class PLibRegistration
 	{
 		AnimationChannelReg.init(bus);
 		AnimationEventReg.init(bus);
-		EntityTypeReg.init(bus);
+		MeshDeformerReg.init(bus);
 		/*
+		EntityTypeReg.init(bus);
 		BlockReg.init(bus);
 		BETypeReg.init(bus);
 		ItemReg.init(bus);*/

@@ -19,6 +19,7 @@ import com.arcanc.pulselib.content.model.baked.PBakedBone;
 import com.arcanc.pulselib.content.model.baked.PBakedMesh;
 import com.arcanc.pulselib.content.model.baked.PBakedModel;
 import com.arcanc.pulselib.content.model.baked.PMeshRenderContext;
+import com.arcanc.pulselib.content.model.baked.PDeformedMeshBuffers;
 import com.arcanc.pulselib.content.renderer.modelData.PModelData;
 import com.arcanc.pulselib.data.gecko.MolangParser;
 import com.arcanc.pulselib.util.PRenderTypes;
@@ -206,7 +207,7 @@ public abstract class PItemRenderer<T extends Item & PAnimatable<T>> extends Blo
 			if (mesh.isEmissive())
 				type = PRenderTypes.RenderTypeProvider.emissiveVariant(type, PTextureCache.ATLAS_LOCATION);
 			
-			PRenderQueue.submitItem(context, type, mesh.vertexBuffer(), new PRenderQueue.InstanceData(matrix4fstack, meshContext.color(), meshContext.packedLight(), meshContext.packedOverlay()));
+			PRenderQueue.submitItem(context, type, PDeformedMeshBuffers.resolve(mesh, meshContext.deformation()), new PRenderQueue.InstanceData(matrix4fstack, meshContext.color(), meshContext.packedLight(), meshContext.packedOverlay()));
 		});
 	}
 	

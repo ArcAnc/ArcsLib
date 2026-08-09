@@ -153,7 +153,7 @@ public record PBakedBone(String name,
 				return;
 			
 			PMeshRenderContext inheritedContext = mesh.isEmissive() ?
-					new PMeshRenderContext(boneContext.renderType(), boneContext.color(), LightTexture.FULL_BRIGHT, boneContext.packedOverlay()) :
+					new PMeshRenderContext(boneContext.renderType(), boneContext.color(), LightTexture.FULL_BRIGHT, boneContext.packedOverlay(), boneContext.deformation()) :
 					boneContext;
 			PMeshRenderContext meshContext = resolver.resolve(this, mesh, inheritedContext);
 			
@@ -177,13 +177,14 @@ public record PBakedBone(String name,
 			ShaderInstance shaderInstance = RenderSystem.getShader();
 			if (shaderInstance == null)
 				return;
-			mesh.vertexBuffer().bind();
+			VertexBuffer vertexBuffer = PDeformedMeshBuffers.resolve(mesh, meshContext.deformation());
+			vertexBuffer.bind();
 			shaderInstance.safeGetUniform("Color").set(colorVector);
 			shaderInstance.safeGetUniform("Light").set(blockLight, skyLight);
 			shaderInstance.safeGetUniform("Overlay").set(u, v);
 			shaderInstance.safeGetUniform("NormalMat").set(poseStack.last().normal());
 			shaderInstance.apply();
-			mesh.vertexBuffer().drawWithShader(matrix4fstack, RenderSystem.getProjectionMatrix(), shaderInstance);
+			vertexBuffer.drawWithShader(matrix4fstack, RenderSystem.getProjectionMatrix(), shaderInstance);
 			VertexBuffer.unbind();
 			type.clearRenderState();
 		});
@@ -254,7 +255,7 @@ public record PBakedBone(String name,
 		if (mesh.textureName().isEmpty())
 			return;
 		PMeshRenderContext inheritedContext = mesh.isEmissive() ?
-				new PMeshRenderContext(inherited.renderType(), inherited.color(), LightTexture.FULL_BRIGHT, inherited.packedOverlay()) : inherited;
+				new PMeshRenderContext(inherited.renderType(), inherited.color(), LightTexture.FULL_BRIGHT, inherited.packedOverlay(), inherited.deformation()) : inherited;
 		PMeshRenderContext meshContext = resolver.resolve(bone, mesh, inheritedContext);
 		RenderType type = meshContext.renderType().apply(PTextureCache.ATLAS_LOCATION);
 		if (mesh.isEmissive())
@@ -268,13 +269,14 @@ public record PBakedBone(String name,
 		ShaderInstance shader = RenderSystem.getShader();
 		if (shader != null)
 		{
-			mesh.vertexBuffer().bind();
+			VertexBuffer vertexBuffer = PDeformedMeshBuffers.resolve(mesh, meshContext.deformation());
+			vertexBuffer.bind();
 			shader.safeGetUniform("Color").set(colorVector);
 			shader.safeGetUniform("Light").set(LightTexture.block(meshContext.packedLight()), LightTexture.sky(meshContext.packedLight()));
 			shader.safeGetUniform("Overlay").set(u, v);
 			shader.safeGetUniform("NormalMat").set(poseStack.last().normal());
 			shader.apply();
-			mesh.vertexBuffer().drawWithShader(matrix4fstack, RenderSystem.getProjectionMatrix(), shader);
+			vertexBuffer.drawWithShader(matrix4fstack, RenderSystem.getProjectionMatrix(), shader);
 			VertexBuffer.unbind();
 		}
 		type.clearRenderState();

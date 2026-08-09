@@ -11,6 +11,8 @@ package com.arcanc.pulselib.content.model.baked;
 
 
 import com.mojang.blaze3d.vertex.VertexBuffer;
+import com.arcanc.pulselib.content.model.PMesh;
+import net.minecraft.resources.ResourceLocation;
 
 import java.util.UUID;
 
@@ -18,6 +20,8 @@ public record PBakedMesh(
 		UUID uuid,
 		VertexBuffer vertexBuffer,
 		String textureName,
-		boolean isEmissive)
+		boolean isEmissive,
+		PMesh source,
+		ResourceLocation textureLocation)
 {
 }

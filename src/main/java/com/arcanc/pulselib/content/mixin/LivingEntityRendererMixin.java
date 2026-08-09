@@ -10,6 +10,7 @@
 package com.arcanc.pulselib.content.mixin;
 
 import com.arcanc.pulselib.content.player.animation.PPlayerAnimations;
+import com.arcanc.pulselib.content.player.deformer.PPlayerMeshDeformers;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.model.EntityModel;
 import net.minecraft.client.model.PlayerModel;
@@ -54,6 +55,7 @@ public abstract class LivingEntityRendererMixin<T extends LivingEntity, M extend
 				playerModel,
 				partialTick,
 				PPlayerAnimations.allParts());
+		PPlayerMeshDeformers.apply(player, playerModel, partialTick);
 		PPlayerAnimations.applyRoot(player, poseStack, partialTick);
 	}
 

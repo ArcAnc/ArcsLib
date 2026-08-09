@@ -11,6 +11,7 @@ package com.arcanc.pulselib.content.player.animation;
 
 import com.arcanc.pulselib.content.animatable.PAnimationController;
 import com.arcanc.pulselib.content.animatable.PAnimationManager;
+import com.arcanc.pulselib.content.model.deformer.PDeformerStack;
 import com.arcanc.pulselib.content.renderer.modelData.PModelData;
 import com.arcanc.pulselib.content.model.animation.PPoseEasing;
 import com.arcanc.pulselib.content.model.animation.PTransitionInterruptionPolicy;
@@ -18,8 +19,10 @@ import com.arcanc.pulselib.data.gecko.MolangParser;
 import net.minecraft.world.entity.player.Player;
 import org.joml.Vector3f;
 
+import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
@@ -36,6 +39,7 @@ public final class PPlayerAnimationDefinition
 	private final PPlayerAnimationWeight weight;
 	private final Map<PPlayerPart, PPlayerAnimationWeight> partWeights;
 	private final Map<String, PPlayerAnimationWeight> boneWeights;
+	private final List<PPlayerAnimationDeformer> deformers;
 	private final Vector3f rootPivot;
 	private final int priority;
 	private final float crossfadeDuration;
@@ -56,6 +60,7 @@ public final class PPlayerAnimationDefinition
 		this.weight = builder.weight;
 		this.partWeights = Map.copyOf(builder.partWeights);
 		this.boneWeights = Map.copyOf(builder.boneWeights);
+		this.deformers = List.copyOf(builder.deformers);
 		this.rootPivot = new Vector3f(builder.rootPivot);
 		this.priority = builder.priority;
 		this.crossfadeDuration = builder.crossfadeDuration;
@@ -121,6 +126,11 @@ public final class PPlayerAnimationDefinition
 	{
 		PPlayerAnimationWeight boneWeight = this.boneWeights.getOrDefault(boneName, PPlayerAnimationWeight.FULL);
 		return Math.clamp(boneWeight.weight(player, partialTick), 0.0f, 1.0f);
+	}
+
+	public List<PPlayerAnimationDeformer> deformers()
+	{
+		return this.deformers;
 	}
 	
 	public Vector3f rootPivot()
@@ -198,6 +208,7 @@ public final class PPlayerAnimationDefinition
 		private PPlayerAnimationWeight weight = PPlayerAnimationWeight.FULL;
 		private final Map<PPlayerPart, PPlayerAnimationWeight> partWeights = new LinkedHashMap<>();
 		private final Map<String, PPlayerAnimationWeight> boneWeights = new LinkedHashMap<>();
+		private final List<PPlayerAnimationDeformer> deformers = new ArrayList<>();
 		private Vector3f rootPivot = new Vector3f();
 		private int priority;
 		private float crossfadeDuration;
@@ -282,6 +293,14 @@ public final class PPlayerAnimationDefinition
 			this.boneWeights.put(boneName, Objects.requireNonNull(weight));
 			return this;
 		}
+
+		public Builder deform(PPlayerPart part,
+		                      PDeformerStack stack,
+		                      PPlayerAnimationDeformerValueSource values)
+		{
+			this.deformers.add(new PPlayerAnimationDeformer(part, stack, values));
+			return this;
+		}
 		
 		public Builder rootPivot(Vector3f rootPivot)
 		{
@@ -300,7 +319,6 @@ public final class PPlayerAnimationDefinition
 			return this;
 		}
 
-		/** Duration is measured in game ticks. */
 		public Builder crossfade(float duration, PPoseEasing easing, PTransitionInterruptionPolicy interruptionPolicy)
 		{
 			if (duration < 0.0f)

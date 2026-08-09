@@ -40,7 +40,7 @@ void main()
     );
     gl_Position = ProjMat * ModelViewMat * InstanceMatrix * vec4(Position, 1.0);
 
-    vec3 normalTransformed = normalize(mat3(InstanceMatrix) * Normal);
+    vec3 normalTransformed = normalize(transpose(inverse(mat3(InstanceMatrix))) * Normal);
     vec4 light = minecraft_mix_light(Light0_Direction, Light1_Direction, normalTransformed, InstanceColor);
     vertexColorBack = -light;
     vertexColorFront = light;
