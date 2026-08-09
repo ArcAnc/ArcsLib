@@ -223,12 +223,14 @@ public class PBakedBone
 			Map<PAnimationController<T>, MolangParser.Context> molangContexts,
 			float partialTick)
 	{
-		PAnimationPoseResolver.LocalPose pose = PAnimationPoseResolver.resolveLocal(
-				this, model, controllers,
+		PAnimationPoseResolver<T> resolver = new PAnimationPoseResolver<>(
+				model,
+				controllers,
 				(controller, tick) -> molangContexts.getOrDefault(controller,
 						PAnimationPoseResolver.<T>defaultContexts().context(controller, tick)),
 				partialTick);
-		return pose.hasTranslation() || pose.hasRotation() || pose.hasScale() ? pose.localTransform() : null;
+		PAnimationPoseResolver.BonePose pose = resolver.resolve(this);
+		return pose.isAnimated() ? pose.localTransform() : null;
 	}
 	
 	public String name()
