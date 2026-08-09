@@ -12,7 +12,12 @@ package com.arcanc.pulselib.content.player.animation;
 import com.arcanc.pulselib.content.animatable.PAnimationController;
 import com.arcanc.pulselib.data.MolangParser;
 import com.mojang.blaze3d.vertex.PoseStack;
+<<<<<<< HEAD
 import net.minecraft.client.model.player.PlayerModel;
+=======
+import com.arcanc.pulselib.data.gltf.PGltfModelLoader;
+import net.minecraft.client.model.PlayerModel;
+>>>>>>> a625c91 (Added deformers for player and custom models)
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.resources.Identifier;
@@ -55,7 +60,7 @@ public final class PPlayerAnimations
 	{
 		return DEFINITIONS.containsKey(id) ? new PPlayerAnimationHandle(player, id) : null;
 	}
-	
+
 	@ApiStatus.Internal
 	public static void tick(ClientLevel level)
 	{
@@ -81,6 +86,7 @@ public final class PPlayerAnimations
 		PPlayerModelPose originalPose = PPlayerModelPose.capture(model, allowedParts);
 		applyDefinitions(player, partialTick, allowedParts, (part, pose, definition, weight) ->
 		{
+			pose = playerModelSpace(pose, definition);
 			for (ModelPart modelPart : part.resolve(model))
 				apply(modelPart, originalPose.part(modelPart), pose, definition.blendMode(), weight);
 		});
@@ -96,7 +102,7 @@ public final class PPlayerAnimations
 	{
 		PPlayerModelPose originalPose = PPlayerModelPose.capture(modelPart);
 		applyDefinitions(player, partialTick, Set.of(playerPart), (part, pose, definition, weight) ->
-				apply(modelPart, originalPose.part(modelPart), pose, definition.blendMode(), weight));
+				apply(modelPart, originalPose.part(modelPart), playerModelSpace(pose, definition), definition.blendMode(), weight));
 		return originalPose;
 	}
 
@@ -113,9 +119,10 @@ public final class PPlayerAnimations
 	{
 		applyDefinitions(player, partialTick, Set.of(PPlayerPart.ROOT), (part, pose, definition, weight) ->
 		{
-			Vector3f translation = new Vector3f(pose.translation()).mul(weight);
-			Vector3f pivot = definition.rootPivot();
-			Quaternionf rotation = new Quaternionf().slerp(pose.rotation(), weight);
+			PPlayerAnimationInstance.PPlayerBonePose modelPose = playerModelSpace(pose, definition);
+			Vector3f translation = new Vector3f(modelPose.translation()).mul(weight);
+			Vector3f pivot = playerModelSpace(definition.rootPivot(), definition);
+			Quaternionf rotation = new Quaternionf().slerp(modelPose.rotation(), weight);
 			Vector3f scale = new Vector3f(1.0f).lerp(pose.scale(), weight);
 
 			poseStack.translate(translation.x, translation.y, translation.z);
@@ -126,15 +133,91 @@ public final class PPlayerAnimations
 		});
 	}
 	
+	private static PPlayerAnimationInstance.PPlayerBonePose playerModelSpace(PPlayerAnimationInstance.PPlayerBonePose pose,
+	                                                                          PPlayerAnimationDefinition definition)
+	{
+		if (!usesGltfCoordinates(definition))
+			return pose;
+		return new PPlayerAnimationInstance.PPlayerBonePose(
+				playerModelSpace(pose.translation(), definition),
+				playerModelSpace(pose.rotation(), definition),
+				new Vector3f(pose.scale()),
+				pose.hasTranslation(),
+				pose.hasRotation(),
+				pose.hasScale());
+	}
+
+	private static Vector3f playerModelSpace(Vector3f vector, PPlayerAnimationDefinition definition)
+	{
+		Vector3f result = new Vector3f(vector);
+		return usesGltfCoordinates(definition) ? result.mul(-1.0f, -1.0f, 1.0f) : result;
+	}
+
+	private static Quaternionf playerModelSpace(Quaternionf rotation, PPlayerAnimationDefinition definition)
+	{
+		Quaternionf result = new Quaternionf(rotation);
+		return usesGltfCoordinates(definition) ? result.set(-result.x, -result.y, result.z, result.w) : result;
+	}
+
+	private static boolean usesGltfCoordinates(PPlayerAnimationDefinition definition)
+	{
+		return definition.modelData().getModelFormat().equals(PGltfModelLoader.INSTANCE.id());
+	}
+	
 	@ApiStatus.Internal
 	public static @Nullable PPlayerCameraPose cameraPose(Player player, float partialTick)
 	{
 		PPlayerCameraPose cameraPose = new PPlayerCameraPose();
 		applyDefinitions(player, partialTick, Set.of(PPlayerPart.ROOT), (part, pose, definition, weight) ->
-				cameraPose.addRoot(pose, definition, weight));
+				cameraPose.addRoot(
+						playerModelSpace(pose, definition),
+						playerModelSpace(definition.rootPivot(), definition),
+						weight));
 		applyDefinitions(player, partialTick, Set.of(PPlayerPart.HEAD), (part, pose, definition, weight) ->
-				cameraPose.addHead(pose, definition.blendMode(), weight));
+				cameraPose.addHead(playerModelSpace(pose, definition), definition.blendMode(), weight));
 		return cameraPose.isEmpty() ? null : cameraPose;
+	}
+
+	@ApiStatus.Internal
+	public static List<PPlayerAnimationDeformerApplication> activeDeformers(Player player,
+	                                                                        PPlayerPart part,
+	                                                                        float partialTick)
+	{
+		List<PPlayerAnimationDeformerApplication> applications = new ArrayList<>();
+		List<Map.Entry<ResourceLocation, PPlayerAnimationDefinition>> definitions = new ArrayList<>(DEFINITIONS.entrySet());
+		definitions.sort(Comparator.
+				comparingInt((Map.Entry<ResourceLocation, PPlayerAnimationDefinition> entry) -> entry.getValue().priority()).
+				thenComparing(Map.Entry :: getKey));
+
+		for (Map.Entry<ResourceLocation, PPlayerAnimationDefinition> entry : definitions)
+		{
+			PPlayerAnimationDefinition definition = entry.getValue();
+			if (!definition.appliesTo(player, part, partialTick))
+				continue;
+			float definitionWeight = definition.weight(player, partialTick);
+			if (definitionWeight <= 0.0f)
+				continue;
+
+			PPlayerAnimationInstance instance = instance(player, entry.getKey(), definition);
+			if (!instance.isContributing())
+				continue;
+			float weight = definitionWeight * instance.activationWeight(partialTick) * definition.partWeight(player, part, partialTick);
+			if (weight <= 0.0f)
+				continue;
+
+			PPlayerAnimationDeformerContext context = new PPlayerAnimationDeformerContext(player, instance, partialTick, weight);
+			for (PPlayerAnimationDeformer deformer : definition.deformers())
+			{
+				if (deformer.part() != part)
+					continue;
+				applications.add(new PPlayerAnimationDeformerApplication(deformer.stack(), (ignored, reference) ->
+				{
+					float value = deformer.values().resolve(context, reference);
+					return Float.isFinite(value) ? Mth.lerp(weight, reference.defaultValue(), value) : reference.defaultValue();
+				}));
+			}
+		}
+		return applications;
 	}
 
 	private static void applyDefinitions(Player player,
@@ -268,14 +351,14 @@ public final class PPlayerAnimations
 		private boolean changed;
 
 		private void addRoot(PPlayerAnimationInstance.PPlayerBonePose pose,
-		                     PPlayerAnimationDefinition definition,
+		                     Vector3f pivot,
 		                     float weight)
 		{
 			if (!pose.hasTranslation() && !pose.hasRotation() && !pose.hasScale())
 				return;
 
 			this.rootTransforms.add(new RootTransform(
-					definition.rootPivot(),
+					new Vector3f(pivot),
 					new Vector3f(pose.translation()).mul(weight),
 					new Quaternionf().slerp(pose.rotation(), weight),
 					new Vector3f(1.0f).lerp(pose.scale(), weight)));

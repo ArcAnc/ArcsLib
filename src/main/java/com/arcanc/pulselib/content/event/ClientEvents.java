@@ -14,6 +14,7 @@ import com.arcanc.pulselib.content.animatable.PItemAnimatable;
 import com.arcanc.pulselib.content.animatable.PLibAnimationTicker;
 import com.arcanc.pulselib.content.animatable.instance.InstanceAnimationManager;
 import com.arcanc.pulselib.content.animatable.singleton.SingletonAnimationManager;
+import com.arcanc.pulselib.content.model.baked.PDeformedMeshBuffers;
 import com.arcanc.pulselib.content.model.textures.atlas.RuntimeLoader;
 import com.arcanc.pulselib.content.player.animation.PPlayerAnimations;
 import com.arcanc.pulselib.content.renderer.PRenderQueue;
@@ -32,8 +33,17 @@ import net.neoforged.bus.api.EventPriority;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.ModLoader;
 import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
+<<<<<<< HEAD
+<<<<<<< HEAD
 import net.neoforged.neoforge.client.event.AddClientReloadListenersEvent;
 import net.neoforged.neoforge.client.event.RegisterSpriteSourcesEvent;
+=======
+import net.neoforged.neoforge.client.event.EntityRenderersEvent;
+=======
+>>>>>>> a625c91 (Added deformers for player and custom models)
+import net.neoforged.neoforge.client.event.RegisterClientReloadListenersEvent;
+import net.neoforged.neoforge.client.event.RegisterSpriteSourceTypesEvent;
+>>>>>>> e194067 (Tons of e)
 import net.neoforged.neoforge.client.extensions.common.IClientItemExtensions;
 import net.neoforged.neoforge.client.extensions.common.RegisterClientExtensionsEvent;
 import net.neoforged.neoforge.common.NeoForge;
@@ -45,9 +55,21 @@ public class ClientEvents
 	
 	public static void registerClientEvents(final IEventBus modEventBus)
 	{
+<<<<<<< HEAD
+<<<<<<< HEAD
 		//modEventBus.addListener(ClientEvents :: registerRenderers);
 		//modEventBus.addListener(ClientEvents :: registerCustomTextures);
 		//modEventBus.addListener(ClientEvents :: registerSpecialModels);
+=======
+		modEventBus.addListener(ClientEvents :: registerRenderers);
+		modEventBus.addListener(ClientEvents :: registerTextures);
+=======
+		//modEventBus.addListener(ClientEvents :: registerRenderers);
+		//modEventBus.addListener(ClientEvents :: registerTextures);
+>>>>>>> a625c91 (Added deformers for player and custom models)
+		PAttachmentAnchorResolvers.init(modEventBus);
+		//registerTestCowTail();
+>>>>>>> e194067 (Tons of e)
 		
 		PAttachmentAnchorResolvers.init(modEventBus);
 		modEventBus.addListener(EventPriority.HIGHEST, ClientEvents :: registerSpriteSources);
@@ -57,6 +79,10 @@ public class ClientEvents
 		NeoForge.EVENT_BUS.addListener(ClientEvents :: playerDisconnected);
 		PRenderTypes.register(modEventBus);
 		PLibAnimationTicker.register(modEventBus);
+<<<<<<< HEAD
+=======
+//		PPlayerAcrobaticDemo.register(modEventBus);
+>>>>>>> a625c91 (Added deformers for player and custom models)
 		PRenderStagesHandler.register(modEventBus);
 		PTextureCache.register(modEventBus);
 		PLibArmorHandler.register(modEventBus);
@@ -140,7 +166,13 @@ public class ClientEvents
 	{
 		if (!event.getLevel().isClientSide())
 			return;
+<<<<<<< HEAD
 		PRenderQueue.cleanUp();
+=======
+		PRenderQueue.cleanup();
+		PDeformedMeshBuffers.cleanup();
+		InstanceAnimationManager.cleanUp();
+>>>>>>> a625c91 (Added deformers for player and custom models)
 		SingletonAnimationManager.cleanUp();
 		InstanceAnimationManager.cleanUp();
 		PPlayerAnimations.cleanUp();
@@ -151,6 +183,8 @@ public class ClientEvents
 		event.register(PLibDatabase.rl("runtime_loader"), RuntimeLoader.CODEC);
 	}
 	
+<<<<<<< HEAD
+<<<<<<< HEAD
 	/*private static void registerSpecialModels(final RegisterSpecialModelRendererEvent event)
 	{
 		event.register(PLibDatabase.rl("test_block"), TestBlockItemRenderer.Unbaked.MAP_CODEC);
@@ -163,18 +197,47 @@ public class ClientEvents
 	}*/
 	
 	/*private static void registerCustomTextures(final PulseLibEvents.RegisterTextureEvent event)
+=======
+	private static void registerRenderers(final EntityRenderersEvent.RegisterRenderers event)
+	{
+		event.registerEntityRenderer(PLibRegistration.EntityTypeReg.TEST_ENTITY.get(), TestEntityRender :: new);
+	}
+	
+	private static void registerTextures(final PulseLibEvents.RegisterTextureEvent event)
+>>>>>>> e194067 (Tons of e)
+=======
+/*	private static void registerRenderers(final EntityRenderersEvent.RegisterRenderers event)
+	{
+		event.registerEntityRenderer(PLibRegistration.EntityTypeReg.TEST_ENTITY.get(), TestEntityRender :: new);
+	}
+*/
+/*	private static void registerTextures(final PulseLibEvents.RegisterTextureEvent event)
+>>>>>>> a625c91 (Added deformers for player and custom models)
 	{
 		event.addTextureLocation(TestEntityRender.SPHERE).
 				addTextureLocation(TestEntityRender.TUBE).
 				addTextureLocation(TestEntityRender.TORUS).
 				addTextureLocation(TestEntityRender.ZERO).
 				addTextureLocation(TestEntityRender.ARMOR);
+		
 		event.addTextureLocation(TestBlockEntityRenderer.CUBE).
 				addTextureLocation(TestBlockEntityRenderer.TORUS).
 				addTextureLocation(TestBlockEntityRenderer.TUBE).
 				addTextureLocation(TestBlockEntityRenderer.PYRAMID);
 		event.addTextureLocation(TestBlockItemRenderer.PYRAMID).
 				addTextureLocation(TestBlockItemRenderer.CIRCLE);
+<<<<<<< HEAD
 		event.addTextureLocation(TestArmorItem.TEXTURE);
 	}*/
+=======
+		event.addTextureLocation(TestTailItem.TEXTURE);
+		event.addTextureLocation(TestArmor.TEXTURE);
+<<<<<<< HEAD
+		*/
+	}
+>>>>>>> e194067 (Tons of e)
+=======
+		
+	}*/
+>>>>>>> a625c91 (Added deformers for player and custom models)
 }

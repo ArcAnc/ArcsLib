@@ -13,8 +13,12 @@
   "client": [
     "BlockEntityRenderStateAccessor",
 	"CameraMixin",
+	"CubeDefinitionMixin",
+	"EntityModelSetMixin",
+	"HumanoidArmorLayerMixin",
 	"ItemInHandRendererAccessor",
 	"ItemInHandRendererMixin",
+<<<<<<< HEAD
 	"LivingEntityRendererMixin",
 	"PlayerRootTransformMixin",
 	"PlayerRendererMixin",
@@ -22,5 +26,13 @@
     "ItemStackRenderStateAccessor",
     "SpecialModelWrapperAccessor",
     "SpecialModelWrapperRenderStateExtractor"
+=======
+    "LivingEntityRendererMixin",
+	"ModelPartCubesMixin",
+    "PlayerRendererMixin",
+    "RenderTypeAccessor$CompositeRenderTypeAccessor",
+    "RenderTypeAccessor$CompositeStateAccessor",
+    "VertexBufferAccessor"
+>>>>>>> a625c91 (Added deformers for player and custom models)
   ]
 }

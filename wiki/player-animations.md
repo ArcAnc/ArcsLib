@@ -27,7 +27,7 @@ public final class ExamplePlayerAnimations {
                         .bind(PPlayerPart.BODY, "body")
                         .bind(PPlayerPart.RIGHT_ARM, "right_arm")
                         .mask(PPlayerPart.BODY, PPlayerPart.RIGHT_ARM)
-                        .blendMode(PPlayerAnimationBlendMode.ADDITIVE)
+                        .blendMode(PPlayerAnimationBlendMode.ADDITIVE_LOCAL)
                         .weight(0.75f)
                         .controllers(registrar -> registrar.add("combat", () -> state -> {
                             state.controller().play(IDLE);
@@ -58,7 +58,7 @@ if (animation != null)
 
 `bind(part, boneName)` maps a bone in the animation model to a semantic player part. `PPlayerPart` values are `ROOT`, `HEAD`, `BODY`, `RIGHT_ARM`, `LEFT_ARM`, `RIGHT_LEG`, and `LEFT_LEG`.
 
-`ROOT` applies the bone transform to the complete third-person player render, including its feature layers. Use it for an emote that moves or rotates the whole player, such as a flip. `rootPivot(x, y, z)` selects its rotation pivot in model-space blocks; a value close to `(0, 0.9, 0)` rotates around the centre of a standing player. In first person, `ROOT` and `HEAD` also drive the local camera. An empty off-hand is rendered when its `LEFT_ARM` or `RIGHT_ARM` binding has an active sampled transform.
+`ROOT` applies the bone transform to the complete third-person player render, including its feature layers. Use it for an emote that moves or rotates the whole player, such as a flip. `rootPivot(x, y, z)` selects its rotation pivot in model-space blocks; a value close to `(0, 0.9, 0)` rotates around the centre of a standing player. In first person, `ROOT` and `HEAD` drive the local camera, while arms use only their local arm transforms. The root transform is deliberately not applied a second time to the first-person hand renderer. An empty off-hand is rendered when its `LEFT_ARM` or `RIGHT_ARM` binding has an active sampled transform.
 
 Each semantic part applies to both the base part and the matching outer skin layer. For example, `RIGHT_ARM` transforms `rightArm` and `rightSleeve` together.
 
@@ -71,10 +71,16 @@ Each semantic part applies to both the base part and the matching outer skin lay
 
 ## Blending and weights
 
-Definitions run in ascending `priority`; registrations with the same priority are ordered by their id.
+Definitions run in ascending `priority`; registrations with the same priority are ordered by their id. The default is `ADDITIVE_LOCAL`, which adds the sampled position and rotation to the pose already produced by vanilla and earlier definitions. It is a good default for recoil, breathing, and gestures.
 
-* `ADDITIVE` adds the sampled position and rotation to the pose already produced by vanilla and earlier definitions. This is the default and works well for recoil, breathing, and gestures.
-* `REPLACE` blends from the original vanilla pose to the sampled pose. It is suitable for emotes or stances that should override vanilla limb motion.
+The available modes are:
+
+* `OVERRIDE` blends from the original vanilla pose to the sampled pose.
+* `ADDITIVE_LOCAL` and `ADDITIVE_MESH_SPACE` add sampled transforms to the existing pose.
+* `MULTIPLY_SCALE` affects scale only.
+* `DIFFERENCE` subtracts translation and applies inverse rotation/scale.
+
+Use `OVERRIDE` for emotes or stances that should replace vanilla limb motion.
 
 The definition weight is clamped to `[0, 1]`. A constant weight is sufficient for most cases:
 
@@ -99,9 +105,50 @@ For a dynamic blend, provide a function evaluated every render pass:
 
 Layer several definitions with different masks, priorities, modes, definition weights, and part weights to combine independent actions.
 
+## Activation crossfades and cycle synchronization
+
+By default a definition starts and stops immediately when its `when(...)` predicate changes. Add `crossfade` to blend that activation in ticks:
+
+```java
+.crossfade(4.0f, PPoseEasing.LINEAR, PTransitionInterruptionPolicy.FROM_CURRENT)
+```
+
+`FROM_CURRENT` reverses smoothly from the current fade amount, `RESTART` starts the new fade from its endpoint, and `COMPLETE_CURRENT` lets the current fade finish before accepting a new predicate change.
+
+Definitions with the same non-empty `syncGroup` keep similarly named looping controllers at the same normalized cycle phase for each player:
+
+```java
+.syncGroup("combat")
+```
+
+Use this for layered models whose walk, idle, or other cyclic animations must stay aligned. `boneWeight(boneName, weight)` can additionally scale one bound bone independently of its semantic player-part weight.
+
+## Mesh deformers
+
+Attach a `PDeformerStack` directly to a definition with `deform(part, stack, values)`. It is evaluated only while that definition contributes; its values are interpolated with the render `partialTick` and automatically fade to each channel's default when the animation fades out.
+
+```java
+private static final PChannelReference<Float> KNEE_BEND =
+        new PChannelReference<>("knee_bend", 0.0f);
+
+// `BENT_LEG` is a compiled PDeformerStack, for example one PBendDeformer.
+PPlayerAnimationDefinition.builder(MODEL)
+        .bind(PPlayerPart.RIGHT_LEG, "right_leg")
+        .deform(PPlayerPart.RIGHT_LEG, BENT_LEG, (context, reference) -> {
+            if (!reference.name().equals(KNEE_BEND.name()))
+                return reference.defaultValue();
+            return sampleKnee(context.controllerSeconds("combat"));
+        })
+        .build();
+```
+
+The callback receives `PPlayerAnimationDeformerContext`: `player()`, `definition()`, `partialTick()`, `weight()`, `isPlaying(name)`, `controllerTicks(name)`, and `controllerSeconds(name)`. More than one deformer may target the same part; they run in declaration order. The lower-level global `PPlayerMeshDeformers.register(...)` remains available for a deformation that is not part of an animation definition.
+
+See [Mesh deformers](mesh-deformers.md) for built-in operations, subdivision, normals, custom meshes, and custom deformer types.
+
 ## Model conventions and limitations
 
-The model only needs a skeleton and animations; mesh data is optional. Bone positions from Gecko animations are converted from blocks to vanilla model pixels automatically. Rotation, position, and scale channels are supported. The skeleton resolver evaluates bind pose and parent transforms; a bound child therefore inherits transforms of intermediate animation bones. A bound `ROOT` is applied once to the render stack and is excluded from child deltas.
+The model only needs a skeleton and animations; mesh data is optional. Bone positions from Gecko animations are converted from blocks to vanilla model pixels automatically. Rotation, position, and scale channels are supported. Standard glTF assets keep their normal right-handed Y-up coordinates: the player pipeline converts their position and quaternion axes to Minecraft's mirrored player render space. Do not pre-flip an exported glTF player animation. The skeleton resolver evaluates bind pose and parent transforms; a bound child therefore inherits transforms of intermediate animation bones. A bound `ROOT` is applied once to the render stack and is excluded from child deltas.
 
 The API affects the whole player model in third person and arms in first person. It restores position, rotation, and scale immediately after every draw, preventing a pose from leaking into a different player or another render layer.
 
