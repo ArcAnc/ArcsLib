@@ -19,11 +19,7 @@ import com.arcanc.pulselib.content.model.baked.PBakedBone;
 import com.arcanc.pulselib.content.model.baked.PBakedMesh;
 import com.arcanc.pulselib.content.model.baked.PBakedModel;
 import com.arcanc.pulselib.content.model.baked.PMeshRenderContext;
-<<<<<<< HEAD
 import com.arcanc.pulselib.content.renderer.base.PItemRenderState;
-=======
-import com.arcanc.pulselib.content.model.baked.PDeformedMeshBuffers;
->>>>>>> a625c91 (Added deformers for player and custom models)
 import com.arcanc.pulselib.content.renderer.modelData.PModelData;
 import com.arcanc.pulselib.data.MolangParser;
 import com.arcanc.pulselib.util.PRenderTypes;
@@ -236,11 +232,7 @@ public abstract class PItemRenderer<T extends Item & PAnimatable<T>, RS extends 
 					PRenderTypes.RenderTypeProvider.emissiveVariant(baseType, PTextureCache.ATLAS_LOCATION) :
 					baseType;
 			
-<<<<<<< HEAD
 			PRenderQueue.submitItem(context, type, mesh, new PRenderQueue.InstanceData(matrix4fstack, meshContext.color(), meshContext.packedLight(), meshContext.packedOverlay()));
-=======
-			PRenderQueue.submitItem(context, type, PDeformedMeshBuffers.resolve(mesh, meshContext.deformation()), new PRenderQueue.InstanceData(matrix4fstack, meshContext.color(), meshContext.packedLight(), meshContext.packedOverlay()));
->>>>>>> a625c91 (Added deformers for player and custom models)
 		});
 	}
 	

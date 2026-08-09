@@ -11,7 +11,7 @@ package com.arcanc.pulselib.content.model.deformer;
 
 import com.arcanc.pulselib.util.PLibDatabase;
 import com.mojang.serialization.MapCodec;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
 
@@ -25,7 +25,7 @@ public final class PBendDeformer implements PMeshDeformer<PBendDefinition>
 	}
 
 	@Override
-	public ResourceLocation id()
+	public Identifier id()
 	{
 		return PLibDatabase.rl("bend");
 	}

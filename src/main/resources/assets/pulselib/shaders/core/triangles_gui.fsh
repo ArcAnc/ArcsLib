@@ -1,9 +1,10 @@
-#version 330
-
-#moj_import <minecraft:dynamictransforms.glsl>
+#version 150
 
 uniform sampler2D Sampler0;
 
+in vec4 vertexColorBack;
+in vec4 vertexColorFront;
+in vec4 lightMapColor;
 in vec4 overlayColor;
 in vec2 texCoord0;
 
@@ -17,7 +18,8 @@ void main()
         discard;
     }
     #endif
-    color *= ColorModulator;
+    color *= gl_FrontFacing ? vertexColorFront : vertexColorBack;
     color.rgb = mix(overlayColor.rgb, color.rgb, overlayColor.a);
+    color *= lightMapColor;
     fragColor = color;
 }

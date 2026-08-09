@@ -1,7 +1,7 @@
 {
   "required": true,
   "package": "com.arcanc.pulselib.content.mixin",
-  "compatibilityLevel": "JAVA_25",
+  "compatibilityLevel": "JAVA_21",
   "mixins": [
   ],
   "injectors": {
@@ -11,28 +11,17 @@
     "requireAnnotations": true
   },
   "client": [
-    "BlockEntityRenderStateAccessor",
 	"CameraMixin",
 	"CubeDefinitionMixin",
 	"EntityModelSetMixin",
 	"HumanoidArmorLayerMixin",
 	"ItemInHandRendererAccessor",
 	"ItemInHandRendererMixin",
-<<<<<<< HEAD
-	"LivingEntityRendererMixin",
-	"PlayerRootTransformMixin",
-	"PlayerRendererMixin",
-    "ItemModelResolverAccessor",
-    "ItemStackRenderStateAccessor",
-    "SpecialModelWrapperAccessor",
-    "SpecialModelWrapperRenderStateExtractor"
-=======
     "LivingEntityRendererMixin",
 	"ModelPartCubesMixin",
     "PlayerRendererMixin",
     "RenderTypeAccessor$CompositeRenderTypeAccessor",
     "RenderTypeAccessor$CompositeStateAccessor",
     "VertexBufferAccessor"
->>>>>>> a625c91 (Added deformers for player and custom models)
   ]
 }

@@ -10,26 +10,26 @@
 package com.arcanc.pulselib.content.animatable;
 
 import com.arcanc.pulselib.content.model.animation.PAnimationEventContext;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 public final class PAnimationEventCallbacks
 {
-	private static final Map<ResourceLocation, LocatorCallback> CALLBACKS = new ConcurrentHashMap<>();
+	private static final Map<Identifier, LocatorCallback> CALLBACKS = new ConcurrentHashMap<>();
 
 	private PAnimationEventCallbacks() { }
 
-	public static void register(ResourceLocation id, LocatorCallback callback)
+	public static void register(Identifier id, LocatorCallback callback)
 	{
 		if (CALLBACKS.putIfAbsent(id, callback) != null)
 			throw new IllegalArgumentException("Animation locator callback already registered: " + id);
 	}
 
-	public static void unregister(ResourceLocation id) { CALLBACKS.remove(id); }
+	public static void unregister(Identifier id) { CALLBACKS.remove(id); }
 
-	public static void dispatch(ResourceLocation id, PAnimationEventContext context, String locator)
+	public static void dispatch(Identifier id, PAnimationEventContext context, String locator)
 	{
 		LocatorCallback callback = CALLBACKS.get(id);
 		if (callback != null)

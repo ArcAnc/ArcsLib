@@ -9,20 +9,15 @@
 
 package com.arcanc.pulselib.content.player.animation;
 
-import com.arcanc.pulselib.content.animatable.PAnimationController;
-import com.arcanc.pulselib.data.MolangParser;
 import com.mojang.blaze3d.vertex.PoseStack;
-<<<<<<< HEAD
-import net.minecraft.client.model.player.PlayerModel;
-=======
 import com.arcanc.pulselib.data.gltf.PGltfModelLoader;
-import net.minecraft.client.model.PlayerModel;
->>>>>>> a625c91 (Added deformers for player and custom models)
+import net.minecraft.client.model.player.PlayerModel;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.player.Player;
+import com.arcanc.pulselib.content.model.animation.PPoseBlendMode;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Quaternionf;
@@ -69,7 +64,11 @@ public final class PPlayerAnimations
 		{
 			livePlayers.add(player.getUUID());
 			for (Map.Entry<Identifier, PPlayerAnimationDefinition> entry : DEFINITIONS.entrySet())
-				instance(player, entry.getKey(), entry.getValue()).tick();
+			{
+				PPlayerAnimationInstance instance = instance(player, entry.getKey(), entry.getValue());
+				instance.tick(entry.getValue().shouldApply(player));
+			}
+			synchronizeGroups(player);
 		}
 		INSTANCES.keySet().removeIf(uuid -> !livePlayers.contains(uuid));
 	}
@@ -184,12 +183,12 @@ public final class PPlayerAnimations
 	                                                                        float partialTick)
 	{
 		List<PPlayerAnimationDeformerApplication> applications = new ArrayList<>();
-		List<Map.Entry<ResourceLocation, PPlayerAnimationDefinition>> definitions = new ArrayList<>(DEFINITIONS.entrySet());
+		List<Map.Entry<Identifier, PPlayerAnimationDefinition>> definitions = new ArrayList<>(DEFINITIONS.entrySet());
 		definitions.sort(Comparator.
-				comparingInt((Map.Entry<ResourceLocation, PPlayerAnimationDefinition> entry) -> entry.getValue().priority()).
+				comparingInt((Map.Entry<Identifier, PPlayerAnimationDefinition> entry) -> entry.getValue().priority()).
 				thenComparing(Map.Entry :: getKey));
 
-		for (Map.Entry<ResourceLocation, PPlayerAnimationDefinition> entry : definitions)
+		for (Map.Entry<Identifier, PPlayerAnimationDefinition> entry : definitions)
 		{
 			PPlayerAnimationDefinition definition = entry.getValue();
 			if (!definition.appliesTo(player, part, partialTick))
@@ -233,26 +232,25 @@ public final class PPlayerAnimations
 		for (Map.Entry<Identifier, PPlayerAnimationDefinition> entry : definitions)
 		{
 			PPlayerAnimationDefinition definition = entry.getValue();
-			if (!definition.shouldApply(player))
-				continue;
-
 			float definitionWeight = definition.weight(player, partialTick);
 			if (definitionWeight <= 0.0f)
 				continue;
 
 			PPlayerAnimationInstance instance = instance(player, entry.getKey(), definition);
-			Map<PAnimationController<PPlayerAnimationInstance>, MolangParser.Context> molangContexts = instance.createMolangContexts(partialTick);
+			if (!instance.isContributing())
+				continue;
 			for (Map.Entry<PPlayerPart, String> binding : definition.bindings().entrySet())
 			{
 				PPlayerPart part = binding.getKey();
 				if (!allowedParts.contains(part) || !definition.appliesTo(player, part, partialTick))
 					continue;
 
-				float weight = definitionWeight * definition.partWeight(player, part, partialTick);
+				float weight = definitionWeight * instance.activationWeight(partialTick) *
+						definition.partWeight(player, part, partialTick) * definition.boneWeight(player, binding.getValue(), partialTick);
 				if (weight <= 0.0f)
 					continue;
 
-				PPlayerAnimationInstance.PPlayerBonePose pose = instance.sample(binding.getValue(), partialTick, molangContexts);
+				PPlayerAnimationInstance.PPlayerBonePose pose = instance.sample(binding.getValue(), partialTick);
 				if (pose == null)
 					continue;
 
@@ -269,43 +267,69 @@ public final class PPlayerAnimations
 		return instance;
 	}
 
+	private static void synchronizeGroups(Player player)
+	{
+		Map<String, List<PPlayerAnimationInstance>> groups = new HashMap<>();
+		for (Map.Entry<Identifier, PPlayerAnimationDefinition> entry : DEFINITIONS.entrySet())
+		{
+			String syncGroup = entry.getValue().syncGroup();
+			if (syncGroup.isBlank())
+				continue;
+			PPlayerAnimationInstance instance = instance(player, entry.getKey(), entry.getValue());
+			if (instance.isContributing())
+				groups.computeIfAbsent(syncGroup, ignored -> new ArrayList<>()).add(instance);
+		}
+		for (List<PPlayerAnimationInstance> group : groups.values())
+			if (group.size() > 1)
+				PPlayerAnimationInstance.synchronize(group);
+	}
+
 	private static void apply(ModelPart part,
 	                          PPlayerModelPose.PartPose original,
 	                          PPlayerAnimationInstance.PPlayerBonePose pose,
 	                          PPlayerAnimationBlendMode blendMode,
 	                          float weight)
 	{
+		PPoseBlendMode mode = blendMode.poseBlendMode();
 		if (pose.hasTranslation())
 		{
 			float x = pose.translation().x() * 16.0f;
 			float y = pose.translation().y() * 16.0f;
 			float z = pose.translation().z() * 16.0f;
-			if (blendMode == PPlayerAnimationBlendMode.ADDITIVE)
+			switch (mode)
 			{
-				part.x += x * weight;
-				part.y += y * weight;
-				part.z += z * weight;
-			}
-			else
-			{
-				part.x = Mth.lerp(weight, part.x, original.x + x);
-				part.y = Mth.lerp(weight, part.y, original.y + y);
-				part.z = Mth.lerp(weight, part.z, original.z + z);
+				case ADDITIVE_LOCAL, ADDITIVE_MESH_SPACE ->
+				{
+					part.x += x * weight;
+					part.y += y * weight;
+					part.z += z * weight;
+				}
+				case DIFFERENCE ->
+				{
+					part.x -= x * weight;
+					part.y -= y * weight;
+					part.z -= z * weight;
+				}
+				case OVERRIDE ->
+				{
+					part.x = Mth.lerp(weight, part.x, original.x + x);
+					part.y = Mth.lerp(weight, part.y, original.y + y);
+					part.z = Mth.lerp(weight, part.z, original.z + z);
+				}
+				case MULTIPLY_SCALE -> { }
 			}
 		}
 
 		if (pose.hasRotation())
 		{
 			Quaternionf current = new Quaternionf().rotationXYZ(part.xRot, part.yRot, part.zRot);
-			Quaternionf target;
-			if (blendMode == PPlayerAnimationBlendMode.ADDITIVE)
+			Quaternionf target = current;
+			switch (mode)
 			{
-				Quaternionf weightedDelta = new Quaternionf().slerp(pose.rotation(), weight);
-				target = current.premul(weightedDelta);
-			}
-			else
-			{
-				target = current.slerp(pose.rotation(), weight);
+				case ADDITIVE_LOCAL, ADDITIVE_MESH_SPACE -> target = current.premul(new Quaternionf().slerp(pose.rotation(), weight));
+				case DIFFERENCE -> target = current.premul(new Quaternionf().slerp(pose.rotation(), weight).invert());
+				case OVERRIDE -> target = current.slerp(pose.rotation(), weight);
+				case MULTIPLY_SCALE -> target = current;
 			}
 
 			Vector3f euler = target.getEulerAnglesXYZ(new Vector3f());
@@ -316,17 +340,26 @@ public final class PPlayerAnimations
 
 		if (pose.hasScale())
 		{
-			if (blendMode == PPlayerAnimationBlendMode.ADDITIVE)
+			switch (mode)
 			{
-				part.xScale *= Mth.lerp(weight, 1.0f, pose.scale().x());
-				part.yScale *= Mth.lerp(weight, 1.0f, pose.scale().y());
-				part.zScale *= Mth.lerp(weight, 1.0f, pose.scale().z());
-			}
-			else
-			{
-				part.xScale = Mth.lerp(weight, part.xScale, original.xScale * pose.scale().x());
-				part.yScale = Mth.lerp(weight, part.yScale, original.yScale * pose.scale().y());
-				part.zScale = Mth.lerp(weight, part.zScale, original.zScale * pose.scale().z());
+				case ADDITIVE_LOCAL, ADDITIVE_MESH_SPACE, MULTIPLY_SCALE ->
+				{
+					part.xScale *= Mth.lerp(weight, 1.0f, pose.scale().x());
+					part.yScale *= Mth.lerp(weight, 1.0f, pose.scale().y());
+					part.zScale *= Mth.lerp(weight, 1.0f, pose.scale().z());
+				}
+				case DIFFERENCE ->
+				{
+					part.xScale /= Mth.lerp(weight, 1.0f, pose.scale().x());
+					part.yScale /= Mth.lerp(weight, 1.0f, pose.scale().y());
+					part.zScale /= Mth.lerp(weight, 1.0f, pose.scale().z());
+				}
+				case OVERRIDE ->
+				{
+					part.xScale = Mth.lerp(weight, part.xScale, original.xScale * pose.scale().x());
+					part.yScale = Mth.lerp(weight, part.yScale, original.yScale * pose.scale().y());
+					part.zScale = Mth.lerp(weight, part.zScale, original.zScale * pose.scale().z());
+				}
 			}
 		}
 	}
@@ -369,10 +402,12 @@ public final class PPlayerAnimations
 		                     PPlayerAnimationBlendMode blendMode,
 		                     float weight)
 		{
+			boolean isAdditive = blendMode.poseBlendMode() == PPoseBlendMode.ADDITIVE_LOCAL ||
+					blendMode.poseBlendMode() == PPoseBlendMode.ADDITIVE_MESH_SPACE;
 			if (pose.hasTranslation())
 			{
 				Vector3f translation = new Vector3f(pose.translation());
-				if (blendMode == PPlayerAnimationBlendMode.ADDITIVE)
+				if (isAdditive)
 					this.headTranslation.add(translation.mul(weight));
 				else
 					this.headTranslation.lerp(translation, weight);
@@ -380,7 +415,7 @@ public final class PPlayerAnimations
 
 			if (pose.hasRotation())
 			{
-				if (blendMode == PPlayerAnimationBlendMode.ADDITIVE)
+				if (isAdditive)
 					this.headRotation.premul(new Quaternionf().slerp(pose.rotation(), weight));
 				else
 					this.headRotation.slerp(pose.rotation(), weight);

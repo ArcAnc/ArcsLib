@@ -20,7 +20,7 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleType;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundSource;
 import org.joml.Vector3f;
@@ -31,7 +31,7 @@ public final class PAnimationEventTypes
 
 	public static final PAnimationEventType<SoundData> SOUND = type("sound", PEventSide.PRESENTATION_ONLY,
 			RecordCodecBuilder.mapCodec(instance -> instance.group(
-					ResourceLocation.CODEC.fieldOf("sound").forGetter(SoundData::sound),
+					Identifier.CODEC.fieldOf("sound").forGetter(SoundData::sound),
 					Codec.STRING.optionalFieldOf("locator", "").forGetter(SoundData::locator),
 					Codec.FLOAT.optionalFieldOf("volume", 1.0f).forGetter(SoundData::volume),
 					Codec.FLOAT.optionalFieldOf("pitch", 1.0f).forGetter(SoundData::pitch)).
@@ -40,7 +40,7 @@ public final class PAnimationEventTypes
 				PAnimationEventContext.PAnimationEventDispatcherBridge.Position position = context.position(data.locator());
 				if (position == null)
 					return;
-				SoundEvent sound = BuiltInRegistries.SOUND_EVENT.get(data.sound());
+				SoundEvent sound = BuiltInRegistries.SOUND_EVENT.get(data.sound()).map(net.minecraft.core.Holder.Reference::value).orElse(null);
 				if (sound == null)
 				{
 					PLibDatabase.LOGGER.warn("Missing animation sound event: {}", data.sound());
@@ -52,7 +52,7 @@ public final class PAnimationEventTypes
 
 	public static final PAnimationEventType<ParticleData> PARTICLE = type("particle", PEventSide.PRESENTATION_ONLY,
 			RecordCodecBuilder.mapCodec(instance -> instance.group(
-					ResourceLocation.CODEC.fieldOf("particle").forGetter(ParticleData::particle),
+					Identifier.CODEC.fieldOf("particle").forGetter(ParticleData::particle),
 					Codec.STRING.optionalFieldOf("locator", "").forGetter(ParticleData::locator),
 					PLibCodecs.VECTOR3F_CODEC.optionalFieldOf("offset", new Vector3f()).forGetter(ParticleData::offset),
 					PLibCodecs.VECTOR3F_CODEC.optionalFieldOf("motion", new Vector3f()).forGetter(ParticleData::motion)).
@@ -61,7 +61,7 @@ public final class PAnimationEventTypes
 				PAnimationEventContext.PAnimationEventDispatcherBridge.Position position = context.position(data.locator());
 				if (position == null)
 					return;
-				ParticleType<?> particleType = BuiltInRegistries.PARTICLE_TYPE.get(data.particle());
+				ParticleType<?> particleType = BuiltInRegistries.PARTICLE_TYPE.get(data.particle()).map(net.minecraft.core.Holder.Reference::value).orElse(null);
 				if (!(particleType instanceof ParticleOptions options))
 				{
 					PLibDatabase.LOGGER.warn("Missing or unsupported simple animation particle: {}", data.particle());
@@ -83,7 +83,7 @@ public final class PAnimationEventTypes
 
 	public static final PAnimationEventType<LocatorCallbackData> LOCATOR_CALLBACK = type("locator_callback", PEventSide.BOTH,
 			RecordCodecBuilder.mapCodec(instance -> instance.group(
-					ResourceLocation.CODEC.fieldOf("callback").forGetter(LocatorCallbackData::callback),
+					Identifier.CODEC.fieldOf("callback").forGetter(LocatorCallbackData::callback),
 					Codec.STRING.optionalFieldOf("locator", "").forGetter(LocatorCallbackData::locator)).
 			apply(instance, LocatorCallbackData::new)),
 			(context, data) -> PAnimationEventCallbacks.dispatch(data.callback(), context, data.locator()));
@@ -114,8 +114,8 @@ public final class PAnimationEventTypes
 	{
 		return new PAnimationEventType<>()
 		{
-			private final ResourceLocation id = PLibDatabase.rl(path);
-			@Override public ResourceLocation id() { return this.id; }
+			private final Identifier id = PLibDatabase.rl(path);
+			@Override public Identifier id() { return this.id; }
 			@Override public MapCodec<T> codec() { return codec; }
 			@Override public PEventSide side() { return side; }
 			@Override public void execute(PAnimationEventContext context, T data) { executor.execute(context, data); }
@@ -125,9 +125,9 @@ public final class PAnimationEventTypes
 	@FunctionalInterface
 	private interface EventExecutor<T> { void execute(PAnimationEventContext context, T data); }
 
-	public record SoundData(ResourceLocation sound, String locator, float volume, float pitch) { }
-	public record ParticleData(ResourceLocation particle, String locator, Vector3f offset, Vector3f motion) { }
+	public record SoundData(Identifier sound, String locator, float volume, float pitch) { }
+	public record ParticleData(Identifier particle, String locator, Vector3f offset, Vector3f motion) { }
 	public record CameraShakeData(float strength, float duration, float frequency) { }
-	public record LocatorCallbackData(ResourceLocation callback, String locator) { }
+	public record LocatorCallbackData(Identifier callback, String locator) { }
 	public record AnimationParameterData(String controller, String parameter, float value, boolean trigger) { }
 }

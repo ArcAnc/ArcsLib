@@ -1,23 +1,19 @@
 /**
  * @author ArcAnc
- * Created at: 24.05.2026
+ * Created at: 27.05.2026
  * Copyright (c) 2026
  * <p>
  * This code is licensed under "Arc's License of Common Sense"
  * Details can be found in the license file in the root folder of this project
  */
 
-package com.arcanc.pulselib.data;
-
+package com.arcanc.pulselib.data.gecko;
 
 import com.arcanc.pulselib.content.model.PBone;
 import com.arcanc.pulselib.content.model.PMesh;
 import com.arcanc.pulselib.content.model.PModel;
-import com.arcanc.pulselib.content.model.animation.PAnimation;
-import com.arcanc.pulselib.content.model.animation.PAnimationChannel;
-import com.arcanc.pulselib.content.model.animation.PAnimationEvent;
-import com.arcanc.pulselib.content.model.animation.PBoneAnimation;
-import com.arcanc.pulselib.content.model.animation.PKeyFrameChannel;
+import com.arcanc.pulselib.content.model.animation.*;
+import com.arcanc.pulselib.content.registration.PLibRegistration;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonNull;
@@ -25,10 +21,10 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.mojang.datafixers.util.Pair;
 import de.javagl.jgltf.model.GltfConstants;
+import org.jetbrains.annotations.Nullable;
 import org.joml.Quaternionf;
 import org.joml.Vector2f;
 import org.joml.Vector3f;
-import org.jspecify.annotations.Nullable;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -44,6 +40,68 @@ public class PGeckoModelParser
 {
 	private static final float MODEL_SCALE = 1f / 16f;
 	private static final String DEFAULT_TEXTURE_NAME = "0";
+	private static final PGeckoDecodeContext ANIMATION_DECODE_CONTEXT = new PGeckoDecodeContext(MODEL_SCALE);
+	private static final List<PGeckoChannelDecoder<?>> CHANNEL_DECODERS = List.of(
+			new PGeckoChannelDecoder<Vector3f>()
+			{
+				@Override
+				public Set<String> fieldNames()
+				{
+					return Set.of("position", "translation");
+				}
+
+				@Override
+				public PAnimationChannelType<Vector3f> channel()
+				{
+					return PLibRegistration.AnimationChannelReg.POSITION.get();
+				}
+
+				@Override
+				public PAnimationValue<Vector3f> decodeValue(JsonElement element, PGeckoDecodeContext context)
+				{
+					return vectorValue(element, 0f, value -> value.mul(context.modelScale()));
+				}
+			},
+			new PGeckoChannelDecoder<Quaternionf>()
+			{
+				@Override
+				public Set<String> fieldNames()
+				{
+					return Set.of("rotation");
+				}
+
+				@Override
+				public PAnimationChannelType<Quaternionf> channel()
+				{
+					return PLibRegistration.AnimationChannelReg.ROTATION.get();
+				}
+
+				@Override
+				public PAnimationValue<Quaternionf> decodeValue(JsonElement element, PGeckoDecodeContext context)
+				{
+					return new PMolangEulerRotationValue(vectorValue(element, 0f, PVectorConversion.IDENTITY));
+				}
+			},
+			new PGeckoChannelDecoder<Vector3f>()
+			{
+				@Override
+				public Set<String> fieldNames()
+				{
+					return Set.of("scale");
+				}
+
+				@Override
+				public PAnimationChannelType<Vector3f> channel()
+				{
+					return PLibRegistration.AnimationChannelReg.SCALE.get();
+				}
+
+				@Override
+				public PAnimationValue<Vector3f> decodeValue(JsonElement element, PGeckoDecodeContext context)
+				{
+					return vectorValue(element, 1f, PVectorConversion.IDENTITY);
+				}
+			});
 	
 	public static PModel parse(InputStream modelStream, InputStream animationStream) throws IOException
 	{
@@ -63,7 +121,7 @@ public class PGeckoModelParser
 		JsonElement bonesNode = member(geometry, "bones");
 		if (!isArray(bonesNode))
 			return model;
-
+		
 		JsonElement description = member(geometry, "description");
 		TextureSize textureSize = new TextureSize(
 				positive(floatValue(member(description, "texture_width"), 16f), 16f),
@@ -74,7 +132,7 @@ public class PGeckoModelParser
 			rawBones.add(readBone(boneNode));
 		
 		Map<String, RawBone> rawBonesByName = rawBones.stream().
-				collect(Collectors.toMap(RawBone :: name, bone -> bone, (left, _) -> left, LinkedHashMap :: new));
+				collect(Collectors.toMap(RawBone :: name, bone -> bone, (left, $) -> left, LinkedHashMap :: new));
 		
 		for (RawBone rawBone : rawBones)
 			createBone(model, bonesByName, links, rawBonesByName, rawBone, textureSize);
@@ -107,16 +165,14 @@ public class PGeckoModelParser
 	{
 		Map<String, PAnimation> animations = new LinkedHashMap<>();
 		Map<String, PBone> bonesByName = model.bones.values().stream().
-				collect(Collectors.toMap(PBone :: name, bone -> bone, (left, _) -> left, LinkedHashMap :: new));
+				collect(Collectors.toMap(PBone :: name, bone -> bone, (left, $) -> left, LinkedHashMap :: new));
 		
 		JsonElement animationsNode = member(root, "animations");
 		if (!isObject(animationsNode))
 			return animations;
 		
-		Iterator<Map.Entry<String, JsonElement>> fields = animationsNode.getAsJsonObject().entrySet().iterator();
-		while (fields.hasNext())
+		for (Map.Entry<String, JsonElement> animationEntry : animationsNode.getAsJsonObject().entrySet())
 		{
-			Map.Entry<String, JsonElement> animationEntry = fields.next();
 			String animationName = animationEntry.getKey();
 			JsonElement animationNode = animationEntry.getValue();
 			Map<String, PBoneAnimation> boneAnimations = new LinkedHashMap<>();
@@ -127,24 +183,22 @@ public class PGeckoModelParser
 			JsonElement bonesNode = member(animationNode, "bones");
 			if (isObject(bonesNode))
 			{
-				Iterator<Map.Entry<String, JsonElement>> boneFields = bonesNode.getAsJsonObject().entrySet().iterator();
-				while (boneFields.hasNext())
+				for (Map.Entry<String, JsonElement> boneEntry : bonesNode.getAsJsonObject().entrySet())
 				{
-					Map.Entry<String, JsonElement> boneEntry = boneFields.next();
 					PBone bone = bonesByName.get(boneEntry.getKey());
 					if (bone == null)
 						continue;
 					
-					Map<PAnimationChannel, List<? extends PKeyFrameChannel<?>>> channels = new HashMap<>();
+					Map<String, PAnimationTrack<?>> tracks = new HashMap<>();
 					JsonElement positionNode = member(boneEntry.getValue(), "position");
 					if (isMissing(positionNode))
 						positionNode = member(boneEntry.getValue(), "translation");
-					maxTime = Math.max(maxTime, parseAnimationChannel(positionNode, PAnimationChannel.POSITION, channels));
-					maxTime = Math.max(maxTime, parseAnimationChannel(member(boneEntry.getValue(), "rotation"), PAnimationChannel.ROTATION, channels));
-					maxTime = Math.max(maxTime, parseAnimationChannel(member(boneEntry.getValue(), "scale"), PAnimationChannel.SCALE, channels));
+					maxTime = Math.max(maxTime, parseAnimationChannel(positionNode, "position", PLibRegistration.AnimationChannelReg.POSITION.get(), tracks));
+					maxTime = Math.max(maxTime, parseAnimationChannel(member(boneEntry.getValue(), "rotation"), "rotation", PLibRegistration.AnimationChannelReg.ROTATION.get(), tracks));
+					maxTime = Math.max(maxTime, parseAnimationChannel(member(boneEntry.getValue(), "scale"), "scale", PLibRegistration.AnimationChannelReg.SCALE.get(), tracks));
 					
-					if (!channels.isEmpty())
-						boneAnimations.put(bone.name(), new PBoneAnimation(bone.uuid(), channels));
+					if (! tracks.isEmpty())
+						boneAnimations.put(bone.name(), new PBoneAnimation(bone.uuid(), tracks));
 				}
 			}
 			
@@ -201,10 +255,10 @@ public class PGeckoModelParser
 		if (isArray(cubesNode))
 			for (JsonElement cubeNode : cubesNode.getAsJsonArray())
 			{
-					PMesh mesh = parseCubeMesh(cubeNode, scale(new Vector3f(rawBone.absolutePivot())), textureName(cubeNode), textureSize);
-					bone.meshUUIDS().add(mesh.uuid());
-					model.meshes.put(mesh.uuid(), mesh);
-				}
+				PMesh mesh = parseCubeMesh(cubeNode, scale(new Vector3f(rawBone.absolutePivot())), textureName(cubeNode), textureSize);
+				bone.meshUUIDS().add(mesh.uuid());
+				model.meshes.put(mesh.uuid(), mesh);
+			}
 		
 		addLocatorBones(bonesByName, links, rawBone);
 	}
@@ -275,35 +329,43 @@ public class PGeckoModelParser
 				textureName);
 	}
 	
-	private static float parseAnimationChannel(JsonElement channelNode,
-	                                           PAnimationChannel channel,
-	                                           Map<PAnimationChannel, List<? extends PKeyFrameChannel<?>>> channels)
+	private static <T> float parseAnimationChannel(JsonElement channelNode,
+	                                               String name,
+	                                               PAnimationChannelType<T> channel,
+	                                               Map<String, PAnimationTrack<?>> tracks)
 	{
 		if (isMissing(channelNode))
 			return 0f;
 		
-		List<PKeyFrameChannel<?>> keyframes = new ArrayList<>();
+		List<PKeyframe<T>> keyframes = new ArrayList<>();
 		float maxTime = 0f;
 		
 		if (isArray(channelNode))
 		{
-			keyframes.add(createKeyFrame(channel, 0f, channelNode));
+			PAnimationValue<T> value = decodeValue(channel, channelNode);
+			keyframes.add(new PKeyframe<>(0f, value, value, PInterpolationType.LINEAR));
 		}
 		else if (isObject(channelNode))
 		{
 			for (Map.Entry<String, JsonElement> entry : channelNode.getAsJsonObject().entrySet())
 			{
 				float time = secondsToTicks(parseFloat(entry.getKey(), 0f));
-				JsonElement valueNode = keyFrameValueNode(entry.getValue());
-				keyframes.add(createKeyFrame(channel, time, valueNode));
+				JsonElement keyframeNode = entry.getValue();
+				JsonElement pre = member(keyframeNode, "pre");
+				JsonElement post = member(keyframeNode, "post");
+				if (isMissing(pre))
+					pre = keyFrameValueNode(keyframeNode);
+				if (isMissing(post))
+					post = pre;
+				keyframes.add(new PKeyframe<>(time, decodeValue(channel, pre), decodeValue(channel, post), interpolation(keyframeNode)));
 				maxTime = Math.max(maxTime, time);
 			}
 		}
 		
 		if (!keyframes.isEmpty())
 		{
-			keyframes.sort(Comparator.comparing(PKeyFrameChannel :: time));
-			channels.put(channel, keyframes);
+			keyframes.sort(Comparator.comparing(PKeyframe :: time));
+			tracks.put(name, new PAnimationTrack<>(channel, keyframes));
 		}
 		
 		return maxTime;
@@ -325,29 +387,25 @@ public class PGeckoModelParser
 		return node;
 	}
 	
-	private static PKeyFrameChannel<?> createKeyFrame(PAnimationChannel channel, float time, JsonElement valueNode)
+	@SuppressWarnings("unchecked")
+	private static <T> PAnimationValue<T> decodeValue(PAnimationChannelType<T> channel, JsonElement node)
 	{
-		if (containsMolang(valueNode))
-			return createMolangKeyFrame(channel, time, valueNode);
-
-		Object value = channelValue(valueNode, channel);
-		return switch (channel)
-		{
-			case POSITION -> new PKeyFrameChannel.PositionKeyFrame(time, (Vector3f) value);
-			case ROTATION -> new PKeyFrameChannel.RotationKeyFrame(time, vector3f(valueNode, new Vector3f()));
-			case SCALE -> new PKeyFrameChannel.ScaleKeyFrame(time, (Vector3f) value);
-		};
+		for (PGeckoChannelDecoder<?> decoder : CHANNEL_DECODERS)
+			if (decoder.channel() == channel)
+				return (PAnimationValue<T>) decoder.decodeValue(node, ANIMATION_DECODE_CONTEXT);
+		throw new IllegalArgumentException("Unsupported Gecko animation channel type: " + channel.id());
 	}
 
-	private static PKeyFrameChannel<?> createMolangKeyFrame(PAnimationChannel channel, float time, JsonElement valueNode)
+	private static PMolangVectorValue vectorValue(JsonElement node, float fallback, PVectorConversion conversion)
 	{
-		VectorExpression vector = vectorExpression(valueNode, channel == PAnimationChannel.SCALE ? 1f : 0f);
-		return switch (channel)
-		{
-			case POSITION -> new PKeyFrameChannel.PositionKeyFrame(time, data -> scale(vector.evaluate(data)));
-			case ROTATION -> PKeyFrameChannel.RotationKeyFrame.euler(time, vector :: evaluate);
-			case SCALE -> new PKeyFrameChannel.ScaleKeyFrame(time, vector :: evaluate);
-		};
+		VectorExpression expression = vectorExpression(node, fallback);
+		return new PMolangVectorValue(expression.x(), expression.y(), expression.z(), conversion);
+	}
+
+	private static PInterpolation interpolation(JsonElement keyframe)
+	{
+		String name = stringValue(member(keyframe, "lerp_mode"), "linear");
+		return PInterpolationType.INTERPOLATION_TYPES.getOrDefault(name, PInterpolationType.LINEAR);
 	}
 
 	private static boolean containsMolang(JsonElement node)
@@ -381,12 +439,12 @@ public class PGeckoModelParser
 		return context -> floatValue(value, fallback);
 	}
 	
-	private static Object channelValue(JsonElement node, PAnimationChannel channel)
+	private static Object channelValue(JsonElement node, PAnimationChannelType<?> channel)
 	{
-		Vector3f vector = vector3f(node, channel == PAnimationChannel.SCALE ? new Vector3f(1f, 1f, 1f) : new Vector3f());
-		if (channel == PAnimationChannel.ROTATION)
+		Vector3f vector = vector3f(node, channel == PLibRegistration.AnimationChannelReg.SCALE.get() ? new Vector3f(1f, 1f, 1f) : new Vector3f());
+		if (channel == PLibRegistration.AnimationChannelReg.ROTATION.get())
 			return eulerDegreesToQuaternion(vector);
-		if (channel == PAnimationChannel.POSITION)
+		if (channel == PLibRegistration.AnimationChannelReg.POSITION.get())
 			return scale(vector);
 		return vector;
 	}
@@ -496,7 +554,7 @@ public class PGeckoModelParser
 		}
 		return normalizeUv(minU, minV, maxU, maxV, textureSize);
 	}
-
+	
 	private static FaceUv normalizeUv(float minU, float minV, float maxU, float maxV, TextureSize textureSize)
 	{
 		return new FaceUv(
@@ -530,7 +588,7 @@ public class PGeckoModelParser
 				(float) Math.toRadians(degrees.y()),
 				(float) Math.toRadians(degrees.z()));
 	}
-
+	
 	private static Vector3f scale(Vector3f vector)
 	{
 		return vector.mul(MODEL_SCALE);
@@ -540,7 +598,7 @@ public class PGeckoModelParser
 	{
 		return seconds * 20f;
 	}
-
+	
 	private static float positive(float value, float fallback)
 	{
 		return value > 0f ? value : fallback;
@@ -638,7 +696,7 @@ public class PGeckoModelParser
 	private record FaceUv(Vector2f min, Vector2f max)
 	{
 	}
-
+	
 	private record TextureSize(float width, float height)
 	{
 	}

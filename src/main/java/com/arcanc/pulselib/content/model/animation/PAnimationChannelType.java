@@ -9,16 +9,20 @@
 
 package com.arcanc.pulselib.content.model.animation;
 
-import com.mojang.serialization.MapCodec;
+
 import net.minecraft.resources.Identifier;
 
-public interface PAnimationEventType<T>
+public interface PAnimationChannelType<T>
 {
 	Identifier id();
 
-	MapCodec<T> codec();
+	Class<T> valueClass();
 
-	PEventSide side();
+	T defaultValue();
 
-	void execute(PAnimationEventContext context, T data);
+	void interpolate(T from, T to, float alpha, PInterpolation interpolation, T destination);
+
+	void blend(T base, T layer, float weight, PBlendMode mode, T destination);
+
+	void apply(PPoseWriter pose, int boneIndex, T value);
 }

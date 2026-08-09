@@ -16,16 +16,13 @@ import com.arcanc.pulselib.content.model.PModel;
 import com.arcanc.pulselib.content.model.baked.AtlasBufferBuilder;
 import com.arcanc.pulselib.content.model.baked.PBakedBone;
 import com.arcanc.pulselib.content.model.baked.PBakedMesh;
-import com.arcanc.pulselib.content.model.baked.PDeformedMeshBuffers;
 import com.arcanc.pulselib.content.model.baked.PBakedModel;
 import com.arcanc.pulselib.content.model.textures.atlas.PLibSpriteMetadata;
-import com.arcanc.pulselib.data.PGltfModelLoader;
+import com.arcanc.pulselib.data.gltf.PGltfModelLoader;
 import com.arcanc.pulselib.data.PModelLoader;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.mojang.blaze3d.buffers.GpuBuffer;
-import com.mojang.blaze3d.IndexType;
-import com.mojang.blaze3d.PrimitiveTopology;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.ByteBufferBuilder;
@@ -125,13 +122,8 @@ public class PModelCache
 	{
 		bone.meshes().forEach(mesh ->
 		{
-<<<<<<< HEAD
 			mesh.vbo().close();
 			mesh.indices().close();
-=======
-			PDeformedMeshBuffers.close(mesh);
-			mesh.vertexBuffer().close();
->>>>>>> a625c91 (Added deformers for player and custom models)
 		});
 		bone.children().forEach(PModelCache :: clearBoneCache);
 	}
@@ -177,9 +169,9 @@ public class PModelCache
 					BufferBuilder bufferBuilder;
 					
 					if (sprite.contents().name().getPath().equals("missingno"))
-						bufferBuilder = new BufferBuilder(byteBufferBuilder, PrimitiveTopology.TRIANGLES, PRenderTypes.VertexFormatProvider.POSITION_TEX_NORMAL);
+						bufferBuilder = new BufferBuilder(byteBufferBuilder, VertexFormat.Mode.TRIANGLES, PRenderTypes.VertexFormatProvider.POSITION_TEX_NORMAL);
 					else
-						bufferBuilder = new AtlasBufferBuilder(byteBufferBuilder, PrimitiveTopology.TRIANGLES, PRenderTypes.VertexFormatProvider.POSITION_TEX_NORMAL, sprite);
+						bufferBuilder = new AtlasBufferBuilder(byteBufferBuilder, VertexFormat.Mode.TRIANGLES, PRenderTypes.VertexFormatProvider.POSITION_TEX_NORMAL, sprite);
 					
 					for (int q = 0; q < mesh.vertexCount(); q++)
 					{
@@ -221,7 +213,7 @@ public class PModelCache
 								() -> meshUUID.toString() + "_indexes",
 								GpuBuffer.USAGE_INDEX,
 								indexBuffer);
-						IndexType type = mesh.glIndexType() == GltfConstants.GL_UNSIGNED_SHORT ? IndexType.SHORT : IndexType.INT;
+						VertexFormat.IndexType type = mesh.glIndexType() == GltfConstants.GL_UNSIGNED_SHORT ? VertexFormat.IndexType.SHORT : VertexFormat.IndexType.INT;
 						builder.meshes.add(new PBakedMesh(
 								meshUUID,
 								buffer,
@@ -230,13 +222,7 @@ public class PModelCache
 								mesh.indicesCount(),
 								type,
 								mesh.texture(),
-<<<<<<< HEAD
 								emissive));
-=======
-								isEmissive,
-								mesh,
-								loc));
->>>>>>> a625c91 (Added deformers for player and custom models)
 					}
 				}
 			}

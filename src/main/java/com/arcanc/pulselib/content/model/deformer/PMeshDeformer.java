@@ -10,11 +10,11 @@
 package com.arcanc.pulselib.content.model.deformer;
 
 import com.mojang.serialization.MapCodec;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 public interface PMeshDeformer<D>
 {
-	ResourceLocation id();
+	Identifier id();
 
 	MapCodec<D> codec();
 
