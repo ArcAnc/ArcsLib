@@ -180,7 +180,7 @@
     
     
       <div class="md-header__source">
-        <a href="https://github.com/ArcAnc/PulseLib" title="Go to repository" class="md-source" data-md-component="source">
+        <a href="https://github.com/ArcAnc/PulseLib/tree/26.1" title="Go to repository" class="md-source" data-md-component="source">
   <div class="md-source__icon md-icon">
     
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
@@ -317,7 +317,7 @@
   </label>
   
     <div class="md-nav__source">
-      <a href="https://github.com/ArcAnc/PulseLib" title="Go to repository" class="md-source" data-md-component="source">
+      <a href="https://github.com/ArcAnc/PulseLib/tree/26.1" title="Go to repository" class="md-source" data-md-component="source">
   <div class="md-source__icon md-icon">
     
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
@@ -955,6 +955,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../mesh-deformers/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Mesh Deformers
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../gui-rendering/" class="md-nav__link">
         
   
@@ -1158,10 +1186,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#current-limitation-variable-lifetime" class="md-nav__link">
+  <a href="#variable-lifetime" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Current limitation: variable.* lifetime
+        variable.* lifetime
       
     </span>
   </a>
@@ -1201,14 +1229,14 @@
 </code></pre></div>
 <p>The Gecko parser compiles each string into a <code>MolangParser.Expression</code> while the model is loaded. It does not parse the source again every tick or for every bone. The compiled expression is evaluated when the current animation pose is mixed.</p>
 <h2 id="context-and-evaluation">Context and evaluation<a class="headerlink" href="#context-and-evaluation" title="Permanent link">&para;</a></h2>
-<p>Each built-in renderer creates one <code>MolangParser.Context</code> per animation controller for a render pass and passes that context to every bone mixed by that controller. This applies to entity, block entity, item, and item GUI rendering, including recursive GUI drawing.</p>
+<p>Each built-in renderer prepares one frame context per animation controller and render pass. The controller copies its frame-specific query and context values into its own persistent <code>MolangParser.Context</code> before it mixes the pose. This applies to entity, block entity, item, and item GUI rendering, including recursive GUI drawing.</p>
 <p>The renderer supplies these values by default:</p>
 <ul>
 <li><code>query.anim_time</code> (also available as <code>q.anim_time</code>) is the controller's interpolated animation time in seconds.</li>
 <li><code>this</code> is supplied by the animation mixer from the accumulated value of the vector component currently being evaluated.</li>
-<li>The random generator is reset from <code>PAnimationManager.key()</code> for every prepared context. <code>math.random</code>, <code>math.random_integer</code>, <code>math.die_roll</code>, and <code>math.die_roll_integer</code> are therefore deterministic for the same animation-manager key and evaluation order.</li>
+<li><code>math.random</code>, <code>math.random_integer</code>, <code>math.die_roll</code>, and <code>math.die_roll_integer</code> use the controller's persistent random state. If deterministic results are required for custom code, seed it through <code>controller.persistentMolangContext().randomSeed(...)</code>.</li>
 </ul>
-<p>The context is deliberately prepared outside <code>PAnimationController</code>. A controller only mixes an animation with the ready context; it does not retain an animatable, a query provider, or a random seed.</p>
+<p>This split keeps render-specific queries fresh without sharing Molang variables or random sequences between different controllers.</p>
 <h2 id="providing-custom-queries">Providing custom queries<a class="headerlink" href="#providing-custom-queries" title="Permanent link">&para;</a></h2>
 <p>Override <code>populateMolangContext</code> in the renderer for the animatable type. The hook exists in <code>PEntityRenderer</code>, <code>PBlockRenderer</code>, and <code>PItemRenderer</code>.</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="nd">@Override</span>
@@ -1225,11 +1253,8 @@
 <h2 id="language-surface">Language surface<a class="headerlink" href="#language-surface" title="Permanent link">&para;</a></h2>
 <p>The parser supports numeric literals, arithmetic, comparisons, logical operators, ternary expressions, statements, assignments to <code>temp.*</code> and <code>variable.*</code>, <code>return</code>, <code>loop</code>, and <code>break</code>. It resolves the <code>query.*</code>, <code>variable.*</code>, <code>temp.*</code>, and <code>context.*</code> namespaces and their usual short aliases (<code>q</code>, <code>v</code>, <code>t</code>, and <code>c</code>).</p>
 <p>Supported math functions include trigonometry, interpolation, clamping, rounding, powers, min/max, random and die-roll functions, plus the implemented <code>math.ease_*</code> variants. An unsupported function is reported as an error instead of silently evaluating to an arbitrary value.</p>
-<h2 id="current-limitation-variable-lifetime">Current limitation: <code>variable.*</code> lifetime<a class="headerlink" href="#current-limitation-variable-lifetime" title="Permanent link">&para;</a></h2>
-<blockquote>
-<p>TODO: move the per-controller <code>MolangParser.Context</code> ownership to <code>PAnimationManager</code> (or an equivalent animation-instance store).</p>
-</blockquote>
-<p>At present, renderers create a fresh context for each render pass. Consequently, an assignment to <code>variable.*</code> is available while that context is being evaluated, but does not persist into the next frame. This is intentionally documented as incomplete Molang behavior and must be addressed before relying on <code>variable.*</code> as long-lived animation state.</p>
+<h2 id="variable-lifetime"><code>variable.*</code> lifetime<a class="headerlink" href="#variable-lifetime" title="Permanent link">&para;</a></h2>
+<p><code>variable.*</code> assignments persist for the lifetime of a <code>PAnimationController</code>, including across render frames. They are private to that controller, so two controllers do not overwrite each other's variables. <code>temp.*</code> remains local to one expression evaluation.</p>
 
 
 

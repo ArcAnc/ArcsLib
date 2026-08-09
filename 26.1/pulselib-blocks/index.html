@@ -184,7 +184,7 @@
     
     
       <div class="md-header__source">
-        <a href="https://github.com/ArcAnc/PulseLib" title="Go to repository" class="md-source" data-md-component="source">
+        <a href="https://github.com/ArcAnc/PulseLib/tree/26.1" title="Go to repository" class="md-source" data-md-component="source">
   <div class="md-source__icon md-icon">
     
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
@@ -323,7 +323,7 @@
   </label>
   
     <div class="md-nav__source">
-      <a href="https://github.com/ArcAnc/PulseLib" title="Go to repository" class="md-source" data-md-component="source">
+      <a href="https://github.com/ArcAnc/PulseLib/tree/26.1" title="Go to repository" class="md-source" data-md-component="source">
   <div class="md-source__icon md-icon">
     
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
@@ -1053,6 +1053,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../mesh-deformers/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Mesh Deformers
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../gui-rendering/" class="md-nav__link">
         
   
@@ -1287,7 +1315,7 @@
   <h1>PulseLib Blocks</h1>
 
 <p>Animated blocks in Minecraft are really animated block entities. The block still handles placement, collision, interaction, redstone behavior, and blockstate data. The visible animated model is rendered by the block entity renderer.</p>
-<p>That split is important: implement <a href="https://github.com/ArcAnc/ArcsLib/blob/26.1/src/main/java/com/arcanc/pulselib/content/animatable/PAnimatable.java"><code>PAnimatable</code></a> on the <code>BlockEntity</code>, not on the <code>Block</code>.</p>
+<p>That split is important: implement <a href="https://github.com/ArcAnc/PulseLib/blob/26.1/src/main/java/com/arcanc/pulselib/content/animatable/PAnimatable.java"><code>PAnimatable</code></a> on the <code>BlockEntity</code>, not on the <code>Block</code>.</p>
 <h2 id="block-class">Block class<a class="headerlink" href="#block-class" title="Permanent link">&para;</a></h2>
 <p>The block should create a block entity and hide vanilla block rendering. If you forget to hide vanilla rendering, you may see the normal block model fighting with the PulseLib model, or you may simply render the wrong thing.</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="kd">public</span><span class="w"> </span><span class="kd">class</span> <span class="nc">CrusherBlock</span><span class="w"> </span><span class="kd">extends</span><span class="w"> </span><span class="n">Block</span><span class="w"> </span><span class="kd">implements</span><span class="w"> </span><span class="n">EntityBlock</span><span class="w"> </span><span class="p">{</span>
@@ -1342,7 +1370,7 @@
 </code></pre></div>
 <h2 id="renderer">Renderer<a class="headerlink" href="#renderer" title="Permanent link">&para;</a></h2>
 <p>The renderer is intentionally small. It only needs model data and a PulseLib render type unless you want extra custom drawing.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="kd">public</span><span class="w"> </span><span class="kd">class</span> <span class="nc">CrusherRenderer</span><span class="w"> </span><span class="kd">extends</span><span class="w"> </span><span class="n">PBlockRenderer</span><span class="o">&lt;</span><span class="n">CrusherBlockEntity</span><span class="p">,</span><span class="w"> </span><span class="n">PBlockRenderState</span><span class="p">.</span><span class="na">Impl</span><span class="o">&lt;</span><span class="n">CrusherBlockEntity</span><span class="o">&gt;&gt;</span><span class="w"> </span><span class="p">{</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="kd">public</span><span class="w"> </span><span class="kd">class</span> <span class="nc">CrusherRenderer</span><span class="w"> </span><span class="kd">extends</span><span class="w"> </span><span class="n">PBlockRenderer</span><span class="o">&lt;</span><span class="n">CrusherBlockEntity</span><span class="p">,</span><span class="w"> </span><span class="n">CrusherRenderState</span><span class="o">&gt;</span><span class="w"> </span><span class="p">{</span>
 <a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="nf">CrusherRenderer</span><span class="p">(</span><span class="n">BlockEntityRendererProvider</span><span class="p">.</span><span class="na">Context</span><span class="w"> </span><span class="n">context</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
 <a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="w">        </span><span class="kd">super</span><span class="p">(</span><span class="k">new</span><span class="w"> </span><span class="n">DefaultBlockModelData</span><span class="p">.</span><span class="na">DefaultBlockModelDataBuilder</span><span class="p">(</span>
 <a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="w">                        </span><span class="n">Identifier</span><span class="p">.</span><span class="na">fromNamespaceAndPath</span><span class="p">(</span><span class="s">&quot;examplemod&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;crusher&quot;</span><span class="p">))</span>
@@ -1351,27 +1379,29 @@
 <a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a><span class="w">    </span><span class="p">}</span>
 <a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a>
 <a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a><span class="w">    </span><span class="nd">@Override</span>
-<a id="__codelineno-2-10" name="__codelineno-2-10" href="#__codelineno-2-10"></a><span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="n">PBlockRenderState</span><span class="p">.</span><span class="na">Impl</span><span class="o">&lt;</span><span class="n">CrusherBlockEntity</span><span class="o">&gt;</span><span class="w"> </span><span class="nf">createRenderState</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
-<a id="__codelineno-2-11" name="__codelineno-2-11" href="#__codelineno-2-11"></a><span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">PBlockRenderState</span><span class="p">.</span><span class="na">Impl</span><span class="o">&lt;&gt;</span><span class="p">();</span>
+<a id="__codelineno-2-10" name="__codelineno-2-10" href="#__codelineno-2-10"></a><span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="n">CrusherRenderState</span><span class="w"> </span><span class="nf">createRenderState</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-2-11" name="__codelineno-2-11" href="#__codelineno-2-11"></a><span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">CrusherRenderState</span><span class="p">();</span>
 <a id="__codelineno-2-12" name="__codelineno-2-12" href="#__codelineno-2-12"></a><span class="w">    </span><span class="p">}</span>
 <a id="__codelineno-2-13" name="__codelineno-2-13" href="#__codelineno-2-13"></a><span class="p">}</span>
+<a id="__codelineno-2-14" name="__codelineno-2-14" href="#__codelineno-2-14"></a>
+<a id="__codelineno-2-15" name="__codelineno-2-15" href="#__codelineno-2-15"></a><span class="kd">public</span><span class="w"> </span><span class="kd">class</span> <span class="nc">CrusherRenderState</span><span class="w"> </span><span class="kd">extends</span><span class="w"> </span><span class="n">PBlockRenderState</span><span class="p">.</span><span class="na">Impl</span><span class="o">&lt;</span><span class="n">CrusherBlockEntity</span><span class="o">&gt;</span><span class="w"> </span><span class="p">{}</span>
 </code></pre></div>
 <h2 id="custom-render-hooks">Custom render hooks<a class="headerlink" href="#custom-render-hooks" title="Permanent link">&para;</a></h2>
 <p>Use hooks when the model is not the whole visual. For example, a machine might render the animated body through PulseLib and draw a vanilla fluid surface or item stack in <code>postSubmit</code>.</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="nd">@Override</span>
 <a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="kd">public</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">postSubmit</span><span class="p">(</span><span class="n">PoseStack</span><span class="w"> </span><span class="n">poseStack</span><span class="p">,</span>
-<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="w">                       </span><span class="n">PBlockRenderState</span><span class="p">.</span><span class="na">Impl</span><span class="o">&lt;</span><span class="n">CrusherBlockEntity</span><span class="o">&gt;</span><span class="w"> </span><span class="n">renderState</span><span class="p">,</span>
+<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="w">                       </span><span class="n">CrusherRenderState</span><span class="w"> </span><span class="n">renderState</span><span class="p">,</span>
 <a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="w">                       </span><span class="n">CameraRenderState</span><span class="w"> </span><span class="n">cameraRenderState</span><span class="p">,</span>
 <a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a><span class="w">                       </span><span class="n">SubmitNodeCollector</span><span class="w"> </span><span class="n">submitNodeCollector</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
-<a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a><span class="w">    </span><span class="c1">// Add custom submit nodes or extra PulseLib queue submissions here.</span>
+<a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a><span class="w">    </span><span class="c1">// Add PulseLib queue submissions or collector nodes here.</span>
 <a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a><span class="p">}</span>
 </code></pre></div>
 <p>Classes used:</p>
 <ul>
-<li><a href="https://github.com/ArcAnc/ArcsLib/blob/26.1/src/main/java/com/arcanc/pulselib/content/renderer/PBlockRenderer.java"><code>PBlockRenderer</code></a></li>
-<li><a href="https://github.com/ArcAnc/ArcsLib/blob/26.1/src/main/java/com/arcanc/pulselib/content/renderer/modelData/DefaultBlockModelData.java"><code>DefaultBlockModelData</code></a></li>
-<li><a href="https://github.com/ArcAnc/ArcsLib/blob/26.1/src/main/java/com/arcanc/pulselib/content/animatable/PAnimatable.java"><code>PAnimatable</code></a></li>
-<li><a href="https://github.com/ArcAnc/ArcsLib/blob/26.1/src/main/java/com/arcanc/pulselib/util/helpers/PLibHelper.java"><code>PLibHelper</code></a></li>
+<li><a href="https://github.com/ArcAnc/PulseLib/blob/26.1/src/main/java/com/arcanc/pulselib/content/renderer/PBlockRenderer.java"><code>PBlockRenderer</code></a></li>
+<li><a href="https://github.com/ArcAnc/PulseLib/blob/26.1/src/main/java/com/arcanc/pulselib/content/renderer/modelData/DefaultBlockModelData.java"><code>DefaultBlockModelData</code></a></li>
+<li><a href="https://github.com/ArcAnc/PulseLib/blob/26.1/src/main/java/com/arcanc/pulselib/content/animatable/PAnimatable.java"><code>PAnimatable</code></a></li>
+<li><a href="https://github.com/ArcAnc/PulseLib/blob/26.1/src/main/java/com/arcanc/pulselib/util/helpers/PLibHelper.java"><code>PLibHelper</code></a></li>
 </ul>
 
 
