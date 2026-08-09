@@ -75,6 +75,7 @@ nav:
       - Entity Render Layers: entity-render-layers.md
       - Armor and Attachments: armor-and-attachments.md
       - Player Animations: player-animations.md
+      - Mesh Deformers: mesh-deformers.md
       - GUI Rendering: gui-rendering.md
   - Advanced:
       - Model Loaders: model-loaders.md

@@ -10,6 +10,7 @@
 package com.arcanc.pulselib.content.model.baked;
 
 
+<<<<<<< HEAD
 import com.mojang.blaze3d.buffers.GpuBuffer;
 import com.mojang.blaze3d.vertex.VertexFormat;
 
@@ -23,5 +24,20 @@ public record PBakedMesh(UUID uuid,
                          VertexFormat.IndexType indexType,
                          String textureName,
                          boolean isEmissive)
+=======
+import com.mojang.blaze3d.vertex.VertexBuffer;
+import com.arcanc.pulselib.content.model.PMesh;
+import net.minecraft.resources.ResourceLocation;
+
+import java.util.UUID;
+
+public record PBakedMesh(
+		UUID uuid,
+		VertexBuffer vertexBuffer,
+		String textureName,
+		boolean isEmissive,
+		PMesh source,
+		ResourceLocation textureLocation)
+>>>>>>> a625c91 (Added deformers for player and custom models)
 {
 }

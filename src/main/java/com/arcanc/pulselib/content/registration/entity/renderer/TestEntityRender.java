@@ -56,11 +56,16 @@ public class TestEntityRender extends PEntityRenderer<TestEntity, PEntityRenderS
 	                                               PBakedMesh mesh,
 	                                               PMeshRenderContext inherited)
 	{
-		return new PMeshRenderContext(
+		PMeshRenderContext context = new PMeshRenderContext(
 				inherited.renderType(),
 				TestDayTimeColor.color(renderState.getAnimatable().level(), renderState.partialTick()),
 				inherited.packedLight(),
+<<<<<<< HEAD
 				inherited.packedOverlay()
 		);
+=======
+				inherited.packedOverlay());
+		return context;
+>>>>>>> a625c91 (Added deformers for player and custom models)
 	}
 }

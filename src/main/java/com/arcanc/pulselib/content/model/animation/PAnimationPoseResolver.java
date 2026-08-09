@@ -83,7 +83,7 @@ public final class PAnimationPoseResolver<T extends PAnimatable<T>>
 		BonePose root = rootBoneName == null ? null : resolve(rootBoneName);
 		Matrix4f current = new Matrix4f(bone.modelTransform());
 		Matrix4f bind = new Matrix4f(bone.bindTransform());
-		if (root != null && root != bone)
+		if (root != null && !boneName.equals(rootBoneName))
 		{
 			current = new Matrix4f(root.modelTransform()).invert().mul(current);
 			bind = new Matrix4f(root.bindTransform()).invert().mul(bind);

@@ -16,6 +16,7 @@ import com.arcanc.pulselib.content.model.PModel;
 import com.arcanc.pulselib.content.model.baked.AtlasBufferBuilder;
 import com.arcanc.pulselib.content.model.baked.PBakedBone;
 import com.arcanc.pulselib.content.model.baked.PBakedMesh;
+import com.arcanc.pulselib.content.model.baked.PDeformedMeshBuffers;
 import com.arcanc.pulselib.content.model.baked.PBakedModel;
 <<<<<<< HEAD
 import com.arcanc.pulselib.content.model.textures.atlas.PLibSpriteMetadata;
@@ -127,8 +128,13 @@ public class PModelCache
 	{
 		bone.meshes().forEach(mesh ->
 		{
+<<<<<<< HEAD
 			mesh.vbo().close();
 			mesh.indices().close();
+=======
+			PDeformedMeshBuffers.close(mesh);
+			mesh.vertexBuffer().close();
+>>>>>>> a625c91 (Added deformers for player and custom models)
 		});
 		bone.children().forEach(PModelCache :: clearBoneCache);
 	}
@@ -227,7 +233,13 @@ public class PModelCache
 								mesh.indicesCount(),
 								type,
 								mesh.texture(),
+<<<<<<< HEAD
 								emissive));
+=======
+								isEmissive,
+								mesh,
+								loc));
+>>>>>>> a625c91 (Added deformers for player and custom models)
 					}
 				}
 			}

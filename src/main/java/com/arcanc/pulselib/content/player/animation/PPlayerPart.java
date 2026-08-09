@@ -24,7 +24,11 @@ public enum PPlayerPart
 	RIGHT_LEG,
 	LEFT_LEG;
 
+<<<<<<< HEAD
 	List<ModelPart> resolve(PlayerModel model)
+=======
+	public List<ModelPart> resolve(PlayerModel<?> model)
+>>>>>>> a625c91 (Added deformers for player and custom models)
 	{
 		return switch (this)
 		{
