@@ -442,10 +442,6 @@ public class PAnimationController<T extends PAnimatable<T>>
 		this.stageStarted = false;
 	}
 
-	/**
-	 * Moves the current stage cursor without replaying events. This is the safe operation for seeks,
-	 * corrections received from the network, and late-created client instances.
-	 */
 	public void seek(PBakedModel model, float animationTime)
 	{
 		if (this.graphRuntime != null)

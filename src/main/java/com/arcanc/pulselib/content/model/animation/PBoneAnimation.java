@@ -10,7 +10,7 @@
 package com.arcanc.pulselib.content.model.animation;
 
 
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.util.Map;
 import java.util.UUID;

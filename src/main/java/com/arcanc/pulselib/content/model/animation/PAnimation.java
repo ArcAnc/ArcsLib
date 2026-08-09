@@ -11,9 +11,9 @@ package com.arcanc.pulselib.content.model.animation;
 
 import com.arcanc.pulselib.content.registration.PLibRegistration;
 import com.arcanc.pulselib.data.gecko.MolangParser;
-import org.jetbrains.annotations.Nullable;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
+import org.jspecify.annotations.Nullable;
 
 import java.util.Comparator;
 import java.util.List;

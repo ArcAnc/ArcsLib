@@ -18,8 +18,8 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
-import org.jetbrains.annotations.Nullable;
 import org.joml.Vector3f;
+import org.jspecify.annotations.Nullable;
 
 import java.util.Collection;
 import java.util.List;
@@ -29,12 +29,14 @@ public final class PAnimationEventDispatcher
 {
 	private PAnimationEventDispatcher() { }
 
-	public static <T extends PAnimatable<T>> void dispatch(T animatable, PAnimationController<T> controller,
-	                                                       PAnimationEvent<?> event, @Nullable PBakedModel model,
+	public static <T extends PAnimatable<T>> void dispatch(T animatable,
+	                                                       PAnimationController<T> controller,
+	                                                       PAnimationEvent<?> event,
+	                                                       @Nullable PBakedModel model,
 	                                                       Collection<PAnimationController<T>> controllers)
 	{
-		@Nullable PositionContext fallback = position(animatable);
-		@Nullable Level level = fallback == null ? null : fallback.level();
+		PositionContext fallback = position(animatable);
+		Level level = fallback == null ? null : fallback.level();
 		if (!runsOn(event.type().side(), level))
 			return;
 
@@ -68,9 +70,12 @@ public final class PAnimationEventDispatcher
 		type.execute(context, typed.data());
 	}
 
-	private static <T extends PAnimatable<T>> @Nullable PAnimationEventContext.PAnimationEventDispatcherBridge.Position positionFor(
-			T animatable, @Nullable PBakedModel model, Collection<PAnimationController<T>> controllers,
-			@Nullable PositionContext fallback, String locator)
+	private static <T extends PAnimatable<T>> PAnimationEventContext.PAnimationEventDispatcherBridge.@Nullable Position positionFor(
+			T animatable,
+			@Nullable PBakedModel model,
+			Collection<PAnimationController<T>> controllers,
+			@Nullable PositionContext fallback,
+			String locator)
 	{
 		if (fallback == null)
 			return null;
@@ -80,8 +85,12 @@ public final class PAnimationEventDispatcher
 		return new PAnimationEventContext.PAnimationEventDispatcherBridge.Position(position.level(), position.x(), position.y(), position.z());
 	}
 
-	private static <T extends PAnimatable<T>> PositionContext resolveLocatorPosition(T animatable, String locator,
-			PBakedModel model, Collection<PAnimationController<T>> controllers, PositionContext fallback)
+	private static <T extends PAnimatable<T>> PositionContext resolveLocatorPosition(
+			T animatable,
+	        String locator,
+			PBakedModel model,
+			Collection<PAnimationController<T>> controllers,
+			PositionContext fallback)
 	{
 		Vector3f localPosition = new Vector3f();
 		if (!findBonePosition(model, controllers, locator, localPosition))

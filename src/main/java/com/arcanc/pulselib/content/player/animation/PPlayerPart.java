@@ -29,8 +29,6 @@ public enum PPlayerPart
 		return switch (this)
 		{
 			case ROOT -> List.of();
-			// Outer layers are children of their matching body part and inherit its pose.
-			// Applying the animation to both levels rotates/translates them twice.
 			case HEAD -> List.of(model.head);
 			case BODY -> List.of(model.body);
 			case RIGHT_ARM -> List.of(model.rightArm);
