@@ -13,15 +13,14 @@ import com.arcanc.pulselib.content.animatable.PAnimatable;
 import com.arcanc.pulselib.content.animatable.PAnimationController;
 import com.arcanc.pulselib.content.model.baked.PBakedBone;
 import com.arcanc.pulselib.content.model.baked.PBakedModel;
-import com.arcanc.pulselib.data.MolangParser;
+import com.arcanc.pulselib.content.registration.PLibRegistration;
+import com.arcanc.pulselib.data.gecko.MolangParser;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Matrix4f;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
 
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Objects;
 
 public final class PAnimationPoseResolver<T extends PAnimatable<T>>
@@ -30,8 +29,9 @@ public final class PAnimationPoseResolver<T extends PAnimatable<T>>
 	private final Collection<PAnimationController<T>> controllers;
 	private final MolangContextProvider<T> molangContexts;
 	private final float partialTick;
-	private final Map<String, PBakedBone> bones = new HashMap<>();
-	private final Map<String, BonePose> poses = new HashMap<>();
+	private final PPose localPose;
+	private final PModelPose modelPose;
+	private final PModelPose bindModelPose;
 
 	public PAnimationPoseResolver(PBakedModel model,
 	                              Collection<PAnimationController<T>> controllers,
@@ -42,48 +42,36 @@ public final class PAnimationPoseResolver<T extends PAnimatable<T>>
 		this.controllers = Objects.requireNonNull(controllers);
 		this.molangContexts = Objects.requireNonNull(molangContexts);
 		this.partialTick = partialTick;
-		this.model.bones().forEach(this :: index);
+		this.localPose = PAnimationRuntime.evaluate(this.model, this.controllers, this.molangContexts, this.partialTick);
+		this.modelPose = new PModelPose(this.model.boneCount());
+		this.modelPose.update(this.model, this.localPose);
+		this.bindModelPose = new PModelPose(this.model.boneCount());
+		this.bindModelPose.update(this.model, this.model.bindPose());
 	}
 
 	public @Nullable BonePose resolve(String boneName)
 	{
-		PBakedBone bone = this.bones.get(boneName);
-		return bone == null ? null : resolve(bone);
+		int index = this.model.boneIndex(boneName);
+		return index < 0 ? null : resolve(this.model.bone(index));
 	}
 
 	public BonePose resolve(PBakedBone bone)
 	{
-		BonePose cached = this.poses.get(bone.name());
-		if (cached != null)
-			return cached;
-
-		LocalPose local = resolveLocal(
-				bone,
-				this.model,
-				this.controllers,
-				this.molangContexts,
-				this.partialTick);
-		BonePose parent = bone.parent() == null ? null : resolve(bone.parent());
-
-		Matrix4f bindTransform = parent == null ? new Matrix4f() : new Matrix4f(parent.bindTransform());
-		apply(bindTransform, new BoneFrame(
-				new Vector3f(bone.basePosition()),
-				new Quaternionf(bone.baseRotation()),
-				new Vector3f(1.0f)));
-
-		Matrix4f modelTransform = parent == null ? new Matrix4f() : new Matrix4f(parent.modelTransform());
-		apply(modelTransform, local.localTransform());
-
-		BonePose pose = new BonePose(
-				local.animationTransform(),
-				local.localTransform(),
-				bindTransform,
-				modelTransform,
-				local.hasTranslation(),
-				local.hasRotation(),
-				local.hasScale());
-		this.poses.put(bone.name(), pose);
-		return pose;
+		int index = this.model.boneIndex(bone);
+		Vector3f baseTranslation = bone.basePosition();
+		Quaternionf baseRotation = bone.baseRotation();
+		Vector3f localTranslation = this.localPose.translation(index);
+		Quaternionf localRotation = this.localPose.rotation(index);
+		Vector3f localScale = this.localPose.scale(index);
+		boolean animated = this.localPose.isDirty(index);
+		return new BonePose(
+				new BoneFrame(new Vector3f(localTranslation).sub(baseTranslation), new Quaternionf(baseRotation).invert().premul(localRotation), new Vector3f(localScale)),
+				new BoneFrame(new Vector3f(localTranslation), new Quaternionf(localRotation), new Vector3f(localScale)),
+				new Matrix4f(this.bindModelPose.transform(index)),
+				new Matrix4f(this.modelPose.transform(index)),
+				animated,
+				animated,
+				animated);
 	}
 	
 	public @Nullable AnimationDelta animationDelta(String boneName, @Nullable String rootBoneName)
@@ -164,19 +152,19 @@ public final class PAnimationPoseResolver<T extends PAnimatable<T>>
 			if (frame == null)
 				continue;
 
-			if (boneAnimation.channels().containsKey(PAnimationChannel.POSITION))
+			if (boneAnimation.hasChannel(PLibRegistration.AnimationChannelReg.POSITION.get()))
 			{
 				translation.add(frame.translation());
 				animationTranslation.add(frame.translation());
 				hasTranslation = true;
 			}
-			if (boneAnimation.channels().containsKey(PAnimationChannel.ROTATION))
+			if (boneAnimation.hasChannel(PLibRegistration.AnimationChannelReg.ROTATION.get()))
 			{
 				rotation.premul(frame.rotation());
 				animationRotation.premul(frame.rotation());
 				hasRotation = true;
 			}
-			if (boneAnimation.channels().containsKey(PAnimationChannel.SCALE))
+			if (boneAnimation.hasChannel(PLibRegistration.AnimationChannelReg.SCALE.get()))
 			{
 				scale.mul(frame.scale());
 				animationScale.mul(frame.scale());
@@ -197,12 +185,6 @@ public final class PAnimationPoseResolver<T extends PAnimatable<T>>
 		return (controller, partialTick) -> new MolangParser.Context().
 				query("anim_time", controller.getInterpolatedTime(partialTick) / 20.0f).
 				randomSeed(0L);
-	}
-
-	private void index(PBakedBone bone)
-	{
-		this.bones.putIfAbsent(bone.name(), bone);
-		bone.children().forEach(this :: index);
 	}
 
 	private static void apply(Matrix4f matrix, BoneFrame frame)

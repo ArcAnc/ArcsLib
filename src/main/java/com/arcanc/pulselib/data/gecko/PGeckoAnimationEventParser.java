@@ -7,13 +7,14 @@
  * Details can be found in the license file in the root folder of this project
  */
 
-package com.arcanc.pulselib.data;
+package com.arcanc.pulselib.data.gecko;
 
 
 import com.arcanc.pulselib.content.model.animation.PAnimationEvent;
 import com.arcanc.pulselib.content.model.animation.PAnimationEventTypes;
 import com.arcanc.pulselib.util.PLibDatabase;
 import com.google.gson.JsonElement;
+import com.google.gson.JsonNull;
 import com.google.gson.JsonObject;
 import net.minecraft.resources.Identifier;
 import org.joml.Vector3f;
@@ -192,11 +193,11 @@ public class PGeckoAnimationEventParser
 	private static JsonElement member(JsonElement element, String name)
 	{
 		if (!isObject(element))
-			return com.google.gson.JsonNull.INSTANCE;
+			return JsonNull.INSTANCE;
 		
 		JsonObject object = element.getAsJsonObject();
 		JsonElement value = object.get(name);
-		return value == null ? com.google.gson.JsonNull.INSTANCE : value;
+		return value == null ? JsonNull.INSTANCE : value;
 	}
 	
 	private static boolean isMissing(JsonElement element)

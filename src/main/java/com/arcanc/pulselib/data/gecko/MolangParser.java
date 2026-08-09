@@ -7,7 +7,7 @@
  * Details can be found in the license file in the root folder of this project
  */
 
-package com.arcanc.pulselib.data;
+package com.arcanc.pulselib.data.gecko;
 
 import net.minecraft.util.RandomSource;
 
@@ -16,7 +16,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Random;
 
 public final class MolangParser
 {
@@ -42,6 +41,11 @@ public final class MolangParser
 	public interface Expression
 	{
 		float evaluate(Context context);
+
+		default PExpressionDependency dependency()
+		{
+			return PExpressionDependency.INSTANCE;
+		}
 
 		default float evaluate(Object data)
 		{
@@ -140,6 +144,21 @@ public final class MolangParser
 		public Context randomSeed(long seed)
 		{
 			this.random.setSeed(seed);
+			return this;
+		}
+
+		/** Copies per-frame query data without touching persistent variables or random state. */
+		public Context copyFrameValuesFrom(Context source)
+		{
+			this.queryValues.clear();
+			this.queryValues.putAll(source.queryValues);
+			this.contextValues.clear();
+			this.contextValues.putAll(source.contextValues);
+			this.queryResolver = source.queryResolver;
+			this.thisValue = source.thisValue;
+			this.thisX = source.thisX;
+			this.thisY = source.thisY;
+			this.thisZ = source.thisZ;
 			return this;
 		}
 
@@ -258,11 +277,13 @@ public final class MolangParser
 		Value evaluate(Evaluation evaluation);
 	}
 
-	private record Program(List<Node> statements) implements Expression
+	private record Program(List<Node> statements, PExpressionDependency dependency, Float constantValue) implements Expression
 	{
 		@Override
 		public float evaluate(Context context)
 		{
+			if (this.constantValue != null)
+				return this.constantValue;
 			Evaluation evaluation = new Evaluation(context == null ? new Context() : context);
 			Value value = Value.of(0f);
 			for (Node statement : this.statements)
@@ -640,7 +661,66 @@ public final class MolangParser
 		{
 			List<Node> statements = statements(TokenType.END);
 			expect(TokenType.END, "end of expression");
-			return new Program(statements);
+			PExpressionDependency dependency = dependency(statements);
+			Program program = new Program(statements, dependency, null);
+			return dependency == PExpressionDependency.CONSTANT ?
+					new Program(statements, dependency, program.evaluate(new Context())) :
+					program;
+		}
+
+		private static PExpressionDependency dependency(List<Node> nodes)
+		{
+			PExpressionDependency result = PExpressionDependency.CONSTANT;
+			for (Node node : nodes)
+				result = PExpressionDependency.combine(result, dependency(node));
+			return result;
+		}
+
+		private static PExpressionDependency dependency(Node node)
+		{
+			if (node instanceof Literal)
+				return PExpressionDependency.CONSTANT;
+			if (node instanceof Variable variable)
+				return variableDependency(variable.name());
+			if (node instanceof Call call)
+			{
+				PExpressionDependency result = dependency(call.arguments());
+				String name = normalizeName(call.name());
+				if (name.equals("math.random") || name.equals("math.random_integer") ||
+						name.equals("math.die_roll") || name.equals("math.die_roll_integer"))
+					return PExpressionDependency.STATEFUL;
+				return PExpressionDependency.combine(result, variableDependency(name));
+			}
+			if (node instanceof Unary unary)
+				return dependency(unary.value());
+			if (node instanceof Binary binary)
+				return PExpressionDependency.combine(dependency(binary.left()), dependency(binary.right()));
+			if (node instanceof Conditional conditional)
+				return PExpressionDependency.combine(dependency(conditional.condition()),
+						PExpressionDependency.combine(dependency(conditional.yes()), dependency(conditional.no())));
+			if (node instanceof Assignment)
+				return PExpressionDependency.STATEFUL;
+			if (node instanceof Block block)
+				return dependency(block.statements());
+			if (node instanceof Return returned)
+				return dependency(returned.value());
+			if (node instanceof FlowNode)
+				return PExpressionDependency.STATEFUL;
+			if (node instanceof Loop loop)
+				return PExpressionDependency.combine(dependency(loop.count()), dependency(loop.body()));
+			return PExpressionDependency.STATEFUL;
+		}
+
+		private static PExpressionDependency variableDependency(String name)
+		{
+			name = normalizeName(name);
+			if (name.equals("true") || name.equals("false") || name.equals("math.pi") || name.startsWith("math."))
+				return PExpressionDependency.CONSTANT;
+			if (name.equals("query.anim_time"))
+				return PExpressionDependency.TIME_ONLY;
+			if (name.startsWith("variable.") || name.startsWith("temp."))
+				return PExpressionDependency.STATEFUL;
+			return PExpressionDependency.INSTANCE;
 		}
 
 		private List<Node> statements(TokenType terminator)

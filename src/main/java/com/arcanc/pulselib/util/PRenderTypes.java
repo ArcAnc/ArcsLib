@@ -10,13 +10,16 @@
 package com.arcanc.pulselib.util;
 
 
+import com.mojang.blaze3d.GpuFormat;
+import com.mojang.blaze3d.PrimitiveTopology;
+import com.mojang.blaze3d.pipeline.BindGroupLayout;
 import com.mojang.blaze3d.pipeline.BlendFunction;
 import com.mojang.blaze3d.pipeline.ColorTargetState;
 import com.mojang.blaze3d.pipeline.DepthStencilState;
 import com.mojang.blaze3d.pipeline.RenderPipeline;
 import com.mojang.blaze3d.shaders.UniformType;
 import com.mojang.blaze3d.vertex.VertexFormat;
-import com.mojang.blaze3d.vertex.VertexFormatElement;
+import net.minecraft.client.renderer.BindGroupLayouts;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.client.renderer.rendertype.RenderSetup;
 import net.minecraft.client.renderer.rendertype.RenderType;
@@ -35,34 +38,53 @@ public class PRenderTypes
 	public static class RenderPipelinesProvider
 	{
 		private static final Set<RenderPipeline> PIPELINES = new HashSet<>();
-		
-		private static final RenderPipeline.Snippet TRIANGLES_SNIPPET = RenderPipeline.builder(RenderPipelines.MATRICES_PROJECTION_SNIPPET).
-				withVertexShader(PLibDatabase.rl("core/triangles")).
-				withFragmentShader(PLibDatabase.rl("core/triangles")).
+		private static final BindGroupLayout TRIANGLES_LAYOUT = BindGroupLayout.builder().
 				withSampler("Sampler0").
 				withSampler("Sampler2").
 				withUniform("Lighting", UniformType.UNIFORM_BUFFER).
 				withUniform("InstanceData", UniformType.UNIFORM_BUFFER).
-				withVertexFormat(VertexFormatProvider.POSITION_TEX_NORMAL, VertexFormat.Mode.TRIANGLES).
+				build();
+		private static final BindGroupLayout TRIANGLES_GUI_LAYOUT = BindGroupLayout.builder().
+				withUniform("ColorOverlay", UniformType.UNIFORM_BUFFER).
+				withUniform("Lighting", UniformType.UNIFORM_BUFFER).
+				withSampler("Sampler0").
+				withSampler("Sampler1").
+				withSampler("Sampler2").
+				build();
+		private static final BindGroupLayout TRIANGLES_INSTANT_LAYOUT = BindGroupLayout.builder().
+				withSampler("Sampler0").
+				withSampler("Sampler1").
+				withSampler("Sampler2").
+				withUniform("Lighting", UniformType.UNIFORM_BUFFER).
+				withUniform("ColorOverlay", UniformType.UNIFORM_BUFFER).
+				build();
+
+		private static final RenderPipeline.Snippet TRIANGLES_SNIPPET = RenderPipeline.builder(RenderPipelines.GLOBALS_SNIPPET).
+				withBindGroupLayout(BindGroupLayouts.MATRICES_PROJECTION).
+				withVertexShader(PLibDatabase.rl("core/triangles")).
+				withFragmentShader(PLibDatabase.rl("core/triangles")).
+				withBindGroupLayout(TRIANGLES_LAYOUT).
+				withVertexBinding(0, VertexFormatProvider.POSITION_TEX_NORMAL).
+				withPrimitiveTopology(PrimitiveTopology.TRIANGLES).
 				withDepthStencilState(DepthStencilState.DEFAULT).
 				buildSnippet();
 		
 		public static final RenderPipeline TRIANGLES_SOLID = registerPipeline(RenderPipeline.builder(TRIANGLES_SNIPPET).
 				withLocation(PLibDatabase.rl("pipeline/triangles_solid_no_cull")).
-				withSampler("Sampler1").
+				withBindGroupLayout(BindGroupLayouts.SAMPLER1).
 				withCull(false).
 				build());
 		
 		public static final RenderPipeline TRIANGLES_CUTOUT = registerPipeline(RenderPipeline.builder(TRIANGLES_SNIPPET).
 				withLocation(PLibDatabase.rl("pipeline/triangles_cutout_no_cull")).
-				withSampler("Sampler1").
+				withBindGroupLayout(BindGroupLayouts.SAMPLER1).
 				withShaderDefine("ALPHA_CUTOUT", 0.1F).
 				withCull(false).
 				build());
 		
 		public static final RenderPipeline TRIANGLES_TRANSLUCENT = registerPipeline(RenderPipeline.builder(TRIANGLES_SNIPPET).
 				withLocation(PLibDatabase.rl("pipeline/triangles_translucent_no_cull")).
-				withSampler("Sampler1").
+				withBindGroupLayout(BindGroupLayouts.SAMPLER1).
 				withShaderDefine("ALPHA_CUTOUT", 0.1F).
 				withCull(false).
 				withColorTargetState(new ColorTargetState(BlendFunction.TRANSLUCENT)).
@@ -70,7 +92,7 @@ public class PRenderTypes
 
 		public static final RenderPipeline TRIANGLES_EMISSIVE_CUTOUT = registerPipeline(RenderPipeline.builder(TRIANGLES_SNIPPET).
 				withLocation(PLibDatabase.rl("pipeline/triangles_emissive_cutout_no_cull")).
-				withSampler("Sampler1").
+				withBindGroupLayout(BindGroupLayouts.SAMPLER1).
 				withShaderDefine("EMISSIVE").
 				withShaderDefine("ALPHA_CUTOUT", 0.1F).
 				withCull(false).
@@ -78,40 +100,36 @@ public class PRenderTypes
 
 		public static final RenderPipeline TRIANGLES_EMISSIVE_TRANSLUCENT = registerPipeline(RenderPipeline.builder(TRIANGLES_SNIPPET).
 				withLocation(PLibDatabase.rl("pipeline/triangles_emissive_translucent_no_cull")).
-				withSampler("Sampler1").
+				withBindGroupLayout(BindGroupLayouts.SAMPLER1).
 				withShaderDefine("EMISSIVE").
 				withShaderDefine("ALPHA_CUTOUT", 0.1F).
 				withCull(false).
 				withColorTargetState(new ColorTargetState(BlendFunction.TRANSLUCENT)).
 				build());
 		
-		public static final RenderPipeline TRIANGLES_GUI = registerPipeline(RenderPipeline.builder(RenderPipelines.MATRICES_PROJECTION_SNIPPET).
+		public static final RenderPipeline TRIANGLES_GUI = registerPipeline(RenderPipeline.builder(RenderPipelines.GLOBALS_SNIPPET).
+				withBindGroupLayout(BindGroupLayouts.MATRICES_PROJECTION).
 				withVertexShader(PLibDatabase.rl("core/triangles_gui")).
 				withFragmentShader(PLibDatabase.rl("core/triangles_gui")).
 				withLocation(PLibDatabase.rl("pipeline/triangles_gui")).
-				withUniform("ColorOverlay", UniformType.UNIFORM_BUFFER).
-				withUniform("Lighting", UniformType.UNIFORM_BUFFER).
-				withSampler("Sampler0").
-				withSampler("Sampler1").
-				withSampler("Sampler2").
+				withBindGroupLayout(TRIANGLES_GUI_LAYOUT).
 				withShaderDefine("ALPHA_CUTOUT", 0.1F).
 				withCull(false).
 				withColorTargetState(new ColorTargetState(BlendFunction.TRANSLUCENT)).
 				withDepthStencilState(DepthStencilState.DEFAULT).
-				withVertexFormat(VertexFormatProvider.POSITION_TEX_NORMAL, VertexFormat.Mode.TRIANGLES).
+				withVertexBinding(0, VertexFormatProvider.POSITION_TEX_NORMAL).
+				withPrimitiveTopology(PrimitiveTopology.TRIANGLES).
 				build());
 
-		private static final RenderPipeline.Snippet TRIANGLES_INSTANT_SNIPPET = RenderPipeline.builder(RenderPipelines.MATRICES_PROJECTION_SNIPPET).
+		private static final RenderPipeline.Snippet TRIANGLES_INSTANT_SNIPPET = RenderPipeline.builder(RenderPipelines.GLOBALS_SNIPPET).
+				withBindGroupLayout(BindGroupLayouts.MATRICES_PROJECTION).
 				withVertexShader(PLibDatabase.rl("core/triangles_instant")).
 				withFragmentShader(PLibDatabase.rl("core/triangles_instant")).
-				withSampler("Sampler0").
-				withSampler("Sampler1").
-				withSampler("Sampler2").
-				withUniform("Lighting", UniformType.UNIFORM_BUFFER).
-				withUniform("ColorOverlay", UniformType.UNIFORM_BUFFER).
+				withBindGroupLayout(TRIANGLES_INSTANT_LAYOUT).
 				withCull(false).
 				withDepthStencilState(DepthStencilState.DEFAULT).
-				withVertexFormat(VertexFormatProvider.POSITION_TEX_NORMAL, VertexFormat.Mode.TRIANGLES).
+				withVertexBinding(0, VertexFormatProvider.POSITION_TEX_NORMAL).
+				withPrimitiveTopology(PrimitiveTopology.TRIANGLES).
 				buildSnippet();
 
 		public static final RenderPipeline TRIANGLES_INSTANT_CUTOUT = registerPipeline(RenderPipeline.builder(TRIANGLES_INSTANT_SNIPPET).
@@ -153,11 +171,10 @@ public class PRenderTypes
 	
 	public static class VertexFormatProvider
 	{
-		public static final VertexFormat POSITION_TEX_NORMAL = VertexFormat.builder().
-				add("Position", VertexFormatElement.POSITION).
-				add("UV0", VertexFormatElement.UV0).
-				add("Normal", VertexFormatElement.NORMAL).
-				padding(1).
+		public static final VertexFormat POSITION_TEX_NORMAL = VertexFormat.builder(0).
+				addAttribute("Position", GpuFormat.RGB32_FLOAT).
+				addAttribute("UV0", GpuFormat.RG32_FLOAT).
+				addAttribute("Normal", GpuFormat.RGBA8_SNORM).
 				build();
 	}
 	

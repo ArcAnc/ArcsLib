@@ -14,11 +14,12 @@ import com.arcanc.pulselib.content.model.deformer.PMeshDeformation;
 import com.arcanc.pulselib.util.PRenderTypes;
 import com.arcanc.pulselib.util.PTextureCache;
 import com.mojang.blaze3d.buffers.GpuBuffer;
+import com.mojang.blaze3d.buffers.GpuBufferSlice;
+import com.mojang.blaze3d.PrimitiveTopology;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.ByteBufferBuilder;
 import com.mojang.blaze3d.vertex.MeshData;
-import com.mojang.blaze3d.vertex.VertexFormat;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import org.joml.Vector3f;
 
@@ -33,17 +34,17 @@ public final class PDeformedMeshBuffers
 
 	private static final Map<PBakedMesh, IdentityHashMap<Object, GpuBuffer>> BUFFERS = new IdentityHashMap<>();
 
-	public static GpuBuffer resolve(PBakedMesh mesh, PMeshDeformation deformation)
+	public static GpuBufferSlice resolve(PBakedMesh mesh, PMeshDeformation deformation)
 	{
 		if (deformation == null || deformation.stack().isEmpty())
-			return mesh.vbo();
+			return mesh.vbo().slice();
 		IdentityHashMap<Object, GpuBuffer> buffers = BUFFERS.computeIfAbsent(mesh, ignored -> new IdentityHashMap<>());
 		GpuBuffer previous = buffers.remove(deformation.cacheKey());
 		if (previous != null)
 			previous.close();
 		GpuBuffer buffer = upload(mesh, deformation);
 		buffers.put(deformation.cacheKey(), buffer);
-		return buffer;
+		return buffer.slice();
 	}
 
 	public static void close(PBakedMesh mesh)
@@ -66,8 +67,8 @@ public final class PDeformedMeshBuffers
 		ByteBufferBuilder bytes = ByteBufferBuilder.exactlySized(
 				mesh.vertexCount() * PRenderTypes.VertexFormatProvider.POSITION_TEX_NORMAL.getVertexSize());
 		BufferBuilder builder = sprite.contents().name().getPath().equals("missingno")
-				? new BufferBuilder(bytes, VertexFormat.Mode.TRIANGLES, PRenderTypes.VertexFormatProvider.POSITION_TEX_NORMAL)
-				: new AtlasBufferBuilder(bytes, VertexFormat.Mode.TRIANGLES, PRenderTypes.VertexFormatProvider.POSITION_TEX_NORMAL, sprite);
+				? new BufferBuilder(bytes, PrimitiveTopology.TRIANGLES, PRenderTypes.VertexFormatProvider.POSITION_TEX_NORMAL)
+				: new AtlasBufferBuilder(bytes, PrimitiveTopology.TRIANGLES, PRenderTypes.VertexFormatProvider.POSITION_TEX_NORMAL, sprite);
 		for (int vertex = 0; vertex < mesh.vertexCount(); vertex++)
 		{
 			Vector3f position = new Vector3f(mesh.positions().get(vertex * 3), mesh.positions().get(vertex * 3 + 1), mesh.positions().get(vertex * 3 + 2));

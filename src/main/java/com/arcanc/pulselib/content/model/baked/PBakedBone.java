@@ -141,7 +141,7 @@ public class PBakedBone
 		Minecraft mc = PLibRenderHelper.mc();
 		
 		TextureAtlas atlas = PTextureCache.getTextureAtlas();
-		Matrix4f matrix4fStack = new Matrix4f(RenderSystem.getModelViewMatrix());
+		Matrix4f matrix4fStack = RenderSystem.getModelViewMatrixCopy();
 		matrix4fStack.mul(poseStack.last().pose());
 		GpuBufferSlice transforms = RenderSystem.getDynamicUniforms().
 				writeTransform(matrix4fStack, new Vector4f(1.0f, 1.0f, 1.0f, 1.0f), new Vector3f(), new Matrix4f());
@@ -172,9 +172,7 @@ public class PBakedBone
 			OverlayTexture overlayTexture = mc.gameRenderer.overlayTexture();
 			
 			this.ensureBufferInitialized();
-			try (GpuBuffer.MappedView colorLightOverlayMappedView = RenderSystem.getDevice().
-					createCommandEncoder().
-					mapBuffer(this.colorLightOverlay.currentBuffer(), false, true))
+			try (GpuBufferSlice.MappedView colorLightOverlayMappedView = this.colorLightOverlay.currentBuffer().map(false, true))
 			{
 				int u = meshContext.packedOverlay() & 0xFFFF;
 				int v = (meshContext.packedOverlay() >> 16) & 0xFFFF;
@@ -187,7 +185,7 @@ public class PBakedBone
 			}
 			
 			try(RenderPass pass = RenderSystem.getDevice().createCommandEncoder().
-					createRenderPass(mesh.uuid() :: toString, colorAttachment, OptionalInt.empty(), depthTexture, OptionalDouble.empty()))
+					createRenderPass(mesh.uuid() :: toString, colorAttachment, Optional.empty(), depthTexture, OptionalDouble.empty()))
 			{
 				pass.setPipeline(type.pipeline());
 				RenderSystem.bindDefaultUniforms(pass);
@@ -199,7 +197,7 @@ public class PBakedBone
 				pass.setVertexBuffer(0, PDeformedMeshBuffers.resolve(mesh, meshContext.deformation()));
 				pass.setIndexBuffer(mesh.indices(), mesh.indexType());
 				
-				pass.drawIndexed(0, 0, mesh.indicesCount(), 1);
+				pass.drawIndexed(mesh.indicesCount(), 1, 0, 0, 0);
 			}
 		});
 		

@@ -7,7 +7,7 @@
  * Details can be found in the license file in the root folder of this project
  */
 
-package com.arcanc.pulselib.data;
+package com.arcanc.pulselib.data.gltf;
 
 
 import com.arcanc.pulselib.content.model.animation.PAnimation;
@@ -16,6 +16,7 @@ import com.arcanc.pulselib.content.model.animation.PAnimationEventType;
 import com.arcanc.pulselib.content.registration.PLibRegistration;
 import com.arcanc.pulselib.util.PLibDatabase;
 import com.google.gson.JsonElement;
+import com.google.gson.JsonNull;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.mojang.serialization.JsonOps;
@@ -147,11 +148,11 @@ public class PGltfAnimationEventSidecarParser
 	private static JsonElement member(JsonElement element, String name)
 	{
 		if (!isObject(element))
-			return com.google.gson.JsonNull.INSTANCE;
+			return JsonNull.INSTANCE;
 		
 		JsonObject object = element.getAsJsonObject();
 		JsonElement value = object.get(name);
-		return value == null ? com.google.gson.JsonNull.INSTANCE : value;
+		return value == null ? JsonNull.INSTANCE : value;
 	}
 	
 	private static boolean isMissing(@Nullable JsonElement element)

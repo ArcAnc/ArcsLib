@@ -7,10 +7,11 @@
  * Details can be found in the license file in the root folder of this project
  */
 
-package com.arcanc.pulselib.data;
+package com.arcanc.pulselib.data.gecko;
 
 
 import com.arcanc.pulselib.content.model.PModel;
+import com.arcanc.pulselib.data.PModelLoader;
 import com.arcanc.pulselib.util.PLibDatabase;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import net.minecraft.resources.Identifier;
