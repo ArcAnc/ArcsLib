@@ -2,8 +2,8 @@ site_name: PulseLib
 site_description: Animation library for Minecraft mods
 site_url: https://arcanc.github.io/PulseLib/
 
-repo_name: ArcAnc/PulseLib
-repo_url: https://github.com/ArcAnc/PulseLib
+repo_name: ArcAnc/ArcsLib
+repo_url: https://github.com/ArcAnc/ArcsLib/tree/26.1
 
 docs_dir: .
 site_dir: ../site

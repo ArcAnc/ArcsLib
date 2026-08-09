@@ -1,6 +1,6 @@
 PulseLib does not draw model textures directly from arbitrary files. It first collects them into a runtime atlas, then the baked model stores UVs for that atlas. This is why texture registration is a required step instead of an optional convenience.
 
-Texture registration uses [`PulseLibEvents.RegisterTextureEvent`](https://github.com/ArcAnc/PulseLib/blob/1.21.1/src/main/java/com/arcanc/pulselib/content/event/PulseLibEvents.java).
+Texture registration uses [`PulseLibEvents.RegisterTextureEvent`](https://github.com/ArcAnc/ArcsLib/blob/26.1/src/main/java/com/arcanc/pulselib/content/event/PulseLibEvents.java).
 
 ## Register textures
 
@@ -11,9 +11,9 @@ Subscribe on the mod event bus and add every texture that a PulseLib model may u
 public final class ExampleClientEvents {
     @SubscribeEvent
     public static void registerPulseTextures(PulseLibEvents.RegisterTextureEvent event) {
-        event.addTextureLocation(ResourceLocation.fromNamespaceAndPath(
+        event.addTextureLocation(Identifier.fromNamespaceAndPath(
                 ExampleMod.MOD_ID, "entity/robot/body"));
-        event.addTextureLocation(ResourceLocation.fromNamespaceAndPath(
+        event.addTextureLocation(Identifier.fromNamespaceAndPath(
                 ExampleMod.MOD_ID, "entity/robot/eyes"));
     }
 }
@@ -28,7 +28,7 @@ assets/examplemod/textures/entity/robot/body.png
 becomes:
 
 ```java
-ResourceLocation.fromNamespaceAndPath("examplemod", "entity/robot/body")
+Identifier.fromNamespaceAndPath("examplemod", "entity/robot/body")
 ```
 
 ## Runtime atlas
@@ -37,8 +37,8 @@ The atlas is registered by PulseLib itself. Your mod only contributes texture lo
 
 Runtime atlas classes:
 
-* [`PTextureCache`](https://github.com/ArcAnc/PulseLib/blob/1.21.1/src/main/java/com/arcanc/pulselib/util/PTextureCache.java)
-* [`RuntimeLoader`](https://github.com/ArcAnc/PulseLib/blob/1.21.1/src/main/java/com/arcanc/pulselib/content/model/textures/atlas/RuntimeLoader.java)
+* [`PTextureCache`](https://github.com/ArcAnc/ArcsLib/blob/26.1/src/main/java/com/arcanc/pulselib/util/PTextureCache.java)
+* [`RuntimeLoader`](https://github.com/ArcAnc/ArcsLib/blob/26.1/src/main/java/com/arcanc/pulselib/content/model/textures/atlas/RuntimeLoader.java)
 
 PulseLib registers the atlas at:
 
@@ -50,7 +50,7 @@ Renderers normally pass `PTextureCache.ATLAS_LOCATION` to `PRenderTypes`, so you
 
 ## Emissive textures
 
-Emissive textures are useful for eyes, screens, lamps, energy parts, and other pieces that should ignore normal light. PulseLib reads this flag from texture metadata through [`PLibMetadata`](https://github.com/ArcAnc/PulseLib/blob/1.21.1/src/main/java/com/arcanc/pulselib/content/model/textures/atlas/PLibMetadata.java).
+Emissive textures are useful for eyes, screens, lamps, energy parts, and other pieces that should ignore normal light. PulseLib reads this flag from texture metadata through [`PLibSpriteMetadata`](https://github.com/ArcAnc/ArcsLib/blob/26.1/src/main/java/com/arcanc/pulselib/content/model/textures/atlas/PLibSpriteMetadata.java).
 
 To mark a texture as emissive, add a `.png.mcmeta` file next to it:
 
@@ -76,17 +76,15 @@ PRenderTypes.RenderTypeProvider.emissiveVariant(baseType, PTextureCache.ATLAS_LO
 You can also choose an emissive render type directly in custom rendering code:
 
 ```java
-PRenderTypes.RenderTypeProvider::trianglesSolidEmissive
-PRenderTypes.RenderTypeProvider::trianglesCutoutEmissive
-PRenderTypes.RenderTypeProvider::trianglesTranslucentEmissive
-PRenderTypes.RenderTypeProvider::trianglesGuiEmissive
+PRenderTypes.RenderTypeProvider::trianglesEmissiveCutout
+PRenderTypes.RenderTypeProvider::trianglesEmissiveTranslucent
 ```
 
-`trianglesLitEmissive` remains only as the compatibility counterpart of `trianglesLit`; it is not a distinct shader variant for new rendering code.
+Choose the cutout or translucent variant according to the desired blend mode. There is no separate solid or GUI emissive render type in 26.1.
 
 Classes used:
 
-* [`PTextureCache`](https://github.com/ArcAnc/PulseLib/blob/1.21.1/src/main/java/com/arcanc/pulselib/util/PTextureCache.java)
-* [`RuntimeLoader`](https://github.com/ArcAnc/PulseLib/blob/1.21.1/src/main/java/com/arcanc/pulselib/content/model/textures/atlas/RuntimeLoader.java)
-* [`PLibMetadata`](https://github.com/ArcAnc/PulseLib/blob/1.21.1/src/main/java/com/arcanc/pulselib/content/model/textures/atlas/PLibMetadata.java)
-* [`PRenderTypes`](https://github.com/ArcAnc/PulseLib/blob/1.21.1/src/main/java/com/arcanc/pulselib/util/PRenderTypes.java)
+* [`PTextureCache`](https://github.com/ArcAnc/ArcsLib/blob/26.1/src/main/java/com/arcanc/pulselib/util/PTextureCache.java)
+* [`RuntimeLoader`](https://github.com/ArcAnc/ArcsLib/blob/26.1/src/main/java/com/arcanc/pulselib/content/model/textures/atlas/RuntimeLoader.java)
+* [`PLibSpriteMetadata`](https://github.com/ArcAnc/ArcsLib/blob/26.1/src/main/java/com/arcanc/pulselib/content/model/textures/atlas/PLibSpriteMetadata.java)
+* [`PRenderTypes`](https://github.com/ArcAnc/ArcsLib/blob/26.1/src/main/java/com/arcanc/pulselib/util/PRenderTypes.java)

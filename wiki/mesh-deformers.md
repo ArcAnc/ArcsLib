@@ -81,7 +81,7 @@ Implement `PMeshDeformer<D>` for a new operation. `codec()` describes a serializ
 
 ```java
 public final class MyDeformer implements PMeshDeformer<MyDefinition> {
-    @Override public ResourceLocation id() { return MY_ID; }
+    @Override public Identifier id() { return MY_ID; }
     @Override public MapCodec<MyDefinition> codec() { return MyDefinition.CODEC; }
 
     @Override

@@ -1,4 +1,4 @@
-Entities are the most natural fit for PulseLib: each entity already has its own lifetime, position, rotation, and tick state. The entity implements [`PAnimatable`](https://github.com/ArcAnc/PulseLib/blob/1.21.1/src/main/java/com/arcanc/pulselib/content/animatable/PAnimatable.java), and [`PEntityRenderer`](https://github.com/ArcAnc/PulseLib/blob/1.21.1/src/main/java/com/arcanc/pulselib/content/renderer/PEntityRenderer.java) renders the animated model.
+Entities are the most natural fit for PulseLib: each entity already has its own lifetime, position, rotation, and tick state. The entity implements [`PAnimatable`](https://github.com/ArcAnc/ArcsLib/blob/26.1/src/main/java/com/arcanc/pulselib/content/animatable/PAnimatable.java), and [`PEntityRenderer`](https://github.com/ArcAnc/ArcsLib/blob/26.1/src/main/java/com/arcanc/pulselib/content/renderer/PEntityRenderer.java) renders the animated model.
 
 Use entity controllers to translate gameplay state into animation state. Do not put rendering decisions into the AI goals or renderer when a controller can express the same rule cleanly.
 
@@ -43,12 +43,17 @@ public class RobotEntity extends PathfinderMob implements PAnimatable<RobotEntit
 The renderer is mostly declarative: model data plus render type. Living entity rotation and scaling are handled by `PEntityRenderer`.
 
 ```java
-public class RobotRenderer extends PEntityRenderer<RobotEntity> {
+public class RobotRenderer extends PEntityRenderer<RobotEntity, PEntityRenderState.LivingImpl<RobotEntity>> {
     public RobotRenderer(EntityRendererProvider.Context context) {
         super(context,
                 new DefaultEntityModelData.DefaultEntityModelDataBuilder(
-                        ResourceLocation.fromNamespaceAndPath("examplemod", "robot")).build(),
+                        Identifier.fromNamespaceAndPath("examplemod", "robot")).build(),
                 PRenderTypes.RenderTypeProvider::trianglesSolid);
+    }
+
+    @Override
+    public PEntityRenderState.LivingImpl<RobotEntity> createRenderState() {
+        return PLibHelper.livingRenderState();
     }
 }
 ```
@@ -73,10 +78,10 @@ For `LivingEntity`, `PEntityRenderer` follows several vanilla transforms so cust
 
 ## Layers
 
-Use [`PEntityRenderLayer`](https://github.com/ArcAnc/PulseLib/blob/1.21.1/src/main/java/com/arcanc/pulselib/content/renderer/PEntityRenderLayer.java) for extra model parts attached to entity bones: armor plates, backpacks, equipment, or conditional body parts. See [Entity Render Layers](Entity-Render-Layers).
+Use [`PEntityRenderLayer`](https://github.com/ArcAnc/ArcsLib/blob/26.1/src/main/java/com/arcanc/pulselib/content/renderer/PEntityRenderLayer.java) for extra model parts attached to entity bones: armor plates, backpacks, equipment, or conditional body parts. See [Entity Render Layers](entity-render-layers.md).
 
 Classes used:
 
-* [`PEntityRenderer`](https://github.com/ArcAnc/PulseLib/blob/1.21.1/src/main/java/com/arcanc/pulselib/content/renderer/PEntityRenderer.java)
-* [`DefaultEntityModelData`](https://github.com/ArcAnc/PulseLib/blob/1.21.1/src/main/java/com/arcanc/pulselib/content/renderer/modelData/DefaultEntityModelData.java)
-* [`PAnimationController`](https://github.com/ArcAnc/PulseLib/blob/1.21.1/src/main/java/com/arcanc/pulselib/content/animatable/PAnimationController.java)
+* [`PEntityRenderer`](https://github.com/ArcAnc/ArcsLib/blob/26.1/src/main/java/com/arcanc/pulselib/content/renderer/PEntityRenderer.java)
+* [`DefaultEntityModelData`](https://github.com/ArcAnc/ArcsLib/blob/26.1/src/main/java/com/arcanc/pulselib/content/renderer/modelData/DefaultEntityModelData.java)
+* [`PAnimationController`](https://github.com/ArcAnc/ArcsLib/blob/26.1/src/main/java/com/arcanc/pulselib/content/animatable/PAnimationController.java)

@@ -1,10 +1,10 @@
 # Table of Content
-* [Full Video Tutorial](https://github.com/ArcAnc/PulseLib/wiki/Basic#full-video-tutorial)
-* [Rigging](https://github.com/ArcAnc/PulseLib/wiki/Basic#rigging)
-    - [Grouping](https://github.com/ArcAnc/PulseLib/wiki/Basic#rigging)
-    - [Parenting and Pivots](https://github.com/ArcAnc/PulseLib/wiki/Basic#parenting-and-pivots)
-* [Animating a Model in Blockbench](https://github.com/ArcAnc/PulseLib/wiki/Basic#animating-a-model-in-blockbench)
-* [Exporting the Model](https://github.com/ArcAnc/PulseLib/wiki/Basic#exporting-model)
+* [Full Video Tutorial](#full-video-tutorial)
+* [Rigging](#rigging)
+    - [Grouping](#grouping)
+    - [Parenting and Pivots](#parenting-and-pivots)
+* [Animating a Model in Blockbench](#animating-a-model-in-blockbench)
+* [Exporting the Model](#exporting-model)
 
 ## Full Video Tutorial
 

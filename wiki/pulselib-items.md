@@ -1,20 +1,10 @@
 Items need a slightly different setup from entities and block entities. Minecraft creates one `Item` object for the item type, but the player can hold many `ItemStack`s of that type. If animation state lived directly on the item object, every stack would share the same animation.
 
-PulseLib handles this by using [`AnimManagerKey`](https://github.com/ArcAnc/PulseLib/blob/1.21.1/src/main/java/com/arcanc/pulselib/content/animatable/AnimManagerKey.java) and [`SingletonAnimationManager`](https://github.com/ArcAnc/PulseLib/blob/1.21.1/src/main/java/com/arcanc/pulselib/content/animatable/singleton/SingletonAnimationManager.java). The item still implements [`PItemAnimatable`](https://github.com/ArcAnc/PulseLib/blob/1.21.1/src/main/java/com/arcanc/pulselib/content/animatable/PItemAnimatable.java), but the actual manager is resolved per key.
+PulseLib handles this by using [`AnimManagerKey`](https://github.com/ArcAnc/ArcsLib/blob/26.1/src/main/java/com/arcanc/pulselib/content/animatable/AnimManagerKey.java) and [`SingletonAnimationManager`](https://github.com/ArcAnc/ArcsLib/blob/26.1/src/main/java/com/arcanc/pulselib/content/animatable/singleton/SingletonAnimationManager.java). The item still implements [`PItemAnimatable`](https://github.com/ArcAnc/ArcsLib/blob/26.1/src/main/java/com/arcanc/pulselib/content/animatable/PItemAnimatable.java), but the actual manager is resolved per key.
 
-## Item model JSON
+## Item model definition
 
-Create a vanilla item model file. This is not the animated model; it tells Minecraft to use the custom item renderer.
-
-```text
-assets/<modid>/models/item/<item>.json
-```
-
-```json
-{
-  "parent": "builtin/entity"
-}
-```
+The old `models/item/<item>.json` file with `"parent": "builtin/entity"` does not select a PulseLib renderer on 26.1. Register a `SpecialModelRenderer.Unbaked` codec, then reference that registered special-model type from the item's 26.1 model definition. The wrapper below is the PulseLib side of that setup.
 
 ## Item class
 
@@ -45,39 +35,54 @@ public class WandItem extends Item implements PItemAnimatable<WandItem> {
 
     @Override
     public IClientItemExtensions registerClientExtension() {
-        return new IClientItemExtensions() {
-            private final WandRenderer renderer = new WandRenderer(
-                    Minecraft.getInstance().getBlockEntityRenderDispatcher(),
-                    Minecraft.getInstance().getEntityModels());
-
-            @Override
-            public BlockEntityWithoutLevelRenderer getCustomRenderer() {
-                return this.renderer;
-            }
-        };
+        // Add custom item-extension behaviour here if it is needed.
+        // Animated rendering itself is provided by the 26.1 special-model renderer below.
+        return IClientItemExtensions.DEFAULT;
     }
 }
 ```
 
 ## Renderer
 
-The renderer points at the GLB model and selects a PulseLib render type. It also receives the vanilla dispatcher/model-set objects required by `BlockEntityWithoutLevelRenderer`.
+The 26.1 renderer is a `SpecialModelRenderer`, not a `BlockEntityWithoutLevelRenderer`. It points at model data, selects a PulseLib render type, and creates a render state for every item render.
 
 ```java
-public class WandRenderer extends PItemRenderer<WandItem> {
-    public WandRenderer(BlockEntityRenderDispatcher blockEntityRenderDispatcher,
-                        EntityModelSet entityModelSet) {
-        super(new DefaultItemModelData.DefaultItemModelDataBuilder(
-                        ResourceLocation.fromNamespaceAndPath("examplemod", "wand"))
-                        .build(),
-                PRenderTypes.RenderTypeProvider::trianglesSolid,
-                blockEntityRenderDispatcher,
-                entityModelSet);
+public class WandRenderer extends PItemRenderer<WandItem, WandRenderState> {
+    public WandRenderer(PModelData data) {
+        super(data, PRenderTypes.RenderTypeProvider::trianglesSolid);
+    }
+
+    @Override
+    protected WandRenderState createRenderState() {
+        return new WandRenderState();
+    }
+}
+
+public class WandRenderState extends PItemRenderState.Impl<WandItem> {}
+```
+
+Provide an `Unbaked` special-model wrapper that bakes this renderer:
+
+```java
+public record Unbaked(PModelData data)
+        implements SpecialModelRenderer.Unbaked<WandRenderState> {
+    public static final MapCodec<Unbaked> MAP_CODEC = PModelData.CODEC.xmap(Unbaked::new, Unbaked::data);
+
+    @Override
+    public WandRenderer bake(BakingContext context) {
+        return new WandRenderer(data);
+    }
+
+    @Override
+    public MapCodec<Unbaked> type() {
+        return MAP_CODEC;
     }
 }
 ```
 
-PulseLib automatically registers item client extensions for items that implement `PItemAnimatable`, so you do not need a separate client extension event for the common case.
+Register that unbaked codec with NeoForge's special-model renderer registration and reference it from the item's 26.1 model definition. PulseLib does not convert a legacy `builtin/entity` JSON into this renderer automatically.
+
+The item extension returned by `registerClientExtension()` is still registered automatically for `PItemAnimatable` items by PulseLib's client setup.
 
 ## Stack-specific state
 
@@ -85,7 +90,7 @@ PulseLib automatically registers item client extensions for items that implement
 
 Classes used:
 
-* [`PItemAnimatable`](https://github.com/ArcAnc/PulseLib/blob/1.21.1/src/main/java/com/arcanc/pulselib/content/animatable/PItemAnimatable.java)
-* [`PItemRenderer`](https://github.com/ArcAnc/PulseLib/blob/1.21.1/src/main/java/com/arcanc/pulselib/content/renderer/PItemRenderer.java)
-* [`SingletonAnimationManager`](https://github.com/ArcAnc/PulseLib/blob/1.21.1/src/main/java/com/arcanc/pulselib/content/animatable/singleton/SingletonAnimationManager.java)
-* [`DefaultItemModelData`](https://github.com/ArcAnc/PulseLib/blob/1.21.1/src/main/java/com/arcanc/pulselib/content/renderer/modelData/DefaultItemModelData.java)
+* [`PItemAnimatable`](https://github.com/ArcAnc/ArcsLib/blob/26.1/src/main/java/com/arcanc/pulselib/content/animatable/PItemAnimatable.java)
+* [`PItemRenderer`](https://github.com/ArcAnc/ArcsLib/blob/26.1/src/main/java/com/arcanc/pulselib/content/renderer/PItemRenderer.java)
+* [`SingletonAnimationManager`](https://github.com/ArcAnc/ArcsLib/blob/26.1/src/main/java/com/arcanc/pulselib/content/animatable/singleton/SingletonAnimationManager.java)
+* [`DefaultItemModelData`](https://github.com/ArcAnc/ArcsLib/blob/26.1/src/main/java/com/arcanc/pulselib/content/renderer/modelData/DefaultItemModelData.java)

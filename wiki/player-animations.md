@@ -10,7 +10,7 @@ The API is client-only. Register definitions on the mod event bus through `Pulse
         value = Dist.CLIENT)
 public final class ExamplePlayerAnimations {
     private static final PModelData COMBAT_MODEL = new PModelData.Builder(
-            ResourceLocation.fromNamespaceAndPath(ExampleMod.MOD_ID, "player/combat"),
+            Identifier.fromNamespaceAndPath(ExampleMod.MOD_ID, "player/combat"),
             "player",
             PGeckoModelLoader.INSTANCE.id()).build();
 
@@ -21,7 +21,7 @@ public final class ExamplePlayerAnimations {
     @SubscribeEvent
     public static void register(PulseLibEvents.PlayerAnimationRegistrationEvent event) {
         event.registration().register(
-                ResourceLocation.fromNamespaceAndPath(ExampleMod.MOD_ID, "combat_pose"),
+                Identifier.fromNamespaceAndPath(ExampleMod.MOD_ID, "combat_pose"),
                 PPlayerAnimationDefinition.builder(COMBAT_MODEL)
                         .when(player -> player.getMainHandItem().is(MyItems.KATANA.get()))
                         .bind(PPlayerPart.BODY, "body")
