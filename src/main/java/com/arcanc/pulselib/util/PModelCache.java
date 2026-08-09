@@ -15,6 +15,7 @@ import com.arcanc.pulselib.content.model.PMesh;
 import com.arcanc.pulselib.content.model.PModel;
 import com.arcanc.pulselib.content.model.baked.AtlasBufferBuilder;
 import com.arcanc.pulselib.content.model.baked.PBakedBone;
+import com.arcanc.pulselib.content.model.baked.PDeformedMeshBuffers;
 import com.arcanc.pulselib.content.model.baked.PBakedMesh;
 import com.arcanc.pulselib.content.model.baked.PBakedModel;
 import com.arcanc.pulselib.content.model.textures.atlas.PLibSpriteMetadata;
@@ -122,6 +123,7 @@ public class PModelCache
 	{
 		bone.meshes().forEach(mesh ->
 		{
+			PDeformedMeshBuffers.close(mesh);
 			mesh.vbo().close();
 			mesh.indices().close();
 		});
@@ -222,7 +224,9 @@ public class PModelCache
 								mesh.indicesCount(),
 								type,
 								mesh.texture(),
-								emissive));
+								emissive,
+								mesh,
+								loc));
 					}
 				}
 			}

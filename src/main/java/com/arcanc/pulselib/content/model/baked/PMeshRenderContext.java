@@ -9,7 +9,7 @@
 
 package com.arcanc.pulselib.content.model.baked;
 
-
+import com.arcanc.pulselib.content.model.deformer.PMeshDeformation;
 import net.minecraft.client.renderer.rendertype.RenderType;
 import net.minecraft.resources.Identifier;
 
@@ -19,6 +19,11 @@ public record PMeshRenderContext(
 		Function<Identifier, RenderType> renderType,
 		int color,
 		int packedLight,
-		int packedOverlay)
+		int packedOverlay,
+		PMeshDeformation deformation)
 {
+	public PMeshRenderContext(Function<Identifier, RenderType> renderType, int color, int packedLight, int packedOverlay)
+	{
+		this(renderType, color, packedLight, packedOverlay, null);
+	}
 }
