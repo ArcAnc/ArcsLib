@@ -24,7 +24,7 @@ Welcome to our [Wiki][wiki]
 
 ### Maven
 
-You can find Maven setup details in the [installation guide](https://arcanc.github.io/PulseLib/1.21.1/installation/).
+You can find Maven setup details in the [installation guide](https://arcanc.github.io/PulseLib/master/installation/).
 
 ### Contributing
 

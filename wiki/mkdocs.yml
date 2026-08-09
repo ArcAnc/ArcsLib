@@ -3,7 +3,7 @@ site_description: Animation library for Minecraft mods
 site_url: https://arcanc.github.io/PulseLib/
 
 repo_name: ArcAnc/PulseLib
-repo_url: https://github.com/ArcAnc/PulseLib/tree/26.1
+repo_url: https://github.com/ArcAnc/PulseLib/tree/master
 
 docs_dir: .
 site_dir: ../site
@@ -64,6 +64,7 @@ nav:
       - ModelData: modeldata.md
       - Animatables and Controllers: animatables-and-controllers.md
       - Animation Events: animation-events.md
+      - Molang Animations: molang-animations.md
       - Renderers: renderers.md
       - Render Types and Queue: render-types-and-queue.md
       - Textures and Emissive: textures-and-emissive.md

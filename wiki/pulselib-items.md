@@ -1,10 +1,10 @@
 Items need a slightly different setup from entities and block entities. Minecraft creates one `Item` object for the item type, but the player can hold many `ItemStack`s of that type. If animation state lived directly on the item object, every stack would share the same animation.
 
-PulseLib handles this by using [`AnimManagerKey`](https://github.com/ArcAnc/PulseLib/blob/26.1/src/main/java/com/arcanc/pulselib/content/animatable/AnimManagerKey.java) and [`SingletonAnimationManager`](https://github.com/ArcAnc/PulseLib/blob/26.1/src/main/java/com/arcanc/pulselib/content/animatable/singleton/SingletonAnimationManager.java). The item still implements [`PItemAnimatable`](https://github.com/ArcAnc/PulseLib/blob/26.1/src/main/java/com/arcanc/pulselib/content/animatable/PItemAnimatable.java), but the actual manager is resolved per key.
+PulseLib handles this by using [`AnimManagerKey`](https://github.com/ArcAnc/PulseLib/blob/master/src/main/java/com/arcanc/pulselib/content/animatable/AnimManagerKey.java) and [`SingletonAnimationManager`](https://github.com/ArcAnc/PulseLib/blob/master/src/main/java/com/arcanc/pulselib/content/animatable/singleton/SingletonAnimationManager.java). The item still implements [`PItemAnimatable`](https://github.com/ArcAnc/PulseLib/blob/master/src/main/java/com/arcanc/pulselib/content/animatable/PItemAnimatable.java), but the actual manager is resolved per key.
 
 ## Item model definition
 
-The old `models/item/<item>.json` file with `"parent": "builtin/entity"` does not select a PulseLib renderer on 26.1. Register a `SpecialModelRenderer.Unbaked` codec, then reference that registered special-model type from the item's 26.1 model definition. The wrapper below is the PulseLib side of that setup.
+The old `models/item/<item>.json` file with `"parent": "builtin/entity"` does not select a PulseLib renderer on 26.2. Register a `SpecialModelRenderer.Unbaked` codec, then reference that registered special-model type from the item's 26.2 model definition. The wrapper below is the PulseLib side of that setup.
 
 ## Item class
 
@@ -36,7 +36,7 @@ public class WandItem extends Item implements PItemAnimatable<WandItem> {
     @Override
     public IClientItemExtensions registerClientExtension() {
         // Add custom item-extension behaviour here if it is needed.
-        // Animated rendering itself is provided by the 26.1 special-model renderer below.
+        // Animated rendering itself is provided by the 26.2 special-model renderer below.
         return IClientItemExtensions.DEFAULT;
     }
 }
@@ -44,7 +44,7 @@ public class WandItem extends Item implements PItemAnimatable<WandItem> {
 
 ## Renderer
 
-The 26.1 renderer is a `SpecialModelRenderer`, not a `BlockEntityWithoutLevelRenderer`. It points at model data, selects a PulseLib render type, and creates a render state for every item render.
+The 26.2 renderer is a `SpecialModelRenderer`, not a `BlockEntityWithoutLevelRenderer`. It points at model data, selects a PulseLib render type, and creates a render state for every item render.
 
 ```java
 public class WandRenderer extends PItemRenderer<WandItem, WandRenderState> {
@@ -80,7 +80,7 @@ public record Unbaked(PModelData data)
 }
 ```
 
-Register that unbaked codec with NeoForge's special-model renderer registration and reference it from the item's 26.1 model definition. PulseLib does not convert a legacy `builtin/entity` JSON into this renderer automatically.
+Register that unbaked codec with NeoForge's special-model renderer registration and reference it from the item's 26.2 model definition. PulseLib does not convert a legacy `builtin/entity` JSON into this renderer automatically.
 
 The item extension returned by `registerClientExtension()` is still registered automatically for `PItemAnimatable` items by PulseLib's client setup.
 
@@ -90,7 +90,7 @@ The item extension returned by `registerClientExtension()` is still registered a
 
 Classes used:
 
-* [`PItemAnimatable`](https://github.com/ArcAnc/PulseLib/blob/26.1/src/main/java/com/arcanc/pulselib/content/animatable/PItemAnimatable.java)
-* [`PItemRenderer`](https://github.com/ArcAnc/PulseLib/blob/26.1/src/main/java/com/arcanc/pulselib/content/renderer/PItemRenderer.java)
-* [`SingletonAnimationManager`](https://github.com/ArcAnc/PulseLib/blob/26.1/src/main/java/com/arcanc/pulselib/content/animatable/singleton/SingletonAnimationManager.java)
-* [`DefaultItemModelData`](https://github.com/ArcAnc/PulseLib/blob/26.1/src/main/java/com/arcanc/pulselib/content/renderer/modelData/DefaultItemModelData.java)
+* [`PItemAnimatable`](https://github.com/ArcAnc/PulseLib/blob/master/src/main/java/com/arcanc/pulselib/content/animatable/PItemAnimatable.java)
+* [`PItemRenderer`](https://github.com/ArcAnc/PulseLib/blob/master/src/main/java/com/arcanc/pulselib/content/renderer/PItemRenderer.java)
+* [`SingletonAnimationManager`](https://github.com/ArcAnc/PulseLib/blob/master/src/main/java/com/arcanc/pulselib/content/animatable/singleton/SingletonAnimationManager.java)
+* [`DefaultItemModelData`](https://github.com/ArcAnc/PulseLib/blob/master/src/main/java/com/arcanc/pulselib/content/renderer/modelData/DefaultItemModelData.java)

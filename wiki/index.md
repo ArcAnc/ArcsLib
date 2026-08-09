@@ -40,4 +40,4 @@ If you would like to support the development of PulseLib, you can do so through 
 ---
 
 All code and artwork are distributed under the  
-[![Static Badge](https://img.shields.io/badge/license-Arc's_License_of_Common_Sense-black?style=for-the-badge)](https://github.com/ArcAnc/PulseLib/blob/26.1/LICENSE.txt)
+[![Static Badge](https://img.shields.io/badge/license-Arc's_License_of_Common_Sense-black?style=for-the-badge)](https://github.com/ArcAnc/PulseLib/blob/master/LICENSE.txt)

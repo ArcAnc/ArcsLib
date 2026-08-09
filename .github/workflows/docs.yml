@@ -56,12 +56,8 @@ jobs:
           VERSION="${GITHUB_REF_NAME}"
 
           if [[ "$VERSION" == "master" ]]; then
-            mike deploy \
-              --push \
-              --update-aliases \
-              "$VERSION" latest
-
-            mike set-default --push latest
+            mike deploy --push "$VERSION"
+            mike set-default --push "$VERSION"
           else
             mike deploy --push "$VERSION"
           fi
