@@ -959,6 +959,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../mesh-deformers.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Mesh Deformers
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../gui-rendering/" class="md-nav__link">
         
   
@@ -1190,6 +1218,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#mesh-deformers" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Mesh deformers
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#events-and-helpers" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1296,6 +1335,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#mesh-deformers" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Mesh deformers
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#events-and-helpers" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1367,9 +1417,16 @@
 </ul>
 <h2 id="player-animations">Player animations<a class="headerlink" href="#player-animations" title="Permanent link">&para;</a></h2>
 <ul>
-<li><a href="https://github.com/ArcAnc/PulseLib/blob/1.21.1/src/main/java/com/arcanc/pulselib/content/player/animation/PPlayerAnimationDefinition.java"><code>PPlayerAnimationDefinition</code></a> configures bindings, masks, blend modes, weights, activation crossfades, cycle synchronization, controllers, and Molang queries.</li>
+<li><a href="https://github.com/ArcAnc/PulseLib/blob/1.21.1/src/main/java/com/arcanc/pulselib/content/player/animation/PPlayerAnimationDefinition.java"><code>PPlayerAnimationDefinition</code></a> configures bindings, masks, blend modes, weights, activation crossfades, cycle synchronization, controllers, Molang queries, and animation-owned mesh deformers through <code>Builder.deform(...)</code>.</li>
 <li><a href="https://github.com/ArcAnc/PulseLib/blob/1.21.1/src/main/java/com/arcanc/pulselib/content/player/animation/PPlayerAnimations.java"><code>PPlayerAnimations</code></a>, <a href="https://github.com/ArcAnc/PulseLib/blob/1.21.1/src/main/java/com/arcanc/pulselib/content/player/animation/PPlayerAnimationHandle.java"><code>PPlayerAnimationHandle</code></a>, and <a href="https://github.com/ArcAnc/PulseLib/blob/1.21.1/src/main/java/com/arcanc/pulselib/content/player/animation/PPlayerAnimationInstance.java"><code>PPlayerAnimationInstance</code></a> expose runtime registration and per-player state.</li>
 <li><a href="https://github.com/ArcAnc/PulseLib/blob/1.21.1/src/main/java/com/arcanc/pulselib/content/player/animation/PPlayerPart.java"><code>PPlayerPart</code></a>, <a href="https://github.com/ArcAnc/PulseLib/blob/1.21.1/src/main/java/com/arcanc/pulselib/content/player/animation/PPlayerAnimationMask.java"><code>PPlayerAnimationMask</code></a>, <a href="https://github.com/ArcAnc/PulseLib/blob/1.21.1/src/main/java/com/arcanc/pulselib/content/player/animation/PPlayerAnimationBlendMode.java"><code>PPlayerAnimationBlendMode</code></a>, and <a href="https://github.com/ArcAnc/PulseLib/blob/1.21.1/src/main/java/com/arcanc/pulselib/content/player/animation/PPlayerAnimationWeight.java"><code>PPlayerAnimationWeight</code></a> define how a player pose is applied.</li>
+<li><a href="https://github.com/ArcAnc/PulseLib/blob/1.21.1/src/main/java/com/arcanc/pulselib/content/player/animation/PPlayerAnimationDeformer.java"><code>PPlayerAnimationDeformer</code></a>, <a href="https://github.com/ArcAnc/PulseLib/blob/1.21.1/src/main/java/com/arcanc/pulselib/content/player/animation/PPlayerAnimationDeformerValueSource.java"><code>PPlayerAnimationDeformerValueSource</code></a>, and <a href="https://github.com/ArcAnc/PulseLib/blob/1.21.1/src/main/java/com/arcanc/pulselib/content/player/animation/PPlayerAnimationDeformerContext.java"><code>PPlayerAnimationDeformerContext</code></a> attach a deformer stack to a definition and sample channels from its player/controller context.</li>
+</ul>
+<h2 id="mesh-deformers">Mesh deformers<a class="headerlink" href="#mesh-deformers" title="Permanent link">&para;</a></h2>
+<ul>
+<li><a href="https://github.com/ArcAnc/PulseLib/blob/1.21.1/src/main/java/com/arcanc/pulselib/content/model/deformer/PMeshDeformer.java"><code>PMeshDeformer</code></a>, <a href="https://github.com/ArcAnc/PulseLib/blob/1.21.1/src/main/java/com/arcanc/pulselib/content/model/deformer/PDeformerInstance.java"><code>PDeformerInstance</code></a>, <a href="https://github.com/ArcAnc/PulseLib/blob/1.21.1/src/main/java/com/arcanc/pulselib/content/model/deformer/PDeformerStack.java"><code>PDeformerStack</code></a>, and <a href="https://github.com/ArcAnc/PulseLib/blob/1.21.1/src/main/java/com/arcanc/pulselib/content/model/deformer/PChannelReference.java"><code>PChannelReference</code></a> define and evaluate reusable deformations.</li>
+<li>Built-in operations are <a href="https://github.com/ArcAnc/PulseLib/blob/1.21.1/src/main/java/com/arcanc/pulselib/content/model/deformer/PBendDeformer.java"><code>PBendDeformer</code></a>, <a href="https://github.com/ArcAnc/PulseLib/blob/1.21.1/src/main/java/com/arcanc/pulselib/content/model/deformer/PTwistDeformer.java"><code>PTwistDeformer</code></a>, <a href="https://github.com/ArcAnc/PulseLib/blob/1.21.1/src/main/java/com/arcanc/pulselib/content/model/deformer/PStretchDeformer.java"><code>PStretchDeformer</code></a>, <a href="https://github.com/ArcAnc/PulseLib/blob/1.21.1/src/main/java/com/arcanc/pulselib/content/model/deformer/PSquashDeformer.java"><code>PSquashDeformer</code></a>, <a href="https://github.com/ArcAnc/PulseLib/blob/1.21.1/src/main/java/com/arcanc/pulselib/content/model/deformer/PTaperDeformer.java"><code>PTaperDeformer</code></a>, and <a href="https://github.com/ArcAnc/PulseLib/blob/1.21.1/src/main/java/com/arcanc/pulselib/content/model/deformer/PWaveDeformer.java"><code>PWaveDeformer</code></a>.</li>
+<li><a href="https://github.com/ArcAnc/PulseLib/blob/1.21.1/src/main/java/com/arcanc/pulselib/content/model/deformer/PMeshDeformation.java"><code>PMeshDeformation</code></a> and <a href="https://github.com/ArcAnc/PulseLib/blob/1.21.1/src/main/java/com/arcanc/pulselib/content/model/baked/PDeformedMeshBuffers.java"><code>PDeformedMeshBuffers</code></a> drive deformed custom triangle meshes and optional subdivision. <a href="https://github.com/ArcAnc/PulseLib/blob/1.21.1/src/main/java/com/arcanc/pulselib/content/player/deformer/PPlayerMeshDeformers.java"><code>PPlayerMeshDeformers</code></a> is the independent player-binding API.</li>
 </ul>
 <h2 id="events-and-helpers">Events and helpers<a class="headerlink" href="#events-and-helpers" title="Permanent link">&para;</a></h2>
 <ul>
