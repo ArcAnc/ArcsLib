@@ -90,6 +90,7 @@ public class PRenderTypes
 				withFragmentShader(PLibDatabase.rl("core/triangles_gui")).
 				withLocation(PLibDatabase.rl("pipeline/triangles_gui")).
 				withUniform("ColorOverlay", UniformType.UNIFORM_BUFFER).
+				withUniform("Lighting", UniformType.UNIFORM_BUFFER).
 				withSampler("Sampler0").
 				withSampler("Sampler1").
 				withSampler("Sampler2").
