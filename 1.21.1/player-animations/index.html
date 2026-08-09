@@ -16,7 +16,7 @@
         <link rel="prev" href="../armor-and-attachments/">
       
       
-        <link rel="next" href="../gui-rendering/">
+        <link rel="next" href="../mesh-deformers/">
       
       
         
@@ -1068,7 +1068,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../mesh-deformers.md" class="md-nav__link">
+      <a href="../mesh-deformers/" class="md-nav__link">
         
   
   
@@ -1440,7 +1440,7 @@
 <a id="__codelineno-8-12" name="__codelineno-8-12" href="#__codelineno-8-12"></a><span class="w">        </span><span class="p">.</span><span class="na">build</span><span class="p">();</span>
 </code></pre></div>
 <p>The callback receives <code>PPlayerAnimationDeformerContext</code>: <code>player()</code>, <code>definition()</code>, <code>partialTick()</code>, <code>weight()</code>, <code>isPlaying(name)</code>, <code>controllerTicks(name)</code>, and <code>controllerSeconds(name)</code>. More than one deformer may target the same part; they run in declaration order. The lower-level global <code>PPlayerMeshDeformers.register(...)</code> remains available for a deformation that is not part of an animation definition.</p>
-<p>See <a href="mesh-deformers.md">Mesh deformers</a> for built-in operations, subdivision, normals, custom meshes, and custom deformer types.</p>
+<p>See <a href="../mesh-deformers/">Mesh deformers</a> for built-in operations, subdivision, normals, custom meshes, and custom deformer types.</p>
 <h2 id="model-conventions-and-limitations">Model conventions and limitations<a class="headerlink" href="#model-conventions-and-limitations" title="Permanent link">&para;</a></h2>
 <p>The model only needs a skeleton and animations; mesh data is optional. Bone positions from Gecko animations are converted from blocks to vanilla model pixels automatically. Rotation, position, and scale channels are supported. Standard glTF assets keep their normal right-handed Y-up coordinates: the player pipeline converts their position and quaternion axes to Minecraft's mirrored player render space. Do not pre-flip an exported glTF player animation. The skeleton resolver evaluates bind pose and parent transforms; a bound child therefore inherits transforms of intermediate animation bones. A bound <code>ROOT</code> is applied once to the render stack and is excluded from child deltas.</p>
 <p>The API affects the whole player model in third person and arms in first person. It restores position, rotation, and scale immediately after every draw, preventing a pose from leaking into a different player or another render layer.</p>
