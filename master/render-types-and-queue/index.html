@@ -184,7 +184,7 @@
     
     
       <div class="md-header__source">
-        <a href="https://github.com/ArcAnc/PulseLib" title="Go to repository" class="md-source" data-md-component="source">
+        <a href="https://github.com/ArcAnc/PulseLib/tree/26.1" title="Go to repository" class="md-source" data-md-component="source">
   <div class="md-source__icon md-icon">
     
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
@@ -323,7 +323,7 @@
   </label>
   
     <div class="md-nav__source">
-      <a href="https://github.com/ArcAnc/PulseLib" title="Go to repository" class="md-source" data-md-component="source">
+      <a href="https://github.com/ArcAnc/PulseLib/tree/26.1" title="Go to repository" class="md-source" data-md-component="source">
   <div class="md-source__icon md-icon">
     
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
@@ -1064,6 +1064,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../mesh-deformers/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Mesh Deformers
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../gui-rendering/" class="md-nav__link">
         
   
@@ -1309,34 +1337,33 @@
   <h1>Render Types and Queue</h1>
 
 <p>Most mods can use PulseLib's renderers without touching the render queue directly. This page exists for the cases where you need to understand why PulseLib does not use vanilla <code>RenderType</code> values and where custom rendering should be inserted.</p>
-<p>PulseLib models are triangle meshes loaded from glTF/GLB or another model loader. Vanilla baked block models are mostly quad-based, so PulseLib provides its own triangle render types, shaders, vertex format, and instanced queue. That is why examples use <a href="https://github.com/ArcAnc/PulseLib/blob/master/src/main/java/com/arcanc/pulselib/util/PRenderTypes.java"><code>PRenderTypes</code></a> instead of <code>RenderType.entityCutout</code> or block render types.</p>
+<p>PulseLib models are triangle meshes loaded from glTF/GLB or another model loader. Vanilla baked block models are mostly quad-based, so PulseLib provides its own triangle render types, shaders, vertex format, and instanced queue. That is why examples use <a href="https://github.com/ArcAnc/PulseLib/blob/26.1/src/main/java/com/arcanc/pulselib/util/PRenderTypes.java"><code>PRenderTypes</code></a> instead of <code>RenderType.entityCutout</code> or block render types.</p>
 <h2 id="which-render-type-should-i-choose">Which render type should I choose?<a class="headerlink" href="#which-render-type-should-i-choose" title="Permanent link">&para;</a></h2>
 <p>Use the simplest type that matches the visual result:</p>
 <ul>
 <li><code>trianglesSolid</code> for opaque models.</li>
 <li><code>trianglesCutout</code> for hard alpha cutouts, like holes or masked pixels.</li>
 <li><code>trianglesTranslucent</code> for glass-like transparency.</li>
-<li><code>trianglesGui</code> for direct GUI drawing.</li>
-<li><code>trianglesEmissiveCutout</code> and <code>trianglesEmissiveTranslucent</code> for explicit emissive custom rendering.</li>
-<li><code>trianglesInstantCutout</code> and <code>trianglesInstantTranslucent</code> for immediate baked-bone drawing.</li>
+<li><code>trianglesGui</code> for GUI item rendering.</li>
 </ul>
+<p>For emissive meshes the built-in renderers select <code>trianglesEmissiveCutout</code> or <code>trianglesEmissiveTranslucent</code> automatically from the base type.</p>
 <p>In a renderer constructor this usually looks like:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="kd">super</span><span class="p">(</span><span class="n">modelData</span><span class="p">,</span><span class="w"> </span><span class="n">PRenderTypes</span><span class="p">.</span><span class="na">RenderTypeProvider</span><span class="p">::</span><span class="n">trianglesSolid</span><span class="p">);</span>
 </code></pre></div>
-<p>If a texture is marked as emissive, the default renderers automatically switch the mesh to the matching emissive variant with <code>PRenderTypes.RenderTypeProvider.emissiveVariant(...)</code>. You normally do not need to choose an emissive render type yourself unless you are writing custom draw code.</p>
-<p>Emissive texture metadata is described on <a href="Textures-and-Emissive">Textures and Emissive</a>.</p>
+<p>If a texture is marked as emissive, the default renderers automatically switch the mesh to the matching emissive variant. You normally do not need to select an emissive type yourself.</p>
+<p>Emissive texture metadata is described on <a href="../textures-and-emissive/">Textures and Emissive</a>.</p>
 <h2 id="why-vanilla-rendertype-is-not-enough">Why vanilla RenderType is not enough<a class="headerlink" href="#why-vanilla-rendertype-is-not-enough" title="Permanent link">&para;</a></h2>
-<p>PulseLib's baked meshes use <a href="https://github.com/ArcAnc/PulseLib/blob/master/src/main/java/com/arcanc/pulselib/util/PRenderTypes.java"><code>PRenderTypes.VertexFormatProvider.POSITION_TEX_NORMAL</code></a>. The shaders also expect per-instance data: transform matrix, color, light, and overlay. A vanilla render type may compile and still render incorrectly because its shader and vertex format do not match the data PulseLib sends.</p>
-<p>Minecraft 26.2 uses the GPU rendering API for this pipeline. If you create a custom render type, keep these requirements:</p>
+<p>PulseLib's baked meshes use <a href="https://github.com/ArcAnc/PulseLib/blob/26.1/src/main/java/com/arcanc/pulselib/util/PRenderTypes.java"><code>PRenderTypes.VertexFormatProvider.POSITION_TEX_NORMAL</code></a>. The 26.1 pipelines also expect the <code>DynamicTransforms</code>, <code>Lighting</code>, and <code>InstanceData</code> uniform buffers. A vanilla render type may compile and still render incorrectly because its shader and vertex format do not match the data PulseLib sends.</p>
+<p>If you create a custom render type, keep these requirements:</p>
 <ul>
-<li><code>PrimitiveTopology.TRIANGLES</code></li>
+<li><code>VertexFormat.Mode.TRIANGLES</code></li>
 <li><code>PRenderTypes.VertexFormatProvider.POSITION_TEX_NORMAL</code></li>
 <li>a shader that understands PulseLib's uniforms and instance attributes</li>
 <li>a transparency state that matches how the queue should sort the mesh</li>
 </ul>
-<p>Custom pipelines must use the 26.2-style vertex binding and primitive topology (<code>withVertexBinding(...)</code> and <code>withPrimitiveTopology(...)</code>); <code>VertexFormat.Mode</code> is no longer used. For most mods, it is safer to start from PulseLib's existing render types and only add a new one when you need a genuinely different shader state.</p>
+<p>For most mods, it is safer to start from PulseLib's existing render types and only add a new one when you need a genuinely different shader state.</p>
 <h2 id="what-the-queue-does">What the queue does<a class="headerlink" href="#what-the-queue-does" title="Permanent link">&para;</a></h2>
-<p><a href="https://github.com/ArcAnc/PulseLib/blob/master/src/main/java/com/arcanc/pulselib/content/renderer/PRenderQueue.java"><code>PRenderQueue</code></a> batches identical meshes together and renders many instances with one instanced draw call. That is important for animated block entities and entities: every object can have its own transform and animation pose, but the GPU can still draw repeated mesh buffers efficiently.</p>
+<p><a href="https://github.com/ArcAnc/PulseLib/blob/26.1/src/main/java/com/arcanc/pulselib/content/renderer/PRenderQueue.java"><code>PRenderQueue</code></a> batches identical meshes together and renders many instances with one instanced draw call. That is important for animated block entities and entities: every object can have its own transform and animation pose, but the GPU can still draw repeated mesh buffers efficiently.</p>
 <p>The queue has a few stages:</p>
 <ul>
 <li><code>SOLID_BLOCKS</code> for solid block entity meshes.</li>
@@ -1344,37 +1371,37 @@
 <li><code>ENTITIES</code> for entity and hand-held item rendering.</li>
 <li><code>GUI</code> for GUI rendering.</li>
 </ul>
-<p>Normal renderers submit into these stages for you. <a href="https://github.com/ArcAnc/PulseLib/blob/master/src/main/java/com/arcanc/pulselib/content/renderer/PRenderStagesHandler.java"><code>PRenderStagesHandler</code></a> handles flushing them at the right time.</p>
+<p>Normal renderers submit into these stages for you. <a href="https://github.com/ArcAnc/PulseLib/blob/26.1/src/main/java/com/arcanc/pulselib/content/renderer/PRenderStagesHandler.java"><code>PRenderStagesHandler</code></a> handles flushing them at the right time.</p>
 <h2 id="when-to-submit-manually">When to submit manually<a class="headerlink" href="#when-to-submit-manually" title="Permanent link">&para;</a></h2>
-<p>Manual queue submission is an advanced escape hatch. Use it when you already have a baked PulseLib mesh and want to draw extra geometry in the same pipeline.</p>
+<p>Manual queue submission is an advanced escape hatch. Use it when you already have a baked PulseLib mesh and want to draw it in the same pipeline.</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="n">PRenderQueue</span><span class="p">.</span><span class="na">submit</span><span class="p">(</span>
 <a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="w">        </span><span class="n">PRenderQueue</span><span class="p">.</span><span class="na">RenderStage</span><span class="p">.</span><span class="na">ENTITIES</span><span class="p">,</span>
 <a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="w">        </span><span class="n">renderType</span><span class="p">,</span>
 <a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="w">        </span><span class="n">bakedMesh</span><span class="p">,</span>
 <a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a><span class="w">        </span><span class="k">new</span><span class="w"> </span><span class="n">PRenderQueue</span><span class="p">.</span><span class="na">InstanceData</span><span class="p">(</span><span class="n">matrix</span><span class="p">,</span><span class="w"> </span><span class="mh">0xFFFFFFFF</span><span class="p">,</span><span class="w"> </span><span class="n">packedLight</span><span class="p">,</span><span class="w"> </span><span class="n">packedOverlay</span><span class="p">));</span>
 </code></pre></div>
-<p>If you only need to draw a vanilla item, text, a beam, or a simple effect, add your own submit node from <code>preSubmit</code> or <code>postSubmit</code> with the supplied <code>SubmitNodeCollector</code>. That keeps vanilla rendering in vanilla's pipeline and PulseLib mesh rendering in PulseLib's pipeline.</p>
+<p><code>PBakedMesh</code> owns the GPU vertex and index buffers. Do not pass a vanilla <code>VertexBuffer</code>: the queue needs PulseLib's mesh data and its triangle vertex format.</p>
 <h2 id="renderer-hooks">Renderer hooks<a class="headerlink" href="#renderer-hooks" title="Permanent link">&para;</a></h2>
 <p>Every PulseLib renderer has the same three-stage flow:</p>
 <ul>
-<li><code>preSubmit</code> runs before the model is submitted.</li>
-<li><code>trueSubmit</code> is the normal PulseLib model submission.</li>
-<li><code>postSubmit</code> runs after the model is submitted.</li>
+<li><code>preSubmit(PoseStack, renderState, CameraRenderState, SubmitNodeCollector)</code> runs before the model is submitted.</li>
+<li><code>trueSubmit(...)</code> is the normal PulseLib model submission.</li>
+<li><code>postSubmit(...)</code> runs after the model is submitted.</li>
 </ul>
 <p>A typical customization is small:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="nd">@Override</span>
 <a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="kd">public</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">postSubmit</span><span class="p">(</span><span class="n">PoseStack</span><span class="w"> </span><span class="n">poseStack</span><span class="p">,</span>
-<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="w">                       </span><span class="n">PEntityRenderState</span><span class="p">.</span><span class="na">LivingImpl</span><span class="o">&lt;</span><span class="n">RobotEntity</span><span class="o">&gt;</span><span class="w"> </span><span class="n">renderState</span><span class="p">,</span>
+<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="w">                       </span><span class="n">RobotRenderState</span><span class="w"> </span><span class="n">renderState</span><span class="p">,</span>
 <a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="w">                       </span><span class="n">CameraRenderState</span><span class="w"> </span><span class="n">cameraRenderState</span><span class="p">,</span>
 <a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a><span class="w">                       </span><span class="n">SubmitNodeCollector</span><span class="w"> </span><span class="n">submitNodeCollector</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
-<a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a><span class="w">    </span><span class="c1">// Add custom submit nodes here, or submit extra PulseLib-compatible meshes.</span>
+<a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a><span class="w">    </span><span class="c1">// Submit additional PulseLib meshes or collector nodes here.</span>
 <a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a><span class="p">}</span>
 </code></pre></div>
 <p>Classes used:</p>
 <ul>
-<li><a href="https://github.com/ArcAnc/PulseLib/blob/master/src/main/java/com/arcanc/pulselib/util/PRenderTypes.java"><code>PRenderTypes</code></a></li>
-<li><a href="https://github.com/ArcAnc/PulseLib/blob/master/src/main/java/com/arcanc/pulselib/content/renderer/PRenderQueue.java"><code>PRenderQueue</code></a></li>
-<li><a href="https://github.com/ArcAnc/PulseLib/blob/master/src/main/java/com/arcanc/pulselib/content/renderer/PRenderStagesHandler.java"><code>PRenderStagesHandler</code></a></li>
+<li><a href="https://github.com/ArcAnc/PulseLib/blob/26.1/src/main/java/com/arcanc/pulselib/util/PRenderTypes.java"><code>PRenderTypes</code></a></li>
+<li><a href="https://github.com/ArcAnc/PulseLib/blob/26.1/src/main/java/com/arcanc/pulselib/content/renderer/PRenderQueue.java"><code>PRenderQueue</code></a></li>
+<li><a href="https://github.com/ArcAnc/PulseLib/blob/26.1/src/main/java/com/arcanc/pulselib/content/renderer/PRenderStagesHandler.java"><code>PRenderStagesHandler</code></a></li>
 </ul>
 
 

@@ -78,7 +78,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#item-json" class="md-skip">
+        <a href="#item-model-definition" class="md-skip">
           Skip to content
         </a>
       
@@ -184,7 +184,7 @@
     
     
       <div class="md-header__source">
-        <a href="https://github.com/ArcAnc/PulseLib" title="Go to repository" class="md-source" data-md-component="source">
+        <a href="https://github.com/ArcAnc/PulseLib/tree/26.1" title="Go to repository" class="md-source" data-md-component="source">
   <div class="md-source__icon md-icon">
     
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
@@ -323,7 +323,7 @@
   </label>
   
     <div class="md-nav__source">
-      <a href="https://github.com/ArcAnc/PulseLib" title="Go to repository" class="md-source" data-md-component="source">
+      <a href="https://github.com/ArcAnc/PulseLib/tree/26.1" title="Go to repository" class="md-source" data-md-component="source">
   <div class="md-source__icon md-icon">
     
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
@@ -910,10 +910,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#item-json" class="md-nav__link">
+  <a href="#item-model-definition" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Item JSON
+        Item model definition
       
     </span>
   </a>
@@ -1033,6 +1033,34 @@
     
   
     Player Animations
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../mesh-deformers/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Mesh Deformers
   
 
     
@@ -1221,10 +1249,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#item-json" class="md-nav__link">
+  <a href="#item-model-definition" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Item JSON
+        Item model definition
       
     </span>
   </a>
@@ -1287,98 +1315,82 @@
   <h1>PulseLib Items</h1>
 
 <p>Items need a slightly different setup from entities and block entities. Minecraft creates one <code>Item</code> object for the item type, but the player can hold many <code>ItemStack</code>s of that type. If animation state lived directly on the item object, every stack would share the same animation.</p>
-<p>PulseLib handles this by using <a href="https://github.com/ArcAnc/PulseLib/blob/master/src/main/java/com/arcanc/pulselib/content/animatable/AnimManagerKey.java"><code>AnimManagerKey</code></a> and <a href="https://github.com/ArcAnc/PulseLib/blob/master/src/main/java/com/arcanc/pulselib/content/animatable/singleton/SingletonAnimationManager.java"><code>SingletonAnimationManager</code></a>. The item still implements <a href="https://github.com/ArcAnc/PulseLib/blob/master/src/main/java/com/arcanc/pulselib/content/animatable/PItemAnimatable.java"><code>PItemAnimatable</code></a>, but the actual manager is resolved per key.</p>
-<h2 id="item-json">Item JSON<a class="headerlink" href="#item-json" title="Permanent link">&para;</a></h2>
-<p>Create a modern item definition file. This is not the animated GLB model; it tells Minecraft to use your registered special model renderer.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>assets/&lt;modid&gt;/items/&lt;item&gt;.json
-</code></pre></div>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="p">{</span>
-<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="w">  </span><span class="nt">&quot;model&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="w">    </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;minecraft:special&quot;</span><span class="p">,</span>
-<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="w">    </span><span class="nt">&quot;base&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;examplemod:item/wand&quot;</span><span class="p">,</span>
-<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a><span class="w">    </span><span class="nt">&quot;model&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a><span class="w">      </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;examplemod:wand&quot;</span><span class="p">,</span>
-<a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a><span class="w">      </span><span class="nt">&quot;model_location&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;examplemod:glmodels/item/wand.glb&quot;</span><span class="p">,</span>
-<a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a><span class="w">      </span><span class="nt">&quot;textures&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
-<a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a><span class="w">        </span><span class="s2">&quot;examplemod:item/wand/body&quot;</span>
-<a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a><span class="w">      </span><span class="p">]</span>
-<a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a><span class="w">    </span><span class="p">}</span>
-<a id="__codelineno-1-12" name="__codelineno-1-12" href="#__codelineno-1-12"></a><span class="w">  </span><span class="p">}</span>
-<a id="__codelineno-1-13" name="__codelineno-1-13" href="#__codelineno-1-13"></a><span class="p">}</span>
-</code></pre></div>
-<p>The <code>model.type</code> value, here <code>examplemod:wand</code>, must be registered as a special renderer codec. The nested fields are decoded by <code>PModelData.CODEC</code>: <code>model_location</code>, optional <code>model_type</code>, optional <code>model_format</code>, and <code>textures</code>.</p>
+<p>PulseLib handles this by using <a href="https://github.com/ArcAnc/PulseLib/blob/26.1/src/main/java/com/arcanc/pulselib/content/animatable/AnimManagerKey.java"><code>AnimManagerKey</code></a> and <a href="https://github.com/ArcAnc/PulseLib/blob/26.1/src/main/java/com/arcanc/pulselib/content/animatable/singleton/SingletonAnimationManager.java"><code>SingletonAnimationManager</code></a>. The item still implements <a href="https://github.com/ArcAnc/PulseLib/blob/26.1/src/main/java/com/arcanc/pulselib/content/animatable/PItemAnimatable.java"><code>PItemAnimatable</code></a>, but the actual manager is resolved per key.</p>
+<h2 id="item-model-definition">Item model definition<a class="headerlink" href="#item-model-definition" title="Permanent link">&para;</a></h2>
+<p>The old <code>models/item/&lt;item&gt;.json</code> file with <code>"parent": "builtin/entity"</code> does not select a PulseLib renderer on 26.1. Register a <code>SpecialModelRenderer.Unbaked</code> codec, then reference that registered special-model type from the item's 26.1 model definition. The wrapper below is the PulseLib side of that setup.</p>
 <h2 id="item-class">Item class<a class="headerlink" href="#item-class" title="Permanent link">&para;</a></h2>
 <p>The important part here is <code>getAnimationManager</code>. Use the key passed into the method, not a single field shared by every stack.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="kd">public</span><span class="w"> </span><span class="kd">class</span> <span class="nc">WandItem</span><span class="w"> </span><span class="kd">extends</span><span class="w"> </span><span class="n">Item</span><span class="w"> </span><span class="kd">implements</span><span class="w"> </span><span class="n">PItemAnimatable</span><span class="o">&lt;</span><span class="n">WandItem</span><span class="o">&gt;</span><span class="w"> </span><span class="p">{</span>
-<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">PRawAnimation</span><span class="w"> </span><span class="n">IDLE</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">PRawAnimation</span><span class="p">.</span><span class="na">begin</span><span class="p">()</span>
-<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="w">            </span><span class="p">.</span><span class="na">thenLoop</span><span class="p">(</span><span class="s">&quot;idle&quot;</span><span class="p">)</span>
-<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="w">            </span><span class="p">.</span><span class="na">build</span><span class="p">();</span>
-<a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a>
-<a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a><span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="nf">WandItem</span><span class="p">(</span><span class="n">Properties</span><span class="w"> </span><span class="n">properties</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
-<a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a><span class="w">        </span><span class="kd">super</span><span class="p">(</span><span class="n">properties</span><span class="p">);</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="kd">public</span><span class="w"> </span><span class="kd">class</span> <span class="nc">WandItem</span><span class="w"> </span><span class="kd">extends</span><span class="w"> </span><span class="n">Item</span><span class="w"> </span><span class="kd">implements</span><span class="w"> </span><span class="n">PItemAnimatable</span><span class="o">&lt;</span><span class="n">WandItem</span><span class="o">&gt;</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">PRawAnimation</span><span class="w"> </span><span class="n">IDLE</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">PRawAnimation</span><span class="p">.</span><span class="na">begin</span><span class="p">()</span>
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="w">            </span><span class="p">.</span><span class="na">thenLoop</span><span class="p">(</span><span class="s">&quot;idle&quot;</span><span class="p">)</span>
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="w">            </span><span class="p">.</span><span class="na">build</span><span class="p">();</span>
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>
+<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="nf">WandItem</span><span class="p">(</span><span class="n">Properties</span><span class="w"> </span><span class="n">properties</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a><span class="w">        </span><span class="kd">super</span><span class="p">(</span><span class="n">properties</span><span class="p">);</span>
+<a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a><span class="w">    </span><span class="p">}</span>
+<a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a>
+<a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a><span class="w">    </span><span class="nd">@Override</span>
+<a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a><span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="n">PAnimationManager</span><span class="o">&lt;</span><span class="n">WandItem</span><span class="o">&gt;</span><span class="w"> </span><span class="nf">getAnimationManager</span><span class="p">(</span><span class="n">AnimManagerKey</span><span class="w"> </span><span class="n">key</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a><span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">SingletonAnimationManager</span><span class="p">.</span><span class="na">getManager</span><span class="p">(</span><span class="n">key</span><span class="p">,</span><span class="w"> </span><span class="k">this</span><span class="p">);</span>
+<a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a><span class="w">    </span><span class="p">}</span>
+<a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a>
+<a id="__codelineno-0-15" name="__codelineno-0-15" href="#__codelineno-0-15"></a><span class="w">    </span><span class="nd">@Override</span>
+<a id="__codelineno-0-16" name="__codelineno-0-16" href="#__codelineno-0-16"></a><span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">registerAnimationControllers</span><span class="p">(</span><span class="n">PAnimationManager</span><span class="p">.</span><span class="na">PAnimationRegistrar</span><span class="o">&lt;</span><span class="n">WandItem</span><span class="o">&gt;</span><span class="w"> </span><span class="n">registrar</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-0-17" name="__codelineno-0-17" href="#__codelineno-0-17"></a><span class="w">        </span><span class="n">registrar</span><span class="p">.</span><span class="na">add</span><span class="p">(</span><span class="s">&quot;idle&quot;</span><span class="p">,</span><span class="w"> </span><span class="p">()</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">state</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-0-18" name="__codelineno-0-18" href="#__codelineno-0-18"></a><span class="w">            </span><span class="n">state</span><span class="p">.</span><span class="na">controller</span><span class="p">().</span><span class="na">play</span><span class="p">(</span><span class="n">IDLE</span><span class="p">);</span>
+<a id="__codelineno-0-19" name="__codelineno-0-19" href="#__codelineno-0-19"></a><span class="w">            </span><span class="k">return</span><span class="w"> </span><span class="n">ControllerState</span><span class="p">.</span><span class="na">PLAY</span><span class="p">;</span>
+<a id="__codelineno-0-20" name="__codelineno-0-20" href="#__codelineno-0-20"></a><span class="w">        </span><span class="p">});</span>
+<a id="__codelineno-0-21" name="__codelineno-0-21" href="#__codelineno-0-21"></a><span class="w">    </span><span class="p">}</span>
+<a id="__codelineno-0-22" name="__codelineno-0-22" href="#__codelineno-0-22"></a>
+<a id="__codelineno-0-23" name="__codelineno-0-23" href="#__codelineno-0-23"></a><span class="w">    </span><span class="nd">@Override</span>
+<a id="__codelineno-0-24" name="__codelineno-0-24" href="#__codelineno-0-24"></a><span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="n">IClientItemExtensions</span><span class="w"> </span><span class="nf">registerClientExtension</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-0-25" name="__codelineno-0-25" href="#__codelineno-0-25"></a><span class="w">        </span><span class="c1">// Add custom item-extension behaviour here if it is needed.</span>
+<a id="__codelineno-0-26" name="__codelineno-0-26" href="#__codelineno-0-26"></a><span class="w">        </span><span class="c1">// Animated rendering itself is provided by the 26.1 special-model renderer below.</span>
+<a id="__codelineno-0-27" name="__codelineno-0-27" href="#__codelineno-0-27"></a><span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">IClientItemExtensions</span><span class="p">.</span><span class="na">DEFAULT</span><span class="p">;</span>
+<a id="__codelineno-0-28" name="__codelineno-0-28" href="#__codelineno-0-28"></a><span class="w">    </span><span class="p">}</span>
+<a id="__codelineno-0-29" name="__codelineno-0-29" href="#__codelineno-0-29"></a><span class="p">}</span>
+</code></pre></div>
+<h2 id="renderer">Renderer<a class="headerlink" href="#renderer" title="Permanent link">&para;</a></h2>
+<p>The 26.1 renderer is a <code>SpecialModelRenderer</code>, not a <code>BlockEntityWithoutLevelRenderer</code>. It points at model data, selects a PulseLib render type, and creates a render state for every item render.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="kd">public</span><span class="w"> </span><span class="kd">class</span> <span class="nc">WandRenderer</span><span class="w"> </span><span class="kd">extends</span><span class="w"> </span><span class="n">PItemRenderer</span><span class="o">&lt;</span><span class="n">WandItem</span><span class="p">,</span><span class="w"> </span><span class="n">WandRenderState</span><span class="o">&gt;</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="nf">WandRenderer</span><span class="p">(</span><span class="n">PModelData</span><span class="w"> </span><span class="n">data</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="w">        </span><span class="kd">super</span><span class="p">(</span><span class="n">data</span><span class="p">,</span><span class="w"> </span><span class="n">PRenderTypes</span><span class="p">.</span><span class="na">RenderTypeProvider</span><span class="p">::</span><span class="n">trianglesSolid</span><span class="p">);</span>
+<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="w">    </span><span class="p">}</span>
+<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>
+<a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a><span class="w">    </span><span class="nd">@Override</span>
+<a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a><span class="w">    </span><span class="kd">protected</span><span class="w"> </span><span class="n">WandRenderState</span><span class="w"> </span><span class="nf">createRenderState</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a><span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">WandRenderState</span><span class="p">();</span>
+<a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a><span class="w">    </span><span class="p">}</span>
+<a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a><span class="p">}</span>
+<a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a>
+<a id="__codelineno-1-12" name="__codelineno-1-12" href="#__codelineno-1-12"></a><span class="kd">public</span><span class="w"> </span><span class="kd">class</span> <span class="nc">WandRenderState</span><span class="w"> </span><span class="kd">extends</span><span class="w"> </span><span class="n">PItemRenderState</span><span class="p">.</span><span class="na">Impl</span><span class="o">&lt;</span><span class="n">WandItem</span><span class="o">&gt;</span><span class="w"> </span><span class="p">{}</span>
+</code></pre></div>
+<p>Provide an <code>Unbaked</code> special-model wrapper that bakes this renderer:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="kd">public</span><span class="w"> </span><span class="kd">record</span> <span class="nc">Unbaked</span><span class="p">(</span><span class="n">PModelData</span><span class="w"> </span><span class="n">data</span><span class="p">)</span>
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="w">        </span><span class="kd">implements</span><span class="w"> </span><span class="n">SpecialModelRenderer</span><span class="p">.</span><span class="na">Unbaked</span><span class="o">&lt;</span><span class="n">WandRenderState</span><span class="o">&gt;</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">MapCodec</span><span class="o">&lt;</span><span class="n">Unbaked</span><span class="o">&gt;</span><span class="w"> </span><span class="n">MAP_CODEC</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">PModelData</span><span class="p">.</span><span class="na">CODEC</span><span class="p">.</span><span class="na">xmap</span><span class="p">(</span><span class="n">Unbaked</span><span class="p">::</span><span class="k">new</span><span class="p">,</span><span class="w"> </span><span class="n">Unbaked</span><span class="p">::</span><span class="n">data</span><span class="p">);</span>
+<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>
+<a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a><span class="w">    </span><span class="nd">@Override</span>
+<a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a><span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="n">WandRenderer</span><span class="w"> </span><span class="nf">bake</span><span class="p">(</span><span class="n">BakingContext</span><span class="w"> </span><span class="n">context</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a><span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">WandRenderer</span><span class="p">(</span><span class="n">data</span><span class="p">);</span>
 <a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a><span class="w">    </span><span class="p">}</span>
 <a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a>
 <a id="__codelineno-2-10" name="__codelineno-2-10" href="#__codelineno-2-10"></a><span class="w">    </span><span class="nd">@Override</span>
-<a id="__codelineno-2-11" name="__codelineno-2-11" href="#__codelineno-2-11"></a><span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="n">PAnimationManager</span><span class="o">&lt;</span><span class="n">WandItem</span><span class="o">&gt;</span><span class="w"> </span><span class="nf">getAnimationManager</span><span class="p">(</span><span class="n">AnimManagerKey</span><span class="w"> </span><span class="n">key</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
-<a id="__codelineno-2-12" name="__codelineno-2-12" href="#__codelineno-2-12"></a><span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">SingletonAnimationManager</span><span class="p">.</span><span class="na">getManager</span><span class="p">(</span><span class="n">key</span><span class="p">,</span><span class="w"> </span><span class="k">this</span><span class="p">);</span>
+<a id="__codelineno-2-11" name="__codelineno-2-11" href="#__codelineno-2-11"></a><span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="n">MapCodec</span><span class="o">&lt;</span><span class="n">Unbaked</span><span class="o">&gt;</span><span class="w"> </span><span class="nf">type</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-2-12" name="__codelineno-2-12" href="#__codelineno-2-12"></a><span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">MAP_CODEC</span><span class="p">;</span>
 <a id="__codelineno-2-13" name="__codelineno-2-13" href="#__codelineno-2-13"></a><span class="w">    </span><span class="p">}</span>
-<a id="__codelineno-2-14" name="__codelineno-2-14" href="#__codelineno-2-14"></a>
-<a id="__codelineno-2-15" name="__codelineno-2-15" href="#__codelineno-2-15"></a><span class="w">    </span><span class="nd">@Override</span>
-<a id="__codelineno-2-16" name="__codelineno-2-16" href="#__codelineno-2-16"></a><span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">registerAnimationControllers</span><span class="p">(</span><span class="n">PAnimationManager</span><span class="p">.</span><span class="na">PAnimationRegistrar</span><span class="o">&lt;</span><span class="n">WandItem</span><span class="o">&gt;</span><span class="w"> </span><span class="n">registrar</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
-<a id="__codelineno-2-17" name="__codelineno-2-17" href="#__codelineno-2-17"></a><span class="w">        </span><span class="n">registrar</span><span class="p">.</span><span class="na">add</span><span class="p">(</span><span class="s">&quot;idle&quot;</span><span class="p">,</span><span class="w"> </span><span class="p">()</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">state</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="p">{</span>
-<a id="__codelineno-2-18" name="__codelineno-2-18" href="#__codelineno-2-18"></a><span class="w">            </span><span class="n">state</span><span class="p">.</span><span class="na">controller</span><span class="p">().</span><span class="na">play</span><span class="p">(</span><span class="n">IDLE</span><span class="p">);</span>
-<a id="__codelineno-2-19" name="__codelineno-2-19" href="#__codelineno-2-19"></a><span class="w">            </span><span class="k">return</span><span class="w"> </span><span class="n">ControllerState</span><span class="p">.</span><span class="na">PLAY</span><span class="p">;</span>
-<a id="__codelineno-2-20" name="__codelineno-2-20" href="#__codelineno-2-20"></a><span class="w">        </span><span class="p">});</span>
-<a id="__codelineno-2-21" name="__codelineno-2-21" href="#__codelineno-2-21"></a><span class="w">    </span><span class="p">}</span>
-<a id="__codelineno-2-22" name="__codelineno-2-22" href="#__codelineno-2-22"></a>
-<a id="__codelineno-2-23" name="__codelineno-2-23" href="#__codelineno-2-23"></a><span class="w">    </span><span class="nd">@Override</span>
-<a id="__codelineno-2-24" name="__codelineno-2-24" href="#__codelineno-2-24"></a><span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="n">IClientItemExtensions</span><span class="w"> </span><span class="nf">registerClientExtension</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
-<a id="__codelineno-2-25" name="__codelineno-2-25" href="#__codelineno-2-25"></a><span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">IClientItemExtensions</span><span class="p">.</span><span class="na">DEFAULT</span><span class="p">;</span>
-<a id="__codelineno-2-26" name="__codelineno-2-26" href="#__codelineno-2-26"></a><span class="w">    </span><span class="p">}</span>
-<a id="__codelineno-2-27" name="__codelineno-2-27" href="#__codelineno-2-27"></a><span class="p">}</span>
+<a id="__codelineno-2-14" name="__codelineno-2-14" href="#__codelineno-2-14"></a><span class="p">}</span>
 </code></pre></div>
-<h2 id="renderer">Renderer<a class="headerlink" href="#renderer" title="Permanent link">&para;</a></h2>
-<p>The renderer points at the GLB model and selects a PulseLib render type. <code>PItemRenderer</code> implements Minecraft's <code>SpecialModelRenderer&lt;RS&gt;</code>, so it needs a render-state type and an unbaked codec.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="kd">public</span><span class="w"> </span><span class="kd">class</span> <span class="nc">WandRenderer</span><span class="w"> </span><span class="kd">extends</span><span class="w"> </span><span class="n">PItemRenderer</span><span class="o">&lt;</span><span class="n">WandItem</span><span class="p">,</span><span class="w"> </span><span class="n">PItemRenderState</span><span class="p">.</span><span class="na">Impl</span><span class="o">&lt;</span><span class="n">WandItem</span><span class="o">&gt;&gt;</span><span class="w"> </span><span class="p">{</span>
-<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="nf">WandRenderer</span><span class="p">(</span><span class="n">PModelData</span><span class="w"> </span><span class="n">modelData</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
-<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="w">        </span><span class="kd">super</span><span class="p">(</span><span class="n">modelData</span><span class="p">,</span><span class="w"> </span><span class="n">PRenderTypes</span><span class="p">.</span><span class="na">RenderTypeProvider</span><span class="p">::</span><span class="n">trianglesSolid</span><span class="p">);</span>
-<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="w">    </span><span class="p">}</span>
-<a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a>
-<a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a><span class="w">    </span><span class="nd">@Override</span>
-<a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a><span class="w">    </span><span class="kd">protected</span><span class="w"> </span><span class="n">PItemRenderState</span><span class="p">.</span><span class="na">Impl</span><span class="o">&lt;</span><span class="n">WandItem</span><span class="o">&gt;</span><span class="w"> </span><span class="nf">createRenderState</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
-<a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a><span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">PItemRenderState</span><span class="p">.</span><span class="na">Impl</span><span class="o">&lt;&gt;</span><span class="p">();</span>
-<a id="__codelineno-3-9" name="__codelineno-3-9" href="#__codelineno-3-9"></a><span class="w">    </span><span class="p">}</span>
-<a id="__codelineno-3-10" name="__codelineno-3-10" href="#__codelineno-3-10"></a>
-<a id="__codelineno-3-11" name="__codelineno-3-11" href="#__codelineno-3-11"></a><span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kd">record</span> <span class="nc">Unbaked</span><span class="p">(</span><span class="n">PModelData</span><span class="w"> </span><span class="n">data</span><span class="p">)</span><span class="w"> </span><span class="kd">implements</span><span class="w"> </span><span class="n">SpecialModelRenderer</span><span class="p">.</span><span class="na">Unbaked</span><span class="o">&lt;</span><span class="n">PItemRenderState</span><span class="p">.</span><span class="na">Impl</span><span class="o">&lt;</span><span class="n">WandItem</span><span class="o">&gt;&gt;</span><span class="w"> </span><span class="p">{</span>
-<a id="__codelineno-3-12" name="__codelineno-3-12" href="#__codelineno-3-12"></a><span class="w">        </span><span class="kd">public</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">MapCodec</span><span class="o">&lt;</span><span class="n">Unbaked</span><span class="o">&gt;</span><span class="w"> </span><span class="n">MAP_CODEC</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">PModelData</span><span class="p">.</span><span class="na">CODEC</span><span class="p">.</span><span class="na">xmap</span><span class="p">(</span><span class="n">Unbaked</span><span class="p">::</span><span class="k">new</span><span class="p">,</span><span class="w"> </span><span class="n">Unbaked</span><span class="p">::</span><span class="n">data</span><span class="p">);</span>
-<a id="__codelineno-3-13" name="__codelineno-3-13" href="#__codelineno-3-13"></a>
-<a id="__codelineno-3-14" name="__codelineno-3-14" href="#__codelineno-3-14"></a><span class="w">        </span><span class="nd">@Override</span>
-<a id="__codelineno-3-15" name="__codelineno-3-15" href="#__codelineno-3-15"></a><span class="w">        </span><span class="kd">public</span><span class="w"> </span><span class="n">WandRenderer</span><span class="w"> </span><span class="nf">bake</span><span class="p">(</span><span class="n">BakingContext</span><span class="w"> </span><span class="n">context</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
-<a id="__codelineno-3-16" name="__codelineno-3-16" href="#__codelineno-3-16"></a><span class="w">            </span><span class="k">return</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">WandRenderer</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="na">data</span><span class="p">);</span>
-<a id="__codelineno-3-17" name="__codelineno-3-17" href="#__codelineno-3-17"></a><span class="w">        </span><span class="p">}</span>
-<a id="__codelineno-3-18" name="__codelineno-3-18" href="#__codelineno-3-18"></a>
-<a id="__codelineno-3-19" name="__codelineno-3-19" href="#__codelineno-3-19"></a><span class="w">        </span><span class="nd">@Override</span>
-<a id="__codelineno-3-20" name="__codelineno-3-20" href="#__codelineno-3-20"></a><span class="w">        </span><span class="kd">public</span><span class="w"> </span><span class="n">MapCodec</span><span class="o">&lt;</span><span class="n">Unbaked</span><span class="o">&gt;</span><span class="w"> </span><span class="nf">type</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
-<a id="__codelineno-3-21" name="__codelineno-3-21" href="#__codelineno-3-21"></a><span class="w">            </span><span class="k">return</span><span class="w"> </span><span class="n">MAP_CODEC</span><span class="p">;</span>
-<a id="__codelineno-3-22" name="__codelineno-3-22" href="#__codelineno-3-22"></a><span class="w">        </span><span class="p">}</span>
-<a id="__codelineno-3-23" name="__codelineno-3-23" href="#__codelineno-3-23"></a><span class="w">    </span><span class="p">}</span>
-<a id="__codelineno-3-24" name="__codelineno-3-24" href="#__codelineno-3-24"></a><span class="p">}</span>
-</code></pre></div>
-<p>Register the unbaked renderer on the client mod event bus:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="nd">@SubscribeEvent</span>
-<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="kd">public</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">registerSpecialModels</span><span class="p">(</span><span class="n">RegisterSpecialModelRendererEvent</span><span class="w"> </span><span class="n">event</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
-<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="w">    </span><span class="n">event</span><span class="p">.</span><span class="na">register</span><span class="p">(</span><span class="n">Identifier</span><span class="p">.</span><span class="na">fromNamespaceAndPath</span><span class="p">(</span><span class="s">&quot;examplemod&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;wand&quot;</span><span class="p">),</span><span class="w"> </span><span class="n">WandRenderer</span><span class="p">.</span><span class="na">Unbaked</span><span class="p">.</span><span class="na">MAP_CODEC</span><span class="p">);</span>
-<a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a><span class="p">}</span>
-</code></pre></div>
-<p>PulseLib automatically registers item client extensions for items that implement <code>PItemAnimatable</code>. Return <code>IClientItemExtensions.DEFAULT</code> unless the item also needs extra client extension behavior, such as armor integration.</p>
+<p>Register that unbaked codec with NeoForge's special-model renderer registration and reference it from the item's 26.1 model definition. PulseLib does not convert a legacy <code>builtin/entity</code> JSON into this renderer automatically.</p>
+<p>The item extension returned by <code>registerClientExtension()</code> is still registered automatically for <code>PItemAnimatable</code> items by PulseLib's client setup.</p>
 <h2 id="stack-specific-state">Stack-specific state<a class="headerlink" href="#stack-specific-state" title="Permanent link">&para;</a></h2>
 <p><code>AnimManagerKey.of(ItemStack)</code> uses item id, stack count, and component data. If your item animation should differ by custom data, store it in item components so the key changes. If two stacks have identical key data, they can reuse the same cached manager.</p>
 <p>Classes used:</p>
 <ul>
-<li><a href="https://github.com/ArcAnc/PulseLib/blob/master/src/main/java/com/arcanc/pulselib/content/animatable/PItemAnimatable.java"><code>PItemAnimatable</code></a></li>
-<li><a href="https://github.com/ArcAnc/PulseLib/blob/master/src/main/java/com/arcanc/pulselib/content/renderer/PItemRenderer.java"><code>PItemRenderer</code></a></li>
-<li><a href="https://github.com/ArcAnc/PulseLib/blob/master/src/main/java/com/arcanc/pulselib/content/animatable/singleton/SingletonAnimationManager.java"><code>SingletonAnimationManager</code></a></li>
-<li><a href="https://github.com/ArcAnc/PulseLib/blob/master/src/main/java/com/arcanc/pulselib/content/renderer/modelData/DefaultItemModelData.java"><code>DefaultItemModelData</code></a></li>
+<li><a href="https://github.com/ArcAnc/PulseLib/blob/26.1/src/main/java/com/arcanc/pulselib/content/animatable/PItemAnimatable.java"><code>PItemAnimatable</code></a></li>
+<li><a href="https://github.com/ArcAnc/PulseLib/blob/26.1/src/main/java/com/arcanc/pulselib/content/renderer/PItemRenderer.java"><code>PItemRenderer</code></a></li>
+<li><a href="https://github.com/ArcAnc/PulseLib/blob/26.1/src/main/java/com/arcanc/pulselib/content/animatable/singleton/SingletonAnimationManager.java"><code>SingletonAnimationManager</code></a></li>
+<li><a href="https://github.com/ArcAnc/PulseLib/blob/26.1/src/main/java/com/arcanc/pulselib/content/renderer/modelData/DefaultItemModelData.java"><code>DefaultItemModelData</code></a></li>
 </ul>
 
 

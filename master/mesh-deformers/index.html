@@ -10,13 +10,13 @@
       
       
       
-        <link rel="canonical" href="https://arcanc.github.io/PulseLib/master/gui-rendering/">
+        <link rel="canonical" href="https://arcanc.github.io/PulseLib/master/mesh-deformers/">
       
       
-        <link rel="prev" href="../mesh-deformers/">
+        <link rel="prev" href="../player-animations/">
       
       
-        <link rel="next" href="../model-loaders/">
+        <link rel="next" href="../gui-rendering/">
       
       
         
@@ -27,7 +27,7 @@
     
     
       
-        <title>GUI Rendering - PulseLib</title>
+        <title>Mesh Deformers - PulseLib</title>
       
     
     
@@ -77,6 +77,11 @@
     <label class="md-overlay" for="__drawer"></label>
     <div data-md-component="skip">
       
+        
+        <a href="#mesh-deformers" class="md-skip">
+          Skip to content
+        </a>
+      
     </div>
     <div data-md-component="announce">
       
@@ -111,7 +116,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              GUI Rendering
+              Mesh Deformers
             
           </span>
         </div>
@@ -958,10 +963,37 @@
                 
   
   
+    
   
   
-    <li class="md-nav__item">
-      <a href="../mesh-deformers/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Mesh Deformers
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         
   
   
@@ -977,6 +1009,81 @@
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#build-a-stack" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Build a stack
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#built-in-operations" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Built-in operations
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#custom-model-meshes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Custom model meshes
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#player-animations" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Player animations
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#custom-deformer-types" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Custom deformer types
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -986,17 +1093,10 @@
                 
   
   
-    
   
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../gui-rendering/" class="md-nav__link">
         
   
   
@@ -1012,7 +1112,6 @@
   
 
       </a>
-      
     </li>
   
 
@@ -1157,6 +1256,71 @@
   
   
   
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#build-a-stack" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Build a stack
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#built-in-operations" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Built-in operations
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#custom-model-meshes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Custom model meshes
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#player-animations" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Player animations
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#custom-deformer-types" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Custom deformer types
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
   
 </nav>
                   </div>
@@ -1176,33 +1340,109 @@
   
 
 
-  <h1>GUI Rendering</h1>
-
-<p>PulseLib 26.1 renders animated item models in a GUI through <a href="https://github.com/ArcAnc/PulseLib/blob/26.1/src/main/java/com/arcanc/pulselib/content/renderer/PItemRenderer.java"><code>PItemRenderer</code></a>. The renderer detects <code>ItemDisplayContext.GUI</code>, submits the mesh to <code>PRenderQueue.RenderStage.GUI</code>, and registers custom geometry that flushes that stage in the current GUI render pass.</p>
-<p>There is no public <code>PLibHelper.renderModelInGui(...)</code> helper in this branch. For an item, implement a <code>PItemRenderer</code> and let Minecraft invoke its special-model renderer:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="kd">public</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="kd">class</span> <span class="nc">WandRenderer</span><span class="w"> </span><span class="kd">extends</span><span class="w"> </span><span class="n">PItemRenderer</span><span class="o">&lt;</span><span class="n">WandItem</span><span class="p">,</span><span class="w"> </span><span class="n">WandRenderState</span><span class="o">&gt;</span><span class="w"> </span><span class="p">{</span>
-<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="nf">WandRenderer</span><span class="p">(</span><span class="n">PModelData</span><span class="w"> </span><span class="n">data</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
-<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="w">        </span><span class="kd">super</span><span class="p">(</span><span class="n">data</span><span class="p">,</span><span class="w"> </span><span class="n">PRenderTypes</span><span class="p">.</span><span class="na">RenderTypeProvider</span><span class="p">::</span><span class="n">trianglesGui</span><span class="p">);</span>
-<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="w">    </span><span class="p">}</span>
-<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>
-<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="w">    </span><span class="nd">@Override</span>
-<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a><span class="w">    </span><span class="kd">protected</span><span class="w"> </span><span class="n">WandRenderState</span><span class="w"> </span><span class="nf">createRenderState</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
-<a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a><span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">WandRenderState</span><span class="p">();</span>
-<a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a><span class="w">    </span><span class="p">}</span>
-<a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a><span class="p">}</span>
-<a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a>
-<a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a><span class="kd">public</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="kd">class</span> <span class="nc">WandRenderState</span><span class="w"> </span><span class="kd">extends</span><span class="w"> </span><span class="n">PItemRenderState</span><span class="p">.</span><span class="na">Impl</span><span class="o">&lt;</span><span class="n">WandItem</span><span class="o">&gt;</span><span class="w"> </span><span class="p">{</span>
-<a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a><span class="p">}</span>
+<h1 id="mesh-deformers">Mesh deformers<a class="headerlink" href="#mesh-deformers" title="Permanent link">&para;</a></h1>
+<p>Mesh deformers modify vertices after a mesh has been baked. A stack may contain several ordered operations, such as bend followed by twist. PulseLib derives transformed normals from the deformation Jacobian, so lighting follows the deformed surface.</p>
+<p>Built-in operations are registered as <code>pulselib:bend</code>, <code>pulselib:twist</code>, <code>pulselib:stretch</code>, <code>pulselib:squash</code>, <code>pulselib:taper</code>, and <code>pulselib:wave</code>.</p>
+<h2 id="build-a-stack">Build a stack<a class="headerlink" href="#build-a-stack" title="Permanent link">&para;</a></h2>
+<p>Definitions use local mesh coordinates. Axes are normalized during preparation; <code>positiveExtent</code> and <code>negativeExtent</code> define the interval along a length axis, measured from <code>origin</code>. Angles are radians.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="kd">private</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">PChannelReference</span><span class="o">&lt;</span><span class="n">Float</span><span class="o">&gt;</span><span class="w"> </span><span class="n">KNEE_ANGLE</span><span class="w"> </span><span class="o">=</span>
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="w">        </span><span class="k">new</span><span class="w"> </span><span class="n">PChannelReference</span><span class="o">&lt;&gt;</span><span class="p">(</span><span class="s">&quot;knee_angle&quot;</span><span class="p">,</span><span class="w"> </span><span class="mf">0.0f</span><span class="p">);</span>
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="kd">private</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">PDeformerStack</span><span class="w"> </span><span class="n">KNEE_BEND</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">PDeformerStack</span><span class="p">.</span><span class="na">compile</span><span class="p">(</span><span class="n">List</span><span class="p">.</span><span class="na">of</span><span class="p">(</span>
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="w">        </span><span class="k">new</span><span class="w"> </span><span class="n">PDeformerInstance</span><span class="o">&lt;&gt;</span><span class="p">(</span><span class="n">PBendDeformer</span><span class="p">.</span><span class="na">INSTANCE</span><span class="p">,</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">PBendDefinition</span><span class="p">(</span>
+<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="w">                </span><span class="k">new</span><span class="w"> </span><span class="n">Vector3f</span><span class="p">(</span><span class="mf">0.0f</span><span class="p">,</span><span class="w"> </span><span class="mf">6.0f</span><span class="p">,</span><span class="w"> </span><span class="mf">0.0f</span><span class="p">),</span><span class="w"> </span><span class="c1">// origin</span>
+<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a><span class="w">                </span><span class="k">new</span><span class="w"> </span><span class="n">Vector3f</span><span class="p">(</span><span class="mf">0.0f</span><span class="p">,</span><span class="w"> </span><span class="mf">1.0f</span><span class="p">,</span><span class="w"> </span><span class="mf">0.0f</span><span class="p">),</span><span class="w"> </span><span class="c1">// length axis</span>
+<a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a><span class="w">                </span><span class="k">new</span><span class="w"> </span><span class="n">Vector3f</span><span class="p">(</span><span class="mf">1.0f</span><span class="p">,</span><span class="w"> </span><span class="mf">0.0f</span><span class="p">,</span><span class="w"> </span><span class="mf">0.0f</span><span class="p">),</span><span class="w"> </span><span class="c1">// bend axis</span>
+<a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a><span class="w">                </span><span class="mf">6.0f</span><span class="p">,</span><span class="w"> </span><span class="mf">0.0f</span><span class="p">,</span><span class="w">                    </span><span class="c1">// positive and negative extents</span>
+<a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a><span class="w">                </span><span class="n">KNEE_ANGLE</span><span class="p">))));</span>
 </code></pre></div>
-<p>For custom GUI-only geometry, submit a <a href="https://github.com/ArcAnc/PulseLib/blob/26.1/src/main/java/com/arcanc/pulselib/content/model/baked/PBakedMesh.java"><code>PBakedMesh</code></a> to <code>PRenderQueue</code> and flush it from a <code>SubmitNodeCollector</code> custom-geometry callback. Keep that code inside a renderer or special-model renderer: it needs the active pose stack, collector, and packed light/overlay values supplied by Minecraft.</p>
-<p><code>PItemRenderer</code> does not replace the render type supplied to its constructor when the display context changes. For a GUI-only special model, use <code>PRenderTypes.RenderTypeProvider::trianglesGui</code>; use <code>trianglesSolid</code>, <code>trianglesCutout</code>, or <code>trianglesTranslucent</code> for a model rendered in normal world or entity contexts. A renderer shared by both kinds of context must choose its type in <code>resolveMeshRender(...)</code>.</p>
-<p>Classes used:</p>
-<ul>
-<li><a href="https://github.com/ArcAnc/PulseLib/blob/26.1/src/main/java/com/arcanc/pulselib/content/renderer/PItemRenderer.java"><code>PItemRenderer</code></a></li>
-<li><a href="https://github.com/ArcAnc/PulseLib/blob/26.1/src/main/java/com/arcanc/pulselib/content/renderer/base/PItemRenderState.java"><code>PItemRenderState</code></a></li>
-<li><a href="https://github.com/ArcAnc/PulseLib/blob/26.1/src/main/java/com/arcanc/pulselib/content/renderer/PRenderQueue.java"><code>PRenderQueue</code></a></li>
-<li><a href="https://github.com/ArcAnc/PulseLib/blob/26.1/src/main/java/com/arcanc/pulselib/util/PRenderTypes.java"><code>PRenderTypes</code></a></li>
-</ul>
+<p><code>PChannelReference</code> names a runtime float input and supplies its neutral fallback. Use <code>PChannelReference.constant(value)</code> for a fixed value. Stacks are immutable after <code>compile(...)</code>; use <code>PDeformerStack.compose(first, second)</code> to make a longer stack.</p>
+<h2 id="built-in-operations">Built-in operations<a class="headerlink" href="#built-in-operations" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>Id</th>
+<th>Definition</th>
+<th>Effect</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>pulselib:bend</code></td>
+<td><code>PBendDefinition</code></td>
+<td>Bends an interval around an arbitrary perpendicular axis. <code>angle</code> is the total bend angle.</td>
+</tr>
+<tr>
+<td><code>pulselib:twist</code></td>
+<td><code>PTwistDefinition</code></td>
+<td>Rotates vertices progressively around <code>lengthAxis</code>; <code>angle</code> is the total twist.</td>
+</tr>
+<tr>
+<td><code>pulselib:stretch</code></td>
+<td><code>PStretchDefinition</code></td>
+<td>Scales displacement along <code>axis</code>; <code>scale = 1</code> is neutral.</td>
+</tr>
+<tr>
+<td><code>pulselib:squash</code></td>
+<td><code>PSquashDefinition</code></td>
+<td>Scales along <code>axis</code> and compensates perpendicular axes to preserve local volume. <code>scale = 1</code> is neutral.</td>
+</tr>
+<tr>
+<td><code>pulselib:taper</code></td>
+<td><code>PTaperDefinition</code></td>
+<td>Scales the radial component from <code>1</code> at the negative end to <code>tipScale</code> at the positive end.</td>
+</tr>
+<tr>
+<td><code>pulselib:wave</code></td>
+<td><code>PWaveDefinition</code></td>
+<td>Applies a sine displacement inside the interval. It uses <code>amplitude</code>, <code>phase</code>, and a positive <code>wavelength</code>.</td>
+</tr>
+</tbody>
+</table>
+<p>For bend and wave, the secondary axis must not be parallel to <code>lengthAxis</code>. All interval deformers reject an empty interval; stretch, squash, and taper clamp a non-positive scale to a small positive value.</p>
+<h2 id="custom-model-meshes">Custom model meshes<a class="headerlink" href="#custom-model-meshes" title="Permanent link">&para;</a></h2>
+<p>Use <code>PMeshDeformation</code> with a <code>PMeshRenderContext</code> to deform a baked triangle mesh. The <code>cacheKey</code> must be a stable object for one independently rendered deformation; PulseLib reuses its dynamic vertex buffer and uploads current vertices each frame.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="kd">private</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">Object</span><span class="w"> </span><span class="n">bendBufferKey</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">Object</span><span class="p">();</span>
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="n">PMeshDeformation</span><span class="w"> </span><span class="n">deformation</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">PMeshDeformation</span><span class="p">(</span>
+<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="w">        </span><span class="n">KNEE_BEND</span><span class="p">,</span>
+<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a><span class="w">        </span><span class="n">reference</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">reference</span><span class="p">.</span><span class="na">name</span><span class="p">().</span><span class="na">equals</span><span class="p">(</span><span class="n">KNEE_ANGLE</span><span class="p">.</span><span class="na">name</span><span class="p">())</span>
+<a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a><span class="w">                </span><span class="o">?</span><span class="w"> </span><span class="n">currentAngleRadians</span><span class="p">()</span>
+<a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a><span class="w">                </span><span class="p">:</span><span class="w"> </span><span class="n">reference</span><span class="p">.</span><span class="na">defaultValue</span><span class="p">(),</span>
+<a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a><span class="w">        </span><span class="n">bendBufferKey</span><span class="p">,</span>
+<a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a><span class="w">        </span><span class="mi">2</span><span class="p">);</span>
+<a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a>
+<a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a><span class="k">return</span><span class="w"> </span><span class="n">baseMeshRenderContext</span><span class="p">().</span><span class="na">withDeformation</span><span class="p">(</span><span class="n">deformation</span><span class="p">);</span>
+</code></pre></div>
+<p><code>PMeshDeformation</code> subdivides the source triangle mesh only when necessary. Level <code>0</code> uses the original mesh; the default is <code>2</code>; valid levels are <code>0</code> through <code>4</code>. Higher levels make curved bends smoother but increase vertex count exponentially per source triangle. The subdivided source is cached per baked mesh and level.</p>
+<h2 id="player-animations">Player animations<a class="headerlink" href="#player-animations" title="Permanent link">&para;</a></h2>
+<p>Attach a stack directly to a player animation definition. It is active only while that definition contributes, samples controller time with <code>partialTick</code>, and fades every channel back to its default during an activation crossfade.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="n">PPlayerAnimationDefinition</span><span class="p">.</span><span class="na">builder</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="w">        </span><span class="p">.</span><span class="na">bind</span><span class="p">(</span><span class="n">PPlayerPart</span><span class="p">.</span><span class="na">RIGHT_LEG</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;right_leg&quot;</span><span class="p">)</span>
+<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="w">        </span><span class="p">.</span><span class="na">deform</span><span class="p">(</span><span class="n">PPlayerPart</span><span class="p">.</span><span class="na">RIGHT_LEG</span><span class="p">,</span><span class="w"> </span><span class="n">KNEE_BEND</span><span class="p">,</span><span class="w"> </span><span class="p">(</span><span class="n">context</span><span class="p">,</span><span class="w"> </span><span class="n">reference</span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="w">            </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">reference</span><span class="p">.</span><span class="na">name</span><span class="p">().</span><span class="na">equals</span><span class="p">(</span><span class="n">KNEE_ANGLE</span><span class="p">.</span><span class="na">name</span><span class="p">()))</span>
+<a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a><span class="w">                </span><span class="k">return</span><span class="w"> </span><span class="n">reference</span><span class="p">.</span><span class="na">defaultValue</span><span class="p">();</span>
+<a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a><span class="w">            </span><span class="k">return</span><span class="w"> </span><span class="n">kneeCurve</span><span class="p">(</span><span class="n">context</span><span class="p">.</span><span class="na">controllerSeconds</span><span class="p">(</span><span class="s">&quot;acrobatics&quot;</span><span class="p">));</span>
+<a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a><span class="w">        </span><span class="p">})</span>
+<a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a><span class="w">        </span><span class="p">.</span><span class="na">build</span><span class="p">();</span>
+</code></pre></div>
+<p><code>PPlayerAnimationDeformerContext</code> exposes <code>player()</code>, <code>definition()</code>, <code>partialTick()</code>, <code>weight()</code>, <code>isPlaying(controller)</code>, <code>controllerTicks(controller)</code>, and <code>controllerSeconds(controller)</code>. <code>weight()</code> already includes definition, activation-fade, and part weights. Several <code>.deform(...)</code> calls may target one part and run in declaration order. Player deformations apply to outer skin layers and compatible armor model parts.</p>
+<p><code>PPlayerMeshDeformers.register(id, part, predicate, stack, values)</code> remains available for a deformation that is independent of an animation definition. Use <code>frameAt(...)</code> to obtain a deformed attachment position and an orthonormal <code>right</code>/<code>up</code>/<code>forward</code> frame; its overload with <code>partialTick</code> matches interpolated player animation renders.</p>
+<h2 id="custom-deformer-types">Custom deformer types<a class="headerlink" href="#custom-deformer-types" title="Permanent link">&para;</a></h2>
+<p>Implement <code>PMeshDeformer&lt;D&gt;</code> for a new operation. <code>codec()</code> describes a serializable definition and <code>prepare(...)</code> creates one or more efficient <code>PPreparedDeformer</code> operations. Register the type in the <code>pulselib:mesh_deformer</code> registry from your mod.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="kd">public</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="kd">class</span> <span class="nc">MyDeformer</span><span class="w"> </span><span class="kd">implements</span><span class="w"> </span><span class="n">PMeshDeformer</span><span class="o">&lt;</span><span class="n">MyDefinition</span><span class="o">&gt;</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="w">    </span><span class="nd">@Override</span><span class="w"> </span><span class="kd">public</span><span class="w"> </span><span class="n">Identifier</span><span class="w"> </span><span class="nf">id</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="n">MY_ID</span><span class="p">;</span><span class="w"> </span><span class="p">}</span>
+<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="w">    </span><span class="nd">@Override</span><span class="w"> </span><span class="kd">public</span><span class="w"> </span><span class="n">MapCodec</span><span class="o">&lt;</span><span class="n">MyDefinition</span><span class="o">&gt;</span><span class="w"> </span><span class="nf">codec</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="n">MyDefinition</span><span class="p">.</span><span class="na">CODEC</span><span class="p">;</span><span class="w"> </span><span class="p">}</span>
+<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a>
+<a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a><span class="w">    </span><span class="nd">@Override</span>
+<a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a><span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">prepare</span><span class="p">(</span><span class="n">PDeformerPrepareContext</span><span class="w"> </span><span class="n">context</span><span class="p">,</span><span class="w"> </span><span class="n">MyDefinition</span><span class="w"> </span><span class="n">definition</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a><span class="w">        </span><span class="n">context</span><span class="p">.</span><span class="na">add</span><span class="p">((</span><span class="n">position</span><span class="p">,</span><span class="w"> </span><span class="n">values</span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a><span class="w">            </span><span class="c1">// Modify position in place.</span>
+<a id="__codelineno-3-9" name="__codelineno-3-9" href="#__codelineno-3-9"></a><span class="w">        </span><span class="p">});</span>
+<a id="__codelineno-3-10" name="__codelineno-3-10" href="#__codelineno-3-10"></a><span class="w">    </span><span class="p">}</span>
+<a id="__codelineno-3-11" name="__codelineno-3-11" href="#__codelineno-3-11"></a><span class="p">}</span>
+</code></pre></div>
+<p>Do not retain mutable render state inside a prepared operation. Read changing values through <code>PDeformerValueSource</code> instead.</p>
 
 
 
