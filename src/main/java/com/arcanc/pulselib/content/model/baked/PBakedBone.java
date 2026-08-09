@@ -196,7 +196,7 @@ public class PBakedBone
 				pass.bindTexture("Sampler0", atlas.getTextureView(), atlas.getSampler());
 				pass.bindTexture("Sampler1", overlayTexture.getTextureView(), RenderSystem.getSamplerCache().getClampToEdge(FilterMode.LINEAR));
 				pass.bindTexture("Sampler2", lightTexture, RenderSystem.getSamplerCache().getClampToEdge(FilterMode.LINEAR));
-				pass.setVertexBuffer(0, mesh.vbo());
+				pass.setVertexBuffer(0, PDeformedMeshBuffers.resolve(mesh, meshContext.deformation()));
 				pass.setIndexBuffer(mesh.indices(), mesh.indexType());
 				
 				pass.drawIndexed(0, 0, mesh.indicesCount(), 1);
