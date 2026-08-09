@@ -21,11 +21,11 @@ PulseLib is a modern animation library for Minecraft designed to deliver high pe
 
 ---
 
-Installation instructions are available [here](https://github.com/ArcAnc/PulseLib/wiki/Installation).
+Installation instructions are available [here](installation.md).
 
 ---
 
-To get started and explore the documentation, check it out [here](https://github.com/ArcAnc/PulseLib/wiki/Getting-Started).
+To get started and explore the documentation, check it out [here](getting-started.md).
 
 ---
 
@@ -40,4 +40,4 @@ If you would like to support the development of PulseLib, you can do so through 
 ---
 
 All code and artwork are distributed under the  
-[![Static Badge](https://img.shields.io/badge/license-Arc's_License_of_Common_Sense-black?style=for-the-badge)](https://github.com/ArcAnc/PulseLib/blob/1.21.1/LICENSE.txt)
+[![Static Badge](https://img.shields.io/badge/license-Arc's_License_of_Common_Sense-black?style=for-the-badge)](https://github.com/ArcAnc/ArcsLib/blob/26.1/LICENSE.txt)
