@@ -1,8 +1,8 @@
-PulseLib model loading is extensible through [`PModelLoader`](https://github.com/ArcAnc/ArcsLib/blob/26.1/src/main/java/com/arcanc/pulselib/data/PModelLoader.java). Loaded raw models are baked into [`PBakedModel`](https://github.com/ArcAnc/ArcsLib/blob/26.1/src/main/java/com/arcanc/pulselib/content/model/baked/PBakedModel.java) by [`PModelCache`](https://github.com/ArcAnc/ArcsLib/blob/26.1/src/main/java/com/arcanc/pulselib/util/PModelCache.java).
+PulseLib model loading is extensible through [`PModelLoader`](https://github.com/ArcAnc/PulseLib/blob/26.1/src/main/java/com/arcanc/pulselib/data/PModelLoader.java). Loaded raw models are baked into [`PBakedModel`](https://github.com/ArcAnc/PulseLib/blob/26.1/src/main/java/com/arcanc/pulselib/content/model/baked/PBakedModel.java) by [`PModelCache`](https://github.com/ArcAnc/PulseLib/blob/26.1/src/main/java/com/arcanc/pulselib/util/PModelCache.java).
 
 ## Built-in glTF loader
 
-[`PGltfModelLoader`](https://github.com/ArcAnc/ArcsLib/blob/26.1/src/main/java/com/arcanc/pulselib/data/gltf/PGltfModelLoader.java) is registered by default.
+[`PGltfModelLoader`](https://github.com/ArcAnc/PulseLib/blob/26.1/src/main/java/com/arcanc/pulselib/data/gltf/PGltfModelLoader.java) is registered by default.
 
 Supported roots and extensions:
 
@@ -23,11 +23,11 @@ resolves to:
 assets/<namespace>/glmodels/entity/<path>.glb
 ```
 
-The parser is [`PGltfModelParser`](https://github.com/ArcAnc/ArcsLib/blob/26.1/src/main/java/com/arcanc/pulselib/data/gltf/PGltfModelParser.java). glTF channels are decoded through the registered position, rotation, and scale channel types, so the loaded animation data now uses the same generic track API as other formats.
+The parser is [`PGltfModelParser`](https://github.com/ArcAnc/PulseLib/blob/26.1/src/main/java/com/arcanc/pulselib/data/gltf/PGltfModelParser.java). glTF channels are decoded through the registered position, rotation, and scale channel types, so the loaded animation data now uses the same generic track API as other formats.
 
 ## Gecko loader
 
-[`PGeckoModelLoader`](https://github.com/ArcAnc/ArcsLib/blob/26.1/src/main/java/com/arcanc/pulselib/data/gecko/PGeckoModelLoader.java) supports:
+[`PGeckoModelLoader`](https://github.com/ArcAnc/PulseLib/blob/26.1/src/main/java/com/arcanc/pulselib/data/gecko/PGeckoModelLoader.java) supports:
 
 ```text
 assets/<modid>/geckolib/models/**/*.geo.json
@@ -51,7 +51,7 @@ PModelData data = new DefaultEntityModelData.DefaultEntityModelDataBuilder(
         .build();
 ```
 
-The parser is [`PGeckoModelParser`](https://github.com/ArcAnc/ArcsLib/blob/26.1/src/main/java/com/arcanc/pulselib/data/gecko/PGeckoModelParser.java).
+The parser is [`PGeckoModelParser`](https://github.com/ArcAnc/PulseLib/blob/26.1/src/main/java/com/arcanc/pulselib/data/gecko/PGeckoModelParser.java).
 
 Gecko animation vector components may be Molang expressions. See [Molang animations](molang-animations.md) for the supported language, context values, renderer hooks, and persistence rules.
 
