@@ -9,43 +9,26 @@
 
 package com.arcanc.pulselib.content.model.baked;
 
+
 import com.arcanc.pulselib.content.animatable.PAnimatable;
 import com.arcanc.pulselib.content.animatable.PAnimationController;
 import com.arcanc.pulselib.content.model.animation.PAnimation;
-<<<<<<< HEAD
-=======
 import com.arcanc.pulselib.content.model.animation.PAnimationPoseResolver;
 import com.arcanc.pulselib.content.model.animation.PAnimationRuntime;
 import com.arcanc.pulselib.content.model.animation.PBoneAnimation;
 import com.arcanc.pulselib.content.model.animation.PCompiledAnimation;
 import com.arcanc.pulselib.content.model.animation.PPose;
->>>>>>> e194067 (Tons of e)
 import com.arcanc.pulselib.content.renderer.modelData.PModelData;
 import com.arcanc.pulselib.data.gecko.MolangParser;
 import com.mojang.blaze3d.vertex.PoseStack;
-<<<<<<< HEAD
 import net.minecraft.client.renderer.rendertype.RenderType;
 import net.minecraft.resources.Identifier;
-=======
-import net.minecraft.client.renderer.RenderType;
-import net.minecraft.resources.ResourceLocation;
-import org.joml.Vector3f;
->>>>>>> e194067 (Tons of e)
 
 import java.util.*;
 import java.util.function.Function;
 
 public final class PBakedModel
 {
-<<<<<<< HEAD
-	public <T extends PAnimatable<T>>void instantDraw(PoseStack poseStack,
-	                                                  PModelData modelData,
-	                                                  Collection<PAnimationController<T>> controllers,
-	                                                  Function<Identifier, RenderType> renderType,
-	                                                  int color,
-	                                                  int packedOverlay,
-	                                                  float partialTick)
-=======
 	private final List<PBakedBone> bones;
 	private final Map<String, PAnimation> animations;
 	private final PBakedBone[] indexedBones;
@@ -72,67 +55,33 @@ public final class PBakedModel
 		this.compiledAnimations = compileAnimations();
 	}
 
-	public List<PBakedBone> bones()
-	{
-		return this.bones;
-	}
+	public List<PBakedBone> bones() { return this.bones; }
+	public Map<String, PAnimation> animations() { return this.animations; }
+	public int boneCount() { return this.indexedBones.length; }
+	public int boneIndex(String name) { return this.boneIndices.getOrDefault(name, -1); }
+	public int boneIndex(PBakedBone bone) { return boneIndex(bone.name()); }
+	public PBakedBone bone(int index) { return this.indexedBones[index]; }
+	public int parentIndex(int index) { return this.parents[index]; }
+	public int[] parentIndices() { return this.parents.clone(); }
+	public PCompiledAnimation compiledAnimation(String name) { return this.compiledAnimations.get(name); }
 
-	public Map<String, PAnimation> animations()
-	{
-		return this.animations;
-	}
-
-	public int boneCount()
-	{
-		return this.indexedBones.length;
-	}
-
-	public int boneIndex(String name)
-	{
-		return this.boneIndices.getOrDefault(name, -1);
-	}
-
-	public int boneIndex(PBakedBone bone)
-	{
-		return boneIndex(bone.name());
-	}
-
-	public PBakedBone bone(int index)
-	{
-		return this.indexedBones[index];
-	}
-
-	public int parentIndex(int index)
-	{
-		return this.parents[index];
-	}
-	
-	public int[] parentIndices()
-	{
-		return this.parents.clone();
-	}
-
-	public PCompiledAnimation compiledAnimation(String name)
-	{
-		return this.compiledAnimations.get(name);
-	}
-	
 	public PPose bindPose()
 	{
 		PPose pose = new PPose(this.indexedBones.length);
 		for (int index = 0; index < this.indexedBones.length; index++)
 		{
 			PBakedBone bone = this.indexedBones[index];
-			pose.set(index, bone.basePosition(), bone.baseRotation(), new Vector3f(1f));
+			pose.set(index, bone.basePosition(), bone.baseRotation(), new org.joml.Vector3f(1f));
 		}
 		return pose;
 	}
-
-	public <T extends PAnimatable<T>> void instantDraw(PoseStack poseStack, PModelData modelData,
-	                                                   Collection<PAnimationController<T>> controllers,
-	                                                   Function<ResourceLocation, RenderType> renderType, int color,
-	                                                   int packedLight, int packedOverlay, float partialTick)
->>>>>>> e194067 (Tons of e)
+	public <T extends PAnimatable<T>>void instantDraw(PoseStack poseStack,
+	                                                  PModelData modelData,
+	                                                  Collection<PAnimationController<T>> controllers,
+	                                                  Function<Identifier, RenderType> renderType,
+	                                                  int color,
+	                                                  int packedOverlay,
+	                                                  float partialTick)
 	{
 		this.bones.forEach(bone -> bone.instantDraw(
 				poseStack,
@@ -144,7 +93,6 @@ public final class PBakedModel
 				partialTick));
 	}
 
-<<<<<<< HEAD
 	public <T extends PAnimatable<T>>void instantDraw(PoseStack poseStack,
 	                                                  PModelData modelData,
 	                                                  Collection<PAnimationController<T>> controllers,
@@ -163,32 +111,6 @@ public final class PBakedModel
 				packedLight,
 				packedOverlay,
 				partialTick));
-	}
-=======
-	public <T extends PAnimatable<T>> void instantDraw(PoseStack poseStack, PModelData modelData,
-	                                                   Collection<PAnimationController<T>> controllers,
-	                                                   Map<PAnimationController<T>, MolangParser.Context> molangContexts,
-	                                                   Function<ResourceLocation, RenderType> renderType, int color,
-	                                                   int packedLight, int packedOverlay, float partialTick)
-	{
-		PPose pose = evaluate(controllers, molangContexts, partialTick);
-		this.bones.forEach(bone -> bone.instantDraw(poseStack, this, pose, renderType, color, packedLight, packedOverlay));
-	}
-
-	public <T extends PAnimatable<T>> void instantDraw(PoseStack poseStack, PModelData modelData,
-	                                                   Collection<PAnimationController<T>> controllers,
-	                                                   PMeshRenderResolver resolver, PMeshRenderContext inherited, float partialTick)
-	{
-		instantDraw(poseStack, modelData, controllers, Map.of(), resolver, inherited, partialTick);
-	}
-
-	public <T extends PAnimatable<T>> void instantDraw(PoseStack poseStack, PModelData modelData,
-	                                                   Collection<PAnimationController<T>> controllers,
-	                                                   Map<PAnimationController<T>, MolangParser.Context> molangContexts,
-	                                                   PMeshRenderResolver resolver, PMeshRenderContext inherited, float partialTick)
-	{
-		PPose pose = evaluate(controllers, molangContexts, partialTick);
-		this.bones.forEach(bone -> bone.instantDraw(poseStack, this, pose, resolver, inherited));
 	}
 
 	public <T extends PAnimatable<T>> PPose evaluate(Collection<PAnimationController<T>> controllers,
@@ -231,5 +153,4 @@ public final class PBakedModel
 		}
 		return Map.copyOf(compiled);
 	}
->>>>>>> e194067 (Tons of e)
 }

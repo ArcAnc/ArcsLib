@@ -11,11 +11,7 @@ package com.arcanc.pulselib.content.animatable;
 
 
 import com.arcanc.pulselib.content.model.baked.PBakedModel;
-<<<<<<< HEAD
-import com.arcanc.pulselib.util.PLibDatabase;
-=======
 import com.arcanc.pulselib.content.model.animation.PAnimationGraph;
->>>>>>> e194067 (Tons of e)
 import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 
@@ -34,15 +30,20 @@ public class PAnimationManager<T extends PAnimatable<T>>
 	
 	protected final T animatable;
 	protected final AnimManagerKey key;
+	protected PBakedModel model;
 	protected final Map<String, Supplier<PAnimationController.StateHandler<T>>> factories = new Object2ObjectArrayMap<>();
 	protected final Map<String, Supplier<PAnimationGraph>> graphFactories = new Object2ObjectArrayMap<>();
 	protected final Map<String, PAnimationController<T>> controllers = new Object2ObjectArrayMap<>();
 	
-	public final Map<String, PAnimationController<T>> getControllers()
+	public Map<String, PAnimationController<T>> getControllers()
 	{
 		return this.controllers;
 	}
-	protected PBakedModel model;
+	
+	public T getAnimatable()
+	{
+		return this.animatable;
+	}
 	
 	public PAnimationManager(final T animatable)
 	{
@@ -75,7 +76,6 @@ public class PAnimationManager<T extends PAnimatable<T>>
 		return this.key;
 	}
 	
-	
 	public void bindModel(PBakedModel model)
 	{
 		if (model != this.model)
@@ -87,13 +87,8 @@ public class PAnimationManager<T extends PAnimatable<T>>
 		for (PAnimationController<T> controller : this.controllers.values())
 			controller.tick(this.animatable, 1, this.model, this.controllers.values());
 	}
-<<<<<<< HEAD
-
-	public record PAnimationRegistrar<T extends PAnimatable<T>>(List<Entry<T>> entries)
-=======
 	
 	public record PAnimationRegistrar<T extends PAnimatable<T>>(List<Entry<T>> entries, List<GraphEntry> graphEntries)
->>>>>>> e194067 (Tons of e)
 	{
 		public PAnimationRegistrar(List<Entry<T>> entries)
 		{

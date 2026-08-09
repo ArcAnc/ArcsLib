@@ -10,11 +10,11 @@
 package com.arcanc.pulselib.content.model.animation;
 
 
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 public interface PAnimationChannelType<T>
 {
-	ResourceLocation id();
+	Identifier id();
 
 	Class<T> valueClass();
 

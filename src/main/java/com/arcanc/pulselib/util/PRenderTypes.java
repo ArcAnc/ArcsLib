@@ -175,7 +175,6 @@ public class PRenderTypes
 		
 		private static RenderType createTrianglesSolid(Identifier texture)
 		{
-<<<<<<< HEAD
 			RenderSetup setup = RenderSetup.builder(RenderPipelinesProvider.TRIANGLES_SOLID).
 					withTexture("Sampler0", texture).
 					useLightmap().
@@ -198,81 +197,10 @@ public class PRenderTypes
 					createRenderSetup();
 			
 			return RenderType.create(PLibDatabase.rl("triangles_cutout").toString(), setup);
-=======
-			private static final RenderStateShard.ShaderStateShard TRIANGLES_SOLID_STATE_SHARD = new RenderStateShard.ShaderStateShard(() -> ShadersProvider.TRIANGLES_SOLID_SHADER);
-			private static final RenderStateShard.ShaderStateShard TRIANGLES_CUTOUT_STATE_SHARD = new RenderStateShard.ShaderStateShard(() -> ShadersProvider.TRIANGLES_CUTOUT_SHADER);
-			private static final RenderStateShard.ShaderStateShard TRIANGLES_TRANSLUCENT_STATE_SHARD = new RenderStateShard.ShaderStateShard(() -> ShadersProvider.TRIANGLES_TRANSLUCENT_SHADER);
-			private static final RenderStateShard.ShaderStateShard TRIANGLES_GUI_STATE_SHARD = new RenderStateShard.ShaderStateShard(() -> ShadersProvider.TRIANGLES_GUI_SHADER);
-			private static final RenderStateShard.ShaderStateShard TRIANGLES_LIT_STATE_SHARD = new RenderStateShard.ShaderStateShard(() -> ShadersProvider.TRIANGLES_GUI_SHADER);
-			private static final RenderStateShard.ShaderStateShard TRIANGLES_EMISSIVE_STATE_SHARD = new RenderStateShard.ShaderStateShard(() -> ShadersProvider.TRIANGLES_EMISSIVE_SHADER);
-			private static final RenderStateShard.ShaderStateShard TRIANGLES_CUTOUT_EMISSIVE_STATE_SHARD = new RenderStateShard.ShaderStateShard(() -> ShadersProvider.TRIANGLES_CUTOUT_EMISSIVE_SHADER);
-			private static final RenderStateShard.ShaderStateShard TRIANGLES_TRANSLUCENT_EMISSIVE_STATE_SHARD = new RenderStateShard.ShaderStateShard(() -> ShadersProvider.TRIANGLES_TRANSLUCENT_EMISSIVE_SHADER);
-			private static final RenderStateShard.ShaderStateShard TRIANGLES_GUI_EMISSIVE_STATE_SHARD = new RenderStateShard.ShaderStateShard(() -> ShadersProvider.TRIANGLES_GUI_EMISSIVE_SHADER);
-			private static final RenderStateShard.ShaderStateShard TRIANGLES_LIT_EMISSIVE_STATE_SHARD = new RenderStateShard.ShaderStateShard(() -> ShadersProvider.TRIANGLES_GUI_EMISSIVE_SHADER);
-		}
-		
-		@Nullable
-		public static ShaderInstance TRIANGLES_SOLID_SHADER;
-		@Nullable
-		public static ShaderInstance TRIANGLES_CUTOUT_SHADER;
-		@Nullable
-		public static ShaderInstance TRIANGLES_TRANSLUCENT_SHADER;
-		@Nullable
-		public static ShaderInstance TRIANGLES_GUI_SHADER;
-		@Nullable
-		public static ShaderInstance TRIANGLES_EMISSIVE_SHADER;
-		@Nullable
-		public static ShaderInstance TRIANGLES_CUTOUT_EMISSIVE_SHADER;
-		@Nullable
-		public static ShaderInstance TRIANGLES_TRANSLUCENT_EMISSIVE_SHADER;
-		@Nullable
-		public static ShaderInstance TRIANGLES_GUI_EMISSIVE_SHADER;
-		
-		public static @Nullable ShaderInstance trianglesSolid()
-		{
-			return TRIANGLES_SOLID_SHADER;
-		}
-		public static @Nullable ShaderInstance trianglesCutout()
-		{
-			return TRIANGLES_CUTOUT_SHADER;
-		}
-		public static @Nullable ShaderInstance trianglesTranslucent()
-		{
-			return TRIANGLES_TRANSLUCENT_SHADER;
-		}
-		public static @Nullable ShaderInstance trianglesGui()
-		{
-			return TRIANGLES_GUI_SHADER;
-		}
-		public static @Nullable ShaderInstance trianglesLit()
-		{
-			return TRIANGLES_GUI_SHADER;
-		}
-		public static @Nullable ShaderInstance trianglesEmissive()
-		{
-			return TRIANGLES_EMISSIVE_SHADER;
-		}
-		public static @Nullable ShaderInstance trianglesCutoutEmissive()
-		{
-			return TRIANGLES_CUTOUT_EMISSIVE_SHADER;
-		}
-		public static @Nullable ShaderInstance trianglesTranslucentEmissive()
-		{
-			return TRIANGLES_TRANSLUCENT_EMISSIVE_SHADER;
-		}
-		public static @Nullable ShaderInstance trianglesGuiEmissive()
-		{
-			return TRIANGLES_GUI_EMISSIVE_SHADER;
-		}
-		public static @Nullable ShaderInstance trianglesLitEmissive()
-		{
-			return TRIANGLES_GUI_EMISSIVE_SHADER;
->>>>>>> e194067 (Tons of e)
 		}
 		
 		private static RenderType createTrianglesTranslucent(Identifier texture)
 		{
-<<<<<<< HEAD
 			RenderSetup setup = RenderSetup.builder(RenderPipelinesProvider.TRIANGLES_TRANSLUCENT).
 					withTexture("Sampler0", texture).
 					useLightmap().
@@ -428,55 +356,6 @@ public class PRenderTypes
 		public static RenderType instantEmissiveVariant(RenderType baseType, Identifier texture)
 		{
 			return isTransparent(baseType) ? trianglesInstantEmissiveTranslucent(texture) : trianglesInstantEmissiveCutout(texture);
-=======
-			try
-			{
-				event.registerShader(new ShaderInstance(
-								event.getResourceProvider(),
-								PLibDatabase.rl("triangles_solid"),
-								VertexFormatProvider.POSITION_TEX_NORMAL),
-						shaderInstance -> TRIANGLES_SOLID_SHADER = shaderInstance);
-				event.registerShader(new ShaderInstance(
-								event.getResourceProvider(),
-								PLibDatabase.rl("triangles_cutout"),
-								VertexFormatProvider.POSITION_TEX_NORMAL),
-						shaderInstance -> TRIANGLES_CUTOUT_SHADER = shaderInstance);
-				event.registerShader(new ShaderInstance(
-								event.getResourceProvider(),
-								PLibDatabase.rl("triangles_translucent"),
-								VertexFormatProvider.POSITION_TEX_NORMAL),
-						shaderInstance -> TRIANGLES_TRANSLUCENT_SHADER = shaderInstance);
-				event.registerShader(new ShaderInstance(
-								event.getResourceProvider(),
-								PLibDatabase.rl("triangles_gui"),
-								VertexFormatProvider.POSITION_TEX_NORMAL),
-						shaderInstance -> TRIANGLES_GUI_SHADER = shaderInstance);
-				event.registerShader(new ShaderInstance(
-								event.getResourceProvider(),
-								PLibDatabase.rl("triangles_emissive"),
-								VertexFormatProvider.POSITION_TEX_NORMAL),
-						shaderInstance -> TRIANGLES_EMISSIVE_SHADER = shaderInstance);
-				event.registerShader(new ShaderInstance(
-								event.getResourceProvider(),
-								PLibDatabase.rl("triangles_cutout_emissive"),
-								VertexFormatProvider.POSITION_TEX_NORMAL),
-						shaderInstance -> TRIANGLES_CUTOUT_EMISSIVE_SHADER = shaderInstance);
-				event.registerShader(new ShaderInstance(
-								event.getResourceProvider(),
-								PLibDatabase.rl("triangles_translucent_emissive"),
-								VertexFormatProvider.POSITION_TEX_NORMAL),
-						shaderInstance -> TRIANGLES_TRANSLUCENT_EMISSIVE_SHADER = shaderInstance);
-				event.registerShader(new ShaderInstance(
-								event.getResourceProvider(),
-								PLibDatabase.rl("triangles_gui_emissive"),
-								VertexFormatProvider.POSITION_TEX_NORMAL),
-						shaderInstance -> TRIANGLES_GUI_EMISSIVE_SHADER = shaderInstance);
-			}
-			catch (IOException e)
-			{
-				PLibDatabase.LOGGER.warn("Failed to register shaders: {}", String.valueOf(e));
-			}
->>>>>>> e194067 (Tons of e)
 		}
 	}
 	

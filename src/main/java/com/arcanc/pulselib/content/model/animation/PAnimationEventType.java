@@ -10,11 +10,11 @@
 package com.arcanc.pulselib.content.model.animation;
 
 import com.mojang.serialization.MapCodec;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 public interface PAnimationEventType<T>
 {
-	ResourceLocation id();
+	Identifier id();
 
 	MapCodec<T> codec();
 

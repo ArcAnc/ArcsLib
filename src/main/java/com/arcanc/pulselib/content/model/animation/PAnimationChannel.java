@@ -10,13 +10,13 @@
 package com.arcanc.pulselib.content.model.animation;
 
 
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
 
 public class PAnimationChannel
 {
-	public record Vector3fChannelType(ResourceLocation id, Vector3f defaultValue, boolean multiplicativeBlend)
+	public record Vector3fChannelType(Identifier id, Vector3f defaultValue, boolean multiplicativeBlend)
 			implements PAnimationChannelType<Vector3f>
 	{
 		@Override
@@ -64,7 +64,7 @@ public class PAnimationChannel
 		}
 	}
 
-	public record QuaternionChannelType(ResourceLocation id) implements PAnimationChannelType<Quaternionf>
+	public record QuaternionChannelType(Identifier id) implements PAnimationChannelType<Quaternionf>
 	{
 		@Override
 		public Class<Quaternionf> valueClass()

@@ -9,15 +9,9 @@
 
 package com.arcanc.pulselib.content.player.animation;
 
-import com.arcanc.pulselib.content.animatable.PAnimationController;
-import com.arcanc.pulselib.data.MolangParser;
 import com.mojang.blaze3d.vertex.PoseStack;
-<<<<<<< HEAD
-import net.minecraft.client.model.player.PlayerModel;
-=======
 import com.arcanc.pulselib.data.gltf.PGltfModelLoader;
-import net.minecraft.client.model.PlayerModel;
->>>>>>> a625c91 (Added deformers for player and custom models)
+import net.minecraft.client.model.player.PlayerModel;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.resources.Identifier;
@@ -69,17 +63,12 @@ public final class PPlayerAnimations
 		for (Player player : level.players())
 		{
 			livePlayers.add(player.getUUID());
-<<<<<<< HEAD
 			for (Map.Entry<Identifier, PPlayerAnimationDefinition> entry : DEFINITIONS.entrySet())
-				instance(player, entry.getKey(), entry.getValue()).tick();
-=======
-			for (Map.Entry<ResourceLocation, PPlayerAnimationDefinition> entry : DEFINITIONS.entrySet())
 			{
 				PPlayerAnimationInstance instance = instance(player, entry.getKey(), entry.getValue());
 				instance.tick(entry.getValue().shouldApply(player));
 			}
 			synchronizeGroups(player);
->>>>>>> e194067 (Tons of e)
 		}
 		INSTANCES.keySet().removeIf(uuid -> !livePlayers.contains(uuid));
 	}
@@ -194,12 +183,12 @@ public final class PPlayerAnimations
 	                                                                        float partialTick)
 	{
 		List<PPlayerAnimationDeformerApplication> applications = new ArrayList<>();
-		List<Map.Entry<ResourceLocation, PPlayerAnimationDefinition>> definitions = new ArrayList<>(DEFINITIONS.entrySet());
+		List<Map.Entry<Identifier, PPlayerAnimationDefinition>> definitions = new ArrayList<>(DEFINITIONS.entrySet());
 		definitions.sort(Comparator.
-				comparingInt((Map.Entry<ResourceLocation, PPlayerAnimationDefinition> entry) -> entry.getValue().priority()).
+				comparingInt((Map.Entry<Identifier, PPlayerAnimationDefinition> entry) -> entry.getValue().priority()).
 				thenComparing(Map.Entry :: getKey));
 
-		for (Map.Entry<ResourceLocation, PPlayerAnimationDefinition> entry : definitions)
+		for (Map.Entry<Identifier, PPlayerAnimationDefinition> entry : definitions)
 		{
 			PPlayerAnimationDefinition definition = entry.getValue();
 			if (!definition.appliesTo(player, part, partialTick))
@@ -248,12 +237,8 @@ public final class PPlayerAnimations
 				continue;
 
 			PPlayerAnimationInstance instance = instance(player, entry.getKey(), definition);
-<<<<<<< HEAD
-			Map<PAnimationController<PPlayerAnimationInstance>, MolangParser.Context> molangContexts = instance.createMolangContexts(partialTick);
-=======
 			if (!instance.isContributing())
 				continue;
->>>>>>> e194067 (Tons of e)
 			for (Map.Entry<PPlayerPart, String> binding : definition.bindings().entrySet())
 			{
 				PPlayerPart part = binding.getKey();
@@ -265,7 +250,7 @@ public final class PPlayerAnimations
 				if (weight <= 0.0f)
 					continue;
 
-				PPlayerAnimationInstance.PPlayerBonePose pose = instance.sample(binding.getValue(), partialTick, molangContexts);
+				PPlayerAnimationInstance.PPlayerBonePose pose = instance.sample(binding.getValue(), partialTick);
 				if (pose == null)
 					continue;
 
@@ -285,7 +270,7 @@ public final class PPlayerAnimations
 	private static void synchronizeGroups(Player player)
 	{
 		Map<String, List<PPlayerAnimationInstance>> groups = new HashMap<>();
-		for (Map.Entry<ResourceLocation, PPlayerAnimationDefinition> entry : DEFINITIONS.entrySet())
+		for (Map.Entry<Identifier, PPlayerAnimationDefinition> entry : DEFINITIONS.entrySet())
 		{
 			String syncGroup = entry.getValue().syncGroup();
 			if (syncGroup.isBlank())

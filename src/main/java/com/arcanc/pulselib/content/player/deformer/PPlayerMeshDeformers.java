@@ -15,9 +15,9 @@ import com.arcanc.pulselib.content.player.animation.PPlayerAnimationDeformerAppl
 import com.arcanc.pulselib.content.player.animation.PPlayerAnimations;
 import com.arcanc.pulselib.content.player.animation.PPlayerPart;
 import net.minecraft.client.model.HumanoidModel;
-import net.minecraft.client.model.PlayerModel;
+import net.minecraft.client.model.player.PlayerModel;
 import net.minecraft.client.model.geom.ModelPart;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.player.Player;
 import org.joml.Vector3f;
 
@@ -29,13 +29,13 @@ import java.util.function.Predicate;
 
 public final class PPlayerMeshDeformers
 {
-	private static final Map<ResourceLocation, Binding> BINDINGS = new LinkedHashMap<>();
+	private static final Map<Identifier, Binding> BINDINGS = new LinkedHashMap<>();
 
 	private PPlayerMeshDeformers()
 	{
 	}
 
-	public static void register(ResourceLocation id, PPlayerPart part, Predicate<Player> applies,
+	public static void register(Identifier id, PPlayerPart part, Predicate<Player> applies,
 							PDeformerStack stack, PPlayerDeformerValueSource values)
 	{
 		Objects.requireNonNull(id);
@@ -43,7 +43,7 @@ public final class PPlayerMeshDeformers
 			throw new IllegalArgumentException("Duplicate player deformer binding " + id);
 	}
 
-	public static void unregister(ResourceLocation id)
+	public static void unregister(Identifier id)
 	{
 		BINDINGS.remove(id);
 	}
@@ -78,12 +78,12 @@ public final class PPlayerMeshDeformers
 		return new PDeformerFrame(position, right, up, forward);
 	}
 
-	public static void apply(Player player, PlayerModel<?> model)
+	public static void apply(Player player, PlayerModel model)
 	{
 		apply(player, model, 0.0f);
 	}
 
-	public static void apply(Player player, PlayerModel<?> model, float partialTick)
+	public static void apply(Player player, PlayerModel model, float partialTick)
 	{
 		for (PPlayerPart part : PPlayerPart.values())
 			for (ModelPart modelPart : part.resolve(model))

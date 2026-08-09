@@ -11,7 +11,7 @@ package com.arcanc.pulselib.content.model.deformer;
 
 import com.arcanc.pulselib.util.PLibDatabase;
 import com.mojang.serialization.MapCodec;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import org.joml.Vector3f;
 
 public final class PWaveDeformer implements PMeshDeformer<PWaveDefinition>
@@ -24,7 +24,7 @@ public final class PWaveDeformer implements PMeshDeformer<PWaveDefinition>
 	}
 
 	@Override
-	public ResourceLocation id()
+	public Identifier id()
 	{
 		return PLibDatabase.rl("wave");
 	}

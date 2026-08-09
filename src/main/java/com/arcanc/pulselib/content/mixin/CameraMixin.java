@@ -48,7 +48,10 @@ public abstract class CameraMixin
 		if (pose == null)
 		{
 			Camera camera = (Camera)(Object)this;
-			this.setRotation(camera.getYRot() + shake, camera.getXRot() + shake * 0.5f, 0.0f);
+			Vector3f euler = camera.rotation().getEulerAnglesYXZ(new Vector3f());
+			this.setRotation(180.0f - (float)Math.toDegrees(euler.y) + shake,
+					-(float)Math.toDegrees(euler.x) + shake * 0.5f,
+					-(float)Math.toDegrees(euler.z));
 			return;
 		}
 

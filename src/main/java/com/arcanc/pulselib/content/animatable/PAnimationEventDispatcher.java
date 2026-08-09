@@ -111,7 +111,7 @@ public final class PAnimationEventDispatcher
 		if (blockState.hasProperty(BlockStateProperties.FACING)) direction = blockState.getValue(BlockStateProperties.FACING);
 		if (direction.getAxis() == Direction.Axis.Z) direction = direction.getOpposite();
 		if (direction.getAxis().isHorizontal()) localPosition.rotateY((float)Math.toRadians(direction.toYRot()));
-		else localPosition.rotateX((float)Math.toRadians(90f * direction.getNormal().getY()));
+		else localPosition.rotateX((float)Math.toRadians(90f * direction.getUnitVec3i().getY()));
 	}
 
 	private static <T extends PAnimatable<T>> boolean findBonePosition(PBakedModel model,

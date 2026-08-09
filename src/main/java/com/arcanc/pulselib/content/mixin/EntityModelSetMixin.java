@@ -24,10 +24,6 @@ public class EntityModelSetMixin
 	@Redirect(method = "bakeLayer", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/model/geom/builders/LayerDefinition;bakeRoot()Lnet/minecraft/client/model/geom/ModelPart;"))
 	private ModelPart pulselib$bakePlayerLayerWithDeformableCubes(LayerDefinition definition, ModelLayerLocation location)
 	{
-		String modelPath = location.getModel().getPath();
-		if (!"minecraft".equals(location.getModel().getNamespace()) ||
-				(!"player".equals(modelPath) && !"player_slim".equals(modelPath)))
-			return definition.bakeRoot();
 		try (PDeformableCubeBakeScope.Scope ignored = PDeformableCubeBakeScope.begin())
 		{
 			return definition.bakeRoot();

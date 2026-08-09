@@ -12,7 +12,6 @@ package com.arcanc.pulselib.content.renderer;
 
 import com.arcanc.pulselib.content.animatable.PAnimatable;
 import com.arcanc.pulselib.content.animatable.PAnimationController;
-import com.arcanc.pulselib.content.model.animation.PPose;
 import com.arcanc.pulselib.content.model.baked.PBakedBone;
 import com.arcanc.pulselib.content.model.baked.PBakedMesh;
 import com.arcanc.pulselib.content.model.baked.PBakedModel;
@@ -152,19 +151,13 @@ public abstract class PEntityRenderLayer<T extends Entity & PAnimatable<T>, RS e
 		if (model == null)
 			return;
 		
-<<<<<<< HEAD
 		PModelData data = getModelData(renderState);
-=======
-		PModelData data = getModelData(animatable);
-		PPose pose = model.evaluate(controllers, molangContexts, partialTick);
->>>>>>> e194067 (Tons of e)
 		for (PBakedBone bone : model.bones())
 		{
 			renderer.perBoneSubmit(
 					renderState,
 					poseStack,
 					bone,
-					pose,
 					controllers,
 					data,
 					this :: getRenderType,

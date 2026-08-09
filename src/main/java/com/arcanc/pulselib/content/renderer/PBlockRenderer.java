@@ -14,21 +14,13 @@ import com.arcanc.pulselib.content.animatable.PAnimatable;
 import com.arcanc.pulselib.content.animatable.PAnimationController;
 import com.arcanc.pulselib.content.animatable.PAnimationManager;
 import com.arcanc.pulselib.content.animatable.instance.InstanceAnimationManager;
-<<<<<<< HEAD
 import com.arcanc.pulselib.content.mixin.BlockEntityRenderStateAccessor;
 import com.arcanc.pulselib.content.model.animation.BoneFrame;
-=======
-import com.arcanc.pulselib.content.model.animation.PPose;
->>>>>>> e194067 (Tons of e)
 import com.arcanc.pulselib.content.model.baked.PBakedBone;
 import com.arcanc.pulselib.content.model.baked.PBakedMesh;
 import com.arcanc.pulselib.content.model.baked.PBakedModel;
 import com.arcanc.pulselib.content.model.baked.PMeshRenderContext;
-<<<<<<< HEAD
 import com.arcanc.pulselib.content.renderer.base.PBlockRenderState;
-=======
-import com.arcanc.pulselib.content.model.baked.PDeformedMeshBuffers;
->>>>>>> a625c91 (Added deformers for player and custom models)
 import com.arcanc.pulselib.content.renderer.modelData.PModelData;
 import com.arcanc.pulselib.data.gecko.MolangParser;
 import com.arcanc.pulselib.util.PRenderTypes;
@@ -129,12 +121,7 @@ public abstract class PBlockRenderer<T extends BlockEntity & PAnimatable<T>, RS 
 				renderState.getAnimatable(), manager, controllers, renderState.partialTick());
 		InstanceAnimationManager.addManager(manager);
 		
-<<<<<<< HEAD
 		model.bones().forEach(bone -> perBoneSubmit(renderState, poseStack, bone, controllers, molangContexts, renderType, -1, renderState.lightCoords, OverlayTexture.NO_OVERLAY));
-=======
-		PPose pose = model.evaluate(controllers, molangContexts, partialTick);
-		model.bones().forEach(bone -> perBoneSubmit(animatable, poseStack, bone, pose, controllers, molangContexts, renderType, -1, packedLight, packedOverlay, partialTick));
->>>>>>> e194067 (Tons of e)
 	}
 	
 	@Override
@@ -142,32 +129,28 @@ public abstract class PBlockRenderer<T extends BlockEntity & PAnimatable<T>, RS 
 	{
 	}
 	
-<<<<<<< HEAD
 	protected void perBoneSubmit(RS renderState, PoseStack poseStack, PBakedBone bone, Collection<PAnimationController<T>> controllers, Map<PAnimationController<T>, MolangParser.Context> molangContexts, Function<Identifier, RenderType> renderType, int packedColor, int packedLight, int packedOverlay)
 	{
 		PModelData data = this.getModelData(renderState);
 		BoneFrame frame = bone.mixBone(data.getModel(), controllers, molangContexts, renderState.partialTick());
-=======
-	protected void perBoneSubmit(T animatable, PoseStack poseStack, PBakedBone bone, PPose pose, Collection<PAnimationController<T>> controllers, Map<PAnimationController<T>, MolangParser.Context> molangContexts, Function<ResourceLocation, RenderType> renderType, int packedColor, int packedLight, int packedOverlay, float partialTick)
-	{
-		PModelData data = this.getModelData(animatable);
-		int boneIndex = data.getModel().boneIndex(bone);
->>>>>>> e194067 (Tons of e)
 		poseStack.pushPose();
-		poseStack.translate(pose.translation(boneIndex).x(), pose.translation(boneIndex).y(), pose.translation(boneIndex).z());
-		poseStack.mulPose(pose.rotation(boneIndex));
-		poseStack.scale(pose.scale(boneIndex).x(), pose.scale(boneIndex).y(), pose.scale(boneIndex).z());
+		if (frame != null)
+		{
+			poseStack.translate(frame.translation().x(), frame.translation().y(), frame.translation().z());
+			poseStack.mulPose(frame.rotation());
+			poseStack.scale(frame.scale().x(), frame.scale().y(), frame.scale().z());
+		}
+		else
+		{
+			poseStack.translate(bone.basePosition().x(), bone.basePosition().y(), bone.basePosition().z());
+			poseStack.mulPose(bone.baseRotation());
+		}
 		
 		this.submitBone(renderState, bone, poseStack, data, controllers, renderType, packedColor, packedLight, packedOverlay);
 		
 		if (!bone.children().isEmpty())
-<<<<<<< HEAD
 			bone.children().forEach(child -> perBoneSubmit(renderState, poseStack, child, controllers, molangContexts, renderType, packedColor, packedLight, packedOverlay));
 		
-=======
-			bone.children().forEach(child -> perBoneSubmit(animatable, poseStack, child, pose, controllers, molangContexts, renderType, packedColor, packedLight, packedOverlay, partialTick));
-
->>>>>>> e194067 (Tons of e)
 		poseStack.popPose();
 	}
 
@@ -262,54 +245,4 @@ public abstract class PBlockRenderer<T extends BlockEntity & PAnimatable<T>, RS 
 			dir = dir.getOpposite();
 		return dir;
 	}
-<<<<<<< HEAD
-=======
-	
-	protected void submitBone(T animatable,
-	                          PBakedBone bone,
-	                          PoseStack poseStack,
-	                          PModelData modelData,
-	                          Collection<PAnimationController<T>> controllers,
-	                          Function<ResourceLocation, RenderType> renderType,
-	                          int color,
-	                          int packedLight,
-	                          int packedOverlay,
-	                          float partialTick)
-	{
-		Matrix4f matrix4fstack = new Matrix4f(poseStack.last().pose());
-
-		bone.meshes().forEach(mesh ->
-		{
-			if (mesh.textureName().isEmpty())
-				return;
-			
-			PMeshRenderContext inherited = new PMeshRenderContext(
-					renderType,
-					color,
-					mesh.isEmissive() ? LightTexture.FULL_BRIGHT : packedLight,
-					packedOverlay);
-			PMeshRenderContext meshContext = resolveMeshRender(animatable, bone, mesh, inherited, partialTick);
-			
-			RenderType baseType = meshContext.renderType().apply(PTextureCache.ATLAS_LOCATION);
-			RenderType type = mesh.isEmissive() ? PRenderTypes.RenderTypeProvider.emissiveVariant(baseType, PTextureCache.ATLAS_LOCATION) : baseType;
-			
-			PRenderTypes.getTransparencyState(type).ifPresent(transparency ->
-			{
-				if (transparency == RenderStateShard.TransparencyStateShard.NO_TRANSPARENCY)
-					PRenderQueue.submitBlockEntityMesh(type, PDeformedMeshBuffers.resolve(mesh, meshContext.deformation()), new PRenderQueue.InstanceData(matrix4fstack, meshContext.color(), meshContext.packedLight(), meshContext.packedOverlay()));
-				else
-					PRenderQueue.submitBlockEntityTranslucentMesh(type, PDeformedMeshBuffers.resolve(mesh, meshContext.deformation()), new PRenderQueue.InstanceData(matrix4fstack, meshContext.color(), meshContext.packedLight(), meshContext.packedOverlay()));
-			});
-		});
-	}
-	
-	protected PMeshRenderContext resolveMeshRender(T animatable,
-	                                               PBakedBone bone,
-	                                               PBakedMesh mesh,
-	                                               PMeshRenderContext inherited,
-	                                               float partialTick)
-	{
-		return inherited;
-	}
->>>>>>> a625c91 (Added deformers for player and custom models)
 }

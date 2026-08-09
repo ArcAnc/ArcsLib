@@ -14,7 +14,6 @@ import com.arcanc.pulselib.content.animatable.PAnimatable;
 import com.arcanc.pulselib.content.animatable.PAnimationController;
 import com.arcanc.pulselib.content.model.animation.BoneFrame;
 import com.arcanc.pulselib.content.model.animation.PAnimationPoseResolver;
-import com.arcanc.pulselib.content.model.animation.PPose;
 import com.arcanc.pulselib.data.gecko.MolangParser;
 import com.arcanc.pulselib.content.renderer.modelData.PModelData;
 import com.arcanc.pulselib.util.PLibDatabase;
@@ -51,7 +50,6 @@ import java.util.function.Function;
  */
 public class PBakedBone
 {
-<<<<<<< HEAD
 	private final String name;
 	private final Vector3f basePosition;
 	private final Quaternionf baseRotation;
@@ -67,48 +65,6 @@ public class PBakedBone
 	                  List<PBakedBone> children,
 	                  @Nullable PBakedBone parent,
 	                  List<PBakedMesh> meshes)
-=======
-	public void instantDraw(PoseStack poseStack,
-	                        PBakedModel model,
-	                        PPose pose,
-	                        Function<ResourceLocation, RenderType> renderType,
-	                        int color,
-	                        int packedLight,
-	                        int packedOverlay)
-	{
-		PMeshRenderContext context = new PMeshRenderContext(renderType, color, packedLight, packedOverlay);
-		instantDraw(poseStack, model, pose, (bone, mesh, inherited) -> inherited, context);
-	}
-
-	public void instantDraw(PoseStack poseStack,
-	                        PBakedModel model,
-	                        PPose pose,
-	                        PMeshRenderResolver resolver,
-	                        PMeshRenderContext inherited)
-	{
-		int boneIndex = model.boneIndex(this);
-		poseStack.pushPose();
-		poseStack.translate(pose.translation(boneIndex).x(), pose.translation(boneIndex).y(), pose.translation(boneIndex).z());
-		poseStack.mulPose(pose.rotation(boneIndex));
-		poseStack.scale(pose.scale(boneIndex).x(), pose.scale(boneIndex).y(), pose.scale(boneIndex).z());
-		Matrix4f matrix4fstack = new Matrix4f(RenderSystem.getModelViewMatrix());
-		matrix4fstack.mul(poseStack.last().pose());
-
-		PMeshRenderContext boneContext = inherited;
-		this.meshes().forEach(mesh -> drawMesh(mesh, this, resolver, boneContext, poseStack, matrix4fstack));
-		this.children().forEach(child -> child.instantDraw(poseStack, model, pose, resolver, boneContext));
-		poseStack.popPose();
-	}
-
-	public <T extends PAnimatable<T>> void instantDraw(PoseStack poseStack,
-	                                                   PModelData modelData,
-	                                                   Collection<PAnimationController<T>> controllers,
-	                                                   Function<ResourceLocation, RenderType> renderType,
-	                                                   int color,
-	                                                   int packedLight,
-	                                                   int packedOverlay,
-	                                                   float partialTick)
->>>>>>> e194067 (Tons of e)
 	{
 		this.name = name;
 		this.basePosition = basePosition;
@@ -196,7 +152,6 @@ public class PBakedBone
 			if (mesh.textureName().isEmpty())
 				return;
 			
-<<<<<<< HEAD
 			PMeshRenderContext meshContext = resolver.resolve(this, mesh, boneContext);
 			RenderType baseType = meshContext.renderType().apply(PTextureCache.ATLAS_LOCATION);
 			RenderType type = mesh.isEmissive() ?
@@ -212,12 +167,6 @@ public class PBakedBone
 			GpuTextureView depthTexture = renderTarget.useDepth
 					? (RenderSystem.outputDepthTextureOverride != null ? RenderSystem.outputDepthTextureOverride : renderTarget.getDepthTextureView())
 					: null;
-=======
-			PMeshRenderContext inheritedContext = mesh.isEmissive() ?
-					new PMeshRenderContext(boneContext.renderType(), boneContext.color(), LightTexture.FULL_BRIGHT, boneContext.packedOverlay(), boneContext.deformation()) :
-					boneContext;
-			PMeshRenderContext meshContext = resolver.resolve(this, mesh, inheritedContext);
->>>>>>> a625c91 (Added deformers for player and custom models)
 			
 			GpuTextureView lightTexture = mc.gameRenderer.levelLightmap();
 			OverlayTexture overlayTexture = mc.gameRenderer.overlayTexture();
@@ -237,7 +186,6 @@ public class PBakedBone
 				
 			}
 			
-<<<<<<< HEAD
 			try(RenderPass pass = RenderSystem.getDevice().createCommandEncoder().
 					createRenderPass(mesh.uuid() :: toString, colorAttachment, OptionalInt.empty(), depthTexture, OptionalDouble.empty()))
 			{
@@ -253,26 +201,6 @@ public class PBakedBone
 				
 				pass.drawIndexed(0, 0, mesh.indicesCount(), 1);
 			}
-=======
-			int meshPackedLight = meshContext.packedLight();
-			int blockLight = LightTexture.block(meshPackedLight);
-			int skyLight = LightTexture.sky(meshPackedLight);
-			type.setupRenderState();
-			
-			ShaderInstance shaderInstance = RenderSystem.getShader();
-			if (shaderInstance == null)
-				return;
-			VertexBuffer vertexBuffer = PDeformedMeshBuffers.resolve(mesh, meshContext.deformation());
-			vertexBuffer.bind();
-			shaderInstance.safeGetUniform("Color").set(colorVector);
-			shaderInstance.safeGetUniform("Light").set(blockLight, skyLight);
-			shaderInstance.safeGetUniform("Overlay").set(u, v);
-			shaderInstance.safeGetUniform("NormalMat").set(poseStack.last().normal());
-			shaderInstance.apply();
-			vertexBuffer.drawWithShader(matrix4fstack, RenderSystem.getProjectionMatrix(), shaderInstance);
-			VertexBuffer.unbind();
-			type.clearRenderState();
->>>>>>> a625c91 (Added deformers for player and custom models)
 		});
 		
 		this.children().forEach(children ->
@@ -356,42 +284,5 @@ public class PBakedBone
 			this.basePosition = basePosition;
 			this.baseRotation = baseRotation;
 		}
-	}
-
-	private static void drawMesh(PBakedMesh mesh,
-	                             PBakedBone bone,
-	                             PMeshRenderResolver resolver,
-	                             PMeshRenderContext inherited,
-	                             PoseStack poseStack,
-	                             Matrix4f matrix4fstack)
-	{
-		if (mesh.textureName().isEmpty())
-			return;
-		PMeshRenderContext inheritedContext = mesh.isEmissive() ?
-				new PMeshRenderContext(inherited.renderType(), inherited.color(), LightTexture.FULL_BRIGHT, inherited.packedOverlay(), inherited.deformation()) : inherited;
-		PMeshRenderContext meshContext = resolver.resolve(bone, mesh, inheritedContext);
-		RenderType type = meshContext.renderType().apply(PTextureCache.ATLAS_LOCATION);
-		if (mesh.isEmissive())
-			type = PRenderTypes.RenderTypeProvider.emissiveVariant(type, PTextureCache.ATLAS_LOCATION);
-		int u = meshContext.packedOverlay() & 0xFFFF;
-		int v = (meshContext.packedOverlay() >> 16) & 0xFFFF;
-		int color = meshContext.color();
-		Vector4f colorVector = new Vector4f(FastColor.ARGB32.red(color) / 255f, FastColor.ARGB32.green(color) / 255f,
-				FastColor.ARGB32.blue(color) / 255f, FastColor.ARGB32.alpha(color) / 255f);
-		type.setupRenderState();
-		ShaderInstance shader = RenderSystem.getShader();
-		if (shader != null)
-		{
-			VertexBuffer vertexBuffer = PDeformedMeshBuffers.resolve(mesh, meshContext.deformation());
-			vertexBuffer.bind();
-			shader.safeGetUniform("Color").set(colorVector);
-			shader.safeGetUniform("Light").set(LightTexture.block(meshContext.packedLight()), LightTexture.sky(meshContext.packedLight()));
-			shader.safeGetUniform("Overlay").set(u, v);
-			shader.safeGetUniform("NormalMat").set(poseStack.last().normal());
-			shader.apply();
-			vertexBuffer.drawWithShader(matrix4fstack, RenderSystem.getProjectionMatrix(), shader);
-			VertexBuffer.unbind();
-		}
-		type.clearRenderState();
 	}
 }

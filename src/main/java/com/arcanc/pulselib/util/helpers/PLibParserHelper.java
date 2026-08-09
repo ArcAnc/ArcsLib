@@ -13,11 +13,26 @@ package com.arcanc.pulselib.util.helpers;
 import de.javagl.jgltf.model.AccessorData;
 import de.javagl.jgltf.model.AccessorModel;
 import de.javagl.jgltf.model.GltfConstants;
+import de.javagl.jgltf.model.ImageModel;
+import de.javagl.jgltf.model.MaterialModel;
+import de.javagl.jgltf.model.TextureModel;
+import de.javagl.jgltf.model.v2.MaterialModelV2;
 
 import java.nio.*;
 
 public class PLibParserHelper
 {
+	public static String extractTextureName(MaterialModel material)
+	{
+		if (!(material instanceof MaterialModelV2 v2))
+			return "";
+		TextureModel texture = v2.getBaseColorTexture();
+		if (texture == null)
+			return "";
+		ImageModel image = texture.getImageModel();
+		return image == null || image.getUri() == null ? "" : image.getUri();
+	}
+
 	public static FloatBuffer getFloatBuffer(AccessorModel accessor)
 	{
 		if (accessor == null)
