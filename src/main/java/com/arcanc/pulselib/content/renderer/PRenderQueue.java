@@ -11,6 +11,8 @@ package com.arcanc.pulselib.content.renderer;
 
 
 import com.arcanc.pulselib.content.model.baked.PBakedMesh;
+import com.arcanc.pulselib.content.model.baked.PDeformedMeshBuffers;
+import com.arcanc.pulselib.content.model.deformer.PMeshDeformation;
 import com.arcanc.pulselib.util.PLibDatabase;
 import com.arcanc.pulselib.util.PTextureCache;
 import com.arcanc.pulselib.util.helpers.PLibRenderHelper;
@@ -49,19 +51,29 @@ public class PRenderQueue
 	private static final Map<RenderStage,
 			Map<BatchKey, InstanceBatch>> COMMANDS = new Object2ObjectOpenHashMap<>();
 	
-	public static void submitBlockEntityMesh(RenderType renderType, PBakedMesh mesh, InstanceData data)
+	public static void submitBlockEntityMesh(RenderType renderType,
+	                                         PBakedMesh mesh,
+	                                         @Nullable PMeshDeformation deformation,
+	                                         InstanceData data)
 	{
 		submit(RenderStage.SOLID_BLOCKS,
-				renderType, mesh, data);
+				renderType, mesh, deformation, data);
 	}
 	
-	public static void submitBlockEntityTranslucentMesh(RenderType renderType, PBakedMesh mesh, InstanceData data)
+	public static void submitBlockEntityTranslucentMesh(RenderType renderType,
+	                                                    PBakedMesh mesh,
+	                                                    @Nullable PMeshDeformation deformation,
+	                                                    InstanceData data)
 	{
 		submit(RenderStage.TRANSLUCENT_BLOCKS,
-				renderType, mesh, data);
+				renderType, mesh, deformation, data);
 	}
 	
-	public static void submitItem(ItemDisplayContext context, RenderType renderType, PBakedMesh mesh, InstanceData data)
+	public static void submitItem(ItemDisplayContext context,
+	                              RenderType renderType,
+	                              PBakedMesh mesh,
+	                              @Nullable PMeshDeformation deformation,
+	                              InstanceData data)
 	{
 		RenderStage stage = switch (context)
 		{
@@ -71,21 +83,25 @@ public class PRenderQueue
 			     HEAD, ON_SHELF -> RenderStage.ENTITIES;
 			case GROUND, FIXED, NONE -> RenderStage.TRANSLUCENT_BLOCKS;
 		};
-		submit(stage, renderType, mesh, data);
+		submit(stage, renderType, mesh, deformation, data);
 	}
 	
-	public static void submitEntityMesh(RenderType renderType, PBakedMesh mesh, InstanceData data)
+	public static void submitEntityMesh(RenderType renderType,
+	                                    PBakedMesh mesh,
+	                                    @Nullable PMeshDeformation deformation,
+	                                    InstanceData data)
 	{
-		submit(RenderStage.ENTITIES, renderType, mesh, data);
+		submit(RenderStage.ENTITIES, renderType, mesh, deformation, data);
 	}
 	
 	public static void submit(RenderStage stage,
 	                          RenderType type,
 	                          PBakedMesh mesh,
+	                          @Nullable PMeshDeformation deformation,
 	                          InstanceData data)
 	{
 		Map<BatchKey, InstanceBatch> stageMap = COMMANDS.computeIfAbsent(stage, s -> new Object2ObjectOpenHashMap<>());
-		BatchKey key = new BatchKey(type, mesh);
+		BatchKey key = new BatchKey(type, mesh, deformation);
 		InstanceBatch batch = stageMap.computeIfAbsent(key, k -> new InstanceBatch());
 		batch.add(data);
 	}
@@ -148,7 +164,7 @@ public class PRenderQueue
 					pass.bindTexture("Sampler0", atlas.getTextureView(), atlas.getSampler());
 					pass.bindTexture("Sampler1", overlayTexture.getTextureView(), RenderSystem.getSamplerCache().getClampToEdge(FilterMode.LINEAR));
 					pass.bindTexture("Sampler2", lightTexture, RenderSystem.getSamplerCache().getClampToEdge(FilterMode.LINEAR));
-					pass.setVertexBuffer(0, mesh.vbo());
+					pass.setVertexBuffer(0, PDeformedMeshBuffers.resolve(mesh, key.deformation()));
 					pass.setIndexBuffer(mesh.indices(), mesh.indexType());
 					
 					pass.drawIndexed(0, 0, mesh.indicesCount(), count);
@@ -214,7 +230,7 @@ public class PRenderQueue
 		}
 	}
 	
-	public record BatchKey(RenderType type, PBakedMesh mesh) {}
+	public record BatchKey(RenderType type, PBakedMesh mesh, @Nullable PMeshDeformation deformation) {}
 	
 	public record InstanceData(
 			Matrix4f posMatrix,

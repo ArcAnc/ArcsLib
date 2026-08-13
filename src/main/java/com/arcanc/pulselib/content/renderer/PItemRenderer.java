@@ -234,7 +234,7 @@ public abstract class PItemRenderer<T extends Item & PAnimatable<T>, RS extends 
 					PRenderTypes.RenderTypeProvider.emissiveVariant(baseType, PTextureCache.ATLAS_LOCATION) :
 					baseType;
 			
-			PRenderQueue.submitItem(context, type, material.mesh(), new PRenderQueue.InstanceData(matrix4fstack, meshContext.color(), material.packedLight(), meshContext.packedOverlay()));
+			PRenderQueue.submitItem(context, type, material.mesh(), meshContext.deformation(), new PRenderQueue.InstanceData(matrix4fstack, meshContext.color(), material.packedLight(), meshContext.packedOverlay()));
 		});
 	}
 	
