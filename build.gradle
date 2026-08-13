@@ -1,4 +1,5 @@
 import net.darkhax.curseforgegradle.Constants;
+import net.darkhax.curseforgegradle.TaskPublishCurseForge
 
 plugins {
     id 'java-library'
@@ -252,7 +253,7 @@ modrinth {
     loaders = ["neoforge"]
 }
 
-tasks.register("publishCurseForge", net.darkhax.curseforgegradle.TaskPublishCurseForge) {
+tasks.register("publishCurseForge", TaskPublishCurseForge) {
     apiToken = curseforgeToken
 
     dependsOn tasks.jar

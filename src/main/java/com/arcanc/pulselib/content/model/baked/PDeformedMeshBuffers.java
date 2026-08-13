@@ -21,6 +21,7 @@ import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import org.joml.Vector3f;
 
 import java.nio.ByteBuffer;
+import java.util.HashMap;
 import java.util.IdentityHashMap;
 import java.util.Map;
 
@@ -64,7 +65,7 @@ public final class PDeformedMeshBuffers
 		int level = deformation.subdivisionLevel();
 		if (level == 0)
 			return mesh.source();
-		return SUBDIVIDED_SOURCES.computeIfAbsent(mesh, ignored -> new java.util.HashMap<>()).computeIfAbsent(
+		return SUBDIVIDED_SOURCES.computeIfAbsent(mesh, ignored -> new HashMap<>()).computeIfAbsent(
 				level, ignored -> PMeshTessellator.subdivide(mesh.source(), level));
 	}
 

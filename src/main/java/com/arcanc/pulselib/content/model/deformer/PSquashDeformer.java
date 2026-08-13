@@ -1,3 +1,12 @@
+/**
+ * @author ArcAnc
+ * Created at: 05.08.2026
+ * Copyright (c) 2026
+ * <p>
+ * This code is licensed under "Arc's License of Common Sense"
+ * Details can be found in the license file in the root folder of this project
+ */
+
 package com.arcanc.pulselib.content.model.deformer;
 
 import com.arcanc.pulselib.util.PLibDatabase;
@@ -5,7 +14,6 @@ import com.mojang.serialization.MapCodec;
 import net.minecraft.resources.Identifier;
 import org.joml.Vector3f;
 
-/** Scales one axis and compensates the two perpendicular axes to preserve local volume. */
 public final class PSquashDeformer implements PMeshDeformer<PSquashDefinition>
 {
 	public static final PSquashDeformer INSTANCE = new PSquashDeformer();
