@@ -10,6 +10,7 @@
 package com.arcanc.pulselib.content.renderer;
 
 
+import com.arcanc.pulselib.content.model.deformer.gpu.PGpuDeformerBuffers;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
 import net.neoforged.neoforge.common.NeoForge;
@@ -33,5 +34,6 @@ public class PRenderStagesHandler
 		PRenderQueue.flush(PRenderQueue.RenderStage.ENTITIES);
 		
 		PRenderQueue.flush(PRenderQueue.RenderStage.TRANSLUCENT_BLOCKS);
+		PGpuDeformerBuffers.finishFrame();
 	}
 }

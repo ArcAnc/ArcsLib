@@ -15,6 +15,7 @@ import com.mojang.blaze3d.pipeline.ColorTargetState;
 import com.mojang.blaze3d.pipeline.DepthStencilState;
 import com.mojang.blaze3d.pipeline.RenderPipeline;
 import com.mojang.blaze3d.shaders.UniformType;
+import com.mojang.blaze3d.textures.TextureFormat;
 import com.mojang.blaze3d.vertex.VertexFormat;
 import com.mojang.blaze3d.vertex.VertexFormatElement;
 import net.minecraft.client.renderer.RenderPipelines;
@@ -43,6 +44,8 @@ public class PRenderTypes
 				withSampler("Sampler2").
 				withUniform("Lighting", UniformType.UNIFORM_BUFFER).
 				withUniform("InstanceData", UniformType.UNIFORM_BUFFER).
+				withUniform("DeformerOperations", UniformType.TEXEL_BUFFER, TextureFormat.RED8I).
+				withUniform("DeformerValues", UniformType.TEXEL_BUFFER, TextureFormat.RED8I).
 				withVertexFormat(VertexFormatProvider.POSITION_TEX_NORMAL, VertexFormat.Mode.TRIANGLES).
 				withDepthStencilState(DepthStencilState.DEFAULT).
 				buildSnippet();

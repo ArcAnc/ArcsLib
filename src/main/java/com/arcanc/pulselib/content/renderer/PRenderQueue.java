@@ -11,8 +11,9 @@ package com.arcanc.pulselib.content.renderer;
 
 
 import com.arcanc.pulselib.content.model.baked.PBakedMesh;
-import com.arcanc.pulselib.content.model.baked.PDeformedMeshBuffers;
+import com.arcanc.pulselib.content.model.baked.PSubdividedMeshCache;
 import com.arcanc.pulselib.content.model.deformer.PMeshDeformation;
+import com.arcanc.pulselib.content.model.deformer.gpu.PGpuDeformerBuffers;
 import com.arcanc.pulselib.util.PLibDatabase;
 import com.arcanc.pulselib.util.PTextureCache;
 import com.arcanc.pulselib.util.helpers.PLibRenderHelper;
@@ -50,6 +51,7 @@ public class PRenderQueue
 {
 	private static final Map<RenderStage,
 			Map<BatchKey, InstanceBatch>> COMMANDS = new Object2ObjectOpenHashMap<>();
+	private static final DeformerBuffers DEFORMER_BUFFERS = new DeformerBuffers();
 	
 	public static void submitBlockEntityMesh(RenderType renderType,
 	                                         PBakedMesh mesh,
@@ -101,9 +103,11 @@ public class PRenderQueue
 	                          InstanceData data)
 	{
 		Map<BatchKey, InstanceBatch> stageMap = COMMANDS.computeIfAbsent(stage, s -> new Object2ObjectOpenHashMap<>());
-		BatchKey key = new BatchKey(type, mesh, deformation);
+		PBakedMesh subdividedMesh = PSubdividedMeshCache.resolve(mesh, deformation == null ? 0 : deformation.subdivisionLevel());
+		PGpuDeformerBuffers.Submission deformer = PGpuDeformerBuffers.submit(deformation);
+		BatchKey key = new BatchKey(type, subdividedMesh);
 		InstanceBatch batch = stageMap.computeIfAbsent(key, k -> new InstanceBatch());
-		batch.add(data);
+		batch.add(data.withDeformer(deformer));
 	}
 	
 	public static void flush(RenderStage stage)
@@ -117,6 +121,7 @@ public class PRenderQueue
 		TextureAtlas atlas = PTextureCache.getTextureAtlas();
 		GpuTextureView lightTexture = mc.gameRenderer.levelLightmap();
 		OverlayTexture overlayTexture = mc.gameRenderer.overlayTexture();
+		DeformerBuffers.Bindings deformerBuffers = DEFORMER_BUFFERS.upload();
 		
 		for (Map.Entry<BatchKey, InstanceBatch> entry : map.entrySet())
 		{
@@ -129,7 +134,6 @@ public class PRenderQueue
 			
 			RenderType type = key.type();
 			PBakedMesh mesh = key.mesh();
-			PDeformedMeshBuffers.MeshBuffers deformedMesh = PDeformedMeshBuffers.resolve(mesh, key.deformation());
 			
 			GpuBufferSlice dynamicTransforms = RenderSystem.getDynamicUniforms().
 					writeTransform(
@@ -161,21 +165,24 @@ public class PRenderQueue
 					RenderSystem.bindDefaultUniforms(pass);
 					pass.setUniform("DynamicTransforms", dynamicTransforms);
 					pass.setUniform("InstanceData", instanceData.currentBuffer());
+					pass.setUniform("DeformerOperations", deformerBuffers.operations());
+					pass.setUniform("DeformerValues", deformerBuffers.values());
 					applyActiveScissor(pass);
 					pass.bindTexture("Sampler0", atlas.getTextureView(), atlas.getSampler());
 					pass.bindTexture("Sampler1", overlayTexture.getTextureView(), RenderSystem.getSamplerCache().getClampToEdge(FilterMode.LINEAR));
 					pass.bindTexture("Sampler2", lightTexture, RenderSystem.getSamplerCache().getClampToEdge(FilterMode.LINEAR));
-					pass.setVertexBuffer(0, deformedMesh.vertices());
-					pass.setIndexBuffer(deformedMesh.indices(), deformedMesh.indexType());
+					pass.setVertexBuffer(0, mesh.vbo());
+					pass.setIndexBuffer(mesh.indices(), mesh.indexType());
 					
-					pass.drawIndexed(0, 0, deformedMesh.indicesCount(), count);
+					pass.drawIndexed(0, 0, mesh.indicesCount(), count);
 				}
 				
 				offset += count;
 			}
 			
-			batch.clear();
+			batch.delete();
 		}
+		map.clear();
 	}
 	
 	private static void applyActiveScissor(RenderPass pass)
@@ -196,6 +203,8 @@ public class PRenderQueue
 			stageMap.clear();
 		}
 		COMMANDS.clear();
+		DEFORMER_BUFFERS.close();
+		PGpuDeformerBuffers.cleanup();
 	}
 	
 	public static class RenderStage
@@ -231,14 +240,28 @@ public class PRenderQueue
 		}
 	}
 	
-	public record BatchKey(RenderType type, PBakedMesh mesh, @Nullable PMeshDeformation deformation) {}
+	public record BatchKey(RenderType type, PBakedMesh mesh) {}
 	
 	public record InstanceData(
 			Matrix4f posMatrix,
 			int packedColor,
 			int packedLight,
-			int packedOverlay)
-	{}
+			int packedOverlay,
+			int deformerOperationOffset,
+			int deformerValueOffset,
+			int deformerOperationCount)
+	{
+		public InstanceData(Matrix4f posMatrix, int packedColor, int packedLight, int packedOverlay)
+		{
+			this(posMatrix, packedColor, packedLight, packedOverlay, -1, -1, 0);
+		}
+
+		private InstanceData withDeformer(PGpuDeformerBuffers.Submission deformer)
+		{
+			return new InstanceData(this.posMatrix, this.packedColor, this.packedLight, this.packedOverlay,
+					deformer.operationOffset(), deformer.valueOffset(), deformer.operationCount());
+		}
+	}
 	
 	public static class InstanceBatch
 	{
@@ -247,6 +270,7 @@ public class PRenderQueue
 				putVec4().
 				putVec2().
 				putVec2().
+				putIVec4().
 				get();
 		
 		private static final int MAX_INSTANCES = 512;
@@ -289,7 +313,8 @@ public class PRenderQueue
 							putVec2(LightCoordsUtil.block(data.packedLight()),
 								LightCoordsUtil.sky(data.packedLight())).
 							putVec2(data.packedOverlay() & 0xFFFF,
-								data.packedOverlay() >> 16 & 0xFFFF);
+								data.packedOverlay() >> 16 & 0xFFFF).
+							putIVec4(data.deformerOperationOffset(), data.deformerValueOffset(), data.deformerOperationCount(), 0);
 				}
 			}
 			return this.instanceData;
@@ -313,5 +338,72 @@ public class PRenderQueue
 				this.instanceData = null;
 			}
 		}
+	}
+
+	private static final class DeformerBuffers
+	{
+		private static final int MINIMUM_SIZE = Float.BYTES * 4;
+
+		private @Nullable MappableRingBuffer operations;
+		private @Nullable MappableRingBuffer values;
+
+		public Bindings upload()
+		{
+			this.operations = upload(this.operations, PGpuDeformerBuffers.operations(), PGpuDeformerBuffers.operationsDirty(), "deformer_operations");
+			this.values = upload(this.values, PGpuDeformerBuffers.values(), PGpuDeformerBuffers.valuesDirty(), "deformer_values");
+			PGpuDeformerBuffers.markOperationsUploaded();
+			PGpuDeformerBuffers.markValuesUploaded();
+			return new Bindings(this.operations.currentBuffer(), this.values.currentBuffer());
+		}
+
+		public void close()
+		{
+			if (this.operations != null)
+			{
+				this.operations.close();
+				this.operations = null;
+			}
+			if (this.values != null)
+			{
+				this.values.close();
+				this.values = null;
+			}
+		}
+
+		private static MappableRingBuffer upload(@Nullable MappableRingBuffer buffer,
+		                                         List<Float> data,
+		                                         boolean dirty,
+		                                         String label)
+		{
+			int size = Math.max(MINIMUM_SIZE, data.size() * Float.BYTES);
+			if (buffer == null || buffer.size() < size)
+			{
+				if (buffer != null)
+					buffer.close();
+				buffer = new MappableRingBuffer(
+						() -> PLibDatabase.rl(label).toLanguageKey(),
+						GpuBuffer.USAGE_UNIFORM_TEXEL_BUFFER | GpuBuffer.USAGE_MAP_WRITE,
+						size);
+				dirty = true;
+			}
+			else if (dirty)
+				buffer.rotate();
+			if (dirty)
+				try (GpuBuffer.MappedView mapped = RenderSystem.getDevice().createCommandEncoder().mapBuffer(buffer.currentBuffer(), false, true))
+				{
+					var bytes = mapped.data();
+					for (float value : data)
+					{
+						int bits = Float.floatToRawIntBits(value);
+						bytes.put((byte)bits);
+						bytes.put((byte)(bits >> 8));
+						bytes.put((byte)(bits >> 16));
+						bytes.put((byte)(bits >> 24));
+					}
+				}
+			return buffer;
+		}
+
+		private record Bindings(GpuBuffer operations, GpuBuffer values) {}
 	}
 }

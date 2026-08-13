@@ -1,6 +1,6 @@
 /**
  * @author ArcAnc
- * Created at: 13.08.2026
+ * Created at: 14.08.2026
  * Copyright (c) 2026
  * <p>
  * This code is licensed under "Arc's License of Common Sense"
@@ -10,7 +10,7 @@
 package com.arcanc.pulselib.content.model.baked;
 
 import com.arcanc.pulselib.content.model.PMesh;
-import com.arcanc.pulselib.content.model.textures.atlas.PLibSpriteMetadata;
+import com.arcanc.pulselib.content.model.deformer.PMeshTessellator;
 import com.arcanc.pulselib.util.PRenderTypes;
 import com.arcanc.pulselib.util.PTextureCache;
 import com.mojang.blaze3d.buffers.GpuBuffer;
@@ -19,49 +19,47 @@ import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.ByteBufferBuilder;
 import com.mojang.blaze3d.vertex.MeshData;
 import com.mojang.blaze3d.vertex.VertexFormat;
+import de.javagl.jgltf.model.GltfConstants;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.resources.Identifier;
-import org.jspecify.annotations.Nullable;
 
 import java.nio.ByteBuffer;
 import java.util.HashMap;
 import java.util.IdentityHashMap;
 import java.util.Map;
 
-public final class PMeshTextureVariants
+public final class PSubdividedMeshCache
 {
-	private static final Map<PBakedMesh, Map<Identifier, PBakedMesh>> VARIANTS = new IdentityHashMap<>();
+	private static final Map<PBakedMesh, Map<Integer, PBakedMesh>> MESHES = new IdentityHashMap<>();
 
-	private PMeshTextureVariants()
+	private PSubdividedMeshCache()
 	{
 	}
 
-	public static PBakedMesh resolve(PBakedMesh mesh, @Nullable Identifier texture)
+	public static PBakedMesh resolve(PBakedMesh mesh, int subdivisionLevel)
 	{
-		Identifier resolvedTexture = texture == null ? mesh.textureLocation() : texture;
-		return VARIANTS.computeIfAbsent(mesh, ignored -> new HashMap<>()).computeIfAbsent(resolvedTexture,
-				location -> bake(mesh, location));
+		if (subdivisionLevel == 0)
+			return mesh;
+		return MESHES.computeIfAbsent(mesh, ignored -> new HashMap<>()).computeIfAbsent(subdivisionLevel,
+				level -> bake(mesh, level));
 	}
 
-	public static void clear()
+	public static void close(PBakedMesh mesh)
 	{
-		for (Map<Identifier, PBakedMesh> variants : VARIANTS.values())
-			for (PBakedMesh variant : variants.values())
-			{
-				PDeformedMeshBuffers.close(variant);
-				PSubdividedMeshCache.close(variant);
-				variant.vbo().close();
-				variant.indices().close();
-			}
-		VARIANTS.clear();
+		Map<Integer, PBakedMesh> variants = MESHES.remove(mesh);
+		if (variants != null)
+			variants.values().forEach(PSubdividedMeshCache :: closeBuffers);
 	}
 
-	private static PBakedMesh bake(PBakedMesh base, Identifier texture)
+	public static void cleanup()
 	{
-		PMesh source = base.source();
-		TextureAtlasSprite sprite = PTextureCache.getTextureAtlas().getSprite(texture);
-		boolean emissive = sprite.contents().getAdditionalMetadata(PLibSpriteMetadata.TYPE).
-				map(PLibSpriteMetadata :: emissive).orElse(false);
+		MESHES.values().forEach(variants -> variants.values().forEach(PSubdividedMeshCache :: closeBuffers));
+		MESHES.clear();
+	}
+
+	private static PBakedMesh bake(PBakedMesh base, int subdivisionLevel)
+	{
+		PMesh source = PMeshTessellator.subdivide(base.source(), subdivisionLevel);
+		TextureAtlasSprite sprite = PTextureCache.getTextureAtlas().getSprite(base.textureLocation());
 		ByteBufferBuilder bytes = ByteBufferBuilder.exactlySized(
 				source.vertexCount() * PRenderTypes.VertexFormatProvider.POSITION_TEX_NORMAL.getVertexSize());
 		BufferBuilder builder = sprite.contents().name().getPath().equals("missingno")
@@ -74,13 +72,33 @@ public final class PMeshTextureVariants
 		try (MeshData data = builder.buildOrThrow())
 		{
 			GpuBuffer vertices = RenderSystem.getDevice().createBuffer(
-					() -> base.uuid() + "_" + texture + "_vertices", GpuBuffer.USAGE_VERTEX, data.vertexBuffer());
+					() -> base.uuid() + "_subdivided_" + subdivisionLevel,
+					GpuBuffer.USAGE_VERTEX,
+					data.vertexBuffer());
 			ByteBuffer indices = source.indices().duplicate();
 			indices.clear();
 			GpuBuffer indexBuffer = RenderSystem.getDevice().createBuffer(
-					() -> base.uuid() + "_" + texture + "_indices", GpuBuffer.USAGE_INDEX, indices);
+					() -> base.uuid() + "_subdivided_" + subdivisionLevel + "_indices",
+					GpuBuffer.USAGE_INDEX,
+					indices);
 			return new PBakedMesh(base.uuid(), vertices, source.vertexCount(), indexBuffer, source.indicesCount(),
-					base.indexType(), base.textureName(), emissive, source, texture);
+					indexType(source), base.textureName(), base.isEmissive(), source, base.textureLocation());
 		}
+	}
+
+	private static VertexFormat.IndexType indexType(PMesh mesh)
+	{
+		return switch (mesh.glIndexType())
+		{
+			case GltfConstants.GL_UNSIGNED_SHORT -> VertexFormat.IndexType.SHORT;
+			case GltfConstants.GL_UNSIGNED_INT -> VertexFormat.IndexType.INT;
+			default -> throw new IllegalArgumentException("Unsupported GLTF index type: " + mesh.glIndexType());
+		};
+	}
+
+	private static void closeBuffers(PBakedMesh mesh)
+	{
+		mesh.vbo().close();
+		mesh.indices().close();
 	}
 }

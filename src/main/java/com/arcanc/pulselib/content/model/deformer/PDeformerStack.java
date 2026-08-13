@@ -21,10 +21,17 @@ public final class PDeformerStack
 	private static final float FRAME_EPSILON = 0.001f;
 
 	private final List<PPreparedDeformer> operations;
+	private final List<PDeformerInstance<?>> definitions;
 
 	PDeformerStack(List<PPreparedDeformer> operations)
 	{
+		this(operations, List.of());
+	}
+
+	private PDeformerStack(List<PPreparedDeformer> operations, List<PDeformerInstance<?>> definitions)
+	{
 		this.operations = List.copyOf(operations);
+		this.definitions = List.copyOf(definitions);
 	}
 
 	public static PDeformerStack compile(List<? extends PDeformerInstance<?>> definitions)
@@ -33,20 +40,30 @@ public final class PDeformerStack
 		PDeformerPrepareContext context = new PDeformerPrepareContext();
 		for (PDeformerInstance<?> definition : definitions)
 			definition.prepare(context);
-		return context.build();
+		PDeformerStack prepared = context.build();
+		return new PDeformerStack(prepared.operations, List.copyOf(definitions));
 	}
 
 	public static PDeformerStack compose(PDeformerStack... stacks)
 	{
 		List<PPreparedDeformer> operations = new ArrayList<>();
+		List<PDeformerInstance<?>> definitions = new ArrayList<>();
 		for (PDeformerStack stack : stacks)
+		{
 			operations.addAll(stack.operations);
-		return operations.isEmpty() ? EMPTY : new PDeformerStack(operations);
+			definitions.addAll(stack.definitions);
+		}
+		return operations.isEmpty() ? EMPTY : new PDeformerStack(operations, definitions);
 	}
 
 	public boolean isEmpty()
 	{
 		return this.operations.isEmpty();
+	}
+
+	public List<PDeformerInstance<?>> definitions()
+	{
+		return this.definitions;
 	}
 
 	public Vector3f deform(Vector3f localPosition, PDeformerValueSource values)
