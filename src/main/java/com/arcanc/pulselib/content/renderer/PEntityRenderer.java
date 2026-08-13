@@ -417,7 +417,7 @@ public abstract class PEntityRenderer<T extends Entity & PAnimatable<T>, RS exte
 					PRenderTypes.RenderTypeProvider.emissiveVariant(baseType, PTextureCache.ATLAS_LOCATION) :
 					baseType;
 			
-			PRenderQueue.submitEntityMesh(type, mesh, new PRenderQueue.InstanceData(matrix4fstack, meshContext.color(), meshContext.packedLight(), meshContext.packedOverlay()));
+			PRenderQueue.submitEntityMesh(type, mesh, meshContext.deformation(), new PRenderQueue.InstanceData(matrix4fstack, meshContext.color(), meshContext.packedLight(), meshContext.packedOverlay()));
 		}
 	}
 	

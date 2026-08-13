@@ -208,9 +208,9 @@ public abstract class PBlockRenderer<T extends BlockEntity & PAnimatable<T>, RS 
 					baseType;
 			
 			if (PRenderTypes.isTransparent(type))
-				PRenderQueue.submitBlockEntityTranslucentMesh(type, mesh, new PRenderQueue.InstanceData(matrix4fstack, meshContext.color(), meshContext.packedLight(), meshContext.packedOverlay()));
+				PRenderQueue.submitBlockEntityTranslucentMesh(type, mesh, meshContext.deformation(), new PRenderQueue.InstanceData(matrix4fstack, meshContext.color(), meshContext.packedLight(), meshContext.packedOverlay()));
 			else
-				PRenderQueue.submitBlockEntityMesh(type, mesh, new PRenderQueue.InstanceData(matrix4fstack, meshContext.color(), meshContext.packedLight(), meshContext.packedOverlay()));
+				PRenderQueue.submitBlockEntityMesh(type, mesh, meshContext.deformation(), new PRenderQueue.InstanceData(matrix4fstack, meshContext.color(), meshContext.packedLight(), meshContext.packedOverlay()));
 		});
 	}
 	

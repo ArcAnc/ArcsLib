@@ -17,6 +17,7 @@ import com.arcanc.pulselib.content.model.baked.AtlasBufferBuilder;
 import com.arcanc.pulselib.content.model.baked.PBakedBone;
 import com.arcanc.pulselib.content.model.baked.PDeformedMeshBuffers;
 import com.arcanc.pulselib.content.model.baked.PBakedMesh;
+import com.arcanc.pulselib.content.model.baked.PSubdividedMeshCache;
 import com.arcanc.pulselib.content.model.baked.PBakedModel;
 import com.arcanc.pulselib.content.model.textures.atlas.PLibSpriteMetadata;
 import com.arcanc.pulselib.data.gltf.PGltfModelLoader;
@@ -125,6 +126,7 @@ public class PModelCache
 		bone.meshes().forEach(mesh ->
 		{
 			PDeformedMeshBuffers.close(mesh);
+			PSubdividedMeshCache.close(mesh);
 			mesh.vbo().close();
 			mesh.indices().close();
 		});

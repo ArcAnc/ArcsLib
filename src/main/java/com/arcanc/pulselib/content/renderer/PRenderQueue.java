@@ -11,6 +11,9 @@ package com.arcanc.pulselib.content.renderer;
 
 
 import com.arcanc.pulselib.content.model.baked.PBakedMesh;
+import com.arcanc.pulselib.content.model.baked.PSubdividedMeshCache;
+import com.arcanc.pulselib.content.model.deformer.PMeshDeformation;
+import com.arcanc.pulselib.content.model.deformer.gpu.PGpuDeformerBuffers;
 import com.arcanc.pulselib.util.PLibDatabase;
 import com.arcanc.pulselib.util.PTextureCache;
 import com.arcanc.pulselib.util.helpers.PLibRenderHelper;
@@ -48,20 +51,21 @@ public class PRenderQueue
 {
 	private static final Map<RenderStage,
 			Map<BatchKey, InstanceBatch>> COMMANDS = new Object2ObjectOpenHashMap<>();
+	private static final DeformerBuffers DEFORMER_BUFFERS = new DeformerBuffers();
 	
-	public static void submitBlockEntityMesh(RenderType renderType, PBakedMesh mesh, InstanceData data)
+	public static void submitBlockEntityMesh(RenderType renderType, PBakedMesh mesh, @Nullable PMeshDeformation deformation, InstanceData data)
 	{
 		submit(RenderStage.SOLID_BLOCKS,
-				renderType, mesh, data);
+				renderType, mesh, deformation, data);
 	}
 	
-	public static void submitBlockEntityTranslucentMesh(RenderType renderType, PBakedMesh mesh, InstanceData data)
+	public static void submitBlockEntityTranslucentMesh(RenderType renderType, PBakedMesh mesh, @Nullable PMeshDeformation deformation, InstanceData data)
 	{
 		submit(RenderStage.TRANSLUCENT_BLOCKS,
-				renderType, mesh, data);
+				renderType, mesh, deformation, data);
 	}
 	
-	public static void submitItem(ItemDisplayContext context, RenderType renderType, PBakedMesh mesh, InstanceData data)
+	public static void submitItem(ItemDisplayContext context, RenderType renderType, PBakedMesh mesh, @Nullable PMeshDeformation deformation, InstanceData data)
 	{
 		RenderStage stage = switch (context)
 		{
@@ -71,23 +75,24 @@ public class PRenderQueue
 			     HEAD, ON_SHELF -> RenderStage.ENTITIES;
 			case GROUND, FIXED, NONE -> RenderStage.TRANSLUCENT_BLOCKS;
 		};
-		submit(stage, renderType, mesh, data);
+		submit(stage, renderType, mesh, deformation, data);
 	}
 	
-	public static void submitEntityMesh(RenderType renderType, PBakedMesh mesh, InstanceData data)
+	public static void submitEntityMesh(RenderType renderType, PBakedMesh mesh, @Nullable PMeshDeformation deformation, InstanceData data)
 	{
-		submit(RenderStage.ENTITIES, renderType, mesh, data);
+		submit(RenderStage.ENTITIES, renderType, mesh, deformation, data);
 	}
 	
 	public static void submit(RenderStage stage,
 	                          RenderType type,
-	                          PBakedMesh mesh,
+	                          PBakedMesh mesh, @Nullable PMeshDeformation deformation,
 	                          InstanceData data)
 	{
 		Map<BatchKey, InstanceBatch> stageMap = COMMANDS.computeIfAbsent(stage, s -> new Object2ObjectOpenHashMap<>());
-		BatchKey key = new BatchKey(type, mesh);
+		PBakedMesh subdividedMesh = PSubdividedMeshCache.resolve(mesh, deformation == null ? 0 : deformation.subdivisionLevel());
+		BatchKey key = new BatchKey(type, subdividedMesh);
 		InstanceBatch batch = stageMap.computeIfAbsent(key, k -> new InstanceBatch());
-		batch.add(data);
+		batch.add(data.withDeformer(PGpuDeformerBuffers.submit(deformation)));
 	}
 	
 	public static void flush(RenderStage stage)
@@ -101,6 +106,7 @@ public class PRenderQueue
 		TextureAtlas atlas = PTextureCache.getTextureAtlas();
 		GpuTextureView lightTexture = mc.gameRenderer.levelLightmap();
 		OverlayTexture overlayTexture = mc.gameRenderer.overlayTexture();
+		DeformerBuffers.Bindings deformerBuffers = DEFORMER_BUFFERS.upload();
 		
 		for (Map.Entry<BatchKey, InstanceBatch> entry : map.entrySet())
 		{
@@ -144,6 +150,8 @@ public class PRenderQueue
 					RenderSystem.bindDefaultUniforms(pass);
 					pass.setUniform("DynamicTransforms", dynamicTransforms);
 					pass.setUniform("InstanceData", instanceData.currentBuffer());
+					pass.setUniform("DeformerOperations", deformerBuffers.operations());
+					pass.setUniform("DeformerValues", deformerBuffers.values());
 					applyActiveScissor(pass);
 					pass.bindTexture("Sampler0", atlas.getTextureView(), atlas.getSampler());
 					pass.bindTexture("Sampler1", overlayTexture.getTextureView(), RenderSystem.getSamplerCache().getClampToEdge(FilterMode.LINEAR));
@@ -179,6 +187,8 @@ public class PRenderQueue
 			stageMap.clear();
 		}
 		COMMANDS.clear();
+		DEFORMER_BUFFERS.close();
+		PGpuDeformerBuffers.cleanup();
 	}
 	
 	public static class RenderStage
@@ -220,8 +230,17 @@ public class PRenderQueue
 			Matrix4f posMatrix,
 			int packedColor,
 			int packedLight,
-			int packedOverlay)
-	{}
+			int packedOverlay, int deformerOperationOffset, int deformerValueOffset, int deformerOperationCount)
+	{
+		public InstanceData(Matrix4f posMatrix, int packedColor, int packedLight, int packedOverlay)
+		{
+			this(posMatrix, packedColor, packedLight, packedOverlay, -1, -1, 0);
+		}
+		private InstanceData withDeformer(PGpuDeformerBuffers.Submission deformer)
+		{
+			return new InstanceData(posMatrix, packedColor, packedLight, packedOverlay, deformer.operationOffset(), deformer.valueOffset(), deformer.operationCount());
+		}
+	}
 	
 	public static class InstanceBatch
 	{
@@ -230,6 +249,7 @@ public class PRenderQueue
 				putVec4().
 				putVec2().
 				putVec2().
+				putIVec4().
 				get();
 		
 		private static final int MAX_INSTANCES = 512;
@@ -270,7 +290,8 @@ public class PRenderQueue
 							putVec2(LightCoordsUtil.block(data.packedLight()),
 								LightCoordsUtil.sky(data.packedLight())).
 							putVec2(data.packedOverlay() & 0xFFFF,
-								data.packedOverlay() >> 16 & 0xFFFF);
+								data.packedOverlay() >> 16 & 0xFFFF).
+							putIVec4(data.deformerOperationOffset(), data.deformerValueOffset(), data.deformerOperationCount(), 0);
 				}
 			}
 			return this.instanceData;
@@ -294,5 +315,28 @@ public class PRenderQueue
 				this.instanceData = null;
 			}
 		}
+	}
+
+	private static final class DeformerBuffers
+	{
+		private static final int MINIMUM_SIZE = Float.BYTES * 4;
+		private @Nullable MappableRingBuffer operations, values;
+		Bindings upload()
+		{
+			operations = upload(operations, PGpuDeformerBuffers.operations(), PGpuDeformerBuffers.operationsDirty(), "deformer_operations");
+			values = upload(values, PGpuDeformerBuffers.values(), PGpuDeformerBuffers.valuesDirty(), "deformer_values");
+			PGpuDeformerBuffers.markOperationsUploaded(); PGpuDeformerBuffers.markValuesUploaded();
+			return new Bindings(operations.currentBuffer(), values.currentBuffer());
+		}
+		void close() { if (operations != null) operations.close(); if (values != null) values.close(); operations = values = null; }
+		private static MappableRingBuffer upload(@Nullable MappableRingBuffer buffer, List<Float> data, boolean dirty, String label)
+		{
+			int size = Math.max(MINIMUM_SIZE, data.size() * Float.BYTES);
+			if (buffer == null || buffer.size() < size) { if (buffer != null) buffer.close(); buffer = new MappableRingBuffer(() -> PLibDatabase.rl(label).toLanguageKey(), GpuBuffer.USAGE_UNIFORM_TEXEL_BUFFER | GpuBuffer.USAGE_MAP_WRITE, size); dirty = true; }
+			else if (dirty) buffer.rotate();
+			if (dirty) try (GpuBufferSlice.MappedView mapped = buffer.currentBuffer().map(false, true)) { var bytes = mapped.data(); for (float value : data) { int bits = Float.floatToRawIntBits(value); bytes.put((byte) bits).put((byte) (bits >> 8)).put((byte) (bits >> 16)).put((byte) (bits >> 24)); } }
+			return buffer;
+		}
+		private record Bindings(GpuBuffer operations, GpuBuffer values) {}
 	}
 }

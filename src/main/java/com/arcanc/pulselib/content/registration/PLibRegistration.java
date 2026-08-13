@@ -101,6 +101,8 @@ public class PLibRegistration
 
 		public static final DeferredHolder<PMeshDeformer<?>, PMeshDeformer<PBendDefinition>> BEND =
 				DEFORMERS.register("bend", () -> PBendDeformer.INSTANCE);
+		public static final DeferredHolder<PMeshDeformer<?>, PMeshDeformer<PHingeDefinition>> HINGE =
+				DEFORMERS.register("hinge", () -> PHingeDeformer.INSTANCE);
 		public static final DeferredHolder<PMeshDeformer<?>, PMeshDeformer<PTwistDefinition>> TWIST =
 				DEFORMERS.register("twist", () -> PTwistDeformer.INSTANCE);
 		public static final DeferredHolder<PMeshDeformer<?>, PMeshDeformer<PStretchDefinition>> STRETCH =
