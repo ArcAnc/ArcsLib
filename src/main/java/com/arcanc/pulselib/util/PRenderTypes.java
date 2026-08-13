@@ -473,4 +473,12 @@ public class PRenderTypes
 		else
 			return Optional.empty();
 	}
+	
+	@ApiStatus.Internal
+	public static boolean isTranslucent(RenderType renderType)
+	{
+		return getTransparencyState(renderType).
+				map(transparency -> transparency != RenderStateShard.TransparencyStateShard.NO_TRANSPARENCY).
+				orElse(false);
+	}
 }
