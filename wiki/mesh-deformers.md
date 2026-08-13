@@ -4,9 +4,9 @@ Mesh deformers modify vertices after a mesh has been baked. A stack may contain 
 
 ## GPU execution
 
-For world-rendered PulseLib models, the built-in `bend`, `hinge`, `twist`, `stretch`, `squash`, `taper`, and `wave` operations run in the custom vertex shaders. Mesh geometry remains static; only a compact operation table and current channel values are uploaded per frame. The shader source is shared by render types through `assets/pulselib/shaders/include/deformers.glsl`.
+For world-rendered PulseLib models, the built-in `bend`, `hinge`, `twist`, `stretch`, `squash`, `taper`, and `wave` operations run in the custom vertex shaders. Mesh geometry remains in the static geometry arena; the backend uploads a compact operation table once per compiled stack and uploads the current channel values for each frame. The shader source is shared by render types through `assets/pulselib/shaders/include/deformers.glsl`.
 
-GPU execution is automatic when every operation in a stack is built in and the stack has at most eight operations. A custom `PMeshDeformer` remains CPU-rendered; a future GPU extension point can add a shader descriptor for custom operations. GUI's immediate rendering also remains on the CPU path.
+GPU execution is automatic when every operation in a stack is built in and the stack has at most eight operations. A custom `PMeshDeformer` remains CPU-rendered; a future GPU extension point can add a shader descriptor for custom operations. CPU fallback uploads a dynamic mesh buffer for the current deformation. GUI's immediate rendering also remains on the CPU path.
 
 Curved deformers still need enough vertices. PulseLib creates and caches a static subdivided mesh for the requested `subdivisionLevel`; it does not rebuild that mesh each frame.
 
@@ -63,7 +63,9 @@ PMeshDeformation deformation = new PMeshDeformation(
 return baseMeshRenderContext().withDeformation(deformation);
 ```
 
-`PMeshDeformation` subdivides the source triangle mesh only when necessary. Level `0` uses the original mesh; the default is `2`; valid levels are `0` through `4`. Higher levels make curved bends smoother but increase vertex count exponentially per source triangle. The subdivided source is cached per baked mesh and level.
+`PMeshDeformation` subdivides the source triangle mesh only when necessary. Level `0` uses the original mesh; the default is `2`; valid levels are `0` through `4`. Higher levels make curved bends smoother but increase vertex count exponentially per source triangle. The subdivided static source is cached per baked mesh and level, including on the GPU path.
+
+The shader deformer stream is reset after the translucent world stage. Do not call `PGpuDeformerBuffers.finishFrame()` yourself; the render-stage handler owns this lifecycle. More details are in [Render backend](render-backend.md).
 
 ## Player animations
 

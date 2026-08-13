@@ -78,5 +78,6 @@ nav:
       - Mesh Deformers: mesh-deformers.md
       - GUI Rendering: gui-rendering.md
   - Advanced:
+      - Render Backend: render-backend.md
       - Model Loaders: model-loaders.md
       - API Reference: api-reference.md

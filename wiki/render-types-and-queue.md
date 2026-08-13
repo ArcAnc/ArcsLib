@@ -1,4 +1,4 @@
-Most mods can use PulseLib's renderers without touching the render queue directly. This page exists for the cases where you need to understand why PulseLib does not use vanilla `RenderType` values and where custom rendering should be inserted.
+Most mods can use PulseLib's renderers without touching the render queue directly. This page explains why PulseLib does not use vanilla `RenderType` values and how to add custom geometry to the current render backend. For its internal frame-plan, geometry-arena, and capability paths, see [Render backend](render-backend.md).
 
 PulseLib models are triangle meshes loaded from glTF/GLB or another model loader. Vanilla baked block models are mostly quad-based, so PulseLib provides its own triangle render types, shaders, vertex format, and instanced queue. That is why examples use [`PRenderTypes`](https://github.com/ArcAnc/PulseLib/blob/1.21.1/src/main/java/com/arcanc/pulselib/util/PRenderTypes.java) instead of `RenderType.entityCutout` or block render types.
 
@@ -38,7 +38,9 @@ For most mods, it is safer to start from PulseLib's existing render types and on
 
 ## What the queue does
 
-[`PRenderQueue`](https://github.com/ArcAnc/PulseLib/blob/1.21.1/src/main/java/com/arcanc/pulselib/content/renderer/PRenderQueue.java) batches identical meshes together and renders many instances with one instanced draw call. That is important for animated block entities and entities: every object can have its own transform and animation pose, but the GPU can still draw repeated mesh buffers efficiently.
+[`PRenderQueue`](https://github.com/ArcAnc/PulseLib/blob/1.21.1/src/main/java/com/arcanc/pulselib/content/renderer/PRenderQueue.java) compiles submissions into a frame plan. Opaque submissions with the same render type and geometry are batched as instances; transparent submissions are kept in back-to-front order. The OpenGL driver uploads the instance stream once per flush and uses multi-draw indirect where the current context supports it. It falls back to direct instanced draws when that capability is unavailable.
+
+Static [`PGeometryData`](https://github.com/ArcAnc/PulseLib/blob/1.21.1/src/main/java/com/arcanc/pulselib/content/renderer/plan/PGeometryData.java) is placed in the backend's geometry arena and reused across frames. This is the normal path for baked meshes. Dynamic geometry is reserved for CPU-deformed meshes and is more expensive because its vertex data is uploaded again.
 
 The queue has a few stages:
 
@@ -51,15 +53,32 @@ Normal renderers submit into these stages for you. [`PRenderStagesHandler`](http
 
 ## When to submit manually
 
-Manual queue submission is an advanced escape hatch. Use it when you already have a PulseLib-compatible `VertexBuffer` and want to draw extra geometry in the same pipeline.
+Manual queue submission is an advanced escape hatch. Use it for static triangle data that you have packed in PulseLib's compatible vertex format. Do not submit a vanilla `VertexBuffer`: the queue now accepts `PGeometryData` for static meshes, plus a `PInstanceHeader` for each instance.
 
 ```java
-PRenderQueue.submit(
-        PRenderQueue.RenderStage.ENTITIES,
+PGeometryData geometry = createCompatibleTriangleGeometry();
+PInstanceHeader instance = new PInstanceHeader(
+        poseStack.last().pose(),
+        0xFFFFFFFF,
+        packedLight,
+        packedOverlay);
+
+PRenderQueue.submitEntityMesh(
         renderType,
-        vertexBuffer,
-        new PRenderQueue.InstanceData(matrix, 0xFFFFFFFF, packedLight, packedOverlay));
+        geometry,
+        instance);
 ```
+
+`PGeometryData` copies its supplied vertex and index buffers, so it is safe to retain and submit it repeatedly. Its vertex stride and index type must match the data you supplied. For the standard PulseLib shaders, use `VertexFormat.Mode.TRIANGLES` and `PRenderTypes.VertexFormatProvider.POSITION_TEX_NORMAL` when packing the data. For most integrations, using a baked mesh's `geometry()` is preferable to hand-packing a buffer.
+
+Use the stage-specific methods whenever possible:
+
+* `submitBlockEntityMesh(...)` for opaque block-entity geometry.
+* `submitBlockEntityTranslucentMesh(...)` for block-entity geometry that must be sorted as transparent.
+* `submitEntityMesh(...)` for entities and held items.
+* `submitItem(...)` when the item display context decides the stage.
+
+The queue is flushed by `PRenderStagesHandler`. Do not call `flush(...)` from an ordinary renderer: flushing early breaks batching and can render at the wrong stage. A custom `RenderStage` is available only when you also own the matching flush point.
 
 If you only need to draw a vanilla item, text, a beam, or a simple effect, it is often better to use the `MultiBufferSource` passed to `preSubmit` or `postSubmit`. That keeps vanilla rendering in vanilla's pipeline and PulseLib mesh rendering in PulseLib's pipeline.
 
