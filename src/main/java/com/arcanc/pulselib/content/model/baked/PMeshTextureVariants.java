@@ -1,7 +1,10 @@
 /**
  * @author ArcAnc
- * Created at: 14.08.2026
+ * Created at: 13.08.2026
  * Copyright (c) 2026
+ * <p>
+ * This code is licensed under "Arc's License of Common Sense"
+ * Details can be found in the license file in the root folder of this project
  */
 
 package com.arcanc.pulselib.content.model.baked;
@@ -35,9 +38,8 @@ public final class PMeshTextureVariants
 
 	public static PBakedMesh resolve(PBakedMesh mesh, @Nullable Identifier texture)
 	{
-		if (texture == null || texture.equals(mesh.textureLocation()))
-			return mesh;
-		return VARIANTS.computeIfAbsent(mesh, ignored -> new HashMap<>()).computeIfAbsent(texture,
+		Identifier resolvedTexture = texture == null ? mesh.textureLocation() : texture;
+		return VARIANTS.computeIfAbsent(mesh, ignored -> new HashMap<>()).computeIfAbsent(resolvedTexture,
 				location -> bake(mesh, location));
 	}
 
