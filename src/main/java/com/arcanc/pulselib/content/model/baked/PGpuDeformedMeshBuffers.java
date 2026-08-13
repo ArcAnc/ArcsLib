@@ -18,6 +18,7 @@ import com.mojang.blaze3d.vertex.*;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 
 import java.nio.ByteBuffer;
+import java.util.HashMap;
 import java.util.IdentityHashMap;
 import java.util.Map;
 
@@ -36,7 +37,7 @@ public final class PGpuDeformedMeshBuffers
 			throw new IllegalArgumentException("Subdivision level cannot be negative");
 		if (subdivisionLevel == 0)
 			return mesh.geometry();
-		return GEOMETRIES.computeIfAbsent(mesh, ignored -> new java.util.HashMap<>()).computeIfAbsent(
+		return GEOMETRIES.computeIfAbsent(mesh, ignored -> new HashMap<>()).computeIfAbsent(
 				subdivisionLevel, level -> bake(mesh, PMeshTessellator.subdivide(mesh.source(), level)));
 	}
 

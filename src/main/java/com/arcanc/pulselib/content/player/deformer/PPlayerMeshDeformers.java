@@ -21,6 +21,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
 import org.joml.Vector3f;
 
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -120,7 +121,7 @@ public final class PPlayerMeshDeformers
 
 	private static List<ActiveBinding> active(Player player, PPlayerPart part, float partialTick)
 	{
-		List<ActiveBinding> active = new java.util.ArrayList<>();
+		List<ActiveBinding> active = new ArrayList<>();
 		for (Binding binding : BINDINGS.values())
 			if (binding.part == part && binding.applies.test(player))
 				active.add(new ActiveBinding(binding.stack, binding.values));
