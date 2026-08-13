@@ -19,6 +19,7 @@ import com.arcanc.pulselib.content.model.baked.PBakedBone;
 import com.arcanc.pulselib.content.model.baked.PBakedMesh;
 import com.arcanc.pulselib.content.model.baked.PBakedModel;
 import com.arcanc.pulselib.content.model.baked.PMeshRenderContext;
+import com.arcanc.pulselib.content.model.baked.PMeshRenderMaterial;
 import com.arcanc.pulselib.content.model.baked.PDeformedMeshBuffers;
 import com.arcanc.pulselib.content.model.baked.PGpuDeformedMeshBuffers;
 import com.arcanc.pulselib.content.model.deformer.gpu.PGpuDeformerBuffers;
@@ -201,19 +202,20 @@ public abstract class PItemRenderer<T extends Item & PAnimatable<T>> extends Blo
 			PMeshRenderContext inherited = new PMeshRenderContext(
 					renderType,
 					color,
-					mesh.isEmissive() ? LightTexture.FULL_BRIGHT : packedLight,
+					packedLight,
 					packedOverlay);
 			PMeshRenderContext meshContext = resolveMeshRender(animatable, stack, context, bone, mesh, inherited, partialTick);
+			PMeshRenderMaterial material = PMeshRenderMaterial.resolve(mesh, meshContext);
 			
 			RenderType type = meshContext.renderType().apply(PTextureCache.ATLAS_LOCATION);
-			if (mesh.isEmissive())
+			if (material.emissive())
 				type = PRenderTypes.RenderTypeProvider.emissiveVariant(type, PTextureCache.ATLAS_LOCATION);
 			
 			PGpuDeformerBuffers.Submission deformation = PGpuDeformerBuffers.submit(meshContext.deformation());
 			PRenderQueue.submitItem(context, type, deformation.enabled() ?
-					PGpuDeformedMeshBuffers.resolve(mesh, meshContext.deformation().subdivisionLevel()) :
-					PDeformedMeshBuffers.resolve(mesh, meshContext.deformation()),
-					new PRenderQueue.InstanceData(matrix4fstack, meshContext.color(), meshContext.packedLight(), meshContext.packedOverlay(), deformation));
+					PGpuDeformedMeshBuffers.resolve(material.mesh(), meshContext.deformation().subdivisionLevel()) :
+					PDeformedMeshBuffers.resolve(material.mesh(), meshContext.deformation()),
+					new PRenderQueue.InstanceData(matrix4fstack, meshContext.color(), material.packedLight(), meshContext.packedOverlay(), deformation));
 		});
 	}
 	

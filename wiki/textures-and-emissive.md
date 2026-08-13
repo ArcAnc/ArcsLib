@@ -82,6 +82,30 @@ PRenderTypes.RenderTypeProvider::trianglesEmissiveTranslucent
 
 Choose the cutout or translucent variant according to the desired blend mode. There is no separate solid or GUI emissive render type in 26.1.
 
+## Per-mesh runtime material overrides
+
+Renderers can replace a mesh texture at render time without duplicating the mesh in the source model. Override `resolveMeshRender(...)`, identify the target mesh by its UUID (or `textureName()`), and return a modified context:
+
+```java
+@Override
+protected PMeshRenderContext resolveMeshRender(RobotEntity entity,
+                                               PBakedBone bone,
+                                               PBakedMesh mesh,
+                                               PMeshRenderContext inherited,
+                                               float partialTick) {
+    if (!mesh.uuid().equals(ROBOT_SCREEN_MESH))
+        return inherited;
+
+    return inherited
+            .withTexture(entity.activeScreenTexture())
+            .withEmissive(entity.screenIsLit());
+}
+```
+
+`withTexture(...)` accepts a texture location registered in the PulseLib runtime atlas. On its first use for a given `(mesh, texture)` pair, PulseLib bakes an alternate vertex buffer with UVs mapped to that atlas sprite; later draws reuse that buffer. The variant buffers and their deformation caches are released on the next resource reload.
+
+`withEmissive(true)` forces full-bright emissive rendering, `withEmissive(false)` disables it, and `withEmissive(null)` returns to the selected texture's `.mcmeta` setting.
+
 Classes used:
 
 * [`PTextureCache`](https://github.com/ArcAnc/PulseLib/blob/26.1/src/main/java/com/arcanc/pulselib/util/PTextureCache.java)

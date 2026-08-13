@@ -174,9 +174,9 @@ public class ClientEvents
 		event.registerEntityRenderer(PLibRegistration.EntityTypeReg.TEST_ENTITY.get(), TestEntityRender :: new);
 	}*/
 
-	private static void registerTextures(final PulseLibEvents.RegisterTextureEvent event)
+	/*private static void registerTextures(final PulseLibEvents.RegisterTextureEvent event)
 	{
-	/*	event.addTextureLocation(TestEntityRender.SPHERE).
+		event.addTextureLocation(TestEntityRender.SPHERE).
 				addTextureLocation(TestEntityRender.TUBE).
 				addTextureLocation(TestEntityRender.TORUS).
 				addTextureLocation(TestEntityRender.ZERO).
@@ -190,6 +190,6 @@ public class ClientEvents
 				addTextureLocation(TestBlockItemRenderer.CIRCLE);
 		event.addTextureLocation(TestTailItem.TEXTURE);
 		event.addTextureLocation(TestArmor.TEXTURE);
-	*/
-	}
+	
+	}*/
 }
