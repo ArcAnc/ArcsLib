@@ -1,6 +1,5 @@
 #version 330
 
-#moj_import <minecraft:light.glsl>
 #moj_import <pulselib:deformers.glsl>
 
 in vec3 Position;
@@ -20,15 +19,8 @@ uniform mat4 ModelViewMat;
 uniform mat4 ProjMat;
 
 uniform sampler2D Sampler1;
-uniform sampler2D Sampler2;
-
-uniform vec3 Light0_Direction;
-uniform vec3 Light1_Direction;
 
 out vec4 instanceColorOut;
-out vec4 vertexColorBack;
-out vec4 vertexColorFront;
-out vec4 lightMapColor;
 out vec4 overlayColor;
 out vec2 texCoord0;
 
@@ -40,18 +32,10 @@ void main()
     InstanceMatrix2,
     InstanceMatrix3
     );
-    vec3 deformedPosition;
-    vec3 deformedNormal;
-    pulselib_deform_vertex(Position, Normal, InstanceDeformer, deformedPosition, deformedNormal);
+    vec3 deformedPosition = pulselib_apply_deformers(Position, InstanceDeformer);
     gl_Position = ProjMat * ModelViewMat * InstanceMatrix * vec4(deformedPosition, 1.0);
 
-    vec3 normalTransformed = normalize(transpose(inverse(mat3(InstanceMatrix))) * deformedNormal);
-    vec4 light = minecraft_mix_light(Light0_Direction, Light1_Direction, normalTransformed, InstanceColor);
-    vertexColorBack = -light;
-    vertexColorFront = light;
-
     overlayColor = texelFetch(Sampler1, ivec2(InstanceOverlay), 0);
-    lightMapColor = texelFetch(Sampler2, ivec2(InstanceLight), 0);
 
     instanceColorOut = InstanceColor;
     texCoord0 = UV0;

@@ -1,6 +1,6 @@
 /**
  * @author ArcAnc
- * Created at: 04.04.2026
+ * Created at: 15.03.2026
  * Copyright (c) 2026
  * <p>
  * This code is licensed under "Arc's License of Common Sense"
@@ -13,25 +13,25 @@ package com.arcanc.pulselib.content.renderer;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
 import net.neoforged.neoforge.common.NeoForge;
+import com.arcanc.pulselib.content.model.deformer.gpu.PGpuDeformerBuffers;
 
 public class PRenderStagesHandler
 {
 	public static void register(IEventBus modEventBus)
 	{
-		NeoForge.EVENT_BUS.addListener(PRenderStagesHandler :: renderSolid);
-		
-		NeoForge.EVENT_BUS.addListener(PRenderStagesHandler :: renderTranslucent);
+		NeoForge.EVENT_BUS.addListener(PRenderStagesHandler :: renderLevelStages);
 	}
 	
-	private static void renderSolid(final RenderLevelStageEvent.AfterOpaqueFeatures event)
+	private static void renderLevelStages(final RenderLevelStageEvent event)
 	{
-		PRenderQueue.flush(PRenderQueue.RenderStage.SOLID_BLOCKS);
-	}
-	
-	private static void renderTranslucent(final RenderLevelStageEvent.AfterTranslucentBlocks event)
-	{
-		PRenderQueue.flush(PRenderQueue.RenderStage.ENTITIES);
-		
-		PRenderQueue.flush(PRenderQueue.RenderStage.TRANSLUCENT_BLOCKS);
+		if (event.getStage() == RenderLevelStageEvent.Stage.AFTER_ENTITIES)
+			PRenderQueue.flush(PRenderQueue.RenderStage.ENTITIES);
+		if (event.getStage() == RenderLevelStageEvent.Stage.AFTER_BLOCK_ENTITIES)
+			PRenderQueue.flush(PRenderQueue.RenderStage.SOLID_BLOCKS);
+		else if (event.getStage() == RenderLevelStageEvent.Stage.AFTER_TRIPWIRE_BLOCKS)
+		{
+			PRenderQueue.flush(PRenderQueue.RenderStage.TRANSLUCENT_BLOCKS);
+			PGpuDeformerBuffers.finishFrame();
+		}
 	}
 }

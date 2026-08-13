@@ -2,7 +2,15 @@
 
 Mesh deformers modify vertices after a mesh has been baked. A stack may contain several ordered operations, such as bend followed by twist. PulseLib derives transformed normals from the deformation Jacobian, so lighting follows the deformed surface.
 
-Built-in operations are registered as `pulselib:bend`, `pulselib:twist`, `pulselib:stretch`, `pulselib:squash`, `pulselib:taper`, and `pulselib:wave`.
+## GPU execution
+
+For world-rendered PulseLib models, the built-in `bend`, `hinge`, `twist`, `stretch`, `squash`, `taper`, and `wave` operations run in the custom vertex shaders. Mesh geometry remains static; only a compact operation table and current channel values are uploaded per frame. The shader source is shared by render types through `assets/pulselib/shaders/include/deformers.glsl`.
+
+GPU execution is automatic when every operation in a stack is built in and the stack has at most eight operations. A custom `PMeshDeformer` remains CPU-rendered; a future GPU extension point can add a shader descriptor for custom operations. GUI's immediate rendering also remains on the CPU path.
+
+Curved deformers still need enough vertices. PulseLib creates and caches a static subdivided mesh for the requested `subdivisionLevel`; it does not rebuild that mesh each frame.
+
+Built-in operations are registered as `pulselib:bend`, `pulselib:hinge`, `pulselib:twist`, `pulselib:stretch`, `pulselib:squash`, `pulselib:taper`, and `pulselib:wave`.
 
 ## Build a stack
 
@@ -28,13 +36,14 @@ private static final PDeformerStack KNEE_BEND = PDeformerStack.compile(List.of(
 | Id | Definition | Effect |
 | --- | --- | --- |
 | `pulselib:bend` | `PBendDefinition` | Bends an interval around an arbitrary perpendicular axis. `angle` is the total bend angle. |
+| `pulselib:hinge` | `PHingeDefinition` | Rigidly rotates the positive side of `lengthAxis` around `hingeAxis`; the negative side does not move. `angle` is in radians. |
 | `pulselib:twist` | `PTwistDefinition` | Rotates vertices progressively around `lengthAxis`; `angle` is the total twist. |
 | `pulselib:stretch` | `PStretchDefinition` | Scales displacement along `axis`; `scale = 1` is neutral. |
 | `pulselib:squash` | `PSquashDefinition` | Scales along `axis` and compensates perpendicular axes to preserve local volume. `scale = 1` is neutral. |
 | `pulselib:taper` | `PTaperDefinition` | Scales the radial component from `1` at the negative end to `tipScale` at the positive end. |
 | `pulselib:wave` | `PWaveDefinition` | Applies a sine displacement inside the interval. It uses `amplitude`, `phase`, and a positive `wavelength`. |
 
-For bend and wave, the secondary axis must not be parallel to `lengthAxis`. All interval deformers reject an empty interval; stretch, squash, and taper clamp a non-positive scale to a small positive value.
+For bend, hinge, and wave, the secondary axis must not be parallel to `lengthAxis`. Hinge's fold boundary is the plane through `origin` perpendicular to `lengthAxis`; points on that plane stay on the stationary side. All interval deformers reject an empty interval; stretch, squash, and taper clamp a non-positive scale to a small positive value.
 
 ## Custom model meshes
 

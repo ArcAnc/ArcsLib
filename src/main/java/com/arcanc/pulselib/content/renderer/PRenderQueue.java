@@ -1,6 +1,6 @@
 /**
  * @author ArcAnc
- * Created at: 01.04.2026
+ * Created at: 15.03.2026
  * Copyright (c) 2026
  * <p>
  * This code is licensed under "Arc's License of Common Sense"
@@ -10,82 +10,70 @@
 package com.arcanc.pulselib.content.renderer;
 
 
-import com.arcanc.pulselib.content.model.baked.PBakedMesh;
-import com.arcanc.pulselib.util.PLibDatabase;
-import com.arcanc.pulselib.util.PTextureCache;
+import com.arcanc.pulselib.content.mixin.VertexBufferAccessor;
+import com.arcanc.pulselib.content.model.deformer.gpu.PGpuDeformerBuffers;
 import com.arcanc.pulselib.util.helpers.PLibRenderHelper;
-import com.mojang.blaze3d.buffers.GpuBuffer;
-import com.mojang.blaze3d.buffers.GpuBufferSlice;
-import com.mojang.blaze3d.buffers.Std140Builder;
-import com.mojang.blaze3d.buffers.Std140SizeCalculator;
-import com.mojang.blaze3d.pipeline.RenderTarget;
-import com.mojang.blaze3d.systems.RenderPass;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.systems.ScissorState;
-import com.mojang.blaze3d.textures.FilterMode;
-import com.mojang.blaze3d.textures.GpuTextureView;
+import com.mojang.blaze3d.vertex.VertexBuffer;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.MappableRingBuffer;
-import net.minecraft.client.renderer.rendertype.RenderType;
-import net.minecraft.client.renderer.texture.OverlayTexture;
-import net.minecraft.client.renderer.texture.TextureAtlas;
-import net.minecraft.util.ARGB;
-import net.minecraft.util.LightCoordsUtil;
+import net.minecraft.client.renderer.LightTexture;
+import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.ShaderInstance;
+import net.minecraft.util.FastColor;
 import net.minecraft.world.item.ItemDisplayContext;
+import org.jetbrains.annotations.Nullable;
 import org.joml.Matrix4f;
-import org.joml.Vector3f;
-import org.joml.Vector4f;
-import org.jspecify.annotations.Nullable;
+import org.lwjgl.opengl.*;
+import org.lwjgl.system.MemoryUtil;
 
+import java.nio.ByteBuffer;
 import java.util.List;
 import java.util.Map;
-import java.util.OptionalDouble;
-import java.util.OptionalInt;
 
 public class PRenderQueue
 {
 	private static final Map<RenderStage,
-			Map<BatchKey, InstanceBatch>> COMMANDS = new Object2ObjectOpenHashMap<>();
+						Map<BatchKey, InstanceBatch>> COMMANDS = new Object2ObjectOpenHashMap<>();
 	
-	public static void submitBlockEntityMesh(RenderType renderType, PBakedMesh mesh, InstanceData data)
+	public static void submitBlockEntityMesh(RenderType renderType, VertexBuffer vertexBuffer, InstanceData data)
 	{
 		submit(RenderStage.SOLID_BLOCKS,
-				renderType, mesh, data);
+				renderType, vertexBuffer, data);
 	}
 	
-	public static void submitBlockEntityTranslucentMesh(RenderType renderType, PBakedMesh mesh, InstanceData data)
+	public static void submitBlockEntityTranslucentMesh(RenderType renderType, VertexBuffer vertexBuffer, InstanceData data)
 	{
 		submit(RenderStage.TRANSLUCENT_BLOCKS,
-				renderType, mesh, data);
+				renderType, vertexBuffer, data);
 	}
 	
-	public static void submitItem(ItemDisplayContext context, RenderType renderType, PBakedMesh mesh, InstanceData data)
+	public static void submitItem(ItemDisplayContext context, RenderType renderType, VertexBuffer vertexBuffer, InstanceData data)
 	{
 		RenderStage stage = switch (context)
 		{
 			case GUI -> RenderStage.GUI;
 			case THIRD_PERSON_LEFT_HAND, THIRD_PERSON_RIGHT_HAND,
 			     FIRST_PERSON_LEFT_HAND, FIRST_PERSON_RIGHT_HAND,
-			     HEAD, ON_SHELF -> RenderStage.ENTITIES;
+			     HEAD -> RenderStage.ENTITIES;
 			case GROUND, FIXED, NONE -> RenderStage.TRANSLUCENT_BLOCKS;
 		};
-		submit(stage, renderType, mesh, data);
+		if (stage!= RenderStage.GUI)
+			submit(stage, renderType, vertexBuffer, data);
 	}
 	
-	public static void submitEntityMesh(RenderType renderType, PBakedMesh mesh, InstanceData data)
+	public static void submitEntityMesh(RenderType renderType, VertexBuffer vertexBuffer, InstanceData data)
 	{
-		submit(RenderStage.ENTITIES, renderType, mesh, data);
+		submit(RenderStage.ENTITIES, renderType, vertexBuffer, data);
 	}
 	
 	public static void submit(RenderStage stage,
 	                          RenderType type,
-	                          PBakedMesh mesh,
+	                          VertexBuffer vertexBuffer,
 	                          InstanceData data)
 	{
 		Map<BatchKey, InstanceBatch> stageMap = COMMANDS.computeIfAbsent(stage, s -> new Object2ObjectOpenHashMap<>());
-		BatchKey key = new BatchKey(type, mesh);
+		BatchKey key = new BatchKey(type, vertexBuffer);
 		InstanceBatch batch = stageMap.computeIfAbsent(key, k -> new InstanceBatch());
 		batch.add(data);
 	}
@@ -95,82 +83,56 @@ public class PRenderQueue
 		Map<BatchKey, InstanceBatch> map = COMMANDS.get(stage);
 		if (map == null)
 			return;
-		Minecraft mc = PLibRenderHelper.mc();
 		
+		Matrix4f projection = RenderSystem.getProjectionMatrix();
 		Matrix4f modelView = RenderSystem.getModelViewMatrix();
-		TextureAtlas atlas = PTextureCache.getTextureAtlas();
-		GpuTextureView lightTexture = mc.gameRenderer.levelLightmap();
-		OverlayTexture overlayTexture = mc.gameRenderer.overlayTexture();
 		
 		for (Map.Entry<BatchKey, InstanceBatch> entry : map.entrySet())
 		{
 			BatchKey key = entry.getKey();
 			InstanceBatch batch = entry.getValue();
-			
-			int total = batch.size();
-			if (total == 0)
+			if (batch.size() == 0)
 				continue;
 			
 			RenderType type = key.type();
-			PBakedMesh mesh = key.mesh();
+			VertexBuffer vb = key.buffer();
 			
-			GpuBufferSlice dynamicTransforms = RenderSystem.getDynamicUniforms().
-					writeTransform(
-							modelView,
-							new Vector4f(1.0F, 1.0F, 1.0F, 1.0F),
-							new Vector3f(),
-							new Matrix4f());
-			
-			RenderTarget renderTarget = type.outputTarget().getRenderTarget();
-			
-			GpuTextureView colorTexture = RenderSystem.outputColorTextureOverride != null
-					? RenderSystem.outputColorTextureOverride
-					: renderTarget.getColorTextureView();
-			
-			GpuTextureView depthTexture = renderTarget.useDepth
-					? (RenderSystem.outputDepthTextureOverride != null ? RenderSystem.outputDepthTextureOverride : renderTarget.getDepthTextureView())
-					: null;
-			int offset = 0;
-			
-			while (offset < total)
+			type.setupRenderState();
+			ShaderInstance shader = RenderSystem.getShader();
+			if (shader == null)
 			{
-				int count = Math.min(InstanceBatch.MAX_INSTANCES, total - offset);
-			
-				MappableRingBuffer instanceData = batch.upload(offset, count);
-				
-				try (RenderPass pass = RenderSystem.getDevice().createCommandEncoder().createRenderPass(mesh.uuid() :: toString, colorTexture, OptionalInt.empty(), depthTexture, OptionalDouble.empty()))
-				{
-					pass.setPipeline(type.pipeline());
-					RenderSystem.bindDefaultUniforms(pass);
-					pass.setUniform("DynamicTransforms", dynamicTransforms);
-					pass.setUniform("InstanceData", instanceData.currentBuffer());
-					applyActiveScissor(pass);
-					pass.bindTexture("Sampler0", atlas.getTextureView(), atlas.getSampler());
-					pass.bindTexture("Sampler1", overlayTexture.getTextureView(), RenderSystem.getSamplerCache().getClampToEdge(FilterMode.LINEAR));
-					pass.bindTexture("Sampler2", lightTexture, RenderSystem.getSamplerCache().getClampToEdge(FilterMode.LINEAR));
-					pass.setVertexBuffer(0, mesh.vbo());
-					pass.setIndexBuffer(mesh.indices(), mesh.indexType());
-					
-					pass.drawIndexed(0, 0, mesh.indicesCount(), count);
-				}
-				
-				offset += count;
+				type.clearRenderState();
+				continue;
 			}
+			vb.bind();
+			
+			batch.upload();
+			setupInstanceAttributes(batch);
+			
+			shader.setDefaultUniforms(
+					((VertexBufferAccessor)vb).pulselib$getMode(),
+					modelView,
+					projection,
+					PLibRenderHelper.mc().getWindow()
+			);
+			shader.apply();
+			PGpuDeformerBuffers.bind(shader);
+			
+			GL31.glDrawElementsInstanced(
+					((VertexBufferAccessor)vb).pulselib$getMode().asGLMode,
+					((VertexBufferAccessor)vb).pulselib$getIndexCount(),
+					((VertexBufferAccessor)vb).pulselib$getIndexType().asGLType,
+					0,
+					batch.size());
+			
+			disableInstanceAttributes();
 			
 			batch.clear();
+			type.clearRenderState();
 		}
 	}
 	
-	private static void applyActiveScissor(RenderPass pass)
-	{
-		ScissorState scissor = RenderSystem.getScissorStateForRenderTypeDraws();
-		if (scissor.enabled())
-			pass.enableScissor(scissor.x(), scissor.y(), scissor.width(), scissor.height());
-		else
-			pass.disableScissor();
-	}
-
-	public static void cleanUp()
+	public static void cleanup()
 	{
 		for (Map<BatchKey, InstanceBatch> stageMap : COMMANDS.values())
 		{
@@ -179,6 +141,53 @@ public class PRenderQueue
 			stageMap.clear();
 		}
 		COMMANDS.clear();
+	}
+	
+	private static void setupInstanceAttributes(InstanceBatch batch)
+	{
+		int stride = 16 * 4 + 4 * 4 + 2 * 4 + 2 * 4 + 4 * 4;
+		int offset = 0;
+		int vbo = batch.instanceVBO;
+		
+		GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, vbo);
+		
+		for(int q = 0; q < 4; q++)
+		{
+			GL20.glEnableVertexAttribArray(4 + q);
+			GL20.glVertexAttribPointer(4 + q, 4, GL11.GL_FLOAT, false, stride, offset);
+			GL33.glVertexAttribDivisor(4 + q,1);
+			offset += 16;
+		}
+		
+		GL20.glEnableVertexAttribArray(8);
+		GL20.glVertexAttribPointer(8,4, GL11.GL_FLOAT,false, stride, offset);
+		GL33.glVertexAttribDivisor(8,1);
+		offset += 16;
+		
+		// Light
+		GL20.glEnableVertexAttribArray(9);
+		GL20.glVertexAttribPointer(9,2, GL11.GL_FLOAT, false, stride, offset);
+		GL33.glVertexAttribDivisor(9,1);
+		offset += 8;
+		
+		// Overlay
+		GL20.glEnableVertexAttribArray(10);
+		GL20.glVertexAttribPointer(10,2, GL11.GL_FLOAT, false, stride, offset);
+		offset += 8;
+
+		GL20.glEnableVertexAttribArray(11);
+		GL30.glVertexAttribIPointer(11, 3, GL11.GL_INT, stride, offset);
+		GL33.glVertexAttribDivisor(11, 1);
+		GL33.glVertexAttribDivisor(10,1);
+	}
+	
+	private static void disableInstanceAttributes()
+	{
+		for (int q = 4; q <= 11; q++)
+		{
+			GL20.glDisableVertexAttribArray(q);
+			GL33.glVertexAttribDivisor(q,0);
+		}
 	}
 	
 	public static class RenderStage
@@ -214,68 +223,102 @@ public class PRenderQueue
 		}
 	}
 	
-	public record BatchKey(RenderType type, PBakedMesh mesh) {}
+	public record BatchKey(RenderType type, VertexBuffer buffer) {}
 	
 	public record InstanceData(
 			Matrix4f posMatrix,
 			int packedColor,
 			int packedLight,
-			int packedOverlay)
-	{}
+			int packedOverlay,
+			int deformerOperationOffset,
+			int deformerValueOffset,
+			int deformerOperationCount)
+	{
+		public InstanceData(Matrix4f posMatrix, int packedColor, int packedLight, int packedOverlay)
+		{
+			this(posMatrix, packedColor, packedLight, packedOverlay, -1, -1, 0);
+		}
+
+		public InstanceData(Matrix4f posMatrix, int packedColor, int packedLight, int packedOverlay,
+		                    PGpuDeformerBuffers.Submission deformation)
+		{
+			this(posMatrix, packedColor, packedLight, packedOverlay, deformation.operationOffset(),
+					deformation.valueOffset(), deformation.operationCount());
+		}
+	}
 	
 	public static class InstanceBatch
 	{
-		private static final int STRIDE = new Std140SizeCalculator().
-				putMat4f().
-				putVec4().
-				putVec2().
-				putVec2().
-				get();
-		
-		private static final int MAX_INSTANCES = 512;
-		
 		private final List<InstanceData> list = new ObjectArrayList<>();
+		private int instanceVBO = -1;
 		
-		private @Nullable MappableRingBuffer instanceData;
+		private @Nullable ByteBuffer buffer;
+		private int capacity;
+		
+		private static final int STRIDE = 16 * 4 + 4 * 4 + 2 * 4 + 2 * 4 + 4 * 4;
 		
 		public void add(InstanceData data)
 		{
 			this.list.add(data);
 		}
 		
-		public MappableRingBuffer upload(int offset, int count)
+		public void ensureCapacity(int instances)
 		{
-			int bufferSize = count * STRIDE;
+			int required = instances * STRIDE;
 			
-			if (this.instanceData != null)
-				this.instanceData.close();
-			
-			this.instanceData = new MappableRingBuffer(
-					() -> PLibDatabase.rl("instanceData").toLanguageKey(),
-					GpuBuffer.USAGE_UNIFORM | GpuBuffer.USAGE_MAP_WRITE,
-					bufferSize);
-			
-			try (GpuBuffer.MappedView instanceDataMappedView = RenderSystem.getDevice().
-					createCommandEncoder().
-					mapBuffer(this.instanceData.currentBuffer(), false, true))
+			if(this.buffer == null)
 			{
-				Std140Builder builder = Std140Builder.intoBuffer(instanceDataMappedView.data());
-				for (int q = 0; q < count; q++)
-				{
-					InstanceData data = this.list.get(offset + q);
-					
-					builder.putMat4f(data.posMatrix()).
-							putVec4(ARGB.red(data.packedColor()) / 255f,
-								ARGB.green(data.packedColor()) / 255f,
-								ARGB.blue(data.packedColor()) / 255f,
-								ARGB.alpha(data.packedColor()) / 255f).
-							putVec2(LightCoordsUtil.block(data.packedLight()),
-								LightCoordsUtil.sky(data.packedLight())).
-							putVec2(data.packedOverlay() & 0xFFFF,
-								data.packedOverlay() >> 16 & 0xFFFF);
-				}
+				this.capacity = Math.max(required, 1024);
+				this.buffer = MemoryUtil.memAlloc(this.capacity);
+				return;
 			}
-			return this.instanceData;
+			
+			if(required > this.capacity)
+			{
+				this.capacity = Math.max(required, this.capacity * 2);
+				this.buffer = MemoryUtil.memRealloc(this.buffer, this.capacity);
+			}
+		}
+		
+		public void upload()
+		{
+			if(this.instanceVBO == -1)
+				this.instanceVBO = GL15.glGenBuffers();
+			
+			int size = this.list.size();
+			
+			ensureCapacity(size);
+			
+			this.buffer.clear();
+			
+			for (InstanceData q : this.list)
+			{
+				Matrix4f m = q.posMatrix();
+					
+				this.buffer.putFloat(m.m00()).putFloat(m.m01()).putFloat(m.m02()).putFloat(m.m03());
+				this.buffer.putFloat(m.m10()).putFloat(m.m11()).putFloat(m.m12()).putFloat(m.m13());
+				this.buffer.putFloat(m.m20()).putFloat(m.m21()).putFloat(m.m22()).putFloat(m.m23());
+				this.buffer.putFloat(m.m30()).putFloat(m.m31()).putFloat(m.m32()).putFloat(m.m33());
+				
+				this.buffer.putFloat(FastColor.ARGB32.red(q.packedColor()) / 255f);
+				this.buffer.putFloat(FastColor.ARGB32.green(q.packedColor()) / 255f);
+				this.buffer.putFloat(FastColor.ARGB32.blue(q.packedColor()) / 255f);
+				this.buffer.putFloat(FastColor.ARGB32.alpha(q.packedColor()) / 255f);
+				
+				this.buffer.putFloat(LightTexture.block(q.packedLight()));
+				this.buffer.putFloat(LightTexture.sky(q.packedLight()));
+				this.buffer.putFloat(q.packedOverlay() & 0xFFFF);
+				this.buffer.putFloat((q.packedOverlay() >> 16) & 0xFFFF);
+				this.buffer.putInt(q.deformerOperationOffset());
+				this.buffer.putInt(q.deformerValueOffset());
+				this.buffer.putInt(q.deformerOperationCount());
+				this.buffer.putInt(0);
+			}
+				
+			this.buffer.flip();
+				
+			GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, this.instanceVBO);
+			GL15.glBufferData(GL15.GL_ARRAY_BUFFER, buffer, GL15.GL_DYNAMIC_DRAW);
 		}
 		
 		public int size()
@@ -290,10 +333,16 @@ public class PRenderQueue
 		
 		public void delete()
 		{
-			if (this.instanceData != null)
+			if (this.instanceVBO != -1)
 			{
-				this.instanceData.close();
-				this.instanceData = null;
+				GL15.glDeleteBuffers(this.instanceVBO);
+				this.instanceVBO = -1;
+			}
+			
+			if(this.buffer != null)
+			{
+				MemoryUtil.memFree(this.buffer);
+				this.buffer = null;
 			}
 		}
 	}

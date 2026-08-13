@@ -101,6 +101,8 @@ public class PLibRegistration
 
 		public static final DeferredHolder<PMeshDeformer<?>, PMeshDeformer<PBendDefinition>> BEND =
 				DEFORMERS.register("bend", () -> PBendDeformer.INSTANCE);
+		public static final DeferredHolder<PMeshDeformer<?>, PMeshDeformer<PHingeDefinition>> HINGE =
+				DEFORMERS.register("hinge", () -> PHingeDeformer.INSTANCE);
 		public static final DeferredHolder<PMeshDeformer<?>, PMeshDeformer<PTwistDefinition>> TWIST =
 				DEFORMERS.register("twist", () -> PTwistDeformer.INSTANCE);
 		public static final DeferredHolder<PMeshDeformer<?>, PMeshDeformer<PStretchDefinition>> STRETCH =
@@ -197,8 +199,8 @@ public class PLibRegistration
 		AnimationChannelReg.init(bus);
 		AnimationEventReg.init(bus);
 		MeshDeformerReg.init(bus);
-		/*
-		EntityTypeReg.init(bus);
+		
+		/*EntityTypeReg.init(bus);
 		BlockReg.init(bus);
 		BETypeReg.init(bus);
 		ItemReg.init(bus);*/
