@@ -71,7 +71,7 @@ public class PGltfModelLoader implements PModelLoader
 			for (int q = 3; q < divided.length; q++)
 				loc = loc.withSuffix(divided[q] + "/");
 		
-		return loc.withSuffix(textureName);
+		return loc.withSuffix(stripTextureExtension(textureName));
 	}
 	
 	@Override
@@ -147,5 +147,12 @@ public class PGltfModelLoader implements PModelLoader
 		if (path.endsWith(GLTF_EXTENSION))
 			return path.substring(0, path.length() - GLTF_EXTENSION.length());
 		return path;
+	}
+
+	private static String stripTextureExtension(String textureName)
+	{
+		int extension = textureName.lastIndexOf('.');
+		int separator = textureName.lastIndexOf('/');
+		return extension > separator ? textureName.substring(0, extension) : textureName;
 	}
 }
