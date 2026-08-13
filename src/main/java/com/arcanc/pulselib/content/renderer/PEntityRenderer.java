@@ -19,6 +19,7 @@ import com.arcanc.pulselib.content.model.baked.PBakedBone;
 import com.arcanc.pulselib.content.model.baked.PBakedMesh;
 import com.arcanc.pulselib.content.model.baked.PBakedModel;
 import com.arcanc.pulselib.content.model.baked.PMeshRenderContext;
+import com.arcanc.pulselib.content.model.baked.PMeshRenderMaterial;
 import com.arcanc.pulselib.content.renderer.base.PEntityRenderState;
 import com.arcanc.pulselib.content.renderer.modelData.PModelData;
 import com.arcanc.pulselib.data.gecko.MolangParser;
@@ -411,13 +412,14 @@ public abstract class PEntityRenderer<T extends Entity & PAnimatable<T>, RS exte
 			PMeshRenderContext meshContext = renderLayer == null ?
 					resolveMeshRender(renderState, bone, mesh, inherited) :
 					renderLayer.resolveMeshRender(renderState, bone, mesh, inherited);
+			PMeshRenderMaterial material = PMeshRenderMaterial.resolve(mesh, meshContext);
 			
 			RenderType baseType = meshContext.renderType().apply(PTextureCache.ATLAS_LOCATION);
-			RenderType type = mesh.isEmissive() ?
+			RenderType type = material.emissive() ?
 					PRenderTypes.RenderTypeProvider.emissiveVariant(baseType, PTextureCache.ATLAS_LOCATION) :
 					baseType;
 			
-			PRenderQueue.submitEntityMesh(type, mesh, new PRenderQueue.InstanceData(matrix4fstack, meshContext.color(), meshContext.packedLight(), meshContext.packedOverlay()));
+			PRenderQueue.submitEntityMesh(type, material.mesh(), new PRenderQueue.InstanceData(matrix4fstack, meshContext.color(), material.packedLight(), meshContext.packedOverlay()));
 		}
 	}
 	

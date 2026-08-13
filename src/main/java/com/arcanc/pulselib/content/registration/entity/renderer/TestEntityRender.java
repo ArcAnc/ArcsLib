@@ -56,11 +56,19 @@ public class TestEntityRender extends PEntityRenderer<TestEntity, PEntityRenderS
 	                                               PBakedMesh mesh,
 	                                               PMeshRenderContext inherited)
 	{
-		return new PMeshRenderContext(
+		PMeshRenderContext context = new PMeshRenderContext(
 				inherited.renderType(),
 				TestDayTimeColor.color(renderState.getAnimatable().level(), renderState.partialTick()),
 				inherited.packedLight(),
-				inherited.packedOverlay()
+				inherited.packedOverlay(),
+				inherited.deformation()
 		);
+		if (bone.name().equals("head"))
+		{
+			boolean alternateMaterial = (renderState.getAnimatable().tickCount / 40 & 1) == 0;
+			context = context.withTexture(alternateMaterial ? TORUS : ZERO).
+					withEmissive(alternateMaterial);
+		}
+		return context;
 	}
 }

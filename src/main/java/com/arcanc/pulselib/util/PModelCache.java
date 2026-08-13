@@ -16,6 +16,7 @@ import com.arcanc.pulselib.content.model.PModel;
 import com.arcanc.pulselib.content.model.baked.AtlasBufferBuilder;
 import com.arcanc.pulselib.content.model.baked.PBakedBone;
 import com.arcanc.pulselib.content.model.baked.PDeformedMeshBuffers;
+import com.arcanc.pulselib.content.model.baked.PMeshTextureVariants;
 import com.arcanc.pulselib.content.model.baked.PBakedMesh;
 import com.arcanc.pulselib.content.model.baked.PBakedModel;
 import com.arcanc.pulselib.content.model.textures.atlas.PLibSpriteMetadata;
@@ -115,6 +116,7 @@ public class PModelCache
 		{
 			MODELS.forEach((_, model) ->
 				model.bones().forEach(PModelCache :: clearBoneCache));
+			PMeshTextureVariants.clear();
 			MODELS = null;
 		}
 	}

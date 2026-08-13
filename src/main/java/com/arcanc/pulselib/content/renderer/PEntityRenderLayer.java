@@ -117,7 +117,10 @@ public abstract class PEntityRenderLayer<T extends Entity & PAnimatable<T>, RS e
 				inherited.renderType(),
 				getColor(renderState, bone, mesh, inherited.color()),
 				getPackedLight(renderState, inherited.packedLight()),
-				getPackedOverlay(renderState, inherited.packedOverlay()));
+				getPackedOverlay(renderState, inherited.packedOverlay()),
+				inherited.deformation(),
+				inherited.texture(),
+				inherited.emissive());
 	}
 	
 	public void submit(PEntityRenderer<T, RS> renderer,
