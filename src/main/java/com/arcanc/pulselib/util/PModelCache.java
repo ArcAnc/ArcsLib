@@ -19,6 +19,7 @@ import com.arcanc.pulselib.content.model.baked.PBakedBone;
 import com.arcanc.pulselib.content.model.baked.PBakedMesh;
 import com.arcanc.pulselib.content.model.baked.PDeformedMeshBuffers;
 import com.arcanc.pulselib.content.model.baked.PGpuDeformedMeshBuffers;
+import com.arcanc.pulselib.content.model.baked.PMeshTextureVariants;
 import com.arcanc.pulselib.content.model.deformer.gpu.PGpuDeformerBuffers;
 import com.arcanc.pulselib.content.model.baked.PBakedModel;
 import com.arcanc.pulselib.content.model.textures.atlas.PLibMetadata;
@@ -111,6 +112,7 @@ public class PModelCache
 	
 	private static void clearCaches()
 	{
+		PMeshTextureVariants.clear();
 		if (MODELS != null)
 		{
 			MODELS.forEach(($, model) ->
