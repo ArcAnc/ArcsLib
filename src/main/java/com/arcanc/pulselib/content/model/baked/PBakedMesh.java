@@ -10,15 +10,15 @@
 package com.arcanc.pulselib.content.model.baked;
 
 
-import com.mojang.blaze3d.vertex.VertexBuffer;
 import com.arcanc.pulselib.content.model.PMesh;
+import com.arcanc.pulselib.content.renderer.plan.PGeometryData;
 import net.minecraft.resources.ResourceLocation;
 
 import java.util.UUID;
 
 public record PBakedMesh(
 		UUID uuid,
-		VertexBuffer vertexBuffer,
+		PGeometryData geometry,
 		String textureName,
 		boolean isEmissive,
 		PMesh source,

@@ -13,6 +13,7 @@ import com.arcanc.pulselib.content.mixin.VertexBufferAccessor;
 import com.arcanc.pulselib.content.model.PMesh;
 import com.arcanc.pulselib.content.model.deformer.PMeshDeformation;
 import com.arcanc.pulselib.content.model.deformer.PMeshTessellator;
+import com.arcanc.pulselib.content.renderer.legacy.GlDynamicGeometry;
 import com.arcanc.pulselib.util.PRenderTypes;
 import com.arcanc.pulselib.util.PTextureCache;
 import com.mojang.blaze3d.vertex.*;
@@ -25,35 +26,35 @@ import java.util.Map;
 
 public final class PDeformedMeshBuffers
 {
-	private static final Map<PBakedMesh, IdentityHashMap<Object, VertexBuffer>> BUFFERS = new IdentityHashMap<>();
+	private static final Map<PBakedMesh, IdentityHashMap<Object, GlDynamicGeometry>> BUFFERS = new IdentityHashMap<>();
 	private static final Map<PBakedMesh, Map<Integer, PMesh>> SUBDIVIDED_SOURCES = new IdentityHashMap<>();
 
 	private PDeformedMeshBuffers()
 	{
 	}
 
-	public static VertexBuffer resolve(PBakedMesh mesh, PMeshDeformation deformation)
+	public static GlDynamicGeometry resolve(PBakedMesh mesh, PMeshDeformation deformation)
 	{
 		if (deformation == null || deformation.stack().isEmpty())
-			return mesh.vertexBuffer();
-		VertexBuffer buffer = BUFFERS.computeIfAbsent(mesh, ignored -> new IdentityHashMap<>()).computeIfAbsent(
-				deformation.cacheKey(), ignored -> new VertexBuffer(VertexBuffer.Usage.DYNAMIC));
-		upload(buffer, mesh, source(mesh, deformation), deformation);
-		return buffer;
+			throw new IllegalArgumentException("Static meshes must be submitted through their Geometry Arena data");
+		GlDynamicGeometry geometry = BUFFERS.computeIfAbsent(mesh, ignored -> new IdentityHashMap<>()).computeIfAbsent(
+				deformation.cacheKey(), ignored -> new GlDynamicGeometry());
+		upload(geometry.vertexBuffer(), mesh, source(mesh, deformation), deformation);
+		return geometry;
 	}
 
 	public static void close(PBakedMesh mesh)
 	{
 		SUBDIVIDED_SOURCES.remove(mesh);
-		IdentityHashMap<Object, VertexBuffer> buffers = BUFFERS.remove(mesh);
+		IdentityHashMap<Object, GlDynamicGeometry> buffers = BUFFERS.remove(mesh);
 		if (buffers != null)
-			buffers.values().forEach(VertexBuffer::close);
+			buffers.values().forEach(GlDynamicGeometry::close);
 	}
 
 	public static void cleanup()
 	{
-		for (IdentityHashMap<Object, VertexBuffer> buffers : BUFFERS.values())
-			buffers.values().forEach(VertexBuffer::close);
+		for (IdentityHashMap<Object, GlDynamicGeometry> buffers : BUFFERS.values())
+			buffers.values().forEach(GlDynamicGeometry::close);
 		BUFFERS.clear();
 		SUBDIVIDED_SOURCES.clear();
 	}

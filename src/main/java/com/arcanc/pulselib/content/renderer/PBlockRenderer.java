@@ -24,12 +24,13 @@ import com.arcanc.pulselib.content.model.baked.PMeshRenderMaterial;
 import com.arcanc.pulselib.content.model.baked.PDeformedMeshBuffers;
 import com.arcanc.pulselib.content.model.baked.PGpuDeformedMeshBuffers;
 import com.arcanc.pulselib.content.model.deformer.gpu.PGpuDeformerBuffers;
+import com.arcanc.pulselib.content.renderer.plan.PDynamicGeometry;
+import com.arcanc.pulselib.content.renderer.plan.PInstanceHeader;
 import com.arcanc.pulselib.content.renderer.modelData.PModelData;
 import com.arcanc.pulselib.data.gecko.MolangParser;
 import com.arcanc.pulselib.util.PRenderTypes;
 import com.arcanc.pulselib.util.PTextureCache;
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.VertexBuffer;
 import com.mojang.math.Axis;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import net.minecraft.client.renderer.LightTexture;
@@ -214,14 +215,35 @@ public abstract class PBlockRenderer<T extends BlockEntity & PAnimatable<T>>
 			RenderType type = material.emissive() ? PRenderTypes.RenderTypeProvider.emissiveVariant(baseType, PTextureCache.ATLAS_LOCATION) : baseType;
 			
 			PGpuDeformerBuffers.Submission deformation = PGpuDeformerBuffers.submit(meshContext.deformation());
-			VertexBuffer buffer = deformation.enabled() ? PGpuDeformedMeshBuffers.resolve(material.mesh(), meshContext.deformation().subdivisionLevel()) : PDeformedMeshBuffers.resolve(material.mesh(), meshContext.deformation());
 			PRenderTypes.getTransparencyState(type).ifPresent(transparency ->
 			{
-				PRenderQueue.InstanceData instanceData = new PRenderQueue.InstanceData(matrix4fstack, meshContext.color(), material.packedLight(), meshContext.packedOverlay(), deformation);
-				if (transparency == RenderStateShard.TransparencyStateShard.NO_TRANSPARENCY)
-					PRenderQueue.submitBlockEntityMesh(type, buffer, instanceData);
+				PInstanceHeader instanceData = new PInstanceHeader(matrix4fstack, meshContext.color(), material.packedLight(), meshContext.packedOverlay(),
+						deformation.operationOffset(), deformation.valueOffset(), deformation.operationCount());
+				boolean staticGeometry = meshContext.deformation() == null || meshContext.deformation().stack().isEmpty();
+				if (staticGeometry)
+				{
+					if (transparency == RenderStateShard.TransparencyStateShard.NO_TRANSPARENCY)
+						PRenderQueue.submitBlockEntityMesh(type, material.mesh().geometry(), instanceData);
+					else
+						PRenderQueue.submitBlockEntityTranslucentMesh(type, material.mesh().geometry(), instanceData);
+				}
+				else if (deformation.enabled())
+				{
+					if (transparency == RenderStateShard.TransparencyStateShard.NO_TRANSPARENCY)
+						PRenderQueue.submitBlockEntityMesh(type,
+								PGpuDeformedMeshBuffers.resolve(material.mesh(), meshContext.deformation().subdivisionLevel()), instanceData);
+					else
+						PRenderQueue.submitBlockEntityTranslucentMesh(type,
+								PGpuDeformedMeshBuffers.resolve(material.mesh(), meshContext.deformation().subdivisionLevel()), instanceData);
+				}
 				else
-					PRenderQueue.submitBlockEntityTranslucentMesh(type, buffer, instanceData);
+				{
+					PDynamicGeometry buffer = PDeformedMeshBuffers.resolve(material.mesh(), meshContext.deformation());
+					if (transparency == RenderStateShard.TransparencyStateShard.NO_TRANSPARENCY)
+						PRenderQueue.submitBlockEntityMesh(type, buffer, instanceData);
+					else
+						PRenderQueue.submitBlockEntityTranslucentMesh(type, buffer, instanceData);
+				}
 			});
 		});
 	}

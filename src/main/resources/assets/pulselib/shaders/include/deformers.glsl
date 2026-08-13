@@ -4,6 +4,14 @@
 uniform samplerBuffer DeformerOperations;
 uniform samplerBuffer DeformerValues;
 
+vec4 pulselib_deformer_operation_fetch(int index) {
+    return texelFetch(DeformerOperations, index);
+}
+
+vec4 pulselib_deformer_value_fetch(int index) {
+    return texelFetch(DeformerValues, index);
+}
+
 const float PULSELIB_EPSILON = 0.00001;
 const int PULSELIB_MAX_DEFORMERS = 8;
 
@@ -14,7 +22,7 @@ vec3 pulselib_rotate(vec3 value, vec3 axis, float angle) {
 }
 
 float pulselib_value(int valueOffset, int index) {
-    return texelFetch(DeformerValues, valueOffset + index).x;
+    return pulselib_deformer_value_fetch(valueOffset + index).x;
 }
 
 mat3 pulselib_outer(vec3 column, vec3 row) {
@@ -136,10 +144,10 @@ void pulselib_apply_deformers(vec3 position, ivec3 instanceDeformer, out vec3 re
             break;
         int offset = instanceDeformer.x + operation * 4;
         result = pulselib_apply_operation(result,
-            texelFetch(DeformerOperations, offset),
-            texelFetch(DeformerOperations, offset + 1),
-            texelFetch(DeformerOperations, offset + 2),
-            texelFetch(DeformerOperations, offset + 3),
+            pulselib_deformer_operation_fetch(offset),
+            pulselib_deformer_operation_fetch(offset + 1),
+            pulselib_deformer_operation_fetch(offset + 2),
+            pulselib_deformer_operation_fetch(offset + 3),
             instanceDeformer.y, jacobian);
     }
 }

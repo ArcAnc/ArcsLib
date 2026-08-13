@@ -9,22 +9,21 @@
 
 package com.arcanc.pulselib.content.model.baked;
 
-import com.arcanc.pulselib.content.mixin.VertexBufferAccessor;
 import com.arcanc.pulselib.content.model.PMesh;
+import com.arcanc.pulselib.content.renderer.legacy.GlGeometryDataFactory;
+import com.arcanc.pulselib.content.renderer.plan.PGeometryData;
 import com.arcanc.pulselib.content.model.textures.atlas.PLibMetadata;
 import com.arcanc.pulselib.util.PRenderTypes;
 import com.arcanc.pulselib.util.PTextureCache;
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.ByteBufferBuilder;
 import com.mojang.blaze3d.vertex.MeshData;
-import com.mojang.blaze3d.vertex.VertexBuffer;
 import com.mojang.blaze3d.vertex.VertexFormat;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
-import java.nio.ByteBuffer;
 import java.util.HashMap;
 import java.util.IdentityHashMap;
 import java.util.Map;
@@ -53,7 +52,6 @@ public final class PMeshTextureVariants
 			{
 				PDeformedMeshBuffers.close(variant);
 				PGpuDeformedMeshBuffers.close(variant);
-				variant.vertexBuffer().close();
 			}
 		VARIANTS.clear();
 	}
@@ -72,19 +70,12 @@ public final class PMeshTextureVariants
 			builder.addVertex(source.positions().get(vertex * 3), source.positions().get(vertex * 3 + 1), source.positions().get(vertex * 3 + 2)).
 					setUv(source.uvs().get(vertex * 2), source.uvs().get(vertex * 2 + 1)).
 					setNormal(source.normals().get(vertex * 3), source.normals().get(vertex * 3 + 1), source.normals().get(vertex * 3 + 2));
-		VertexBuffer vertexBuffer = new VertexBuffer(VertexBuffer.Usage.STATIC);
+		PGeometryData geometry;
 		try (MeshData data = builder.buildOrThrow())
 		{
-			vertexBuffer.bind();
-			vertexBuffer.upload(data);
-			VertexBufferAccessor accessor = (VertexBufferAccessor)vertexBuffer;
-			ByteBuffer indices = source.indices().duplicate();
-			indices.clear();
-			accessor.pulselib$UploadIndexBuffer(data.drawState(), indices);
-			accessor.pulselib$setIndexCount(source.indicesCount());
-			accessor.pulselib$setIndexType(source.glIndexType() == VertexFormat.IndexType.SHORT.asGLType ? VertexFormat.IndexType.SHORT : VertexFormat.IndexType.INT);
-			VertexBuffer.unbind();
+			geometry = GlGeometryDataFactory.capture(data, source,
+					PRenderTypes.VertexFormatProvider.POSITION_TEX_NORMAL.getVertexSize());
 		}
-		return new PBakedMesh(base.uuid(), vertexBuffer, base.textureName(), emissive, source, texture);
+		return new PBakedMesh(base.uuid(), geometry, base.textureName(), emissive, source, texture);
 	}
 }

@@ -1,0 +1,32 @@
+/**
+ * @author ArcAnc
+ * Created at: 13.08.2026
+ * Copyright (c) 2026
+ * <p>
+ * This code is licensed under "Arc's License of Common Sense"
+ * Details can be found in the license file in the root folder of this project
+ */
+
+package com.arcanc.pulselib.content.renderer.plan;
+
+import org.joml.Matrix4f;
+
+public record PInstanceHeader(
+		Matrix4f transform,
+		int packedColor,
+		int packedLight,
+		int packedOverlay,
+		int auxiliaryOperationOffset,
+		int auxiliaryValueOffset,
+		int auxiliaryOperationCount)
+{
+	public PInstanceHeader
+	{
+		transform = new Matrix4f(transform);
+	}
+
+	public PInstanceHeader(Matrix4f transform, int packedColor, int packedLight, int packedOverlay)
+	{
+		this(transform, packedColor, packedLight, packedOverlay, -1, -1, 0);
+	}
+}
