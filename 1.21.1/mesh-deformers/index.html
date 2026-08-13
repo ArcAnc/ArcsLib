@@ -1026,6 +1026,17 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#gpu-execution" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        GPU execution
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#build-a-stack" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1266,6 +1277,17 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#gpu-execution" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        GPU execution
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#build-a-stack" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1342,7 +1364,11 @@
 
 <h1 id="mesh-deformers">Mesh deformers<a class="headerlink" href="#mesh-deformers" title="Permanent link">&para;</a></h1>
 <p>Mesh deformers modify vertices after a mesh has been baked. A stack may contain several ordered operations, such as bend followed by twist. PulseLib derives transformed normals from the deformation Jacobian, so lighting follows the deformed surface.</p>
-<p>Built-in operations are registered as <code>pulselib:bend</code>, <code>pulselib:twist</code>, <code>pulselib:stretch</code>, <code>pulselib:squash</code>, <code>pulselib:taper</code>, and <code>pulselib:wave</code>.</p>
+<h2 id="gpu-execution">GPU execution<a class="headerlink" href="#gpu-execution" title="Permanent link">&para;</a></h2>
+<p>For world-rendered PulseLib models, the built-in <code>bend</code>, <code>hinge</code>, <code>twist</code>, <code>stretch</code>, <code>squash</code>, <code>taper</code>, and <code>wave</code> operations run in the custom vertex shaders. Mesh geometry remains static; only a compact operation table and current channel values are uploaded per frame. The shader source is shared by render types through <code>assets/pulselib/shaders/include/deformers.glsl</code>.</p>
+<p>GPU execution is automatic when every operation in a stack is built in and the stack has at most eight operations. A custom <code>PMeshDeformer</code> remains CPU-rendered; a future GPU extension point can add a shader descriptor for custom operations. GUI's immediate rendering also remains on the CPU path.</p>
+<p>Curved deformers still need enough vertices. PulseLib creates and caches a static subdivided mesh for the requested <code>subdivisionLevel</code>; it does not rebuild that mesh each frame.</p>
+<p>Built-in operations are registered as <code>pulselib:bend</code>, <code>pulselib:hinge</code>, <code>pulselib:twist</code>, <code>pulselib:stretch</code>, <code>pulselib:squash</code>, <code>pulselib:taper</code>, and <code>pulselib:wave</code>.</p>
 <h2 id="build-a-stack">Build a stack<a class="headerlink" href="#build-a-stack" title="Permanent link">&para;</a></h2>
 <p>Definitions use local mesh coordinates. Axes are normalized during preparation; <code>positiveExtent</code> and <code>negativeExtent</code> define the interval along a length axis, measured from <code>origin</code>. Angles are radians.</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="kd">private</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">PChannelReference</span><span class="o">&lt;</span><span class="n">Float</span><span class="o">&gt;</span><span class="w"> </span><span class="n">KNEE_ANGLE</span><span class="w"> </span><span class="o">=</span>
@@ -1373,6 +1399,11 @@
 <td>Bends an interval around an arbitrary perpendicular axis. <code>angle</code> is the total bend angle.</td>
 </tr>
 <tr>
+<td><code>pulselib:hinge</code></td>
+<td><code>PHingeDefinition</code></td>
+<td>Rigidly rotates the positive side of <code>lengthAxis</code> around <code>hingeAxis</code>; the negative side does not move. <code>angle</code> is in radians.</td>
+</tr>
+<tr>
 <td><code>pulselib:twist</code></td>
 <td><code>PTwistDefinition</code></td>
 <td>Rotates vertices progressively around <code>lengthAxis</code>; <code>angle</code> is the total twist.</td>
@@ -1399,7 +1430,7 @@
 </tr>
 </tbody>
 </table>
-<p>For bend and wave, the secondary axis must not be parallel to <code>lengthAxis</code>. All interval deformers reject an empty interval; stretch, squash, and taper clamp a non-positive scale to a small positive value.</p>
+<p>For bend, hinge, and wave, the secondary axis must not be parallel to <code>lengthAxis</code>. Hinge's fold boundary is the plane through <code>origin</code> perpendicular to <code>lengthAxis</code>; points on that plane stay on the stationary side. All interval deformers reject an empty interval; stretch, squash, and taper clamp a non-positive scale to a small positive value.</p>
 <h2 id="custom-model-meshes">Custom model meshes<a class="headerlink" href="#custom-model-meshes" title="Permanent link">&para;</a></h2>
 <p>Use <code>PMeshDeformation</code> with a <code>PMeshRenderContext</code> to deform a baked triangle mesh. The <code>cacheKey</code> must be a stable object for one independently rendered deformation; PulseLib reuses its dynamic vertex buffer and uploads current vertices each frame.</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="kd">private</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">Object</span><span class="w"> </span><span class="n">bendBufferKey</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">Object</span><span class="p">();</span>
