@@ -153,8 +153,9 @@ public class PBakedBone
 				return;
 			
 			PMeshRenderContext meshContext = resolver.resolve(this, mesh, boneContext);
+			PMeshRenderMaterial material = PMeshRenderMaterial.resolve(mesh, meshContext);
 			RenderType baseType = meshContext.renderType().apply(PTextureCache.ATLAS_LOCATION);
-			RenderType type = mesh.isEmissive() ?
+			RenderType type = material.emissive() ?
 					PRenderTypes.RenderTypeProvider.instantEmissiveVariant(baseType, PTextureCache.ATLAS_LOCATION) :
 					PRenderTypes.RenderTypeProvider.instantVariant(baseType, PTextureCache.ATLAS_LOCATION);
 
@@ -179,7 +180,7 @@ public class PBakedBone
 				
 				Std140Builder.intoBuffer(colorLightOverlayMappedView.data()).
 						putVec4(ARGB.vector4fFromARGB32(meshContext.color())).
-						putVec2(LightCoordsUtil.block(meshContext.packedLight()), LightCoordsUtil.sky(meshContext.packedLight())).
+						putVec2(LightCoordsUtil.block(material.packedLight()), LightCoordsUtil.sky(material.packedLight())).
 						putIVec2(new Vector2i(u, v));
 				
 			}
@@ -194,10 +195,10 @@ public class PBakedBone
 				pass.bindTexture("Sampler0", atlas.getTextureView(), atlas.getSampler());
 				pass.bindTexture("Sampler1", overlayTexture.getTextureView(), RenderSystem.getSamplerCache().getClampToEdge(FilterMode.LINEAR));
 				pass.bindTexture("Sampler2", lightTexture, RenderSystem.getSamplerCache().getClampToEdge(FilterMode.LINEAR));
-				pass.setVertexBuffer(0, PDeformedMeshBuffers.resolve(mesh, meshContext.deformation()));
-				pass.setIndexBuffer(mesh.indices(), mesh.indexType());
+				pass.setVertexBuffer(0, PDeformedMeshBuffers.resolve(material.mesh(), meshContext.deformation()));
+				pass.setIndexBuffer(material.mesh().indices(), material.mesh().indexType());
 				
-				pass.drawIndexed(mesh.indicesCount(), 1, 0, 0, 0);
+				pass.drawIndexed(material.mesh().indicesCount(), 1, 0, 0, 0);
 			}
 		});
 		

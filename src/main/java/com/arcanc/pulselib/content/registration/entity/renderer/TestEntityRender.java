@@ -81,21 +81,22 @@ public class TestEntityRender extends PEntityRenderer<TestEntity, PEntityRenderS
 				inherited.packedLight(),
 				inherited.packedOverlay()
 		);
+		TestEntity animatable = renderState.getAnimatable();
+		if (bone.name().equals("head"))
+		{
+			boolean alternateMaterial = (animatable.tickCount / 40 & 1) == 0;
+			context = context.withTexture(alternateMaterial ? TORUS : ZERO).
+					withEmissive(alternateMaterial);
+		}
 		if (!bone.name().equals("hand_left") && !bone.name().equals("hand_right"))
 			return context;
 
-		TestEntity animatable = renderState.getAnimatable();
 		float phase = (animatable.tickCount + renderState.partialTick()) * 0.35f;
 		if (bone.name().equals("hand_right"))
 			phase += (float)Math.PI;
 		float resolvedAngle = (float)Math.sin(phase) * 0.35f;
 		Object cacheKey = bone.name().equals("hand_left") ? this.leftArmHingeKey : this.rightArmHingeKey;
-		return new PMeshRenderContext(
-				context.renderType(),
-				context.color(),
-				context.packedLight(),
-				context.packedOverlay(),
-				new PMeshDeformation(
+		return context.withDeformation(new PMeshDeformation(
 				ARM_HINGE,
 				reference -> reference.name().equals(ARM_HINGE_ANGLE.name()) ? resolvedAngle : reference.defaultValue(),
 				cacheKey,
