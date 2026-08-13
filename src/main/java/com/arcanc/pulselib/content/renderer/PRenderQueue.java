@@ -15,6 +15,7 @@ import com.arcanc.pulselib.content.model.baked.PSubdividedMeshCache;
 import com.arcanc.pulselib.content.model.deformer.PMeshDeformation;
 import com.arcanc.pulselib.content.model.deformer.gpu.PGpuDeformerBuffers;
 import com.arcanc.pulselib.util.PLibDatabase;
+import com.arcanc.pulselib.util.PRenderTypes;
 import com.arcanc.pulselib.util.PTextureCache;
 import com.arcanc.pulselib.util.helpers.PLibRenderHelper;
 import com.mojang.blaze3d.buffers.GpuBuffer;
@@ -46,11 +47,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.OptionalDouble;
+import java.util.Comparator;
 
 public class PRenderQueue
 {
 	private static final Map<RenderStage,
 			Map<BatchKey, InstanceBatch>> COMMANDS = new Object2ObjectOpenHashMap<>();
+	private static final Map<RenderStage, List<TransparentCommand>> TRANSPARENT_COMMANDS = new Object2ObjectOpenHashMap<>();
 	private static final DeformerBuffers DEFORMER_BUFFERS = new DeformerBuffers();
 	
 	public static void submitBlockEntityMesh(RenderType renderType, PBakedMesh mesh, @Nullable PMeshDeformation deformation, InstanceData data)
@@ -88,17 +91,25 @@ public class PRenderQueue
 	                          PBakedMesh mesh, @Nullable PMeshDeformation deformation,
 	                          InstanceData data)
 	{
-		Map<BatchKey, InstanceBatch> stageMap = COMMANDS.computeIfAbsent(stage, s -> new Object2ObjectOpenHashMap<>());
 		PBakedMesh subdividedMesh = PSubdividedMeshCache.resolve(mesh, deformation == null ? 0 : deformation.subdivisionLevel());
 		BatchKey key = new BatchKey(type, subdividedMesh);
+		InstanceData submittedData = data.withDeformer(PGpuDeformerBuffers.submit(deformation));
+		if (PRenderTypes.isTransparent(type))
+		{
+			TRANSPARENT_COMMANDS.computeIfAbsent(stage, s -> new ObjectArrayList<>()).
+					add(new TransparentCommand(key, submittedData, distanceSquared(submittedData)));
+			return;
+		}
+		Map<BatchKey, InstanceBatch> stageMap = COMMANDS.computeIfAbsent(stage, s -> new Object2ObjectOpenHashMap<>());
 		InstanceBatch batch = stageMap.computeIfAbsent(key, k -> new InstanceBatch());
-		batch.add(data.withDeformer(PGpuDeformerBuffers.submit(deformation)));
+		batch.add(submittedData);
 	}
 	
 	public static void flush(RenderStage stage)
 	{
 		Map<BatchKey, InstanceBatch> map = COMMANDS.get(stage);
-		if (map == null)
+		List<TransparentCommand> transparentCommands = TRANSPARENT_COMMANDS.get(stage);
+		if (map == null && (transparentCommands == null || transparentCommands.isEmpty()))
 			return;
 		Minecraft mc = PLibRenderHelper.mc();
 		
@@ -108,65 +119,79 @@ public class PRenderQueue
 		OverlayTexture overlayTexture = mc.gameRenderer.overlayTexture();
 		DeformerBuffers.Bindings deformerBuffers = DEFORMER_BUFFERS.upload();
 		
-		for (Map.Entry<BatchKey, InstanceBatch> entry : map.entrySet())
+		if (map != null)
 		{
-			BatchKey key = entry.getKey();
-			InstanceBatch batch = entry.getValue();
-			
-			int total = batch.size();
-			if (total == 0)
-				continue;
-			
-			RenderType type = key.type();
-			PBakedMesh mesh = key.mesh();
-			
-			GpuBufferSlice dynamicTransforms = RenderSystem.getDynamicUniforms().
-					writeTransform(
-							modelView,
-							new Vector4f(1.0F, 1.0F, 1.0F, 1.0F),
-							new Vector3f(),
-							new Matrix4f());
-			
-			RenderTarget renderTarget = type.outputTarget().getRenderTarget();
-			
-			GpuTextureView colorTexture = RenderSystem.outputColorTextureOverride != null
-					? RenderSystem.outputColorTextureOverride
-					: renderTarget.getColorTextureView();
-			
-			GpuTextureView depthTexture = renderTarget.useDepth
-					? (RenderSystem.outputDepthTextureOverride != null ? RenderSystem.outputDepthTextureOverride : renderTarget.getDepthTextureView())
-					: null;
-			int offset = 0;
-			
-			while (offset < total)
-			{
-				int count = Math.min(InstanceBatch.MAX_INSTANCES, total - offset);
-			
-				MappableRingBuffer instanceData = batch.upload(offset, count);
-				
-				try (RenderPass pass = RenderSystem.getDevice().createCommandEncoder().createRenderPass(mesh.uuid() :: toString, colorTexture, Optional.empty(), depthTexture, OptionalDouble.empty()))
-				{
-					pass.setPipeline(type.pipeline());
-					RenderSystem.bindDefaultUniforms(pass);
-					pass.setUniform("DynamicTransforms", dynamicTransforms);
-					pass.setUniform("InstanceData", instanceData.currentBuffer());
-					pass.setUniform("DeformerOperations", deformerBuffers.operations());
-					pass.setUniform("DeformerValues", deformerBuffers.values());
-					applyActiveScissor(pass);
-					pass.bindTexture("Sampler0", atlas.getTextureView(), atlas.getSampler());
-					pass.bindTexture("Sampler1", overlayTexture.getTextureView(), RenderSystem.getSamplerCache().getClampToEdge(FilterMode.LINEAR));
-					pass.bindTexture("Sampler2", lightTexture, RenderSystem.getSamplerCache().getClampToEdge(FilterMode.LINEAR));
-					pass.setVertexBuffer(0, mesh.vbo().slice());
-					pass.setIndexBuffer(mesh.indices(), mesh.indexType());
-					
-					pass.drawIndexed(mesh.indicesCount(), count, 0, 0, 0);
-				}
-				
-				offset += count;
-			}
-			
-			batch.clear();
+			for (Map.Entry<BatchKey, InstanceBatch> entry : map.entrySet())
+				draw(entry.getKey(), entry.getValue(), modelView, atlas, lightTexture, overlayTexture, deformerBuffers);
 		}
+		if (transparentCommands == null || transparentCommands.isEmpty())
+			return;
+		transparentCommands.sort(Comparator.comparingDouble(TransparentCommand::distanceSquared).reversed());
+		BatchKey key = null;
+		InstanceBatch batch = null;
+		for (TransparentCommand command : transparentCommands)
+		{
+			if (!command.key().equals(key))
+			{
+				if (batch != null)
+				{
+					draw(key, batch, modelView, atlas, lightTexture, overlayTexture, deformerBuffers);
+					batch.delete();
+				}
+				key = command.key();
+				batch = new InstanceBatch();
+			}
+			batch.add(command.data());
+		}
+		if (batch != null)
+		{
+			draw(key, batch, modelView, atlas, lightTexture, overlayTexture, deformerBuffers);
+			batch.delete();
+		}
+		transparentCommands.clear();
+	}
+
+	private static float distanceSquared(InstanceData data)
+	{
+		Matrix4f matrix = data.posMatrix();
+		return matrix.m30() * matrix.m30() + matrix.m31() * matrix.m31() + matrix.m32() * matrix.m32();
+	}
+
+	private static void draw(BatchKey key, InstanceBatch batch, Matrix4f modelView, TextureAtlas atlas, GpuTextureView lightTexture, OverlayTexture overlayTexture, DeformerBuffers.Bindings deformerBuffers)
+	{
+		int total = batch.size();
+		if (total == 0)
+			return;
+		RenderType type = key.type();
+		PBakedMesh mesh = key.mesh();
+		GpuBufferSlice dynamicTransforms = RenderSystem.getDynamicUniforms().writeTransform(modelView, new Vector4f(1.0F, 1.0F, 1.0F, 1.0F), new Vector3f(), new Matrix4f());
+		RenderTarget renderTarget = type.outputTarget().getRenderTarget();
+		GpuTextureView colorTexture = RenderSystem.outputColorTextureOverride != null ? RenderSystem.outputColorTextureOverride : renderTarget.getColorTextureView();
+		GpuTextureView depthTexture = renderTarget.useDepth ? (RenderSystem.outputDepthTextureOverride != null ? RenderSystem.outputDepthTextureOverride : renderTarget.getDepthTextureView()) : null;
+		int offset = 0;
+		while (offset < total)
+		{
+			int count = Math.min(InstanceBatch.MAX_INSTANCES, total - offset);
+			MappableRingBuffer instanceData = batch.upload(offset, count);
+			try (RenderPass pass = RenderSystem.getDevice().createCommandEncoder().createRenderPass(mesh.uuid() :: toString, colorTexture, Optional.empty(), depthTexture, OptionalDouble.empty()))
+			{
+				pass.setPipeline(type.pipeline());
+				RenderSystem.bindDefaultUniforms(pass);
+				pass.setUniform("DynamicTransforms", dynamicTransforms);
+				pass.setUniform("InstanceData", instanceData.currentBuffer());
+				pass.setUniform("DeformerOperations", deformerBuffers.operations());
+				pass.setUniform("DeformerValues", deformerBuffers.values());
+				applyActiveScissor(pass);
+				pass.bindTexture("Sampler0", atlas.getTextureView(), atlas.getSampler());
+				pass.bindTexture("Sampler1", overlayTexture.getTextureView(), RenderSystem.getSamplerCache().getClampToEdge(FilterMode.LINEAR));
+				pass.bindTexture("Sampler2", lightTexture, RenderSystem.getSamplerCache().getClampToEdge(FilterMode.LINEAR));
+				pass.setVertexBuffer(0, mesh.vbo().slice());
+				pass.setIndexBuffer(mesh.indices(), mesh.indexType());
+				pass.drawIndexed(mesh.indicesCount(), count, 0, 0, 0);
+			}
+			offset += count;
+		}
+		batch.clear();
 	}
 	
 	private static void applyActiveScissor(RenderPass pass)
@@ -187,6 +212,9 @@ public class PRenderQueue
 			stageMap.clear();
 		}
 		COMMANDS.clear();
+		for (List<TransparentCommand> commands : TRANSPARENT_COMMANDS.values())
+			commands.clear();
+		TRANSPARENT_COMMANDS.clear();
 		DEFORMER_BUFFERS.close();
 		PGpuDeformerBuffers.cleanup();
 	}
@@ -225,6 +253,7 @@ public class PRenderQueue
 	}
 	
 	public record BatchKey(RenderType type, PBakedMesh mesh) {}
+	private record TransparentCommand(BatchKey key, InstanceData data, float distanceSquared) {}
 	
 	public record InstanceData(
 			Matrix4f posMatrix,

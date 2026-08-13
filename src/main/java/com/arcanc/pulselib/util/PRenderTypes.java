@@ -38,6 +38,8 @@ public class PRenderTypes
 	public static class RenderPipelinesProvider
 	{
 		private static final Set<RenderPipeline> PIPELINES = new HashSet<>();
+		private static final DepthStencilState DEPTH_TEST_NO_WRITE =
+				new DepthStencilState(DepthStencilState.DEFAULT.depthTest(), false);
 		private static final BindGroupLayout TRIANGLES_LAYOUT = BindGroupLayout.builder().
 				withSampler("Sampler0").
 				withSampler("Sampler2").
@@ -91,6 +93,7 @@ public class PRenderTypes
 				withShaderDefine("ALPHA_CUTOUT", 0.1F).
 				withCull(false).
 				withColorTargetState(new ColorTargetState(BlendFunction.TRANSLUCENT)).
+				withDepthStencilState(DEPTH_TEST_NO_WRITE).
 				build());
 
 		public static final RenderPipeline TRIANGLES_EMISSIVE_CUTOUT = registerPipeline(RenderPipeline.builder(TRIANGLES_SNIPPET).
@@ -108,6 +111,7 @@ public class PRenderTypes
 				withShaderDefine("ALPHA_CUTOUT", 0.1F).
 				withCull(false).
 				withColorTargetState(new ColorTargetState(BlendFunction.TRANSLUCENT)).
+				withDepthStencilState(DEPTH_TEST_NO_WRITE).
 				build());
 		
 		public static final RenderPipeline TRIANGLES_GUI = registerPipeline(RenderPipeline.builder(RenderPipelines.GLOBALS_SNIPPET).
@@ -144,6 +148,7 @@ public class PRenderTypes
 				withLocation(PLibDatabase.rl("pipeline/triangles_instant_translucent")).
 				withShaderDefine("ALPHA_CUTOUT", 0.1F).
 				withColorTargetState(new ColorTargetState(BlendFunction.TRANSLUCENT)).
+				withDepthStencilState(DEPTH_TEST_NO_WRITE).
 				build());
 
 		public static final RenderPipeline TRIANGLES_INSTANT_EMISSIVE_CUTOUT = registerPipeline(RenderPipeline.builder(TRIANGLES_INSTANT_SNIPPET).
@@ -157,6 +162,7 @@ public class PRenderTypes
 				withShaderDefine("EMISSIVE").
 				withShaderDefine("ALPHA_CUTOUT", 0.1F).
 				withColorTargetState(new ColorTargetState(BlendFunction.TRANSLUCENT)).
+				withDepthStencilState(DEPTH_TEST_NO_WRITE).
 				build());
 		
 		private static RenderPipeline registerPipeline(RenderPipeline pipeline)
@@ -390,4 +396,5 @@ public class PRenderTypes
 	{
 		return renderType.pipeline().getColorTargetState().blendFunction().isPresent();
 	}
+	
 }
