@@ -6,10 +6,9 @@
     "UV0",
     "Normal",
 
-    "InstanceMatrix0",
-    "InstanceMatrix1",
-    "InstanceMatrix2",
-    "InstanceMatrix3",
+    "InstanceRow0",
+    "InstanceRow1",
+    "InstanceRow2",
 
     "InstanceColor",
     "InstanceLight",

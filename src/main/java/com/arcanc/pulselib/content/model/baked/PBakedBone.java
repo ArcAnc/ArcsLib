@@ -175,7 +175,7 @@ public record PBakedBone(String name,
 			ShaderInstance shaderInstance = RenderSystem.getShader();
 			if (shaderInstance == null)
 				return;
-			VertexBuffer vertexBuffer = PDeformedMeshBuffers.resolve(material.mesh(), meshContext.deformation());
+			VertexBuffer vertexBuffer = PDeformedMeshBuffers.resolve(material.mesh(), meshContext.deformation()).vertexBuffer();
 			vertexBuffer.bind();
 			shaderInstance.safeGetUniform("Color").set(colorVector);
 			shaderInstance.safeGetUniform("Light").set(blockLight, skyLight);
@@ -266,7 +266,7 @@ public record PBakedBone(String name,
 		ShaderInstance shader = RenderSystem.getShader();
 		if (shader != null)
 		{
-			VertexBuffer vertexBuffer = PDeformedMeshBuffers.resolve(material.mesh(), meshContext.deformation());
+			VertexBuffer vertexBuffer = PDeformedMeshBuffers.resolve(material.mesh(), meshContext.deformation()).vertexBuffer();
 			vertexBuffer.bind();
 			shader.safeGetUniform("Color").set(colorVector);
 			shader.safeGetUniform("Light").set(LightTexture.block(material.packedLight()), LightTexture.sky(material.packedLight()));

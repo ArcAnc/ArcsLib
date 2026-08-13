@@ -190,6 +190,5 @@ public class ClientEvents
 				addTextureLocation(TestBlockItemRenderer.CIRCLE);
 		event.addTextureLocation(TestTailItem.TEXTURE);
 		event.addTextureLocation(TestArmor.TEXTURE);
-	
 	}*/
 }

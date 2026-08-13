@@ -10,21 +10,17 @@
 package com.arcanc.pulselib.util;
 
 
-import com.arcanc.pulselib.content.mixin.VertexBufferAccessor;
+import com.arcanc.pulselib.content.renderer.legacy.GlGeometryDataFactory;
+import com.arcanc.pulselib.content.renderer.plan.PGeometryData;
 import com.arcanc.pulselib.content.model.PBone;
 import com.arcanc.pulselib.content.model.PMesh;
 import com.arcanc.pulselib.content.model.PModel;
-import com.arcanc.pulselib.content.model.baked.AtlasBufferBuilder;
-import com.arcanc.pulselib.content.model.baked.PBakedBone;
-import com.arcanc.pulselib.content.model.baked.PBakedMesh;
-import com.arcanc.pulselib.content.model.baked.PDeformedMeshBuffers;
-import com.arcanc.pulselib.content.model.baked.PGpuDeformedMeshBuffers;
-import com.arcanc.pulselib.content.model.baked.PMeshTextureVariants;
+import com.arcanc.pulselib.content.model.baked.*;
 import com.arcanc.pulselib.content.model.deformer.gpu.PGpuDeformerBuffers;
-import com.arcanc.pulselib.content.model.baked.PBakedModel;
 import com.arcanc.pulselib.content.model.textures.atlas.PLibMetadata;
-import com.arcanc.pulselib.data.gltf.PGltfModelLoader;
+import com.arcanc.pulselib.content.renderer.PRenderQueue;
 import com.arcanc.pulselib.data.PModelLoader;
+import com.arcanc.pulselib.data.gltf.PGltfModelLoader;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.mojang.blaze3d.vertex.*;
@@ -40,7 +36,6 @@ import org.jetbrains.annotations.Nullable;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
 
-import java.nio.ByteBuffer;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
@@ -112,6 +107,7 @@ public class PModelCache
 	
 	private static void clearCaches()
 	{
+		PRenderQueue.cleanup();
 		PMeshTextureVariants.clear();
 		if (MODELS != null)
 		{
@@ -128,7 +124,6 @@ public class PModelCache
 		{
 			PDeformedMeshBuffers.close(mesh);
 			PGpuDeformedMeshBuffers.close(mesh);
-			mesh.vertexBuffer().close();
 		});
 		bone.children().forEach(PModelCache :: clearBoneCache);
 	}
@@ -205,21 +200,13 @@ public class PModelCache
 										ny,
 										nz);
 					}
-					ByteBuffer indexBuffer = mesh.indices();
-					
 					try (MeshData meshData = bufferBuilder.buildOrThrow())
 					{
-						VertexBuffer vertexBuffer = new VertexBuffer(VertexBuffer.Usage.STATIC);
-						vertexBuffer.bind();
-						vertexBuffer.upload(meshData);
-						VertexBufferAccessor accessor = (VertexBufferAccessor)vertexBuffer;
-						accessor.pulselib$UploadIndexBuffer(meshData.drawState(), indexBuffer);
-						accessor.pulselib$setIndexCount(mesh.indicesCount());
-						accessor.pulselib$setIndexType(mesh.glIndexType() == VertexFormat.IndexType.SHORT.asGLType ? VertexFormat.IndexType.SHORT : VertexFormat.IndexType.INT);
-						VertexBuffer.unbind();
+						PGeometryData geometry = GlGeometryDataFactory.capture(meshData, mesh,
+								PRenderTypes.VertexFormatProvider.POSITION_TEX_NORMAL.getVertexSize());
 						builder.meshes.add(new PBakedMesh(
 								meshUUID,
-								vertexBuffer,
+								geometry,
 								mesh.texture(),
 								isEmissive,
 								mesh,

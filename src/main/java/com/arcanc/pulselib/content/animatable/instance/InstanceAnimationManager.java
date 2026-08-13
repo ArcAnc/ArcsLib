@@ -10,18 +10,19 @@
 package com.arcanc.pulselib.content.animatable.instance;
 
 
-import com.arcanc.pulselib.content.animatable.PAnimatable;
 import com.arcanc.pulselib.content.animatable.AnimManagerKey;
-import com.arcanc.pulselib.content.animatable.PAnimationController;
+import com.arcanc.pulselib.content.animatable.PAnimatable;
 import com.arcanc.pulselib.content.animatable.PAnimationManager;
 import com.arcanc.pulselib.util.PLibDatabase;
 import com.arcanc.pulselib.util.helpers.PLibRenderHelper;
 import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
+import net.minecraft.Util;
 import net.minecraft.client.multiplayer.ClientLevel;
-import net.minecraft.util.Util;
+import net.minecraft.world.entity.Entity;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.client.event.ClientTickEvent;
+import net.neoforged.neoforge.event.entity.EntityLeaveLevelEvent;
 
 import java.util.Objects;
 import java.util.Set;
@@ -35,7 +36,7 @@ import java.util.Set;
 public class InstanceAnimationManager<T extends PAnimatable<T>> extends PAnimationManager<T>
 {
 	private static final Set<AnimationManagerContainer<?>> MANAGERS = new ObjectOpenHashSet<>();
-	
+
 	public InstanceAnimationManager(T animatable)
 	{
 		this(animatable, AnimManagerKey.ofObject(animatable));
@@ -78,6 +79,19 @@ public class InstanceAnimationManager<T extends PAnimatable<T>> extends PAnimati
 	public static void cleanUp()
 	{
 		MANAGERS.clear();
+	}
+
+	public static void removeManager(Object animatable)
+	{
+		MANAGERS.removeIf(container -> container.manager().getAnimatable() == animatable);
+	}
+
+	@SubscribeEvent
+	public static void removeEntityManager(final EntityLeaveLevelEvent event)
+	{
+		if (!event.getLevel().isClientSide())
+			return;
+		removeManager(event.getEntity());
 	}
 	
 	static class AnimationManagerContainer<T extends PAnimatable<T>>

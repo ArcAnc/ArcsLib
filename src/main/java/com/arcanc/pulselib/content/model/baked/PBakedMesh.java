@@ -9,22 +9,19 @@
 
 package com.arcanc.pulselib.content.model.baked;
 
+
 import com.arcanc.pulselib.content.model.PMesh;
-import com.mojang.blaze3d.buffers.GpuBuffer;
-import com.mojang.blaze3d.vertex.VertexFormat;
-import net.minecraft.resources.Identifier;
+import com.arcanc.pulselib.content.renderer.plan.PGeometryData;
+import net.minecraft.resources.ResourceLocation;
 
 import java.util.UUID;
 
-public record PBakedMesh(UUID uuid,
-                         GpuBuffer vbo,
-                         int vertexesAmount,
-                         GpuBuffer indices,
-                         int indicesCount,
-                         VertexFormat.IndexType indexType,
-                         String textureName,
-                         boolean isEmissive,
-                         PMesh source,
-                         Identifier textureLocation)
+public record PBakedMesh(
+		UUID uuid,
+		PGeometryData geometry,
+		String textureName,
+		boolean isEmissive,
+		PMesh source,
+		ResourceLocation textureLocation)
 {
 }
