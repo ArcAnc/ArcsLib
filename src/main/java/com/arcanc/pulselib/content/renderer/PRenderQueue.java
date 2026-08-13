@@ -12,6 +12,7 @@ package com.arcanc.pulselib.content.renderer;
 
 import com.arcanc.pulselib.content.mixin.VertexBufferAccessor;
 import com.arcanc.pulselib.content.model.deformer.gpu.PGpuDeformerBuffers;
+import com.arcanc.pulselib.util.PRenderTypes;
 import com.arcanc.pulselib.util.helpers.PLibRenderHelper;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.VertexBuffer;
@@ -28,6 +29,7 @@ import org.lwjgl.opengl.*;
 import org.lwjgl.system.MemoryUtil;
 
 import java.nio.ByteBuffer;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 
@@ -35,6 +37,8 @@ public class PRenderQueue
 {
 	private static final Map<RenderStage,
 						Map<BatchKey, InstanceBatch>> COMMANDS = new Object2ObjectOpenHashMap<>();
+	private static final Map<RenderStage, List<TransparentCommand>> TRANSPARENT_COMMANDS = new Object2ObjectOpenHashMap<>();
+	private static final InstanceBatch TRANSPARENT_BATCH = new InstanceBatch();
 	
 	public static void submitBlockEntityMesh(RenderType renderType, VertexBuffer vertexBuffer, InstanceData data)
 	{
@@ -44,7 +48,7 @@ public class PRenderQueue
 	
 	public static void submitBlockEntityTranslucentMesh(RenderType renderType, VertexBuffer vertexBuffer, InstanceData data)
 	{
-		submit(RenderStage.TRANSLUCENT_BLOCKS,
+		submitTranslucent(RenderStage.TRANSLUCENT_BLOCKS,
 				renderType, vertexBuffer, data);
 	}
 	
@@ -58,7 +62,7 @@ public class PRenderQueue
 			     HEAD -> RenderStage.ENTITIES;
 			case GROUND, FIXED, NONE -> RenderStage.TRANSLUCENT_BLOCKS;
 		};
-		if (stage!= RenderStage.GUI)
+		if (stage != RenderStage.GUI)
 			submit(stage, renderType, vertexBuffer, data);
 	}
 	
@@ -72,64 +76,123 @@ public class PRenderQueue
 	                          VertexBuffer vertexBuffer,
 	                          InstanceData data)
 	{
+		if (PRenderTypes.isTranslucent(type))
+		{
+			submitTranslucent(stage, type, vertexBuffer, data);
+			return;
+		}
+
 		Map<BatchKey, InstanceBatch> stageMap = COMMANDS.computeIfAbsent(stage, s -> new Object2ObjectOpenHashMap<>());
 		BatchKey key = new BatchKey(type, vertexBuffer);
 		InstanceBatch batch = stageMap.computeIfAbsent(key, k -> new InstanceBatch());
 		batch.add(data);
 	}
 	
+	private static void submitTranslucent(RenderStage stage,
+	                                      RenderType type,
+	                                      VertexBuffer vertexBuffer,
+	                                      InstanceData data)
+	{
+		TRANSPARENT_COMMANDS.computeIfAbsent(stage, ignored -> new ObjectArrayList<>()).add(
+				new TransparentCommand(new BatchKey(type, vertexBuffer), data, distanceSquared(data)));
+	}
+	
 	public static void flush(RenderStage stage)
 	{
-		Map<BatchKey, InstanceBatch> map = COMMANDS.get(stage);
-		if (map == null)
+		Map<BatchKey, InstanceBatch> opaque = COMMANDS.get(stage);
+		List<TransparentCommand> transparent = TRANSPARENT_COMMANDS.get(stage);
+		if (opaque == null && transparent == null)
 			return;
 		
 		Matrix4f projection = RenderSystem.getProjectionMatrix();
 		Matrix4f modelView = RenderSystem.getModelViewMatrix();
 		
-		for (Map.Entry<BatchKey, InstanceBatch> entry : map.entrySet())
+		if (opaque != null)
+			for (Map.Entry<BatchKey, InstanceBatch> entry : opaque.entrySet())
+				draw(entry.getKey(), entry.getValue(), modelView, projection, true);
+
+		if (transparent != null && !transparent.isEmpty())
 		{
-			BatchKey key = entry.getKey();
-			InstanceBatch batch = entry.getValue();
-			if (batch.size() == 0)
-				continue;
-			
-			RenderType type = key.type();
-			VertexBuffer vb = key.buffer();
-			
-			type.setupRenderState();
+			transparent.sort(Comparator.comparingDouble(TransparentCommand :: distanceSquared).reversed());
+			BatchKey activeKey = null;
+			for (TransparentCommand command : transparent)
+			{
+				if (activeKey != null && !activeKey.equals(command.key()))
+				{
+					draw(activeKey, TRANSPARENT_BATCH, modelView, projection, false);
+					TRANSPARENT_BATCH.clear();
+				}
+				activeKey = command.key();
+				TRANSPARENT_BATCH.add(command.data());
+			}
+			if (activeKey != null)
+			{
+				draw(activeKey, TRANSPARENT_BATCH, modelView, projection, false);
+				TRANSPARENT_BATCH.clear();
+			}
+			transparent.clear();
+		}
+	}
+
+	private static void draw(BatchKey key,
+	                         InstanceBatch batch,
+	                         Matrix4f modelView,
+	                         Matrix4f projection,
+	                         boolean writeDepth)
+	{
+		if (batch.size() == 0)
+			return;
+
+		RenderType type = key.type();
+		VertexBuffer vb = key.buffer();
+		type.setupRenderState();
+		if (!writeDepth)
+			RenderSystem.depthMask(false);
+		try
+		{
 			ShaderInstance shader = RenderSystem.getShader();
 			if (shader == null)
-			{
-				type.clearRenderState();
-				continue;
-			}
+				return;
 			vb.bind();
-			
+
 			batch.upload();
 			setupInstanceAttributes(batch);
-			
-			shader.setDefaultUniforms(
-					((VertexBufferAccessor)vb).pulselib$getMode(),
-					modelView,
-					projection,
-					PLibRenderHelper.mc().getWindow()
-			);
-			shader.apply();
-			PGpuDeformerBuffers.bind(shader);
-			
-			GL31.glDrawElementsInstanced(
-					((VertexBufferAccessor)vb).pulselib$getMode().asGLMode,
-					((VertexBufferAccessor)vb).pulselib$getIndexCount(),
-					((VertexBufferAccessor)vb).pulselib$getIndexType().asGLType,
-					0,
-					batch.size());
-			
-			disableInstanceAttributes();
-			
-			batch.clear();
-			type.clearRenderState();
+			try
+			{
+				shader.setDefaultUniforms(
+						((VertexBufferAccessor)vb).pulselib$getMode(),
+						modelView,
+						projection,
+						PLibRenderHelper.mc().getWindow()
+				);
+				shader.apply();
+				PGpuDeformerBuffers.bind(shader);
+
+				GL31.glDrawElementsInstanced(
+						((VertexBufferAccessor)vb).pulselib$getMode().asGLMode,
+						((VertexBufferAccessor)vb).pulselib$getIndexCount(),
+						((VertexBufferAccessor)vb).pulselib$getIndexType().asGLType,
+						0,
+						batch.size());
+			}
+			finally
+			{
+				disableInstanceAttributes();
+			}
 		}
+		finally
+		{
+			if (!writeDepth)
+				RenderSystem.depthMask(true);
+			type.clearRenderState();
+			batch.clear();
+		}
+	}
+
+	private static float distanceSquared(InstanceData data)
+	{
+		Matrix4f matrix = data.posMatrix();
+		return matrix.m30() * matrix.m30() + matrix.m31() * matrix.m31() + matrix.m32() * matrix.m32();
 	}
 	
 	public static void cleanup()
@@ -141,6 +204,8 @@ public class PRenderQueue
 			stageMap.clear();
 		}
 		COMMANDS.clear();
+		TRANSPARENT_COMMANDS.clear();
+		TRANSPARENT_BATCH.delete();
 	}
 	
 	private static void setupInstanceAttributes(InstanceBatch batch)
@@ -224,6 +289,8 @@ public class PRenderQueue
 	}
 	
 	public record BatchKey(RenderType type, VertexBuffer buffer) {}
+
+	private record TransparentCommand(BatchKey key, InstanceData data, float distanceSquared) {}
 	
 	public record InstanceData(
 			Matrix4f posMatrix,
