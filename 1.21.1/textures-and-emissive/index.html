@@ -799,6 +799,17 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#per-mesh-runtime-material-overrides" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Per-mesh runtime material overrides
+      
+    </span>
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -1270,6 +1281,17 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#per-mesh-runtime-material-overrides" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Per-mesh runtime material overrides
+      
+    </span>
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -1346,6 +1368,24 @@
 <a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a><span class="n">PRenderTypes</span><span class="p">.</span><span class="na">RenderTypeProvider</span><span class="p">::</span><span class="n">trianglesGuiEmissive</span>
 </code></pre></div>
 <p><code>trianglesLitEmissive</code> remains only as the compatibility counterpart of <code>trianglesLit</code>; it is not a distinct shader variant for new rendering code.</p>
+<h2 id="per-mesh-runtime-material-overrides">Per-mesh runtime material overrides<a class="headerlink" href="#per-mesh-runtime-material-overrides" title="Permanent link">&para;</a></h2>
+<p>Renderers can replace a mesh texture at render time without duplicating the mesh in the source model. Override <code>resolveMeshRender(...)</code>, identify the target mesh by its UUID (or <code>textureName()</code>), and return a modified context:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="nd">@Override</span>
+<a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a><span class="kd">protected</span><span class="w"> </span><span class="n">PMeshRenderContext</span><span class="w"> </span><span class="nf">resolveMeshRender</span><span class="p">(</span><span class="n">RobotEntity</span><span class="w"> </span><span class="n">entity</span><span class="p">,</span>
+<a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a><span class="w">                                               </span><span class="n">PBakedBone</span><span class="w"> </span><span class="n">bone</span><span class="p">,</span>
+<a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a><span class="w">                                               </span><span class="n">PBakedMesh</span><span class="w"> </span><span class="n">mesh</span><span class="p">,</span>
+<a id="__codelineno-8-5" name="__codelineno-8-5" href="#__codelineno-8-5"></a><span class="w">                                               </span><span class="n">PMeshRenderContext</span><span class="w"> </span><span class="n">inherited</span><span class="p">,</span>
+<a id="__codelineno-8-6" name="__codelineno-8-6" href="#__codelineno-8-6"></a><span class="w">                                               </span><span class="kt">float</span><span class="w"> </span><span class="n">partialTick</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-8-7" name="__codelineno-8-7" href="#__codelineno-8-7"></a><span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">mesh</span><span class="p">.</span><span class="na">uuid</span><span class="p">().</span><span class="na">equals</span><span class="p">(</span><span class="n">ROBOT_SCREEN_MESH</span><span class="p">))</span>
+<a id="__codelineno-8-8" name="__codelineno-8-8" href="#__codelineno-8-8"></a><span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">inherited</span><span class="p">;</span>
+<a id="__codelineno-8-9" name="__codelineno-8-9" href="#__codelineno-8-9"></a>
+<a id="__codelineno-8-10" name="__codelineno-8-10" href="#__codelineno-8-10"></a><span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">inherited</span>
+<a id="__codelineno-8-11" name="__codelineno-8-11" href="#__codelineno-8-11"></a><span class="w">            </span><span class="p">.</span><span class="na">withTexture</span><span class="p">(</span><span class="n">entity</span><span class="p">.</span><span class="na">activeScreenTexture</span><span class="p">())</span>
+<a id="__codelineno-8-12" name="__codelineno-8-12" href="#__codelineno-8-12"></a><span class="w">            </span><span class="p">.</span><span class="na">withEmissive</span><span class="p">(</span><span class="n">entity</span><span class="p">.</span><span class="na">screenIsLit</span><span class="p">());</span>
+<a id="__codelineno-8-13" name="__codelineno-8-13" href="#__codelineno-8-13"></a><span class="p">}</span>
+</code></pre></div>
+<p><code>withTexture(...)</code> accepts a texture location registered in the PulseLib runtime atlas. On its first use for a given <code>(mesh, texture)</code> pair, PulseLib bakes an alternate vertex buffer with UVs mapped to that atlas sprite; later draws reuse that buffer. The variant buffers and their deformation caches are released on the next resource reload.</p>
+<p><code>withEmissive(true)</code> forces full-bright emissive rendering, <code>withEmissive(false)</code> disables it, and <code>withEmissive(null)</code> returns to the selected texture's <code>.mcmeta</code> setting.</p>
 <p>Classes used:</p>
 <ul>
 <li><a href="https://github.com/ArcAnc/PulseLib/blob/1.21.1/src/main/java/com/arcanc/pulselib/util/PTextureCache.java"><code>PTextureCache</code></a></li>
