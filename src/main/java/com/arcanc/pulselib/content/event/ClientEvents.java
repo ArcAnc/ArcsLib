@@ -15,6 +15,8 @@ import com.arcanc.pulselib.content.animatable.PLibAnimationTicker;
 import com.arcanc.pulselib.content.animatable.instance.InstanceAnimationManager;
 import com.arcanc.pulselib.content.animatable.singleton.SingletonAnimationManager;
 import com.arcanc.pulselib.content.model.baked.PDeformedMeshBuffers;
+import com.arcanc.pulselib.content.model.baked.PGpuDeformedMeshBuffers;
+import com.arcanc.pulselib.content.model.deformer.gpu.PGpuDeformerBuffers;
 import com.arcanc.pulselib.content.model.textures.atlas.RuntimeLoader;
 import com.arcanc.pulselib.content.player.animation.PPlayerAnimations;
 import com.arcanc.pulselib.content.renderer.PRenderQueue;
@@ -155,6 +157,8 @@ public class ClientEvents
 			return;
 		PRenderQueue.cleanup();
 		PDeformedMeshBuffers.cleanup();
+		PGpuDeformedMeshBuffers.cleanup();
+		PGpuDeformerBuffers.cleanup();
 		InstanceAnimationManager.cleanUp();
 		SingletonAnimationManager.cleanUp();
 		PPlayerAnimations.cleanUp();
@@ -165,14 +169,14 @@ public class ClientEvents
 		event.register(PLibDatabase.rl("runtime_loader"), RuntimeLoader.TYPE);
 	}
 	
-/*	private static void registerRenderers(final EntityRenderersEvent.RegisterRenderers event)
+	/*private static void registerRenderers(final EntityRenderersEvent.RegisterRenderers event)
 	{
 		event.registerEntityRenderer(PLibRegistration.EntityTypeReg.TEST_ENTITY.get(), TestEntityRender :: new);
-	}
-*/
-/*	private static void registerTextures(final PulseLibEvents.RegisterTextureEvent event)
+	}*/
+
+	private static void registerTextures(final PulseLibEvents.RegisterTextureEvent event)
 	{
-		event.addTextureLocation(TestEntityRender.SPHERE).
+	/*	event.addTextureLocation(TestEntityRender.SPHERE).
 				addTextureLocation(TestEntityRender.TUBE).
 				addTextureLocation(TestEntityRender.TORUS).
 				addTextureLocation(TestEntityRender.ZERO).
@@ -186,6 +190,6 @@ public class ClientEvents
 				addTextureLocation(TestBlockItemRenderer.CIRCLE);
 		event.addTextureLocation(TestTailItem.TEXTURE);
 		event.addTextureLocation(TestArmor.TEXTURE);
-		
-	}*/
+	*/
+	}
 }

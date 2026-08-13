@@ -21,6 +21,8 @@ import com.arcanc.pulselib.content.model.baked.PBakedMesh;
 import com.arcanc.pulselib.content.model.baked.PBakedModel;
 import com.arcanc.pulselib.content.model.baked.PMeshRenderContext;
 import com.arcanc.pulselib.content.model.baked.PDeformedMeshBuffers;
+import com.arcanc.pulselib.content.model.baked.PGpuDeformedMeshBuffers;
+import com.arcanc.pulselib.content.model.deformer.gpu.PGpuDeformerBuffers;
 import com.arcanc.pulselib.content.renderer.modelData.PModelData;
 import com.arcanc.pulselib.data.gecko.MolangParser;
 import com.arcanc.pulselib.util.PRenderTypes;
@@ -353,7 +355,11 @@ public abstract class PEntityRenderer<T extends Entity & PAnimatable<T>> extends
 			if (mesh.isEmissive())
 				type = PRenderTypes.RenderTypeProvider.emissiveVariant(type, PTextureCache.ATLAS_LOCATION);
 			
-			PRenderQueue.submitEntityMesh(type, PDeformedMeshBuffers.resolve(mesh, meshContext.deformation()), new PRenderQueue.InstanceData(matrix4fstack, meshContext.color(), meshContext.packedLight(), meshContext.packedOverlay()));
+			PGpuDeformerBuffers.Submission deformation = PGpuDeformerBuffers.submit(meshContext.deformation());
+			PRenderQueue.submitEntityMesh(type, deformation.enabled() ?
+					PGpuDeformedMeshBuffers.resolve(mesh, meshContext.deformation().subdivisionLevel()) :
+					PDeformedMeshBuffers.resolve(mesh, meshContext.deformation()),
+					new PRenderQueue.InstanceData(matrix4fstack, meshContext.color(), meshContext.packedLight(), meshContext.packedOverlay(), deformation));
 		}
 	}
 	

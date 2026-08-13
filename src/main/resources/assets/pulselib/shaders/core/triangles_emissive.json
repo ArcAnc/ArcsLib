@@ -13,11 +13,14 @@
 
     "InstanceColor",
     "InstanceLight",
-    "InstanceOverlay"
+    "InstanceOverlay",
+    "InstanceDeformer"
   ],
   "samplers": [
     { "name": "Sampler0" },
-    { "name": "Sampler1" }
+    { "name": "Sampler1" },
+    { "name": "DeformerOperations" },
+    { "name": "DeformerValues" }
   ],
   "uniforms": [
     { "name": "ModelViewMat", "type": "matrix4x4", "count": 16, "values": [ 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0 ] },

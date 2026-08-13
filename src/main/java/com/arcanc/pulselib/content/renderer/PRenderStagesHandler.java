@@ -13,6 +13,7 @@ package com.arcanc.pulselib.content.renderer;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
 import net.neoforged.neoforge.common.NeoForge;
+import com.arcanc.pulselib.content.model.deformer.gpu.PGpuDeformerBuffers;
 
 public class PRenderStagesHandler
 {
@@ -28,6 +29,9 @@ public class PRenderStagesHandler
 		if (event.getStage() == RenderLevelStageEvent.Stage.AFTER_BLOCK_ENTITIES)
 			PRenderQueue.flush(PRenderQueue.RenderStage.SOLID_BLOCKS);
 		else if (event.getStage() == RenderLevelStageEvent.Stage.AFTER_TRIPWIRE_BLOCKS)
+		{
 			PRenderQueue.flush(PRenderQueue.RenderStage.TRANSLUCENT_BLOCKS);
+			PGpuDeformerBuffers.finishFrame();
+		}
 	}
 }

@@ -13,12 +13,15 @@
 
     "InstanceColor",
     "InstanceLight",
-    "InstanceOverlay"
+    "InstanceOverlay",
+    "InstanceDeformer"
   ],
   "samplers": [
     { "name": "Sampler0" },
     { "name": "Sampler1" },
-    { "name": "Sampler2" }
+    { "name": "Sampler2" },
+    { "name": "DeformerOperations" },
+    { "name": "DeformerValues" }
   ],
   "defines": {
     "ALPHA_CUTOUT": "0.1"

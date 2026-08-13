@@ -21,11 +21,14 @@ import com.arcanc.pulselib.content.model.baked.PBakedMesh;
 import com.arcanc.pulselib.content.model.baked.PBakedModel;
 import com.arcanc.pulselib.content.model.baked.PMeshRenderContext;
 import com.arcanc.pulselib.content.model.baked.PDeformedMeshBuffers;
+import com.arcanc.pulselib.content.model.baked.PGpuDeformedMeshBuffers;
+import com.arcanc.pulselib.content.model.deformer.gpu.PGpuDeformerBuffers;
 import com.arcanc.pulselib.content.renderer.modelData.PModelData;
 import com.arcanc.pulselib.data.gecko.MolangParser;
 import com.arcanc.pulselib.util.PRenderTypes;
 import com.arcanc.pulselib.util.PTextureCache;
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.VertexBuffer;
 import com.mojang.math.Axis;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import net.minecraft.client.renderer.LightTexture;
@@ -208,12 +211,14 @@ public abstract class PBlockRenderer<T extends BlockEntity & PAnimatable<T>>
 			RenderType baseType = meshContext.renderType().apply(PTextureCache.ATLAS_LOCATION);
 			RenderType type = mesh.isEmissive() ? PRenderTypes.RenderTypeProvider.emissiveVariant(baseType, PTextureCache.ATLAS_LOCATION) : baseType;
 			
+			PGpuDeformerBuffers.Submission deformation = PGpuDeformerBuffers.submit(meshContext.deformation());
+			VertexBuffer buffer = deformation.enabled() ? PGpuDeformedMeshBuffers.resolve(mesh, meshContext.deformation().subdivisionLevel()) : PDeformedMeshBuffers.resolve(mesh, meshContext.deformation());
 			PRenderTypes.getTransparencyState(type).ifPresent(transparency ->
 			{
 				if (transparency == RenderStateShard.TransparencyStateShard.NO_TRANSPARENCY)
-					PRenderQueue.submitBlockEntityMesh(type, PDeformedMeshBuffers.resolve(mesh, meshContext.deformation()), new PRenderQueue.InstanceData(matrix4fstack, meshContext.color(), meshContext.packedLight(), meshContext.packedOverlay()));
+					PRenderQueue.submitBlockEntityMesh(type, buffer, new PRenderQueue.InstanceData(matrix4fstack, meshContext.color(), meshContext.packedLight(), meshContext.packedOverlay(), deformation));
 				else
-					PRenderQueue.submitBlockEntityTranslucentMesh(type, PDeformedMeshBuffers.resolve(mesh, meshContext.deformation()), new PRenderQueue.InstanceData(matrix4fstack, meshContext.color(), meshContext.packedLight(), meshContext.packedOverlay()));
+					PRenderQueue.submitBlockEntityTranslucentMesh(type, buffer, new PRenderQueue.InstanceData(matrix4fstack, meshContext.color(), meshContext.packedLight(), meshContext.packedOverlay(), deformation));
 			});
 		});
 	}

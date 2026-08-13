@@ -1,5 +1,7 @@
 #version 330
 
+#moj_import <pulselib:deformers.glsl>
+
 in vec3 Position;
 in vec2 UV0;
 in vec3 Normal;
@@ -11,6 +13,7 @@ layout(location = 7) in vec4 InstanceMatrix3;
 layout(location = 8) in vec4 InstanceColor;
 layout(location = 9) in vec2 InstanceLight;
 layout(location = 10) in vec2 InstanceOverlay;
+layout(location = 11) in ivec3 InstanceDeformer;
 
 uniform mat4 ModelViewMat;
 uniform mat4 ProjMat;
@@ -29,7 +32,8 @@ void main()
     InstanceMatrix2,
     InstanceMatrix3
     );
-    gl_Position = ProjMat * ModelViewMat * InstanceMatrix * vec4(Position, 1.0);
+    vec3 deformedPosition = pulselib_apply_deformers(Position, InstanceDeformer);
+    gl_Position = ProjMat * ModelViewMat * InstanceMatrix * vec4(deformedPosition, 1.0);
 
     overlayColor = texelFetch(Sampler1, ivec2(InstanceOverlay), 0);
 

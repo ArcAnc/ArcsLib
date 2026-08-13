@@ -11,6 +11,7 @@ package com.arcanc.pulselib.content.renderer;
 
 
 import com.arcanc.pulselib.content.mixin.VertexBufferAccessor;
+import com.arcanc.pulselib.content.model.deformer.gpu.PGpuDeformerBuffers;
 import com.arcanc.pulselib.util.helpers.PLibRenderHelper;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.VertexBuffer;
@@ -115,6 +116,7 @@ public class PRenderQueue
 					PLibRenderHelper.mc().getWindow()
 			);
 			shader.apply();
+			PGpuDeformerBuffers.bind(shader);
 			
 			GL31.glDrawElementsInstanced(
 					((VertexBufferAccessor)vb).pulselib$getMode().asGLMode,
@@ -143,7 +145,7 @@ public class PRenderQueue
 	
 	private static void setupInstanceAttributes(InstanceBatch batch)
 	{
-		int stride = 16 * 4 + 4 * 4 + 2 * 4 + 2 * 4;
+		int stride = 16 * 4 + 4 * 4 + 2 * 4 + 2 * 4 + 4 * 4;
 		int offset = 0;
 		int vbo = batch.instanceVBO;
 		
@@ -171,12 +173,17 @@ public class PRenderQueue
 		// Overlay
 		GL20.glEnableVertexAttribArray(10);
 		GL20.glVertexAttribPointer(10,2, GL11.GL_FLOAT, false, stride, offset);
+		offset += 8;
+
+		GL20.glEnableVertexAttribArray(11);
+		GL30.glVertexAttribIPointer(11, 3, GL11.GL_INT, stride, offset);
+		GL33.glVertexAttribDivisor(11, 1);
 		GL33.glVertexAttribDivisor(10,1);
 	}
 	
 	private static void disableInstanceAttributes()
 	{
-		for (int q = 4; q <= 10; q++)
+		for (int q = 4; q <= 11; q++)
 		{
 			GL20.glDisableVertexAttribArray(q);
 			GL33.glVertexAttribDivisor(q,0);
@@ -222,8 +229,23 @@ public class PRenderQueue
 			Matrix4f posMatrix,
 			int packedColor,
 			int packedLight,
-			int packedOverlay)
-	{}
+			int packedOverlay,
+			int deformerOperationOffset,
+			int deformerValueOffset,
+			int deformerOperationCount)
+	{
+		public InstanceData(Matrix4f posMatrix, int packedColor, int packedLight, int packedOverlay)
+		{
+			this(posMatrix, packedColor, packedLight, packedOverlay, -1, -1, 0);
+		}
+
+		public InstanceData(Matrix4f posMatrix, int packedColor, int packedLight, int packedOverlay,
+		                    PGpuDeformerBuffers.Submission deformation)
+		{
+			this(posMatrix, packedColor, packedLight, packedOverlay, deformation.operationOffset(),
+					deformation.valueOffset(), deformation.operationCount());
+		}
+	}
 	
 	public static class InstanceBatch
 	{
@@ -233,7 +255,7 @@ public class PRenderQueue
 		private @Nullable ByteBuffer buffer;
 		private int capacity;
 		
-		private static final int STRIDE = 16 * 4 + 4 * 4 + 2 * 4 + 2 * 4;
+		private static final int STRIDE = 16 * 4 + 4 * 4 + 2 * 4 + 2 * 4 + 4 * 4;
 		
 		public void add(InstanceData data)
 		{
@@ -287,6 +309,10 @@ public class PRenderQueue
 				this.buffer.putFloat(LightTexture.sky(q.packedLight()));
 				this.buffer.putFloat(q.packedOverlay() & 0xFFFF);
 				this.buffer.putFloat((q.packedOverlay() >> 16) & 0xFFFF);
+				this.buffer.putInt(q.deformerOperationOffset());
+				this.buffer.putInt(q.deformerValueOffset());
+				this.buffer.putInt(q.deformerOperationCount());
+				this.buffer.putInt(0);
 			}
 				
 			this.buffer.flip();

@@ -18,6 +18,8 @@ import com.arcanc.pulselib.content.model.baked.AtlasBufferBuilder;
 import com.arcanc.pulselib.content.model.baked.PBakedBone;
 import com.arcanc.pulselib.content.model.baked.PBakedMesh;
 import com.arcanc.pulselib.content.model.baked.PDeformedMeshBuffers;
+import com.arcanc.pulselib.content.model.baked.PGpuDeformedMeshBuffers;
+import com.arcanc.pulselib.content.model.deformer.gpu.PGpuDeformerBuffers;
 import com.arcanc.pulselib.content.model.baked.PBakedModel;
 import com.arcanc.pulselib.content.model.textures.atlas.PLibMetadata;
 import com.arcanc.pulselib.data.gltf.PGltfModelLoader;
@@ -115,6 +117,7 @@ public class PModelCache
 					model.bones().forEach(PModelCache :: clearBoneCache));
 			MODELS = null;
 		}
+		PGpuDeformerBuffers.clearDefinitions();
 	}
 	
 	private static void clearBoneCache(PBakedBone bone)
@@ -122,6 +125,7 @@ public class PModelCache
 		bone.meshes().forEach(mesh ->
 		{
 			PDeformedMeshBuffers.close(mesh);
+			PGpuDeformedMeshBuffers.close(mesh);
 			mesh.vertexBuffer().close();
 		});
 		bone.children().forEach(PModelCache :: clearBoneCache);
