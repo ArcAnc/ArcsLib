@@ -277,7 +277,7 @@
     
     
       <li class="md-tabs__item md-tabs__item--active">
-        <a href="../model-loaders/" class="md-tabs__link">
+        <a href="../render-backend.md" class="md-tabs__link">
           
   
   
@@ -1079,6 +1079,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../render-backend.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Render Backend
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../model-loaders/" class="md-nav__link">
         
   
@@ -1412,6 +1440,8 @@
 <ul>
 <li><a href="https://github.com/ArcAnc/PulseLib/blob/1.21.1/src/main/java/com/arcanc/pulselib/content/renderer/PRenderer.java"><code>PRenderer&lt;T&gt;</code></a>, <a href="https://github.com/ArcAnc/PulseLib/blob/1.21.1/src/main/java/com/arcanc/pulselib/content/renderer/PBlockRenderer.java"><code>PBlockRenderer&lt;T&gt;</code></a>, <a href="https://github.com/ArcAnc/PulseLib/blob/1.21.1/src/main/java/com/arcanc/pulselib/content/renderer/PItemRenderer.java"><code>PItemRenderer&lt;T&gt;</code></a>, <a href="https://github.com/ArcAnc/PulseLib/blob/1.21.1/src/main/java/com/arcanc/pulselib/content/renderer/PEntityRenderer.java"><code>PEntityRenderer&lt;T&gt;</code></a>, and <a href="https://github.com/ArcAnc/PulseLib/blob/1.21.1/src/main/java/com/arcanc/pulselib/content/renderer/PEntityRenderLayer.java"><code>PEntityRenderLayer&lt;T&gt;</code></a> are renderer entry points.</li>
 <li><a href="https://github.com/ArcAnc/PulseLib/blob/1.21.1/src/main/java/com/arcanc/pulselib/util/PRenderTypes.java"><code>PRenderTypes</code></a> provides compatible triangle render types; <a href="https://github.com/ArcAnc/PulseLib/blob/1.21.1/src/main/java/com/arcanc/pulselib/content/renderer/PRenderQueue.java"><code>PRenderQueue</code></a> batches their submissions.</li>
+<li><a href="https://github.com/ArcAnc/PulseLib/blob/1.21.1/src/main/java/com/arcanc/pulselib/content/renderer/plan/PGeometryData.java"><code>PGeometryData</code></a> is immutable static triangle data, and <a href="https://github.com/ArcAnc/PulseLib/blob/1.21.1/src/main/java/com/arcanc/pulselib/content/renderer/plan/PInstanceHeader.java"><code>PInstanceHeader</code></a> carries a transform, color, lighting, overlay, and optional GPU-deformer offsets for one queued instance. <a href="https://github.com/ArcAnc/PulseLib/blob/1.21.1/src/main/java/com/arcanc/pulselib/content/renderer/plan/PDrawCommand.java"><code>PDrawCommand</code></a>, <a href="https://github.com/ArcAnc/PulseLib/blob/1.21.1/src/main/java/com/arcanc/pulselib/content/renderer/plan/PDrawGroup.java"><code>PDrawGroup</code></a>, and <a href="https://github.com/ArcAnc/PulseLib/blob/1.21.1/src/main/java/com/arcanc/pulselib/content/renderer/plan/PRenderPlan.java"><code>PRenderPlan</code></a> are backend plan data; normal mods should submit through <code>PRenderQueue</code> rather than construct them.</li>
+<li><a href="https://github.com/ArcAnc/PulseLib/blob/1.21.1/src/main/java/com/arcanc/pulselib/content/model/deformer/gpu/PGpuDeformerBuffers.java"><code>PGpuDeformerBuffers</code></a> streams supported deformer stacks to the renderer. Its lifecycle is managed by PulseLib.</li>
 <li><a href="https://github.com/ArcAnc/PulseLib/blob/1.21.1/src/main/java/com/arcanc/pulselib/util/PTextureCache.java"><code>PTextureCache</code></a>, <a href="https://github.com/ArcAnc/PulseLib/blob/1.21.1/src/main/java/com/arcanc/pulselib/content/model/textures/atlas/RuntimeLoader.java"><code>RuntimeLoader</code></a>, and <a href="https://github.com/ArcAnc/PulseLib/blob/1.21.1/src/main/java/com/arcanc/pulselib/content/model/textures/atlas/PLibMetadata.java"><code>PLibMetadata</code></a> manage the runtime texture atlas and emissive metadata.</li>
 <li>Attachments are centered on <a href="https://github.com/ArcAnc/PulseLib/blob/1.21.1/src/main/java/com/arcanc/pulselib/util/attachments/PLivingAttachmentDefinition.java"><code>PLivingAttachmentDefinition</code></a>, <a href="https://github.com/ArcAnc/PulseLib/blob/1.21.1/src/main/java/com/arcanc/pulselib/util/attachments/PLivingAttachments.java"><code>PLivingAttachments</code></a>, <a href="https://github.com/ArcAnc/PulseLib/blob/1.21.1/src/main/java/com/arcanc/pulselib/util/attachments/PAttachmentBinding.java"><code>PAttachmentBinding</code></a>, and <a href="https://github.com/ArcAnc/PulseLib/blob/1.21.1/src/main/java/com/arcanc/pulselib/util/attachments/PAttachmentAnchor.java"><code>PAttachmentAnchor</code></a>.</li>
 </ul>

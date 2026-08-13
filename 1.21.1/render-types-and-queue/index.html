@@ -279,7 +279,7 @@
     
     
       <li class="md-tabs__item">
-        <a href="../model-loaders/" class="md-tabs__link">
+        <a href="../render-backend.md" class="md-tabs__link">
           
   
   
@@ -1179,6 +1179,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../render-backend.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Render Backend
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../model-loaders/" class="md-nav__link">
         
   
@@ -1336,7 +1364,7 @@
 
   <h1>Render Types and Queue</h1>
 
-<p>Most mods can use PulseLib's renderers without touching the render queue directly. This page exists for the cases where you need to understand why PulseLib does not use vanilla <code>RenderType</code> values and where custom rendering should be inserted.</p>
+<p>Most mods can use PulseLib's renderers without touching the render queue directly. This page explains why PulseLib does not use vanilla <code>RenderType</code> values and how to add custom geometry to the current render backend. For its internal frame-plan, geometry-arena, and capability paths, see <a href="render-backend.md">Render backend</a>.</p>
 <p>PulseLib models are triangle meshes loaded from glTF/GLB or another model loader. Vanilla baked block models are mostly quad-based, so PulseLib provides its own triangle render types, shaders, vertex format, and instanced queue. That is why examples use <a href="https://github.com/ArcAnc/PulseLib/blob/1.21.1/src/main/java/com/arcanc/pulselib/util/PRenderTypes.java"><code>PRenderTypes</code></a> instead of <code>RenderType.entityCutout</code> or block render types.</p>
 <h2 id="which-render-type-should-i-choose">Which render type should I choose?<a class="headerlink" href="#which-render-type-should-i-choose" title="Permanent link">&para;</a></h2>
 <p>Use the simplest type that matches the visual result:</p>
@@ -1363,7 +1391,8 @@
 </ul>
 <p>For most mods, it is safer to start from PulseLib's existing render types and only add a new one when you need a genuinely different shader state.</p>
 <h2 id="what-the-queue-does">What the queue does<a class="headerlink" href="#what-the-queue-does" title="Permanent link">&para;</a></h2>
-<p><a href="https://github.com/ArcAnc/PulseLib/blob/1.21.1/src/main/java/com/arcanc/pulselib/content/renderer/PRenderQueue.java"><code>PRenderQueue</code></a> batches identical meshes together and renders many instances with one instanced draw call. That is important for animated block entities and entities: every object can have its own transform and animation pose, but the GPU can still draw repeated mesh buffers efficiently.</p>
+<p><a href="https://github.com/ArcAnc/PulseLib/blob/1.21.1/src/main/java/com/arcanc/pulselib/content/renderer/PRenderQueue.java"><code>PRenderQueue</code></a> compiles submissions into a frame plan. Opaque submissions with the same render type and geometry are batched as instances; transparent submissions are kept in back-to-front order. The OpenGL driver uploads the instance stream once per flush and uses multi-draw indirect where the current context supports it. It falls back to direct instanced draws when that capability is unavailable.</p>
+<p>Static <a href="https://github.com/ArcAnc/PulseLib/blob/1.21.1/src/main/java/com/arcanc/pulselib/content/renderer/plan/PGeometryData.java"><code>PGeometryData</code></a> is placed in the backend's geometry arena and reused across frames. This is the normal path for baked meshes. Dynamic geometry is reserved for CPU-deformed meshes and is more expensive because its vertex data is uploaded again.</p>
 <p>The queue has a few stages:</p>
 <ul>
 <li><code>SOLID_BLOCKS</code> for solid block entity meshes.</li>
@@ -1373,13 +1402,28 @@
 </ul>
 <p>Normal renderers submit into these stages for you. <a href="https://github.com/ArcAnc/PulseLib/blob/1.21.1/src/main/java/com/arcanc/pulselib/content/renderer/PRenderStagesHandler.java"><code>PRenderStagesHandler</code></a> handles flushing them at the right time.</p>
 <h2 id="when-to-submit-manually">When to submit manually<a class="headerlink" href="#when-to-submit-manually" title="Permanent link">&para;</a></h2>
-<p>Manual queue submission is an advanced escape hatch. Use it when you already have a PulseLib-compatible <code>VertexBuffer</code> and want to draw extra geometry in the same pipeline.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="n">PRenderQueue</span><span class="p">.</span><span class="na">submit</span><span class="p">(</span>
-<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="w">        </span><span class="n">PRenderQueue</span><span class="p">.</span><span class="na">RenderStage</span><span class="p">.</span><span class="na">ENTITIES</span><span class="p">,</span>
-<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="w">        </span><span class="n">renderType</span><span class="p">,</span>
-<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="w">        </span><span class="n">vertexBuffer</span><span class="p">,</span>
-<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a><span class="w">        </span><span class="k">new</span><span class="w"> </span><span class="n">PRenderQueue</span><span class="p">.</span><span class="na">InstanceData</span><span class="p">(</span><span class="n">matrix</span><span class="p">,</span><span class="w"> </span><span class="mh">0xFFFFFFFF</span><span class="p">,</span><span class="w"> </span><span class="n">packedLight</span><span class="p">,</span><span class="w"> </span><span class="n">packedOverlay</span><span class="p">));</span>
+<p>Manual queue submission is an advanced escape hatch. Use it for static triangle data that you have packed in PulseLib's compatible vertex format. Do not submit a vanilla <code>VertexBuffer</code>: the queue now accepts <code>PGeometryData</code> for static meshes, plus a <code>PInstanceHeader</code> for each instance.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="n">PGeometryData</span><span class="w"> </span><span class="n">geometry</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">createCompatibleTriangleGeometry</span><span class="p">();</span>
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="n">PInstanceHeader</span><span class="w"> </span><span class="n">instance</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">PInstanceHeader</span><span class="p">(</span>
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="w">        </span><span class="n">poseStack</span><span class="p">.</span><span class="na">last</span><span class="p">().</span><span class="na">pose</span><span class="p">(),</span>
+<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="w">        </span><span class="mh">0xFFFFFFFF</span><span class="p">,</span>
+<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a><span class="w">        </span><span class="n">packedLight</span><span class="p">,</span>
+<a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a><span class="w">        </span><span class="n">packedOverlay</span><span class="p">);</span>
+<a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a>
+<a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a><span class="n">PRenderQueue</span><span class="p">.</span><span class="na">submitEntityMesh</span><span class="p">(</span>
+<a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a><span class="w">        </span><span class="n">renderType</span><span class="p">,</span>
+<a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a><span class="w">        </span><span class="n">geometry</span><span class="p">,</span>
+<a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a><span class="w">        </span><span class="n">instance</span><span class="p">);</span>
 </code></pre></div>
+<p><code>PGeometryData</code> copies its supplied vertex and index buffers, so it is safe to retain and submit it repeatedly. Its vertex stride and index type must match the data you supplied. For the standard PulseLib shaders, use <code>VertexFormat.Mode.TRIANGLES</code> and <code>PRenderTypes.VertexFormatProvider.POSITION_TEX_NORMAL</code> when packing the data. For most integrations, using a baked mesh's <code>geometry()</code> is preferable to hand-packing a buffer.</p>
+<p>Use the stage-specific methods whenever possible:</p>
+<ul>
+<li><code>submitBlockEntityMesh(...)</code> for opaque block-entity geometry.</li>
+<li><code>submitBlockEntityTranslucentMesh(...)</code> for block-entity geometry that must be sorted as transparent.</li>
+<li><code>submitEntityMesh(...)</code> for entities and held items.</li>
+<li><code>submitItem(...)</code> when the item display context decides the stage.</li>
+</ul>
+<p>The queue is flushed by <code>PRenderStagesHandler</code>. Do not call <code>flush(...)</code> from an ordinary renderer: flushing early breaks batching and can render at the wrong stage. A custom <code>RenderStage</code> is available only when you also own the matching flush point.</p>
 <p>If you only need to draw a vanilla item, text, a beam, or a simple effect, it is often better to use the <code>MultiBufferSource</code> passed to <code>preSubmit</code> or <code>postSubmit</code>. That keeps vanilla rendering in vanilla's pipeline and PulseLib mesh rendering in PulseLib's pipeline.</p>
 <h2 id="renderer-hooks">Renderer hooks<a class="headerlink" href="#renderer-hooks" title="Permanent link">&para;</a></h2>
 <p>Every PulseLib renderer has the same three-stage flow:</p>

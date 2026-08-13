@@ -279,7 +279,7 @@
     
     
       <li class="md-tabs__item">
-        <a href="../model-loaders/" class="md-tabs__link">
+        <a href="../render-backend.md" class="md-tabs__link">
           
   
   
@@ -1194,6 +1194,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../render-backend.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Render Backend
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../model-loaders/" class="md-nav__link">
         
   
@@ -1365,8 +1393,8 @@
 <h1 id="mesh-deformers">Mesh deformers<a class="headerlink" href="#mesh-deformers" title="Permanent link">&para;</a></h1>
 <p>Mesh deformers modify vertices after a mesh has been baked. A stack may contain several ordered operations, such as bend followed by twist. PulseLib derives transformed normals from the deformation Jacobian, so lighting follows the deformed surface.</p>
 <h2 id="gpu-execution">GPU execution<a class="headerlink" href="#gpu-execution" title="Permanent link">&para;</a></h2>
-<p>For world-rendered PulseLib models, the built-in <code>bend</code>, <code>hinge</code>, <code>twist</code>, <code>stretch</code>, <code>squash</code>, <code>taper</code>, and <code>wave</code> operations run in the custom vertex shaders. Mesh geometry remains static; only a compact operation table and current channel values are uploaded per frame. The shader source is shared by render types through <code>assets/pulselib/shaders/include/deformers.glsl</code>.</p>
-<p>GPU execution is automatic when every operation in a stack is built in and the stack has at most eight operations. A custom <code>PMeshDeformer</code> remains CPU-rendered; a future GPU extension point can add a shader descriptor for custom operations. GUI's immediate rendering also remains on the CPU path.</p>
+<p>For world-rendered PulseLib models, the built-in <code>bend</code>, <code>hinge</code>, <code>twist</code>, <code>stretch</code>, <code>squash</code>, <code>taper</code>, and <code>wave</code> operations run in the custom vertex shaders. Mesh geometry remains in the static geometry arena; the backend uploads a compact operation table once per compiled stack and uploads the current channel values for each frame. The shader source is shared by render types through <code>assets/pulselib/shaders/include/deformers.glsl</code>.</p>
+<p>GPU execution is automatic when every operation in a stack is built in and the stack has at most eight operations. A custom <code>PMeshDeformer</code> remains CPU-rendered; a future GPU extension point can add a shader descriptor for custom operations. CPU fallback uploads a dynamic mesh buffer for the current deformation. GUI's immediate rendering also remains on the CPU path.</p>
 <p>Curved deformers still need enough vertices. PulseLib creates and caches a static subdivided mesh for the requested <code>subdivisionLevel</code>; it does not rebuild that mesh each frame.</p>
 <p>Built-in operations are registered as <code>pulselib:bend</code>, <code>pulselib:hinge</code>, <code>pulselib:twist</code>, <code>pulselib:stretch</code>, <code>pulselib:squash</code>, <code>pulselib:taper</code>, and <code>pulselib:wave</code>.</p>
 <h2 id="build-a-stack">Build a stack<a class="headerlink" href="#build-a-stack" title="Permanent link">&para;</a></h2>
@@ -1445,7 +1473,8 @@
 <a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a>
 <a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a><span class="k">return</span><span class="w"> </span><span class="n">baseMeshRenderContext</span><span class="p">().</span><span class="na">withDeformation</span><span class="p">(</span><span class="n">deformation</span><span class="p">);</span>
 </code></pre></div>
-<p><code>PMeshDeformation</code> subdivides the source triangle mesh only when necessary. Level <code>0</code> uses the original mesh; the default is <code>2</code>; valid levels are <code>0</code> through <code>4</code>. Higher levels make curved bends smoother but increase vertex count exponentially per source triangle. The subdivided source is cached per baked mesh and level.</p>
+<p><code>PMeshDeformation</code> subdivides the source triangle mesh only when necessary. Level <code>0</code> uses the original mesh; the default is <code>2</code>; valid levels are <code>0</code> through <code>4</code>. Higher levels make curved bends smoother but increase vertex count exponentially per source triangle. The subdivided static source is cached per baked mesh and level, including on the GPU path.</p>
+<p>The shader deformer stream is reset after the translucent world stage. Do not call <code>PGpuDeformerBuffers.finishFrame()</code> yourself; the render-stage handler owns this lifecycle. More details are in <a href="render-backend.md">Render backend</a>.</p>
 <h2 id="player-animations">Player animations<a class="headerlink" href="#player-animations" title="Permanent link">&para;</a></h2>
 <p>Attach a stack directly to a player animation definition. It is active only while that definition contributes, samples controller time with <code>partialTick</code>, and fades every channel back to its default during an activation crossfade.</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="n">PPlayerAnimationDefinition</span><span class="p">.</span><span class="na">builder</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
