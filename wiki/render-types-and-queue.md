@@ -1,6 +1,6 @@
-Most mods can use PulseLib's renderers without touching the render queue directly. This page exists for the cases where you need to understand why PulseLib does not use vanilla `RenderType` values and where custom rendering should be inserted.
+Most mods can use PulseLib's renderers without touching the render queue directly. This page explains why PulseLib does not use vanilla `RenderType` values and how to add custom geometry to the current render backend. For its internal frame-plan, geometry-arena, and capability paths, see [Render backend](render-backend.md).
 
-PulseLib models are triangle meshes loaded from glTF/GLB or another model loader. Vanilla baked block models are mostly quad-based, so PulseLib provides its own triangle render types, shaders, vertex format, and instanced queue. That is why examples use [`PRenderTypes`](https://github.com/ArcAnc/PulseLib/blob/26.1/src/main/java/com/arcanc/pulselib/util/PRenderTypes.java) instead of `RenderType.entityCutout` or block render types.
+PulseLib models are triangle meshes loaded from glTF/GLB or another model loader. Vanilla baked block models are mostly quad-based, so PulseLib provides its own triangle render types, shaders, vertex format, and instanced queue. That is why examples use [`PRenderTypes`](https://github.com/ArcAnc/PulseLib/blob/1.21.1/src/main/java/com/arcanc/pulselib/util/PRenderTypes.java) instead of `RenderType.entityCutout` or block render types.
 
 ## Which render type should I choose?
 
@@ -9,9 +9,9 @@ Use the simplest type that matches the visual result:
 * `trianglesSolid` for opaque models.
 * `trianglesCutout` for hard alpha cutouts, like holes or masked pixels.
 * `trianglesTranslucent` for glass-like transparency.
-* `trianglesGui` for GUI item rendering.
+* `trianglesGui` for direct GUI drawing.
 
-For emissive meshes the built-in renderers select `trianglesEmissiveCutout` or `trianglesEmissiveTranslucent` automatically from the base type.
+`trianglesLit` no longer has its own shader. It remains as a compatibility render type backed by the GUI shader, so do not select it for new world rendering; use `trianglesSolid`, `trianglesCutout`, or `trianglesTranslucent` according to the material instead.
 
 In a renderer constructor this usually looks like:
 
@@ -19,13 +19,13 @@ In a renderer constructor this usually looks like:
 super(modelData, PRenderTypes.RenderTypeProvider::trianglesSolid);
 ```
 
-If a texture is marked as emissive, the default renderers automatically switch the mesh to the matching emissive variant. You normally do not need to select an emissive type yourself.
+If a texture is marked as emissive, the default renderers automatically switch the mesh to the matching emissive variant. You normally do not need to choose `trianglesSolidEmissive` yourself unless you are writing custom draw code.
 
-Emissive texture metadata is described on [Textures and Emissive](textures-and-emissive.md).
+Emissive texture metadata is described on [Textures and Emissive](Textures-and-Emissive).
 
 ## Why vanilla RenderType is not enough
 
-PulseLib's baked meshes use [`PRenderTypes.VertexFormatProvider.POSITION_TEX_NORMAL`](https://github.com/ArcAnc/PulseLib/blob/26.1/src/main/java/com/arcanc/pulselib/util/PRenderTypes.java). The 26.1 pipelines also expect the `DynamicTransforms`, `Lighting`, and `InstanceData` uniform buffers. A vanilla render type may compile and still render incorrectly because its shader and vertex format do not match the data PulseLib sends.
+PulseLib's baked meshes use [`PRenderTypes.VertexFormatProvider.POSITION_TEX_NORMAL`](https://github.com/ArcAnc/PulseLib/blob/1.21.1/src/main/java/com/arcanc/pulselib/util/PRenderTypes.java). The shaders also expect per-instance data: transform matrix, color, light, and overlay. A vanilla render type may compile and still render incorrectly because its shader and vertex format do not match the data PulseLib sends.
 
 If you create a custom render type, keep these requirements:
 
@@ -38,7 +38,9 @@ For most mods, it is safer to start from PulseLib's existing render types and on
 
 ## What the queue does
 
-[`PRenderQueue`](https://github.com/ArcAnc/PulseLib/blob/26.1/src/main/java/com/arcanc/pulselib/content/renderer/PRenderQueue.java) batches identical meshes together and renders many instances with one instanced draw call. That is important for animated block entities and entities: every object can have its own transform and animation pose, but the GPU can still draw repeated mesh buffers efficiently.
+[`PRenderQueue`](https://github.com/ArcAnc/PulseLib/blob/1.21.1/src/main/java/com/arcanc/pulselib/content/renderer/PRenderQueue.java) compiles submissions into a frame plan. Opaque submissions with the same render type and geometry are batched as instances; transparent submissions are kept in back-to-front order. The OpenGL driver uploads the instance stream once per flush and uses multi-draw indirect where the current context supports it. It falls back to direct instanced draws when that capability is unavailable.
+
+Static [`PGeometryData`](https://github.com/ArcAnc/PulseLib/blob/1.21.1/src/main/java/com/arcanc/pulselib/content/renderer/plan/PGeometryData.java) is placed in the backend's geometry arena and reused across frames. This is the normal path for baked meshes. Dynamic geometry is reserved for CPU-deformed meshes and is more expensive because its vertex data is uploaded again.
 
 The queue has a few stages:
 
@@ -47,44 +49,65 @@ The queue has a few stages:
 * `ENTITIES` for entity and hand-held item rendering.
 * `GUI` for GUI rendering.
 
-Normal renderers submit into these stages for you. [`PRenderStagesHandler`](https://github.com/ArcAnc/PulseLib/blob/26.1/src/main/java/com/arcanc/pulselib/content/renderer/PRenderStagesHandler.java) handles flushing them at the right time.
+Normal renderers submit into these stages for you. [`PRenderStagesHandler`](https://github.com/ArcAnc/PulseLib/blob/1.21.1/src/main/java/com/arcanc/pulselib/content/renderer/PRenderStagesHandler.java) handles flushing them at the right time.
 
 ## When to submit manually
 
-Manual queue submission is an advanced escape hatch. Use it when you already have a baked PulseLib mesh and want to draw it in the same pipeline.
+Manual queue submission is an advanced escape hatch. Use it for static triangle data that you have packed in PulseLib's compatible vertex format. Do not submit a vanilla `VertexBuffer`: the queue now accepts `PGeometryData` for static meshes, plus a `PInstanceHeader` for each instance.
 
 ```java
-PRenderQueue.submit(
-        PRenderQueue.RenderStage.ENTITIES,
+PGeometryData geometry = createCompatibleTriangleGeometry();
+PInstanceHeader instance = new PInstanceHeader(
+        poseStack.last().pose(),
+        0xFFFFFFFF,
+        packedLight,
+        packedOverlay);
+
+PRenderQueue.submitEntityMesh(
         renderType,
-        bakedMesh,
-        new PRenderQueue.InstanceData(matrix, 0xFFFFFFFF, packedLight, packedOverlay));
+        geometry,
+        instance);
 ```
 
-`PBakedMesh` owns the GPU vertex and index buffers. Do not pass a vanilla `VertexBuffer`: the queue needs PulseLib's mesh data and its triangle vertex format.
+`PGeometryData` copies its supplied vertex and index buffers, so it is safe to retain and submit it repeatedly. Its vertex stride and index type must match the data you supplied. For the standard PulseLib shaders, use `VertexFormat.Mode.TRIANGLES` and `PRenderTypes.VertexFormatProvider.POSITION_TEX_NORMAL` when packing the data. For most integrations, using a baked mesh's `geometry()` is preferable to hand-packing a buffer.
+
+Use the stage-specific methods whenever possible:
+
+* `submitBlockEntityMesh(...)` for opaque block-entity geometry.
+* `submitBlockEntityTranslucentMesh(...)` for block-entity geometry that must be sorted as transparent.
+* `submitEntityMesh(...)` for entities and held items.
+* `submitItem(...)` when the item display context decides the stage.
+
+The queue is flushed by `PRenderStagesHandler`. Do not call `flush(...)` from an ordinary renderer: flushing early breaks batching and can render at the wrong stage. A custom `RenderStage` is available only when you also own the matching flush point.
+
+If you only need to draw a vanilla item, text, a beam, or a simple effect, it is often better to use the `MultiBufferSource` passed to `preSubmit` or `postSubmit`. That keeps vanilla rendering in vanilla's pipeline and PulseLib mesh rendering in PulseLib's pipeline.
 
 ## Renderer hooks
 
 Every PulseLib renderer has the same three-stage flow:
 
-* `preSubmit(PoseStack, renderState, CameraRenderState, SubmitNodeCollector)` runs before the model is submitted.
-* `trueSubmit(...)` is the normal PulseLib model submission.
-* `postSubmit(...)` runs after the model is submitted.
+* `preSubmit` runs before the model is submitted.
+* `trueSubmit` is the normal PulseLib model submission.
+* `postSubmit` runs after the model is submitted.
 
 A typical customization is small:
 
 ```java
 @Override
 public void postSubmit(PoseStack poseStack,
-                       RobotRenderState renderState,
-                       CameraRenderState cameraRenderState,
-                       SubmitNodeCollector submitNodeCollector) {
-    // Submit additional PulseLib meshes or collector nodes here.
+                       RobotEntity entity,
+                       Function<ResourceLocation, RenderType> renderType,
+                       MultiBufferSource bufferSource,
+                       int packedLight,
+                       int packedOverlay,
+                       float partialTick,
+                       Object... additionalData) {
+    // Add vanilla buffer rendering here, or submit extra PulseLib-compatible meshes.
 }
 ```
 
 Classes used:
 
-* [`PRenderTypes`](https://github.com/ArcAnc/PulseLib/blob/26.1/src/main/java/com/arcanc/pulselib/util/PRenderTypes.java)
-* [`PRenderQueue`](https://github.com/ArcAnc/PulseLib/blob/26.1/src/main/java/com/arcanc/pulselib/content/renderer/PRenderQueue.java)
-* [`PRenderStagesHandler`](https://github.com/ArcAnc/PulseLib/blob/26.1/src/main/java/com/arcanc/pulselib/content/renderer/PRenderStagesHandler.java)
+* [`PRenderTypes`](https://github.com/ArcAnc/PulseLib/blob/1.21.1/src/main/java/com/arcanc/pulselib/util/PRenderTypes.java)
+* [`PRenderQueue`](https://github.com/ArcAnc/PulseLib/blob/1.21.1/src/main/java/com/arcanc/pulselib/content/renderer/PRenderQueue.java)
+* [`PRenderStagesHandler`](https://github.com/ArcAnc/PulseLib/blob/1.21.1/src/main/java/com/arcanc/pulselib/content/renderer/PRenderStagesHandler.java)
