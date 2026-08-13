@@ -187,6 +187,7 @@ public class PBakedBone
 				
 			}
 			
+			PDeformedMeshBuffers.MeshBuffers deformedMesh = PDeformedMeshBuffers.resolve(material.mesh(), meshContext.deformation());
 			try(RenderPass pass = RenderSystem.getDevice().createCommandEncoder().
 					createRenderPass(mesh.uuid() :: toString, colorAttachment, OptionalInt.empty(), depthTexture, OptionalDouble.empty()))
 			{
@@ -197,10 +198,10 @@ public class PBakedBone
 				pass.bindTexture("Sampler0", atlas.getTextureView(), atlas.getSampler());
 				pass.bindTexture("Sampler1", overlayTexture.getTextureView(), RenderSystem.getSamplerCache().getClampToEdge(FilterMode.LINEAR));
 				pass.bindTexture("Sampler2", lightTexture, RenderSystem.getSamplerCache().getClampToEdge(FilterMode.LINEAR));
-				pass.setVertexBuffer(0, PDeformedMeshBuffers.resolve(material.mesh(), meshContext.deformation()));
-				pass.setIndexBuffer(material.mesh().indices(), material.mesh().indexType());
+				pass.setVertexBuffer(0, deformedMesh.vertices());
+				pass.setIndexBuffer(deformedMesh.indices(), deformedMesh.indexType());
 				
-				pass.drawIndexed(0, 0, material.mesh().indicesCount(), 1);
+				pass.drawIndexed(0, 0, deformedMesh.indicesCount(), 1);
 			}
 		});
 		

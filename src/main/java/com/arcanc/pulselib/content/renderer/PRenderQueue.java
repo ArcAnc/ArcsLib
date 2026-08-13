@@ -129,6 +129,7 @@ public class PRenderQueue
 			
 			RenderType type = key.type();
 			PBakedMesh mesh = key.mesh();
+			PDeformedMeshBuffers.MeshBuffers deformedMesh = PDeformedMeshBuffers.resolve(mesh, key.deformation());
 			
 			GpuBufferSlice dynamicTransforms = RenderSystem.getDynamicUniforms().
 					writeTransform(
@@ -164,10 +165,10 @@ public class PRenderQueue
 					pass.bindTexture("Sampler0", atlas.getTextureView(), atlas.getSampler());
 					pass.bindTexture("Sampler1", overlayTexture.getTextureView(), RenderSystem.getSamplerCache().getClampToEdge(FilterMode.LINEAR));
 					pass.bindTexture("Sampler2", lightTexture, RenderSystem.getSamplerCache().getClampToEdge(FilterMode.LINEAR));
-					pass.setVertexBuffer(0, PDeformedMeshBuffers.resolve(mesh, key.deformation()));
-					pass.setIndexBuffer(mesh.indices(), mesh.indexType());
+					pass.setVertexBuffer(0, deformedMesh.vertices());
+					pass.setIndexBuffer(deformedMesh.indices(), deformedMesh.indexType());
 					
-					pass.drawIndexed(0, 0, mesh.indicesCount(), count);
+					pass.drawIndexed(0, 0, deformedMesh.indicesCount(), count);
 				}
 				
 				offset += count;
