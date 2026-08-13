@@ -370,12 +370,4 @@ public class PRenderTypes
 	{
 		return renderType.pipeline().getColorTargetState().blendFunction().isPresent();
 	}
-	
-	@ApiStatus.Internal
-	public static boolean isTranslucent(RenderType renderType)
-	{
-		return getTransparencyState(renderType).
-				map(transparency -> transparency != RenderStateShard.TransparencyStateShard.NO_TRANSPARENCY).
-				orElse(false);
-	}
 }

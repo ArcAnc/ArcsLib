@@ -14,11 +14,9 @@ import com.arcanc.pulselib.content.animatable.PItemAnimatable;
 import com.arcanc.pulselib.content.animatable.PLibAnimationTicker;
 import com.arcanc.pulselib.content.animatable.instance.InstanceAnimationManager;
 import com.arcanc.pulselib.content.animatable.singleton.SingletonAnimationManager;
-import com.arcanc.pulselib.content.model.baked.PDeformedMeshBuffers;
-import com.arcanc.pulselib.content.model.baked.PGpuDeformedMeshBuffers;
-import com.arcanc.pulselib.content.model.deformer.gpu.PGpuDeformerBuffers;
 import com.arcanc.pulselib.content.model.textures.atlas.RuntimeLoader;
 import com.arcanc.pulselib.content.player.animation.PPlayerAnimations;
+import com.arcanc.pulselib.content.registration.player.PPlayerAcrobaticDemo;
 import com.arcanc.pulselib.content.renderer.PRenderQueue;
 import com.arcanc.pulselib.content.renderer.PRenderStagesHandler;
 import com.arcanc.pulselib.util.PLibDatabase;
@@ -35,8 +33,8 @@ import net.neoforged.bus.api.EventPriority;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.ModLoader;
 import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
-import net.neoforged.neoforge.client.event.RegisterClientReloadListenersEvent;
-import net.neoforged.neoforge.client.event.RegisterSpriteSourceTypesEvent;
+import net.neoforged.neoforge.client.event.AddClientReloadListenersEvent;
+import net.neoforged.neoforge.client.event.RegisterSpriteSourcesEvent;
 import net.neoforged.neoforge.client.extensions.common.IClientItemExtensions;
 import net.neoforged.neoforge.client.extensions.common.RegisterClientExtensionsEvent;
 import net.neoforged.neoforge.common.NeoForge;
@@ -44,39 +42,33 @@ import net.neoforged.neoforge.event.level.LevelEvent;
 
 public class ClientEvents
 {
-	//private static final PAttachmentAnchor TEST_COW_BODY = PAttachmentAnchor.of(PLibDatabase.rl("cow_body"));
 	private static boolean pulseClientContentRegistered;
 	
 	public static void registerClientEvents(final IEventBus modEventBus)
 	{
 		//modEventBus.addListener(ClientEvents :: registerRenderers);
-		//modEventBus.addListener(ClientEvents :: registerTextures);
-		PAttachmentAnchorResolvers.init(modEventBus);
-		//registerTestCowTail();
+		//modEventBus.addListener(ClientEvents :: registerCustomTextures);
+		//modEventBus.addListener(ClientEvents :: registerSpecialModels);
 		
+		PAttachmentAnchorResolvers.init(modEventBus);
 		modEventBus.addListener(EventPriority.HIGHEST, ClientEvents :: registerSpriteSources);
 		modEventBus.addListener(ClientEvents :: registerReloadListeners);
 		modEventBus.addListener(ClientEvents :: registerPulseClientContent);
 		modEventBus.addListener(ClientEvents :: registerClientExtensions);
 		NeoForge.EVENT_BUS.addListener(ClientEvents :: playerDisconnected);
-		PLibArmorHandler.register(modEventBus);
 		PRenderTypes.register(modEventBus);
 		PLibAnimationTicker.register(modEventBus);
-//		PPlayerAcrobaticDemo.register(modEventBus);
 		PRenderStagesHandler.register(modEventBus);
 		PTextureCache.register(modEventBus);
+		PLibArmorHandler.register(modEventBus);
+		
+		//PPlayerAcrobaticDemo.register(modEventBus);
 	}
 	
-	/*private static void registerTestCowTail()
+	private static void registerReloadListeners(final AddClientReloadListenersEvent event)
 	{
-		PulseAttachmentAnchorResolvers.register(CowModel.class, TEST_COW_BODY,
-				(entity, model) -> entity.getType() == EntityType.COW ? ((CowModel<?>)model).body : null);
-		PulseLivingAttachments.registerGlobal(TestTailItem.createDefinition(
-				PLivingAttachmentSources.entityPredicate(entity -> entity.getType() == EntityType.COW),
-				TEST_COW_BODY,
-				new Vector3f(0, -0.4f, 0.8f),
-				new Vector3f(90, 0, 0)));
-	}*/
+		event.addListener(PLibDatabase.RELOAD_LISTENER_ID, PModelCache :: reload);
+	}
 	
 	private static void registerPulseClientContent(final FMLClientSetupEvent event)
 	{
@@ -90,32 +82,31 @@ public class ClientEvents
 		
 		PulseLibEvents.AttachmentRegistrationEvent registrationEvent = new PulseLibEvents.AttachmentRegistrationEvent();
 		ModLoader.postEvent(registrationEvent);
-
 		PulseLibEvents.PlayerAnimationRegistrationEvent playerAnimationRegistrationEvent = new PulseLibEvents.PlayerAnimationRegistrationEvent();
 		ModLoader.postEvent(playerAnimationRegistrationEvent);
 		
-		/*registrationEvent.registration().livingAttachment(Registration.ItemReg.TEST_HAT.get(),
+		/*registrationEvent.registration().registerLiving(PLibRegistration.ItemReg.TEST_HAT.get(),
 				new PLivingAttachmentDefinition(
-				TestArmor.MODEL_DATA,
+				TestArmorItem.MODEL_DATA,
 				PLivingAttachmentSources.equipmentSlot(EquipmentSlot.HEAD),
 				List.of(PHumanoidBindings.head("head")),
-				TestArmor :: resolveArmorRender,
+				TestArmorItem :: resolveArmorRender,
 				true));
 		
-		registrationEvent.registration().livingAttachment(Registration.ItemReg.TEST_CHESTPLATE.get(),
+		registrationEvent.registration().registerLiving(PLibRegistration.ItemReg.TEST_CHESTPLATE.get(),
 				new PLivingAttachmentDefinition(
-						TestArmor.MODEL_DATA,
+						TestArmorItem.MODEL_DATA,
 						PLivingAttachmentSources.equipmentSlot(EquipmentSlot.CHEST),
 						List.of(PHumanoidBindings.rightArm("right_arm")),
-						TestArmor :: resolveArmorRender,
+						TestArmorItem :: resolveArmorRender,
 						true));
 		
-		registrationEvent.registration().livingAttachment(Registration.ItemReg.TEST_LEGGINGS.get(),
+		registrationEvent.registration().registerLiving(PLibRegistration.ItemReg.TEST_LEGGINGS.get(),
 				new PLivingAttachmentDefinition(
-						TestArmor.MODEL_DATA,
+						TestArmorItem.MODEL_DATA,
 						PLivingAttachmentSources.equipmentSlot(EquipmentSlot.LEGS),
 						List.of(PHumanoidBindings.rightLeg("right_leg")),
-						TestArmor :: resolveArmorRender,
+						TestArmorItem :: resolveArmorRender,
 						true));*/
 		
 		registrationEvent.registration().apply();
@@ -129,10 +120,10 @@ public class ClientEvents
 		
 		BuiltInRegistries.ITEM.stream().
 				filter(item -> item instanceof PItemAnimatable<?> || PLivingAttachments.contains(item)).
-				forEach(item -> registerClientExtension(event, item));
+				forEach(item -> registerClientExtensionWithItem(event, item));
 	}
 	
-	private static void registerClientExtension(final RegisterClientExtensionsEvent event, final Item item)
+	private static void registerClientExtensionWithItem(final RegisterClientExtensionsEvent event, final Item item)
 	{
 		if (event.isItemRegistered(item))
 			return;
@@ -146,49 +137,45 @@ public class ClientEvents
 			event.registerItem(extension, item);
 	}
 	
-	private static void registerReloadListeners(final RegisterClientReloadListenersEvent event)
-	{
-		event.registerReloadListener(PModelCache :: reload);
-	}
-	
 	private static void playerDisconnected(final LevelEvent.Unload event)
 	{
 		if (!event.getLevel().isClientSide())
 			return;
-		PRenderQueue.cleanup();
-		PDeformedMeshBuffers.cleanup();
-		PGpuDeformedMeshBuffers.cleanup();
-		PGpuDeformerBuffers.cleanup();
-		InstanceAnimationManager.cleanUp();
+		PRenderQueue.cleanUp();
 		SingletonAnimationManager.cleanUp();
+		InstanceAnimationManager.cleanUp();
 		PPlayerAnimations.cleanUp();
 	}
 	
-	private static void registerSpriteSources(final RegisterSpriteSourceTypesEvent event)
+	private static void registerSpriteSources(final RegisterSpriteSourcesEvent event)
 	{
-		event.register(PLibDatabase.rl("runtime_loader"), RuntimeLoader.TYPE);
+		event.register(PLibDatabase.rl("runtime_loader"), RuntimeLoader.CODEC);
 	}
+	
+	/*private static void registerSpecialModels(final RegisterSpecialModelRendererEvent event)
+	{
+		event.register(PLibDatabase.rl("test_block"), TestBlockItemRenderer.Unbaked.MAP_CODEC);
+	}*/
 	
 	/*private static void registerRenderers(final EntityRenderersEvent.RegisterRenderers event)
 	{
+		event.registerBlockEntityRenderer(PLibRegistration.BETypeReg.TEST_BLOCK_ENTITY.get(), TestBlockEntityRenderer :: new);
 		event.registerEntityRenderer(PLibRegistration.EntityTypeReg.TEST_ENTITY.get(), TestEntityRender :: new);
 	}*/
-
-	/*private static void registerTextures(final PulseLibEvents.RegisterTextureEvent event)
+	
+	/*private static void registerCustomTextures(final PulseLibEvents.RegisterTextureEvent event)
 	{
 		event.addTextureLocation(TestEntityRender.SPHERE).
 				addTextureLocation(TestEntityRender.TUBE).
 				addTextureLocation(TestEntityRender.TORUS).
 				addTextureLocation(TestEntityRender.ZERO).
 				addTextureLocation(TestEntityRender.ARMOR);
-		
 		event.addTextureLocation(TestBlockEntityRenderer.CUBE).
 				addTextureLocation(TestBlockEntityRenderer.TORUS).
 				addTextureLocation(TestBlockEntityRenderer.TUBE).
 				addTextureLocation(TestBlockEntityRenderer.PYRAMID);
 		event.addTextureLocation(TestBlockItemRenderer.PYRAMID).
 				addTextureLocation(TestBlockItemRenderer.CIRCLE);
-		event.addTextureLocation(TestTailItem.TEXTURE);
-		event.addTextureLocation(TestArmor.TEXTURE);
+		event.addTextureLocation(TestArmorItem.TEXTURE);
 	}*/
 }

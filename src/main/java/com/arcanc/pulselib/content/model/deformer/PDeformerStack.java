@@ -22,17 +22,9 @@ public final class PDeformerStack
 
 	private final List<PPreparedDeformer> operations;
 
-	private final List<PDeformerInstance<?>> definitions;
-
 	PDeformerStack(List<PPreparedDeformer> operations)
 	{
-		this(operations, List.of());
-	}
-
-	private PDeformerStack(List<PPreparedDeformer> operations, List<PDeformerInstance<?>> definitions)
-	{
 		this.operations = List.copyOf(operations);
-		this.definitions = List.copyOf(definitions);
 	}
 
 	public static PDeformerStack compile(List<? extends PDeformerInstance<?>> definitions)
@@ -41,33 +33,20 @@ public final class PDeformerStack
 		PDeformerPrepareContext context = new PDeformerPrepareContext();
 		for (PDeformerInstance<?> definition : definitions)
 			definition.prepare(context);
-		PDeformerStack prepared = context.build();
-		return new PDeformerStack(prepared.operations, List.copyOf(definitions));
+		return context.build();
 	}
 
 	public static PDeformerStack compose(PDeformerStack... stacks)
 	{
 		List<PPreparedDeformer> operations = new ArrayList<>();
-		List<PDeformerInstance<?>> definitions = new ArrayList<>();
 		for (PDeformerStack stack : stacks)
-		{
 			operations.addAll(stack.operations);
-			definitions.addAll(stack.definitions);
-		}
-		return operations.isEmpty() ? EMPTY : new PDeformerStack(operations, definitions);
+		return operations.isEmpty() ? EMPTY : new PDeformerStack(operations);
 	}
 
 	public boolean isEmpty()
 	{
 		return this.operations.isEmpty();
-	}
-
-	/**
-	 * MUTATE THOSE LIST IS FORBIDDEN!!!
-	 */
-	public List<PDeformerInstance<?>> definitions()
-	{
-		return this.definitions;
 	}
 
 	public Vector3f deform(Vector3f localPosition, PDeformerValueSource values)

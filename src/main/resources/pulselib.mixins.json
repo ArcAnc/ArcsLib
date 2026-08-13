@@ -11,18 +11,20 @@
     "requireAnnotations": true
   },
   "client": [
-	"BlockEntityMixin",
+	"BlockEntityRenderStateAccessor",
 	"CameraMixin",
 	"CubeDefinitionMixin",
 	"EntityModelSetMixin",
 	"HumanoidArmorLayerMixin",
 	"ItemInHandRendererAccessor",
 	"ItemInHandRendererMixin",
-    "LivingEntityRendererMixin",
+	"ItemModelResolverAccessor",
+	"ItemStackRenderStateAccessor",
+	"LivingEntityRendererMixin",
 	"ModelPartCubesMixin",
-    "PlayerRendererMixin",
-    "RenderTypeAccessor$CompositeRenderTypeAccessor",
-    "RenderTypeAccessor$CompositeStateAccessor",
-    "VertexBufferAccessor"
+	"PlayerRootTransformMixin",
+	"PlayerRendererMixin",
+	"SpecialModelWrapperAccessor",
+	"SpecialModelWrapperRenderStateExtractor"
   ]
 }

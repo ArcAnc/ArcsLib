@@ -10,32 +10,38 @@
 package com.arcanc.pulselib.util;
 
 
-import com.arcanc.pulselib.content.renderer.legacy.GlGeometryDataFactory;
-import com.arcanc.pulselib.content.renderer.plan.PGeometryData;
 import com.arcanc.pulselib.content.model.PBone;
 import com.arcanc.pulselib.content.model.PMesh;
 import com.arcanc.pulselib.content.model.PModel;
-import com.arcanc.pulselib.content.model.baked.*;
-import com.arcanc.pulselib.content.model.deformer.gpu.PGpuDeformerBuffers;
-import com.arcanc.pulselib.content.model.textures.atlas.PLibMetadata;
-import com.arcanc.pulselib.content.renderer.PRenderQueue;
-import com.arcanc.pulselib.data.PModelLoader;
+import com.arcanc.pulselib.content.model.baked.AtlasBufferBuilder;
+import com.arcanc.pulselib.content.model.baked.PBakedBone;
+import com.arcanc.pulselib.content.model.baked.PDeformedMeshBuffers;
+import com.arcanc.pulselib.content.model.baked.PBakedMesh;
+import com.arcanc.pulselib.content.model.baked.PBakedModel;
+import com.arcanc.pulselib.content.model.textures.atlas.PLibSpriteMetadata;
 import com.arcanc.pulselib.data.gltf.PGltfModelLoader;
+import com.arcanc.pulselib.data.PModelLoader;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import com.mojang.blaze3d.vertex.*;
+import com.mojang.blaze3d.buffers.GpuBuffer;
+import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.BufferBuilder;
+import com.mojang.blaze3d.vertex.ByteBufferBuilder;
+import com.mojang.blaze3d.vertex.MeshData;
+import com.mojang.blaze3d.vertex.VertexFormat;
 import com.mojang.datafixers.util.Pair;
+import de.javagl.jgltf.model.GltfConstants;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.resources.PreparableReloadListener;
 import net.minecraft.server.packs.resources.ResourceManager;
-import net.minecraft.util.profiling.ProfilerFiller;
 import org.jetbrains.annotations.ApiStatus;
-import org.jetbrains.annotations.Nullable;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
+import org.jspecify.annotations.Nullable;
 
+import java.nio.ByteBuffer;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
@@ -46,18 +52,18 @@ import java.util.stream.Stream;
 
 public class PModelCache
 {
-	private static @Nullable Map<ResourceLocation, PBakedModel> MODELS;
-	private static final Map<ResourceLocation, PModelLoader> MODEL_LOADERS = Stream.of(PGltfModelLoader.INSTANCE).
+	private static @Nullable Map<Identifier, PBakedModel> MODELS;
+	private static final Map<Identifier, PModelLoader> MODEL_LOADERS = Stream.of(PGltfModelLoader.INSTANCE).
 			collect(Collectors.toMap(
-			PModelLoader :: id,
-			Function.identity(),
-			(oldV, newV) ->
-			{
-				throw new IllegalStateException("Duplicate model loader id: " + oldV.id());
-			},
-			Object2ObjectOpenHashMap :: new));
+					PModelLoader :: id,
+					Function.identity(),
+					(oldV, newV) ->
+					{
+						throw new IllegalStateException("Duplicate model loader id: " + oldV.id());
+					},
+					Object2ObjectOpenHashMap :: new));
 	
-	public static @Nullable Map<ResourceLocation, PBakedModel> getModels()
+	public static @Nullable Map<Identifier, PBakedModel> getModels()
 	{
 		return MODELS;
 	}
@@ -70,7 +76,7 @@ public class PModelCache
 		MODEL_LOADERS.put(modelLoader.id(), modelLoader);
 	}
 	
-	public static void unregisterModelLoader(ResourceLocation loaderId)
+	public static void unregisterModelLoader(Identifier loaderId)
 	{
 		MODEL_LOADERS.remove(loaderId);
 	}
@@ -80,22 +86,20 @@ public class PModelCache
 		return List.copyOf(MODEL_LOADERS.values());
 	}
 	
-	public static Optional<PModelLoader> getModelLoader(ResourceLocation loaderId)
+	public static Optional<PModelLoader> getModelLoader(Identifier loaderId)
 	{
 		return Optional.ofNullable(MODEL_LOADERS.get(loaderId));
 	}
 	
 	@ApiStatus.Internal
-	public static CompletableFuture<Void> reload(PreparableReloadListener.PreparationBarrier stage,
-	                                             ResourceManager resourceManager,
-	                                             ProfilerFiller preparationsProfiler,
-	                                             ProfilerFiller reloadProfiler,
+	public static CompletableFuture<Void> reload(PreparableReloadListener.SharedState sharedState,
 	                                             Executor backgroundExecutor,
+	                                             PreparableReloadListener.PreparationBarrier preparationBarrier,
 	                                             Executor gameExecutor)
 	{
-		Map<ResourceLocation, PModel> models = new Object2ObjectOpenHashMap<>();
-		return CompletableFuture.allOf(loadModels(backgroundExecutor, resourceManager, models :: put)).
-				thenCompose(stage :: wait).
+		Map<Identifier, PModel> models = new Object2ObjectOpenHashMap<>();
+		return CompletableFuture.allOf(loadModels(backgroundExecutor, sharedState.resourceManager(), models :: put)).
+				thenCompose(preparationBarrier :: wait).
 				thenAcceptAsync(empty ->
 				{
 					if (PModelCache.MODELS != null)
@@ -107,15 +111,12 @@ public class PModelCache
 	
 	private static void clearCaches()
 	{
-		PRenderQueue.cleanup();
-		PMeshTextureVariants.clear();
 		if (MODELS != null)
 		{
-			MODELS.forEach(($, model) ->
-					model.bones().forEach(PModelCache :: clearBoneCache));
+			MODELS.forEach((_, model) ->
+				model.bones().forEach(PModelCache :: clearBoneCache));
 			MODELS = null;
 		}
-		PGpuDeformerBuffers.clearDefinitions();
 	}
 	
 	private static void clearBoneCache(PBakedBone bone)
@@ -123,18 +124,19 @@ public class PModelCache
 		bone.meshes().forEach(mesh ->
 		{
 			PDeformedMeshBuffers.close(mesh);
-			PGpuDeformedMeshBuffers.close(mesh);
+			mesh.vbo().close();
+			mesh.indices().close();
 		});
 		bone.children().forEach(PModelCache :: clearBoneCache);
 	}
 	
-	private static Map<ResourceLocation, PBakedModel> bakeModels(Map<ResourceLocation, PModel> rawModels)
+	private static Map<Identifier, PBakedModel> bakeModels(Map<Identifier, PModel> rawModels)
 	{
-		Map<ResourceLocation, PBakedModel> bakedModelMap = new Object2ObjectOpenHashMap<>();
-		for (Map.Entry<ResourceLocation, PModel> rawModel : rawModels.entrySet())
+		Map<Identifier, PBakedModel> bakedModelMap = new Object2ObjectOpenHashMap<>();
+		for (Map.Entry<Identifier, PModel> rawModel : rawModels.entrySet())
 		{
 			PModel model = rawModel.getValue();
-			ResourceLocation modelPath = rawModel.getKey();
+			Identifier modelPath = rawModel.getKey();
 			Map<UUID, PBakedBone.PBakedBoneBuilder> bakedBoneBuilder = new HashMap<>();
 			for (PBone bone : model.bones.values())
 			{
@@ -156,17 +158,16 @@ public class PModelCache
 				for (UUID meshUUID : bone2MeshesEntry.getValue().getSecond())
 				{
 					PMesh mesh = model.meshes.get(meshUUID);
-					ResourceLocation loc = textureLocation(modelPath, mesh.texture());
+					Identifier loc = textureLocation(modelPath, mesh.texture());
 					
 					TextureAtlasSprite sprite = PTextureCache.getTextureAtlas().getSprite(loc);
-					boolean isEmissive = sprite.contents().
-							metadata().
-							getSection(PLibMetadata.TYPE).
-							map(PLibMetadata :: isEmissive).
+					
+					boolean emissive = sprite.contents().getAdditionalMetadata(PLibSpriteMetadata.TYPE).
+							map(PLibSpriteMetadata :: emissive).
 							orElse(false);
 					
-					
-					ByteBufferBuilder byteBufferBuilder = new ByteBufferBuilder(mesh.vertexCount() * PRenderTypes.VertexFormatProvider.POSITION_TEX_NORMAL.getVertexSize());
+					ByteBufferBuilder byteBufferBuilder = ByteBufferBuilder.
+							exactlySized(mesh.vertexCount() * PRenderTypes.VertexFormatProvider.POSITION_TEX_NORMAL.getVertexSize());
 					BufferBuilder bufferBuilder;
 					
 					if (sprite.contents().name().getPath().equals("missingno"))
@@ -200,21 +201,36 @@ public class PModelCache
 										ny,
 										nz);
 					}
+					ByteBuffer indexBuffer = mesh.indices();
+					
 					try (MeshData meshData = bufferBuilder.buildOrThrow())
 					{
-						PGeometryData geometry = GlGeometryDataFactory.capture(meshData, mesh,
-								PRenderTypes.VertexFormatProvider.POSITION_TEX_NORMAL.getVertexSize());
+						GpuBuffer buffer = RenderSystem.getDevice().createBuffer(
+								meshUUID :: toString,
+								GpuBuffer.USAGE_VERTEX,
+								meshData.vertexBuffer()
+						);
+						
+						GpuBuffer gpuIndexBuffer = RenderSystem.getDevice().createBuffer(
+								() -> meshUUID.toString() + "_indexes",
+								GpuBuffer.USAGE_INDEX,
+								indexBuffer);
+						VertexFormat.IndexType type = mesh.glIndexType() == GltfConstants.GL_UNSIGNED_SHORT ? VertexFormat.IndexType.SHORT : VertexFormat.IndexType.INT;
 						builder.meshes.add(new PBakedMesh(
 								meshUUID,
-								geometry,
+								buffer,
+								mesh.vertexCount(),
+								gpuIndexBuffer,
+								mesh.indicesCount(),
+								type,
 								mesh.texture(),
-								isEmissive,
+								emissive,
 								mesh,
 								loc));
 					}
 				}
 			}
-			
+
 			for (PBone bone : model.bones.values())
 			{
 				PBone parentBone = bone.parent();
@@ -230,7 +246,7 @@ public class PModelCache
 				child.parent = parent;
 				parent.children.add(child);
 			}
-			
+
 			List<PBakedBone> rootBones = new ArrayList<>();
 			
 			for (PBakedBone.PBakedBoneBuilder builder : bakedBoneBuilder.values())
@@ -240,7 +256,7 @@ public class PModelCache
 			bakedModelMap.put(
 					rawModel.getKey(),
 					new PBakedModel(ImmutableList.copyOf(rootBones),
-							ImmutableMap.copyOf(model.animations))
+									  ImmutableMap.copyOf(model.animations))
 			);
 		}
 		
@@ -275,7 +291,7 @@ public class PModelCache
 		);
 	}
 	
-	public static ResourceLocation resolveTextureLocation(ResourceLocation modelPath, String textureName)
+	public static Identifier resolveTextureLocation(Identifier modelPath, String textureName)
 	{
 		for (PModelLoader modelLoader : PModelCache.getModelLoaders())
 			if (modelLoader.supports(modelPath))
@@ -284,14 +300,14 @@ public class PModelCache
 		return modelPath.withPath(textureName);
 	}
 	
-	private static ResourceLocation textureLocation(ResourceLocation modelPath, String textureName)
+	private static Identifier textureLocation(Identifier modelPath, String textureName)
 	{
 		return resolveTextureLocation(modelPath, textureName);
 	}
 	
 	private static CompletableFuture<?> loadModels(Executor backgroundExecutor,
 	                                               ResourceManager resourceManager,
-	                                               BiConsumer<ResourceLocation, PModel> elementConsumer)
+	                                               BiConsumer<Identifier, PModel> elementConsumer)
 	{
 		CompletableFuture<?> chain = CompletableFuture.completedFuture(null);
 		
