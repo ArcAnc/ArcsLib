@@ -2,7 +2,9 @@
 
 Mesh deformers modify vertices after a mesh has been baked. A stack may contain several ordered operations, such as bend followed by twist. PulseLib derives transformed normals from the deformation Jacobian, so lighting follows the deformed surface.
 
-Built-in operations are registered as `pulselib:bend`, `pulselib:twist`, `pulselib:stretch`, `pulselib:squash`, `pulselib:taper`, and `pulselib:wave`.
+The built-in stacks are evaluated by the GPU in both the queued renderer and the immediate (`instant`) renderer, including GUI item rendering. PulseLib uploads operation definitions and per-instance channel values to shared `RGBA32_FLOAT` texel buffers; the vertex shader applies the deformation to both position and normal. A stack with at most eight directly compiled built-in operations uses this path. Unsupported or custom stacks automatically fall back to a CPU-deformed vertex buffer, so they remain functional but do not receive the GPU batching benefit.
+
+Built-in operations are registered as `pulselib:bend`, `pulselib:hinge`, `pulselib:twist`, `pulselib:stretch`, `pulselib:squash`, `pulselib:taper`, and `pulselib:wave`.
 
 ## Build a stack
 
@@ -28,6 +30,7 @@ private static final PDeformerStack KNEE_BEND = PDeformerStack.compile(List.of(
 | Id | Definition | Effect |
 | --- | --- | --- |
 | `pulselib:bend` | `PBendDefinition` | Bends an interval around an arbitrary perpendicular axis. `angle` is the total bend angle. |
+| `pulselib:hinge` | `PHingeDefinition` | Rotates the positive side of a plane around `hingeAxis`. |
 | `pulselib:twist` | `PTwistDefinition` | Rotates vertices progressively around `lengthAxis`; `angle` is the total twist. |
 | `pulselib:stretch` | `PStretchDefinition` | Scales displacement along `axis`; `scale = 1` is neutral. |
 | `pulselib:squash` | `PSquashDefinition` | Scales along `axis` and compensates perpendicular axes to preserve local volume. `scale = 1` is neutral. |
@@ -38,7 +41,7 @@ For bend and wave, the secondary axis must not be parallel to `lengthAxis`. All 
 
 ## Custom model meshes
 
-Use `PMeshDeformation` with a `PMeshRenderContext` to deform a baked triangle mesh. The `cacheKey` must be a stable object for one independently rendered deformation; PulseLib reuses its dynamic vertex buffer and uploads current vertices each frame.
+Use `PMeshDeformation` with a `PMeshRenderContext` to deform a baked triangle mesh. The `cacheKey` must be a stable non-null object for one independently rendered deformation. It identifies the cached CPU vertex buffer only when PulseLib must use its fallback; GPU-supported stacks keep the base vertex buffer and send their values as instance data instead.
 
 ```java
 private final Object bendBufferKey = new Object();
@@ -54,7 +57,9 @@ PMeshDeformation deformation = new PMeshDeformation(
 return baseMeshRenderContext().withDeformation(deformation);
 ```
 
-`PMeshDeformation` subdivides the source triangle mesh only when necessary. Level `0` uses the original mesh; the default is `2`; valid levels are `0` through `4`. Higher levels make curved bends smoother but increase vertex count exponentially per source triangle. The subdivided source is cached per baked mesh and level.
+`PMeshDeformation` subdivides the source triangle mesh only when necessary. Level `0` uses the original mesh; the default is `2`; valid levels are `0` through `4`. Higher levels make curved bends smoother but increase vertex count exponentially per source triangle. The subdivided source is cached per baked mesh and level, then used by either the GPU or CPU fallback.
+
+`PDeformerStack.compose(...)` and custom `PMeshDeformer` implementations are valid APIs, but they currently use the CPU fallback because they do not carry a directly translatable built-in definition list. Prefer one directly compiled stack of built-in definitions when deformation performance matters.
 
 ## Player animations
 

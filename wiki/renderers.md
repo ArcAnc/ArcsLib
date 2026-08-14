@@ -65,7 +65,7 @@ public class WandRenderer extends PItemRenderer<WandItem, WandRenderState> {
 public class WandRenderState extends PItemRenderState.Impl<WandItem> {}
 ```
 
-In GUI context, `PItemRenderer` submits to the `GUI` queue and immediately flushes that stage through the collector. It preserves the render type supplied to its constructor; use a render type compatible with the contexts in which the item is displayed.
+In GUI context, `PItemRenderer` schedules an immediate draw through the collector. It converts the selected base type to an instant cutout or translucent variant, including the matching emissive variant. The instant shader also supports GPU deformers.
 
 ## Entity renderer
 
@@ -97,8 +97,9 @@ PulseLib models are triangle meshes. Use [`PRenderTypes.RenderTypeProvider`](htt
 PRenderTypes.RenderTypeProvider::trianglesSolid
 PRenderTypes.RenderTypeProvider::trianglesCutout
 PRenderTypes.RenderTypeProvider::trianglesTranslucent
-PRenderTypes.RenderTypeProvider::trianglesGui
 ```
+
+`trianglesGui` is available only as a compatibility alias for instant translucent rendering; new renderers should use one of the three base types above.
 
 Do not pass vanilla entity/block `RenderType` values unless they use a compatible triangle vertex format and shader setup.
 

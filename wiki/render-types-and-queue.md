@@ -9,8 +9,8 @@ Use the simplest type that matches the visual result:
 * `trianglesSolid` for opaque models.
 * `trianglesCutout` for hard alpha cutouts, like holes or masked pixels.
 * `trianglesTranslucent` for glass-like transparency.
-* `trianglesGui` for GUI item rendering.
-* `trianglesInstantCutout` or `trianglesInstantTranslucent` only when rendering an individual mesh immediately; normal renderers should use the queued variants above.
+* `trianglesInstantCutout` or `trianglesInstantTranslucent` when rendering an individual mesh immediately.
+* `trianglesGui` is retained as a compatibility alias for `trianglesInstantTranslucent`; it is not a separate GUI shader or pipeline.
 
 For emissive meshes the built-in renderers select `trianglesEmissiveCutout` or `trianglesEmissiveTranslucent` automatically from the base type.
 
@@ -26,7 +26,7 @@ Emissive texture metadata is described on [Textures and Emissive](textures-and-e
 
 ## Why vanilla RenderType is not enough
 
-PulseLib's baked meshes use [`PRenderTypes.VertexFormatProvider.POSITION_TEX_NORMAL`](https://github.com/ArcAnc/PulseLib/blob/master/src/main/java/com/arcanc/pulselib/util/PRenderTypes.java). The 26.2 GPU pipelines use Minecraft's `PrimitiveTopology.TRIANGLES` and expect the `DynamicTransforms`, `Lighting`, and `InstanceData` uniform buffers. A vanilla render type may compile and still render incorrectly because its shader and vertex format do not match the data PulseLib sends.
+PulseLib's baked meshes use [`PRenderTypes.VertexFormatProvider.POSITION_TEX_NORMAL`](https://github.com/ArcAnc/PulseLib/blob/master/src/main/java/com/arcanc/pulselib/util/PRenderTypes.java). The 26.2 GPU pipelines use Minecraft's `PrimitiveTopology.TRIANGLES`. Queued variants expect `DynamicTransforms`, `Lighting`, and `InstanceData`; instant variants use `ColorOverlay`. Both paths bind the GPU deformer texel buffers. A vanilla render type may compile and still render incorrectly because its shader and vertex format do not match the data PulseLib sends.
 
 If you create a custom render type, keep these requirements:
 
@@ -39,7 +39,7 @@ For most mods, it is safer to start from PulseLib's existing render types and on
 
 ## What the queue does
 
-[`PRenderQueue`](https://github.com/ArcAnc/PulseLib/blob/master/src/main/java/com/arcanc/pulselib/content/renderer/PRenderQueue.java) batches identical meshes together and renders many instances with one instanced draw call. That is important for animated block entities and entities: every object can have its own transform and animation pose, but the GPU can still draw repeated mesh buffers efficiently.
+[`PRenderQueue`](https://github.com/ArcAnc/PulseLib/blob/master/src/main/java/com/arcanc/pulselib/content/renderer/PRenderQueue.java) batches identical opaque meshes together and renders many instances with one instanced draw call (up to 512 instances per draw). Transparent submissions are kept back-to-front. Every object can have its own transform, animation pose, and GPU deformer values while repeated mesh buffers remain efficiently batched.
 
 The queue has a few stages:
 
@@ -59,10 +59,13 @@ PRenderQueue.submit(
         PRenderQueue.RenderStage.ENTITIES,
         renderType,
         bakedMesh,
+        null, // or PMeshDeformation
         new PRenderQueue.InstanceData(matrix, 0xFFFFFFFF, packedLight, packedOverlay));
 ```
 
 `PBakedMesh` owns the GPU vertex and index buffers. Do not pass a vanilla `VertexBuffer`: the queue needs PulseLib's mesh data and its triangle vertex format.
+
+For a `PMeshDeformation`, the queue first selects a cached subdivision level. GPU-supported built-in stacks are represented by offsets in the per-instance data; unsupported stacks use a CPU-deformed vertex buffer for that submission.
 
 ## Renderer hooks
 
