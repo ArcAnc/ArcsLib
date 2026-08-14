@@ -74,6 +74,7 @@ public class PRenderTypes
 		public static final RenderPipeline TRIANGLES_SOLID = registerPipeline(RenderPipeline.builder(TRIANGLES_SNIPPET).
 				withLocation(PLibDatabase.rl("pipeline/triangles_solid_no_cull")).
 				withBindGroupLayout(BindGroupLayouts.SAMPLER1).
+				withShaderDefine("OPAQUE").
 				withCull(false).
 				build());
 		
