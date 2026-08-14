@@ -32,6 +32,7 @@ import org.joml.Vector3f;
 import org.jspecify.annotations.Nullable;
 
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
 
@@ -39,7 +40,7 @@ public abstract class PEntityRenderLayer<T extends Entity & PAnimatable<T>, RS e
 {
 	private final PModelData modelData;
 	private final Function<Identifier, RenderType> renderType;
-	private final Map<String, String> boneBindings = new java.util.HashMap<>();
+	private final Map<String, String> boneBindings = new HashMap<>();
 	private final Vector3f offset = new Vector3f();
 	private final Quaternionf rotation = new Quaternionf();
 	private final Vector3f scale = new Vector3f(1, 1, 1);

@@ -23,6 +23,7 @@ import com.arcanc.pulselib.data.gecko.MolangParser;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.renderer.rendertype.RenderType;
 import net.minecraft.resources.Identifier;
+import org.joml.Vector3f;
 
 import java.util.*;
 import java.util.function.Function;
@@ -71,7 +72,7 @@ public final class PBakedModel
 		for (int index = 0; index < this.indexedBones.length; index++)
 		{
 			PBakedBone bone = this.indexedBones[index];
-			pose.set(index, bone.basePosition(), bone.baseRotation(), new org.joml.Vector3f(1f));
+			pose.set(index, bone.basePosition(), bone.baseRotation(), new Vector3f(1f));
 		}
 		return pose;
 	}

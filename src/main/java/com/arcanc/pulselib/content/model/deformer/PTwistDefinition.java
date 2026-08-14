@@ -10,6 +10,7 @@
 package com.arcanc.pulselib.content.model.deformer;
 
 import com.arcanc.pulselib.util.helpers.PLibCodecs;
+import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import org.joml.Vector3f;
@@ -23,8 +24,8 @@ public record PTwistDefinition(Vector3f origin,
 	public static final MapCodec<PTwistDefinition> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
 			PLibCodecs.VECTOR3F_CODEC.fieldOf("origin").forGetter(PTwistDefinition::origin),
 			PLibCodecs.VECTOR3F_CODEC.fieldOf("length_axis").forGetter(PTwistDefinition::lengthAxis),
-			com.mojang.serialization.Codec.FLOAT.fieldOf("positive_extent").forGetter(PTwistDefinition::positiveExtent),
-			com.mojang.serialization.Codec.FLOAT.fieldOf("negative_extent").forGetter(PTwistDefinition::negativeExtent),
+			Codec.FLOAT.fieldOf("positive_extent").forGetter(PTwistDefinition::positiveExtent),
+			Codec.FLOAT.fieldOf("negative_extent").forGetter(PTwistDefinition::negativeExtent),
 			PChannelReference.FLOAT_CODEC.forGetter(PTwistDefinition::angle)
 	).apply(instance, PTwistDefinition::new));
 

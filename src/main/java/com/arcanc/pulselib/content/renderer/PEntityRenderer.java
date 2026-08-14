@@ -59,6 +59,7 @@ import org.jspecify.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -325,7 +326,7 @@ public abstract class PEntityRenderer<T extends Entity & PAnimatable<T>, RS exte
 	                                                                                   Collection<PAnimationController<T>> controllers,
 	                                                                                   float partialTick)
 	{
-		Map<PAnimationController<T>, MolangParser.Context> contexts = new java.util.IdentityHashMap<>();
+		Map<PAnimationController<T>, MolangParser.Context> contexts = new IdentityHashMap<>();
 		for (PAnimationController<T> controller : controllers)
 		{
 			MolangParser.Context context = new MolangParser.Context().

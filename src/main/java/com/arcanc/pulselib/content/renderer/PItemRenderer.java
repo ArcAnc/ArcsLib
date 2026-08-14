@@ -42,6 +42,7 @@ import org.joml.Vector3fc;
 import org.jspecify.annotations.Nullable;
 
 import java.util.Collection;
+import java.util.IdentityHashMap;
 import java.util.Map;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -184,7 +185,7 @@ public abstract class PItemRenderer<T extends Item & PAnimatable<T>, RS extends 
 	                                                                                   Collection<PAnimationController<T>> controllers,
 	                                                                                   float partialTick)
 	{
-		Map<PAnimationController<T>, MolangParser.Context> contexts = new java.util.IdentityHashMap<>();
+		Map<PAnimationController<T>, MolangParser.Context> contexts = new IdentityHashMap<>();
 		for (PAnimationController<T> controller : controllers)
 		{
 			MolangParser.Context context = new MolangParser.Context().

@@ -17,6 +17,7 @@ import com.arcanc.pulselib.util.helpers.PLibCodecs;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import net.minecraft.core.Holder;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleType;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -40,7 +41,7 @@ public final class PAnimationEventTypes
 				PAnimationEventContext.PAnimationEventDispatcherBridge.Position position = context.position(data.locator());
 				if (position == null)
 					return;
-				SoundEvent sound = BuiltInRegistries.SOUND_EVENT.get(data.sound()).map(net.minecraft.core.Holder.Reference::value).orElse(null);
+				SoundEvent sound = BuiltInRegistries.SOUND_EVENT.get(data.sound()).map(Holder.Reference::value).orElse(null);
 				if (sound == null)
 				{
 					PLibDatabase.LOGGER.warn("Missing animation sound event: {}", data.sound());
@@ -61,7 +62,7 @@ public final class PAnimationEventTypes
 				PAnimationEventContext.PAnimationEventDispatcherBridge.Position position = context.position(data.locator());
 				if (position == null)
 					return;
-				ParticleType<?> particleType = BuiltInRegistries.PARTICLE_TYPE.get(data.particle()).map(net.minecraft.core.Holder.Reference::value).orElse(null);
+				ParticleType<?> particleType = BuiltInRegistries.PARTICLE_TYPE.get(data.particle()).map(Holder.Reference::value).orElse(null);
 				if (!(particleType instanceof ParticleOptions options))
 				{
 					PLibDatabase.LOGGER.warn("Missing or unsupported simple animation particle: {}", data.particle());

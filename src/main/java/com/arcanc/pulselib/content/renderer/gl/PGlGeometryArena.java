@@ -12,6 +12,7 @@ package com.arcanc.pulselib.content.renderer.gl;
 import com.arcanc.pulselib.content.mixin.GlBufferAccessor;
 import com.arcanc.pulselib.content.model.baked.PBakedMesh;
 import com.arcanc.pulselib.util.PRenderTypes;
+import com.mojang.blaze3d.vertex.VertexFormat;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import org.lwjgl.opengl.*;
 
@@ -145,7 +146,7 @@ public final class PGlGeometryArena
 			this.vertices += vertexBytes;
 			this.indices = indexOffset + indexBytes;
 			return new Slice(this, indexOffset, baseVertex, mesh.indicesCount(),
-					mesh.indexType() == com.mojang.blaze3d.vertex.VertexFormat.IndexType.SHORT ? GL11.GL_UNSIGNED_SHORT : GL11.GL_UNSIGNED_INT);
+					mesh.indexType() == VertexFormat.IndexType.SHORT ? GL11.GL_UNSIGNED_SHORT : GL11.GL_UNSIGNED_INT);
 		}
 
 		private static int align(int value, int alignment)
