@@ -48,6 +48,24 @@ PTextureCache.ATLAS_LOCATION // pulselib:textures/atlas.png
 
 Renderers normally pass `PTextureCache.ATLAS_LOCATION` to `PRenderTypes`, so you rarely need to access the atlas manually.
 
+## Per-mesh texture and emissive overrides
+
+`PMeshRenderContext` can override a mesh's texture or emissive state at render time. The replacement texture must still be registered in the runtime atlas. The first use of a `(base mesh, replacement texture)` pair lazily bakes and caches a matching `PBakedMesh`; later renders reuse it.
+
+```java
+@Override
+public PMeshRenderContext resolve(PBakedBone bone, PBakedMesh mesh,
+                                  PMeshRenderContext inherited) {
+    if (!mesh.textureName().equals("eyes"))
+        return inherited;
+    return inherited
+            .withTexture(Identifier.fromNamespaceAndPath("examplemod", "entity/robot/eyes_active"))
+            .withEmissive(true);
+}
+```
+
+Pass `null` to `withTexture` or `withEmissive` to return to the mesh's baked texture or metadata-derived emissive value. An explicit `false` disables emissive even when the selected sprite metadata marks it emissive.
+
 ## Emissive textures
 
 Emissive textures are useful for eyes, screens, lamps, energy parts, and other pieces that should ignore normal light. PulseLib reads this flag from texture metadata through [`PLibSpriteMetadata`](https://github.com/ArcAnc/PulseLib/blob/26.1/src/main/java/com/arcanc/pulselib/content/model/textures/atlas/PLibSpriteMetadata.java).
@@ -67,7 +85,7 @@ assets/examplemod/textures/entity/robot/eyes.png.mcmeta
 }
 ```
 
-When `PModelCache` bakes the model, each mesh stores whether its sprite is emissive. The default renderers automatically switch to an emissive variant through:
+When `PModelCache` bakes the model, each mesh stores whether its sprite is emissive. The default renderers also honour a `PMeshRenderContext.withEmissive(...)` override and automatically switch to an emissive variant through:
 
 ```java
 PRenderTypes.RenderTypeProvider.emissiveVariant(baseType, PTextureCache.ATLAS_LOCATION);

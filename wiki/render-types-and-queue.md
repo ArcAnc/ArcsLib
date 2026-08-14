@@ -9,7 +9,10 @@ Use the simplest type that matches the visual result:
 * `trianglesSolid` for opaque models.
 * `trianglesCutout` for hard alpha cutouts, like holes or masked pixels.
 * `trianglesTranslucent` for glass-like transparency.
-* `trianglesGui` for GUI item rendering.
+* `trianglesGui` for GUI item rendering. It is a compatibility alias for the
+  translucent `instant` pipeline; there is no separate GUI shader in 26.1.
+
+`trianglesSolid` forces an opaque output alpha. Cutout and translucent variants discard fragments below their alpha threshold; translucent variants additionally use blending and are sorted by the queue.
 
 For emissive meshes the built-in renderers select `trianglesEmissiveCutout` or `trianglesEmissiveTranslucent` automatically from the base type.
 
@@ -25,7 +28,9 @@ Emissive texture metadata is described on [Textures and Emissive](textures-and-e
 
 ## Why vanilla RenderType is not enough
 
-PulseLib's baked meshes use [`PRenderTypes.VertexFormatProvider.POSITION_TEX_NORMAL`](https://github.com/ArcAnc/PulseLib/blob/26.1/src/main/java/com/arcanc/pulselib/util/PRenderTypes.java). The 26.1 pipelines also expect the `DynamicTransforms`, `Lighting`, and `InstanceData` uniform buffers. A vanilla render type may compile and still render incorrectly because its shader and vertex format do not match the data PulseLib sends.
+PulseLib's baked meshes use [`PRenderTypes.VertexFormatProvider.POSITION_TEX_NORMAL`](https://github.com/ArcAnc/PulseLib/blob/26.1/src/main/java/com/arcanc/pulselib/util/PRenderTypes.java). The queued triangle pipeline receives `DynamicTransforms` and `Lighting` through the normal 26.1 uniforms, but per-instance transform, colour, light, overlay, and deformer offsets arrive as instanced vertex attributes. The instant pipeline instead receives one mesh's colour, light, overlay, and deformer offsets through `ColorOverlay`.
+
+A vanilla render type may compile and still render incorrectly because its shader and vertex format do not match this contract.
 
 If you create a custom render type, keep these requirements:
 
@@ -58,10 +63,13 @@ PRenderQueue.submit(
         PRenderQueue.RenderStage.ENTITIES,
         renderType,
         bakedMesh,
+        null, // no mesh deformation
         new PRenderQueue.InstanceData(matrix, 0xFFFFFFFF, packedLight, packedOverlay));
 ```
 
 `PBakedMesh` owns the GPU vertex and index buffers. Do not pass a vanilla `VertexBuffer`: the queue needs PulseLib's mesh data and its triangle vertex format.
+
+For opaque submissions, identical `(RenderType, PBakedMesh)` pairs are grouped. Transparent submissions are ordered back-to-front and only adjacent equal pairs are joined, preserving blending order. Static mesh data is packed into OpenGL geometry pages; the queue streams per-instance records and indirect commands through fence-protected ring buffers, using multi-draw indirect where the current OpenGL driver supports it. These are implementation details: callers only submit meshes and must not retain or manipulate the queue's buffers.
 
 ## Renderer hooks
 

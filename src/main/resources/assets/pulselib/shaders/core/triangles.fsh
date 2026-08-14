@@ -25,6 +25,11 @@ out vec4 fragColor;
 void main()
 {
     vec4 color = texture(Sampler0, texCoord0);
+    #ifdef ALPHA_CUTOUT
+    if (color.a < ALPHA_CUTOUT) {
+        discard;
+    }
+    #endif
 
     vec4 faceVertexColor = gl_FrontFacing ? vertexColorFront : vertexColorBack;
 
@@ -43,6 +48,10 @@ void main()
 
     #ifndef EMISSIVE
     color *= lightMapColor;
+    #endif
+
+    #ifdef FORCE_OPAQUE
+    color.a = 1.0;
     #endif
 
     fragColor = color;

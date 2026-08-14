@@ -15,6 +15,7 @@
 	"CameraMixin",
 	"CubeDefinitionMixin",
 	"EntityModelSetMixin",
+	"GlBufferAccessor",
 	"HumanoidArmorLayerMixin",
 	"ItemInHandRendererAccessor",
 	"ItemInHandRendererMixin",

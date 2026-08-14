@@ -38,8 +38,9 @@ public final class PMeshTextureVariants
 
 	public static PBakedMesh resolve(PBakedMesh mesh, @Nullable Identifier texture)
 	{
-		Identifier resolvedTexture = texture == null ? mesh.textureLocation() : texture;
-		return VARIANTS.computeIfAbsent(mesh, ignored -> new HashMap<>()).computeIfAbsent(resolvedTexture,
+		if (texture == null || texture.equals(mesh.textureLocation()))
+			return mesh;
+		return VARIANTS.computeIfAbsent(mesh, ignored -> new HashMap<>()).computeIfAbsent(texture,
 				location -> bake(mesh, location));
 	}
 
@@ -48,7 +49,6 @@ public final class PMeshTextureVariants
 		for (Map<Identifier, PBakedMesh> variants : VARIANTS.values())
 			for (PBakedMesh variant : variants.values())
 			{
-				PDeformedMeshBuffers.close(variant);
 				PSubdividedMeshCache.close(variant);
 				variant.vbo().close();
 				variant.indices().close();

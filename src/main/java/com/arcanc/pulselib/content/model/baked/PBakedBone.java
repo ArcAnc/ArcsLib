@@ -14,6 +14,7 @@ import com.arcanc.pulselib.content.animatable.PAnimatable;
 import com.arcanc.pulselib.content.animatable.PAnimationController;
 import com.arcanc.pulselib.content.model.animation.BoneFrame;
 import com.arcanc.pulselib.content.model.animation.PAnimationPoseResolver;
+import com.arcanc.pulselib.content.model.deformer.gpu.PGpuDeformerBuffers;
 import com.arcanc.pulselib.data.gecko.MolangParser;
 import com.arcanc.pulselib.content.renderer.modelData.PModelData;
 import com.arcanc.pulselib.util.PLibDatabase;
@@ -86,6 +87,7 @@ public class PBakedBone
 						putVec4().
 						putVec2().
 						putIVec2().
+						putIVec4().
 						get());
 	}
 	
@@ -180,14 +182,17 @@ public class PBakedBone
 				int u = meshContext.packedOverlay() & 0xFFFF;
 				int v = (meshContext.packedOverlay() >> 16) & 0xFFFF;
 				
+				PGpuDeformerBuffers.Submission deformer = PGpuDeformerBuffers.submit(meshContext.deformation());
 				Std140Builder.intoBuffer(colorLightOverlayMappedView.data()).
 						putVec4(ARGB.vector4fFromARGB32(meshContext.color())).
 						putVec2(LightCoordsUtil.block(material.packedLight()), LightCoordsUtil.sky(material.packedLight())).
-						putIVec2(new Vector2i(u, v));
+						putIVec2(new Vector2i(u, v)).
+						putIVec4(deformer.operationOffset(), deformer.valueOffset(), deformer.operationCount(), 0);
 				
 			}
 			
-			PDeformedMeshBuffers.MeshBuffers deformedMesh = PDeformedMeshBuffers.resolve(material.mesh(), meshContext.deformation());
+			PBakedMesh deformedMesh = PSubdividedMeshCache.resolve(material.mesh(), meshContext.deformation() == null ? 0 : meshContext.deformation().subdivisionLevel());
+			PGpuDeformerBuffers.Bindings deformerBuffers = PGpuDeformerBuffers.upload();
 			try(RenderPass pass = RenderSystem.getDevice().createCommandEncoder().
 					createRenderPass(mesh.uuid() :: toString, colorAttachment, OptionalInt.empty(), depthTexture, OptionalDouble.empty()))
 			{
@@ -195,10 +200,12 @@ public class PBakedBone
 				RenderSystem.bindDefaultUniforms(pass);
 				pass.setUniform("ColorOverlay", colorLightOverlay.currentBuffer());
 				pass.setUniform("DynamicTransforms", transforms);
+				pass.setUniform("DeformerOperations", deformerBuffers.operations());
+				pass.setUniform("DeformerValues", deformerBuffers.values());
 				pass.bindTexture("Sampler0", atlas.getTextureView(), atlas.getSampler());
 				pass.bindTexture("Sampler1", overlayTexture.getTextureView(), RenderSystem.getSamplerCache().getClampToEdge(FilterMode.LINEAR));
 				pass.bindTexture("Sampler2", lightTexture, RenderSystem.getSamplerCache().getClampToEdge(FilterMode.LINEAR));
-				pass.setVertexBuffer(0, deformedMesh.vertices());
+				pass.setVertexBuffer(0, deformedMesh.vbo());
 				pass.setIndexBuffer(deformedMesh.indices(), deformedMesh.indexType());
 				
 				pass.drawIndexed(0, 0, deformedMesh.indicesCount(), 1);

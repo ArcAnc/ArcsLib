@@ -20,7 +20,7 @@ public final class WandRenderState extends PItemRenderState.Impl<WandItem> {
 
 For custom GUI-only geometry, submit a [`PBakedMesh`](https://github.com/ArcAnc/PulseLib/blob/26.1/src/main/java/com/arcanc/pulselib/content/model/baked/PBakedMesh.java) to `PRenderQueue` and flush it from a `SubmitNodeCollector` custom-geometry callback. Keep that code inside a renderer or special-model renderer: it needs the active pose stack, collector, and packed light/overlay values supplied by Minecraft.
 
-`PItemRenderer` does not replace the render type supplied to its constructor when the display context changes. For a GUI-only special model, use `PRenderTypes.RenderTypeProvider::trianglesGui`; use `trianglesSolid`, `trianglesCutout`, or `trianglesTranslucent` for a model rendered in normal world or entity contexts. A renderer shared by both kinds of context must choose its type in `resolveMeshRender(...)`.
+`PItemRenderer` does not replace the render type supplied to its constructor when the display context changes. For a GUI-only special model, use `PRenderTypes.RenderTypeProvider::trianglesGui`; in 26.1 this is an alias for the translucent `instant` pipeline, not a dedicated GUI shader. Use `trianglesSolid`, `trianglesCutout`, or `trianglesTranslucent` for a model rendered in normal world or entity contexts. A renderer shared by both kinds of context must choose its type in `resolveMeshRender(...)`.
 
 Classes used:
 
