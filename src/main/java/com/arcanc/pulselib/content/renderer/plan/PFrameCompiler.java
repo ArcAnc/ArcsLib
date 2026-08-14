@@ -16,6 +16,7 @@ import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.minecraft.client.renderer.rendertype.RenderType;
 
 import java.util.Comparator;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -51,8 +52,14 @@ public final class PFrameCompiler<S>
 
 		List<PDrawGroup> groups = new ObjectArrayList<>();
 		if (opaqueGroups != null)
-			for (Map.Entry<DrawKey, List<PRenderQueue.InstanceData>> entry : opaqueGroups.entrySet())
+		{
+			List<Map.Entry<DrawKey, List<PRenderQueue.InstanceData>>> entries = new ArrayList<>(opaqueGroups.entrySet());
+			entries.sort(Comparator.comparingInt((Map.Entry<DrawKey, List<PRenderQueue.InstanceData>> entry) ->
+					System.identityHashCode(entry.getKey().pipeline().outputTarget().getRenderTarget())).
+					thenComparingInt(entry -> System.identityHashCode(entry.getKey().pipeline())));
+			for (Map.Entry<DrawKey, List<PRenderQueue.InstanceData>> entry : entries)
 				groups.add(group(entry.getKey(), true, entry.getValue()));
+		}
 
 		if (translucentGroups != null && !translucentGroups.isEmpty())
 		{

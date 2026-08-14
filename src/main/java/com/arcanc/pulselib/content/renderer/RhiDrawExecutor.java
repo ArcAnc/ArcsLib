@@ -26,7 +26,6 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.systems.ScissorState;
 import com.mojang.blaze3d.textures.FilterMode;
 import com.mojang.blaze3d.textures.GpuTextureView;
-import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MappableRingBuffer;
 import net.minecraft.client.renderer.rendertype.RenderType;
@@ -39,6 +38,8 @@ import org.joml.Vector3f;
 import org.joml.Vector4f;
 import org.jspecify.annotations.Nullable;
 
+import java.nio.ByteBuffer;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.OptionalDouble;
@@ -46,7 +47,10 @@ import java.util.OptionalDouble;
 /** Executes PulseLib render plans through Minecraft's 26.2 RHI. */
 final class RhiDrawExecutor
 {
+	private static final int INSTANCE_STRIDE = new Std140SizeCalculator().putMat4f().putVec4().putVec2().putVec2().putIVec4().get();
+	private static final int MAX_INSTANCES_PER_DRAW = 512;
 	private final DeformerBuffers deformerBuffers = new DeformerBuffers();
+	private @Nullable MappableRingBuffer instanceBuffer;
 
 	void execute(PRenderPlan plan)
 	{
@@ -58,58 +62,130 @@ final class RhiDrawExecutor
 		GpuTextureView lightTexture = minecraft.gameRenderer.levelLightmap();
 		OverlayTexture overlayTexture = minecraft.gameRenderer.overlayTexture();
 		DeformerBuffers.Bindings bindings = this.deformerBuffers.upload();
-		for (PDrawGroup group : plan.groups())
-			draw(group, modelView, atlas, lightTexture, overlayTexture, bindings);
-	}
-
-	void cleanup()
-	{
-		this.deformerBuffers.close();
-	}
-
-	private static void draw(PDrawGroup group, Matrix4f modelView, TextureAtlas atlas, GpuTextureView lightTexture, OverlayTexture overlayTexture, DeformerBuffers.Bindings deformerBuffers)
-	{
-		if (group.instances().isEmpty())
-			return;
-		InstanceBatch instances = new InstanceBatch(group.instances());
+		GpuBufferSlice dynamicTransforms = RenderSystem.getDynamicUniforms().writeTransform(
+				modelView, new Vector4f(1.0F, 1.0F, 1.0F, 1.0F), new Vector3f(), new Matrix4f());
+		UploadedInstances instanceData = this.uploadInstances(plan.groups());
+		RenderTarget activeTarget = null;
+		RenderPass activePass = null;
 		try
 		{
-			RenderType type = group.pipeline();
-			PBakedMesh mesh = group.mesh();
-			GpuBufferSlice dynamicTransforms = RenderSystem.getDynamicUniforms().writeTransform(
-					modelView, new Vector4f(1.0F, 1.0F, 1.0F, 1.0F), new Vector3f(), new Matrix4f());
-			RenderTarget renderTarget = type.outputTarget().getRenderTarget();
-			GpuTextureView colorTexture = RenderSystem.outputColorTextureOverride != null
-					? RenderSystem.outputColorTextureOverride : renderTarget.getColorTextureView();
-			GpuTextureView depthTexture = renderTarget.useDepth
-					? (RenderSystem.outputDepthTextureOverride != null ? RenderSystem.outputDepthTextureOverride : renderTarget.getDepthTextureView())
-					: null;
-			for (int offset = 0; offset < instances.size();)
+			for (int groupIndex = 0; groupIndex < plan.groups().size(); groupIndex++)
 			{
-				int count = Math.min(InstanceBatch.MAX_INSTANCES, instances.size() - offset);
-				MappableRingBuffer instanceData = instances.upload(offset, count);
-				try (RenderPass pass = RenderSystem.getDevice().createCommandEncoder().createRenderPass(mesh.uuid()::toString, colorTexture, Optional.empty(), depthTexture, OptionalDouble.empty()))
+				PDrawGroup group = plan.groups().get(groupIndex);
+				RenderTarget target = group.pipeline().outputTarget().getRenderTarget();
+				if (target != activeTarget)
 				{
-					pass.setPipeline(type.pipeline());
-					RenderSystem.bindDefaultUniforms(pass);
-					pass.setUniform("DynamicTransforms", dynamicTransforms);
-					pass.setUniform("InstanceData", instanceData.currentBuffer());
-					pass.setUniform("DeformerOperations", deformerBuffers.operations());
-					pass.setUniform("DeformerValues", deformerBuffers.values());
-					applyActiveScissor(pass);
-					pass.bindTexture("Sampler0", atlas.getTextureView(), atlas.getSampler());
-					pass.bindTexture("Sampler1", overlayTexture.getTextureView(), RenderSystem.getSamplerCache().getClampToEdge(FilterMode.LINEAR));
-					pass.bindTexture("Sampler2", lightTexture, RenderSystem.getSamplerCache().getClampToEdge(FilterMode.LINEAR));
-					pass.setVertexBuffer(0, mesh.vbo().slice());
-					pass.setIndexBuffer(mesh.indices(), mesh.indexType());
-					pass.drawIndexed(mesh.indicesCount(), count, 0, 0, 0);
+					if (activePass != null)
+						activePass.close();
+					activeTarget = target;
+					activePass = createPass(target, group.mesh());
 				}
-				offset += count;
+				draw(activePass, group, dynamicTransforms, instanceData.slice(groupIndex), atlas, lightTexture, overlayTexture, bindings);
 			}
 		}
 		finally
 		{
-			instances.close();
+			if (activePass != null)
+				activePass.close();
+		}
+	}
+
+	void cleanup()
+	{
+		if (this.instanceBuffer != null)
+		{
+			this.instanceBuffer.close();
+			this.instanceBuffer = null;
+		}
+		this.deformerBuffers.close();
+	}
+
+	private UploadedInstances uploadInstances(List<PDrawGroup> groups)
+	{
+		int size = 0;
+		List<Integer> offsets = new ArrayList<>(groups.size());
+		for (PDrawGroup group : groups)
+		{
+			size = alignUniformOffset(size);
+			offsets.add(size);
+			size += group.instances().size() * INSTANCE_STRIDE;
+		}
+		size = Math.max(INSTANCE_STRIDE, size);
+		if (this.instanceBuffer == null || this.instanceBuffer.size() < size)
+		{
+			if (this.instanceBuffer != null)
+				this.instanceBuffer.close();
+			this.instanceBuffer = new MappableRingBuffer(() -> PLibDatabase.rl("instance_data").toLanguageKey(),
+					GpuBuffer.USAGE_UNIFORM | GpuBuffer.USAGE_MAP_WRITE, size);
+		}
+		else
+			this.instanceBuffer.rotate();
+		try (GpuBufferSlice.MappedView view = this.instanceBuffer.currentBuffer().map(false, true))
+		{
+			for (int groupIndex = 0; groupIndex < groups.size(); groupIndex++)
+			{
+				ByteBuffer groupBytes = view.data().duplicate().position(offsets.get(groupIndex));
+				Std140Builder builder = Std140Builder.intoBuffer(groupBytes);
+				for (PRenderQueue.InstanceData instance : groups.get(groupIndex).instances())
+					builder.putMat4f(instance.posMatrix()).
+							putVec4(ARGB.red(instance.packedColor()) / 255f, ARGB.green(instance.packedColor()) / 255f,
+									ARGB.blue(instance.packedColor()) / 255f, ARGB.alpha(instance.packedColor()) / 255f).
+							putVec2(LightCoordsUtil.block(instance.packedLight()), LightCoordsUtil.sky(instance.packedLight())).
+							putVec2(instance.packedOverlay() & 0xFFFF, instance.packedOverlay() >> 16 & 0xFFFF).
+							putIVec4(instance.deformerOperationOffset(), instance.deformerValueOffset(), instance.deformerOperationCount(), 0);
+			}
+		}
+		return new UploadedInstances(this.instanceBuffer.currentBuffer(), offsets, groups);
+	}
+
+	private static int alignUniformOffset(int offset)
+	{
+		return (offset + 255) & ~255;
+	}
+
+	private static RenderPass createPass(RenderTarget target, PBakedMesh mesh)
+	{
+		GpuTextureView colorTexture = RenderSystem.outputColorTextureOverride != null
+				? RenderSystem.outputColorTextureOverride : target.getColorTextureView();
+		GpuTextureView depthTexture = target.useDepth
+				? (RenderSystem.outputDepthTextureOverride != null ? RenderSystem.outputDepthTextureOverride : target.getDepthTextureView())
+				: null;
+		return RenderSystem.getDevice().createCommandEncoder().createRenderPass(mesh.uuid()::toString,
+				colorTexture, Optional.empty(), depthTexture, OptionalDouble.empty());
+	}
+
+	private static void draw(RenderPass pass, PDrawGroup group, GpuBufferSlice dynamicTransforms, GpuBufferSlice instanceData,
+						 TextureAtlas atlas, GpuTextureView lightTexture, OverlayTexture overlayTexture, DeformerBuffers.Bindings deformerBuffers)
+	{
+		if (group.instances().isEmpty())
+			return;
+		RenderType type = group.pipeline();
+		PBakedMesh mesh = group.mesh();
+		pass.setPipeline(type.pipeline());
+		RenderSystem.bindDefaultUniforms(pass);
+		pass.setUniform("DynamicTransforms", dynamicTransforms);
+		pass.setUniform("DeformerOperations", deformerBuffers.operations());
+		pass.setUniform("DeformerValues", deformerBuffers.values());
+		applyActiveScissor(pass);
+		pass.bindTexture("Sampler0", atlas.getTextureView(), atlas.getSampler());
+		pass.bindTexture("Sampler1", overlayTexture.getTextureView(), RenderSystem.getSamplerCache().getClampToEdge(FilterMode.LINEAR));
+		pass.bindTexture("Sampler2", lightTexture, RenderSystem.getSamplerCache().getClampToEdge(FilterMode.LINEAR));
+		pass.setVertexBuffer(0, mesh.vbo().slice());
+		pass.setIndexBuffer(mesh.indices(), mesh.indexType());
+		for (int offset = 0; offset < group.instances().size();)
+		{
+			int count = Math.min(MAX_INSTANCES_PER_DRAW, group.instances().size() - offset);
+			pass.setUniform("InstanceData", instanceData.slice((long)offset * INSTANCE_STRIDE, (long)count * INSTANCE_STRIDE));
+			pass.drawIndexed(mesh.indicesCount(), count, 0, 0, 0);
+			offset += count;
+		}
+	}
+
+	private record UploadedInstances(GpuBuffer buffer, List<Integer> offsets, List<PDrawGroup> groups)
+	{
+		private GpuBufferSlice slice(int groupIndex)
+		{
+			return this.buffer.slice(this.offsets.get(groupIndex), (long)this.groups.get(groupIndex).instances().size() * INSTANCE_STRIDE);
 		}
 	}
 
@@ -120,57 +196,6 @@ final class RhiDrawExecutor
 			pass.enableScissor(scissor.x(), scissor.y(), scissor.width(), scissor.height());
 		else
 			pass.disableScissor();
-	}
-
-	private static final class InstanceBatch
-	{
-		private static final int STRIDE = new Std140SizeCalculator().putMat4f().putVec4().putVec2().putVec2().putIVec4().get();
-		private static final int MAX_INSTANCES = 512;
-		private final List<PRenderQueue.InstanceData> instances;
-		private @Nullable MappableRingBuffer buffer;
-
-		private InstanceBatch(List<PRenderQueue.InstanceData> instances)
-		{
-			this.instances = new ObjectArrayList<>(instances);
-		}
-
-		private int size()
-		{
-			return this.instances.size();
-		}
-
-		private MappableRingBuffer upload(int offset, int count)
-		{
-			if (this.buffer != null)
-				this.buffer.close();
-			this.buffer = new MappableRingBuffer(
-					() -> PLibDatabase.rl("instance_data").toLanguageKey(),
-					GpuBuffer.USAGE_UNIFORM | GpuBuffer.USAGE_MAP_WRITE, count * STRIDE);
-			try (GpuBufferSlice.MappedView view = this.buffer.currentBuffer().map(false, true))
-			{
-				Std140Builder builder = Std140Builder.intoBuffer(view.data());
-				for (int index = 0; index < count; index++)
-				{
-					PRenderQueue.InstanceData instance = this.instances.get(offset + index);
-					builder.putMat4f(instance.posMatrix()).
-							putVec4(ARGB.red(instance.packedColor()) / 255f, ARGB.green(instance.packedColor()) / 255f,
-									ARGB.blue(instance.packedColor()) / 255f, ARGB.alpha(instance.packedColor()) / 255f).
-							putVec2(LightCoordsUtil.block(instance.packedLight()), LightCoordsUtil.sky(instance.packedLight())).
-							putVec2(instance.packedOverlay() & 0xFFFF, instance.packedOverlay() >> 16 & 0xFFFF).
-							putIVec4(instance.deformerOperationOffset(), instance.deformerValueOffset(), instance.deformerOperationCount(), 0);
-				}
-			}
-			return this.buffer;
-		}
-
-		private void close()
-		{
-			if (this.buffer != null)
-			{
-				this.buffer.close();
-				this.buffer = null;
-			}
-		}
 	}
 
 	private static final class DeformerBuffers
