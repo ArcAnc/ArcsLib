@@ -17,7 +17,7 @@ import java.util.List;
 public final class PGpuDeformerBuffers
 {
 	public static final Submission NONE = new Submission(-1, -1, 0);
-	private static final PDeformerStream STREAM = new PDeformerStream();
+	private static final PFrameStreams STREAMS = new PFrameStreams();
 
 	private PGpuDeformerBuffers()
 	{
@@ -25,50 +25,64 @@ public final class PGpuDeformerBuffers
 
 	public static Submission submit(@Nullable PMeshDeformation deformation)
 	{
-		return STREAM.submit(deformation);
+		return STREAMS.deformers().submit(deformation);
 	}
 
 	public static List<Float> operations()
 	{
-		return STREAM.operations();
+		return STREAMS.deformers().operations();
 	}
 
 	public static List<Float> values()
 	{
-		return STREAM.values();
+		return STREAMS.deformers().values();
 	}
 
 	public static boolean operationsDirty()
 	{
-		return STREAM.operationsDirty();
+		return STREAMS.deformers().operationsDirty();
 	}
 
 	public static boolean valuesDirty()
 	{
-		return STREAM.valuesDirty();
+		return STREAMS.deformers().valuesDirty();
 	}
 
 	public static void markOperationsUploaded()
 	{
-		STREAM.markOperationsUploaded();
+		STREAMS.deformers().markOperationsUploaded();
 	}
 
 	public static void markValuesUploaded()
 	{
-		STREAM.markValuesUploaded();
+		STREAMS.deformers().markValuesUploaded();
 	}
 
 	public static void finishFrame()
 	{
-		STREAM.finishFrame();
+		STREAMS.finishFrame();
 	}
 
 	public static void cleanup()
 	{
-		STREAM.clearDefinitions();
+		STREAMS.clearDefinitions();
+	}
+
+	public static void clearDefinitions()
+	{
+		STREAMS.clearDefinitions();
+	}
+
+	public static PFrameStreams streams()
+	{
+		return STREAMS;
 	}
 
 	public record Submission(int operationOffset, int valueOffset, int operationCount)
 	{
+		public boolean enabled()
+		{
+			return this.operationCount > 0;
+		}
 	}
 }

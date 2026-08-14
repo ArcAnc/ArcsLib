@@ -22,6 +22,7 @@ import net.minecraft.util.Util;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.client.event.ClientTickEvent;
+import net.neoforged.neoforge.event.entity.EntityLeaveLevelEvent;
 
 import java.util.Objects;
 import java.util.Set;
@@ -79,6 +80,18 @@ public class InstanceAnimationManager<T extends PAnimatable<T>> extends PAnimati
 	public static void cleanUp()
 	{
 		MANAGERS.clear();
+	}
+
+	public static void removeManager(Object animatable)
+	{
+		MANAGERS.removeIf(container -> container.manager().getAnimatable() == animatable);
+	}
+
+	@SubscribeEvent
+	public static void removeEntityManager(final EntityLeaveLevelEvent event)
+	{
+		if (event.getLevel().isClientSide())
+			removeManager(event.getEntity());
 	}
 	
 	static class AnimationManagerContainer<T extends PAnimatable<T>>

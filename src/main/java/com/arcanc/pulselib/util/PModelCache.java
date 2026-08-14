@@ -21,6 +21,7 @@ import com.arcanc.pulselib.content.model.baked.PBakedMesh;
 import com.arcanc.pulselib.content.model.baked.PSubdividedMeshCache;
 import com.arcanc.pulselib.content.model.baked.PBakedModel;
 import com.arcanc.pulselib.content.model.textures.atlas.PLibSpriteMetadata;
+import com.arcanc.pulselib.content.renderer.PRenderQueue;
 import com.arcanc.pulselib.data.gltf.PGltfModelLoader;
 import com.arcanc.pulselib.data.PModelLoader;
 import com.google.common.collect.ImmutableList;
@@ -114,6 +115,7 @@ public class PModelCache
 	
 	private static void clearCaches()
 	{
+		PRenderQueue.cleanUp();
 		if (MODELS != null)
 		{
 			PMeshTextureVariants.clear();

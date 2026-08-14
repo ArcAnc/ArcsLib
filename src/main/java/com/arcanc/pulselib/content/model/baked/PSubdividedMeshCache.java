@@ -99,6 +99,7 @@ public final class PSubdividedMeshCache
 
 	private static void closeBuffers(PBakedMesh mesh)
 	{
+		PDeformedMeshBuffers.close(mesh);
 		mesh.vbo().close();
 		mesh.indices().close();
 	}
