@@ -124,7 +124,9 @@ final class RhiDrawExecutor
 		{
 			for (int groupIndex = 0; groupIndex < groups.size(); groupIndex++)
 			{
-				ByteBuffer groupBytes = view.data().duplicate().position(offsets.get(groupIndex));
+				ByteBuffer groupBytes = view.data().duplicate();
+				groupBytes.order(view.data().order());
+				groupBytes.position(offsets.get(groupIndex));
 				Std140Builder builder = Std140Builder.intoBuffer(groupBytes);
 				for (PRenderQueue.InstanceData instance : groups.get(groupIndex).instances())
 					builder.putMat4f(instance.posMatrix()).
