@@ -48,13 +48,6 @@ public class PRenderTypes
 				withUniform("DeformerOperations", UniformType.TEXEL_BUFFER, GpuFormat.RGBA32_FLOAT).
 				withUniform("DeformerValues", UniformType.TEXEL_BUFFER, GpuFormat.RGBA32_FLOAT).
 				build();
-		private static final BindGroupLayout TRIANGLES_GUI_LAYOUT = BindGroupLayout.builder().
-				withUniform("ColorOverlay", UniformType.UNIFORM_BUFFER).
-				withUniform("Lighting", UniformType.UNIFORM_BUFFER).
-				withSampler("Sampler0").
-				withSampler("Sampler1").
-				withSampler("Sampler2").
-				build();
 		private static final BindGroupLayout TRIANGLES_INSTANT_LAYOUT = BindGroupLayout.builder().
 				withSampler("Sampler0").
 				withSampler("Sampler1").
@@ -114,20 +107,6 @@ public class PRenderTypes
 				withDepthStencilState(DEPTH_TEST_NO_WRITE).
 				build());
 		
-		public static final RenderPipeline TRIANGLES_GUI = registerPipeline(RenderPipeline.builder(RenderPipelines.GLOBALS_SNIPPET).
-				withBindGroupLayout(BindGroupLayouts.MATRICES_PROJECTION).
-				withVertexShader(PLibDatabase.rl("core/triangles_gui")).
-				withFragmentShader(PLibDatabase.rl("core/triangles_gui")).
-				withLocation(PLibDatabase.rl("pipeline/triangles_gui")).
-				withBindGroupLayout(TRIANGLES_GUI_LAYOUT).
-				withShaderDefine("ALPHA_CUTOUT", 0.1F).
-				withCull(false).
-				withColorTargetState(new ColorTargetState(BlendFunction.TRANSLUCENT)).
-				withDepthStencilState(DepthStencilState.DEFAULT).
-				withVertexBinding(0, VertexFormatProvider.POSITION_TEX_NORMAL).
-				withPrimitiveTopology(PrimitiveTopology.TRIANGLES).
-				build());
-
 		private static final RenderPipeline.Snippet TRIANGLES_INSTANT_SNIPPET = RenderPipeline.builder(RenderPipelines.GLOBALS_SNIPPET).
 				withBindGroupLayout(BindGroupLayouts.MATRICES_PROJECTION).
 				withVertexShader(PLibDatabase.rl("core/triangles_instant")).
@@ -194,7 +173,6 @@ public class PRenderTypes
 		private static final Function<Identifier, RenderType> TRIANGLES_TRANSLUCENT = Util.memoize(RenderTypeProvider :: createTrianglesTranslucent);
 		private static final Function<Identifier, RenderType> TRIANGLES_EMISSIVE_CUTOUT = Util.memoize(RenderTypeProvider :: createTrianglesEmissiveCutout);
 		private static final Function<Identifier, RenderType> TRIANGLES_EMISSIVE_TRANSLUCENT = Util.memoize(RenderTypeProvider :: createTrianglesEmissiveTranslucent);
-		private static final Function<Identifier, RenderType> TRIANGLES_GUI = Util.memoize(RenderTypeProvider :: createTrianglesGui);
 		private static final Function<Identifier, RenderType> TRIANGLES_INSTANT_CUTOUT = Util.memoize(RenderTypeProvider :: createTrianglesInstantCutout);
 		private static final Function<Identifier, RenderType> TRIANGLES_INSTANT_TRANSLUCENT = Util.memoize(RenderTypeProvider :: createTrianglesInstantTranslucent);
 		private static final Function<Identifier, RenderType> TRIANGLES_INSTANT_EMISSIVE_CUTOUT = Util.memoize(RenderTypeProvider :: createTrianglesInstantEmissiveCutout);
@@ -263,17 +241,6 @@ public class PRenderTypes
 			return RenderType.create(PLibDatabase.rl("triangles_emissive_translucent").toString(), setup);
 		}
 		
-		private static RenderType createTrianglesGui(Identifier texture)
-		{
-			RenderSetup setup = RenderSetup.builder(RenderPipelinesProvider.TRIANGLES_GUI).
-					withTexture("Sampler0", texture).
-					useLightmap().
-					useOverlay().
-					createRenderSetup();
-			
-			return RenderType.create(PLibDatabase.rl("triangles_gui").toString(), setup);
-		}
-
 		private static RenderType createTrianglesInstantCutout(Identifier texture)
 		{
 			RenderSetup setup = RenderSetup.builder(RenderPipelinesProvider.TRIANGLES_INSTANT_CUTOUT).
@@ -347,7 +314,7 @@ public class PRenderTypes
 		
 		public static RenderType trianglesGui(Identifier texture)
 		{
-			return TRIANGLES_GUI.apply(texture);
+			return trianglesInstantTranslucent(texture);
 		}
 
 		public static RenderType trianglesInstantCutout(Identifier texture)
