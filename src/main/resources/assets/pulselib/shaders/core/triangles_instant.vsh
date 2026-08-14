@@ -4,6 +4,7 @@
 #moj_import <minecraft:dynamictransforms.glsl>
 #moj_import <minecraft:projection.glsl>
 #moj_import <minecraft:sample_lightmap.glsl>
+#moj_import <pulselib:deformers.glsl>
 
 in vec3 Position;
 in vec2 UV0;
@@ -13,6 +14,7 @@ layout(std140) uniform ColorOverlay {
     vec4 Color;
     vec2 Light;
     ivec2 Overlay;
+    ivec4 InstanceDeformer;
 };
 
 uniform sampler2D Sampler1;
@@ -33,13 +35,16 @@ out vec2 texCoord0;
 
 void main()
 {
-    gl_Position = ProjMat * ModelViewMat * vec4(Position, 1.0);
+    vec3 deformedPosition;
+    vec3 deformedNormal;
+    pulselib_deform_vertex(Position, Normal, InstanceDeformer.xyz, deformedPosition, deformedNormal);
+    gl_Position = ProjMat * ModelViewMat * vec4(deformedPosition, 1.0);
 
     #ifdef EMISSIVE
     vertexColorBack = Color;
     vertexColorFront = Color;
     #else
-    vec3 normalTransformed = normalize(mat3(ModelViewMat) * Normal);
+    vec3 normalTransformed = normalize(mat3(ModelViewMat) * deformedNormal);
     vec2 light = minecraft_compute_light(Light0_Direction, Light1_Direction, normalTransformed);
     vertexColorBack = minecraft_mix_light_separate(-light, Color);
     vertexColorFront = minecraft_mix_light_separate(light, Color);

@@ -49,7 +49,6 @@ final class RhiDrawExecutor
 {
 	private static final int INSTANCE_STRIDE = new Std140SizeCalculator().putMat4f().putVec4().putVec2().putVec2().putIVec4().get();
 	private static final int MAX_INSTANCES_PER_DRAW = 512;
-	private final DeformerBuffers deformerBuffers = new DeformerBuffers();
 	private @Nullable MappableRingBuffer instanceBuffer;
 
 	void execute(PRenderPlan plan)
@@ -61,7 +60,7 @@ final class RhiDrawExecutor
 		TextureAtlas atlas = PTextureCache.getTextureAtlas();
 		GpuTextureView lightTexture = minecraft.gameRenderer.levelLightmap();
 		OverlayTexture overlayTexture = minecraft.gameRenderer.overlayTexture();
-		DeformerBuffers.Bindings bindings = this.deformerBuffers.upload();
+		PGpuDeformerBuffers.Bindings bindings = PGpuDeformerBuffers.upload();
 		GpuBufferSlice dynamicTransforms = RenderSystem.getDynamicUniforms().writeTransform(
 				modelView, new Vector4f(1.0F, 1.0F, 1.0F, 1.0F), new Vector3f(), new Matrix4f());
 		UploadedInstances instanceData = this.uploadInstances(plan.groups());
@@ -97,7 +96,6 @@ final class RhiDrawExecutor
 			this.instanceBuffer.close();
 			this.instanceBuffer = null;
 		}
-		this.deformerBuffers.close();
 	}
 
 	private UploadedInstances uploadInstances(List<PDrawGroup> groups)
@@ -157,7 +155,7 @@ final class RhiDrawExecutor
 	}
 
 	private static void draw(RenderPass pass, PDrawGroup group, GpuBufferSlice dynamicTransforms, GpuBufferSlice instanceData,
-						 TextureAtlas atlas, GpuTextureView lightTexture, OverlayTexture overlayTexture, DeformerBuffers.Bindings deformerBuffers)
+						 TextureAtlas atlas, GpuTextureView lightTexture, OverlayTexture overlayTexture, PGpuDeformerBuffers.Bindings deformerBuffers)
 	{
 		if (group.instances().isEmpty())
 			return;
@@ -200,54 +198,4 @@ final class RhiDrawExecutor
 			pass.disableScissor();
 	}
 
-	private static final class DeformerBuffers
-	{
-		private static final int MINIMUM_SIZE = Float.BYTES * 4;
-		private @Nullable MappableRingBuffer operations, values;
-
-		private Bindings upload()
-		{
-			this.operations = upload(this.operations, PGpuDeformerBuffers.operations(), PGpuDeformerBuffers.operationsDirty(), "deformer_operations");
-			this.values = upload(this.values, PGpuDeformerBuffers.values(), PGpuDeformerBuffers.valuesDirty(), "deformer_values");
-			PGpuDeformerBuffers.markOperationsUploaded();
-			PGpuDeformerBuffers.markValuesUploaded();
-			return new Bindings(this.operations.currentBuffer(), this.values.currentBuffer());
-		}
-
-		private void close()
-		{
-			if (this.operations != null)
-				this.operations.close();
-			if (this.values != null)
-				this.values.close();
-			this.operations = this.values = null;
-		}
-
-		private static MappableRingBuffer upload(@Nullable MappableRingBuffer buffer, List<Float> data, boolean dirty, String label)
-		{
-			int size = Math.max(MINIMUM_SIZE, data.size() * Float.BYTES);
-			if (buffer == null || buffer.size() < size)
-			{
-				if (buffer != null)
-					buffer.close();
-				buffer = new MappableRingBuffer(() -> PLibDatabase.rl(label).toLanguageKey(),
-						GpuBuffer.USAGE_UNIFORM_TEXEL_BUFFER | GpuBuffer.USAGE_MAP_WRITE, size);
-				dirty = true;
-			}
-			else if (dirty)
-				buffer.rotate();
-			if (dirty)
-				try (GpuBufferSlice.MappedView mapped = buffer.currentBuffer().map(false, true))
-				{
-					for (float value : data)
-					{
-						int bits = Float.floatToRawIntBits(value);
-						mapped.data().put((byte)bits).put((byte)(bits >> 8)).put((byte)(bits >> 16)).put((byte)(bits >> 24));
-					}
-				}
-			return buffer;
-		}
-
-		private record Bindings(GpuBuffer operations, GpuBuffer values) {}
-	}
 }

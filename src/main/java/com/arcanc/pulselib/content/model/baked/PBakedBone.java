@@ -14,6 +14,7 @@ import com.arcanc.pulselib.content.animatable.PAnimatable;
 import com.arcanc.pulselib.content.animatable.PAnimationController;
 import com.arcanc.pulselib.content.model.animation.BoneFrame;
 import com.arcanc.pulselib.content.model.animation.PAnimationPoseResolver;
+import com.arcanc.pulselib.content.model.deformer.gpu.PGpuDeformerBuffers;
 import com.arcanc.pulselib.data.gecko.MolangParser;
 import com.arcanc.pulselib.content.renderer.modelData.PModelData;
 import com.arcanc.pulselib.util.PLibDatabase;
@@ -86,6 +87,7 @@ public class PBakedBone
 						putVec4().
 						putVec2().
 						putIVec2().
+						putIVec4().
 						get());
 	}
 	
@@ -171,6 +173,12 @@ public class PBakedBone
 			
 			GpuTextureView lightTexture = mc.gameRenderer.levelLightmap();
 			OverlayTexture overlayTexture = mc.gameRenderer.overlayTexture();
+			PGpuDeformerBuffers.Submission deformer = PGpuDeformerBuffers.submit(meshContext.deformation());
+			PGpuDeformerBuffers.Bindings deformerBuffers = PGpuDeformerBuffers.upload();
+			PBakedMesh renderedMesh = PSubdividedMeshCache.resolve(material.mesh(),
+					meshContext.deformation() == null ? 0 : meshContext.deformation().subdivisionLevel());
+			GpuBufferSlice vertices = meshContext.deformation() != null && !meshContext.deformation().stack().isEmpty() && !deformer.enabled()
+					? PDeformedMeshBuffers.resolve(renderedMesh, meshContext.deformation()) : renderedMesh.vbo().slice();
 			
 			this.ensureBufferInitialized();
 			try (GpuBufferSlice.MappedView colorLightOverlayMappedView = this.colorLightOverlay.currentBuffer().map(false, true))
@@ -181,7 +189,8 @@ public class PBakedBone
 				Std140Builder.intoBuffer(colorLightOverlayMappedView.data()).
 						putVec4(ARGB.vector4fFromARGB32(meshContext.color())).
 						putVec2(LightCoordsUtil.block(material.packedLight()), LightCoordsUtil.sky(material.packedLight())).
-						putIVec2(new Vector2i(u, v));
+						putIVec2(new Vector2i(u, v)).
+						putIVec4(deformer.operationOffset(), deformer.valueOffset(), deformer.operationCount(), 0);
 				
 			}
 			
@@ -192,13 +201,15 @@ public class PBakedBone
 				RenderSystem.bindDefaultUniforms(pass);
 				pass.setUniform("ColorOverlay", colorLightOverlay.currentBuffer());
 				pass.setUniform("DynamicTransforms", transforms);
+				pass.setUniform("DeformerOperations", deformerBuffers.operations());
+				pass.setUniform("DeformerValues", deformerBuffers.values());
 				pass.bindTexture("Sampler0", atlas.getTextureView(), atlas.getSampler());
 				pass.bindTexture("Sampler1", overlayTexture.getTextureView(), RenderSystem.getSamplerCache().getClampToEdge(FilterMode.LINEAR));
 				pass.bindTexture("Sampler2", lightTexture, RenderSystem.getSamplerCache().getClampToEdge(FilterMode.LINEAR));
-				pass.setVertexBuffer(0, PDeformedMeshBuffers.resolve(material.mesh(), meshContext.deformation()));
-				pass.setIndexBuffer(material.mesh().indices(), material.mesh().indexType());
+				pass.setVertexBuffer(0, vertices);
+				pass.setIndexBuffer(renderedMesh.indices(), renderedMesh.indexType());
 				
-				pass.drawIndexed(material.mesh().indicesCount(), 1, 0, 0, 0);
+				pass.drawIndexed(renderedMesh.indicesCount(), 1, 0, 0, 0);
 			}
 		});
 		

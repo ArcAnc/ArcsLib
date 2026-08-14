@@ -54,6 +54,8 @@ public class PRenderTypes
 				withSampler("Sampler2").
 				withUniform("Lighting", UniformType.UNIFORM_BUFFER).
 				withUniform("ColorOverlay", UniformType.UNIFORM_BUFFER).
+				withUniform("DeformerOperations", UniformType.TEXEL_BUFFER, GpuFormat.RGBA32_FLOAT).
+				withUniform("DeformerValues", UniformType.TEXEL_BUFFER, GpuFormat.RGBA32_FLOAT).
 				build();
 
 		private static final RenderPipeline.Snippet TRIANGLES_SNIPPET = RenderPipeline.builder(RenderPipelines.GLOBALS_SNIPPET).
