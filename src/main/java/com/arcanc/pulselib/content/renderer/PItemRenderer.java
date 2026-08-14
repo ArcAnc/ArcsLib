@@ -20,6 +20,7 @@ import com.arcanc.pulselib.content.model.baked.PBakedMesh;
 import com.arcanc.pulselib.content.model.baked.PBakedModel;
 import com.arcanc.pulselib.content.model.baked.PMeshRenderContext;
 import com.arcanc.pulselib.content.model.baked.PMeshRenderMaterial;
+import com.arcanc.pulselib.content.model.baked.PMeshRenderResolver;
 import com.arcanc.pulselib.content.renderer.base.PItemRenderState;
 import com.arcanc.pulselib.content.renderer.modelData.PModelData;
 import com.arcanc.pulselib.data.gecko.MolangParser;
@@ -136,11 +137,19 @@ public abstract class PItemRenderer<T extends Item & PAnimatable<T>, RS extends 
 		ItemDisplayContext context = ((ItemStackRenderStateAccessor)renderState.itemRenderState()).pulselib$getDisplayContext();
 		if (context == ItemDisplayContext.GUI)
 		{
-			model.bones().forEach(bone -> perBoneSubmit(renderState, poseStack, bone, controllers, molangContexts, renderType, -1, renderState.lightCoords(), renderState.overlayCoords(), context));
 			submitNodeCollector.submitCustomGeometry(
 					poseStack,
-					this.renderType.apply(PTextureCache.ATLAS_LOCATION),
-					(_, _) -> PRenderQueue.flush(PRenderQueue.RenderStage.GUI));
+					PRenderTypes.RenderTypeProvider.trianglesInstantTranslucent(PTextureCache.ATLAS_LOCATION),
+					(submittedPose, _) -> {
+						PoseStack instantPoseStack = new PoseStack();
+						instantPoseStack.last().set(submittedPose);
+						PMeshRenderContext inherited = new PMeshRenderContext(
+								this.renderType, -1, renderState.lightCoords(), renderState.overlayCoords());
+						PMeshRenderResolver resolver = (bone, mesh, inheritedContext) ->
+								resolveMeshRender(renderState, context, bone, mesh, inheritedContext);
+						model.bones().forEach(bone -> bone.instantDraw(instantPoseStack, this.getModelData(renderState),
+								controllers, molangContexts, resolver, inherited, renderState.partialTick()));
+					});
 			return;
 		}
 		model.bones().forEach(bone -> perBoneSubmit(renderState, poseStack, bone, controllers, molangContexts, renderType, -1, renderState.lightCoords(), renderState.overlayCoords(), context));

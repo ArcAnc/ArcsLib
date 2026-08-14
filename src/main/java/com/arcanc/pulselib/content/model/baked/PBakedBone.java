@@ -126,7 +126,18 @@ public class PBakedBone
 	                                                  PMeshRenderContext inherited,
 	                                                  float partialTick)
 	{
-		BoneFrame frame = mixBone(modelData.getModel(), controllers, partialTick);
+		instantDraw(poseStack, modelData, controllers, Map.of(), resolver, inherited, partialTick);
+	}
+
+	public <T extends PAnimatable<T>>void instantDraw(PoseStack poseStack,
+	                                                  PModelData modelData,
+	                                                  Collection<PAnimationController<T>> controllers,
+	                                                  Map<PAnimationController<T>, MolangParser.Context> molangContexts,
+	                                                  PMeshRenderResolver resolver,
+	                                                  PMeshRenderContext inherited,
+	                                                  float partialTick)
+	{
+		BoneFrame frame = mixBone(modelData.getModel(), controllers, molangContexts, partialTick);
 		poseStack.pushPose();
 		if (frame != null)
 		{
@@ -214,7 +225,7 @@ public class PBakedBone
 		});
 		
 		this.children().forEach(children ->
-				children.instantDraw(poseStack, modelData, controllers, resolver, boneContext, partialTick));
+				children.instantDraw(poseStack, modelData, controllers, molangContexts, resolver, boneContext, partialTick));
 		
 		poseStack.popPose();
 	}
