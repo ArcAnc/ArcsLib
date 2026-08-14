@@ -54,8 +54,8 @@ public class ClientEvents
 	
 	public static void registerClientEvents(final IEventBus modEventBus)
 	{
-		//modEventBus.addListener(ClientEvents :: registerRenderers);
-		//modEventBus.addListener(ClientEvents :: registerTextures);
+		modEventBus.addListener(ClientEvents :: registerRenderers);
+		modEventBus.addListener(ClientEvents :: registerTextures);
 		PAttachmentAnchorResolvers.init(modEventBus);
 		//registerTestCowTail();
 		
@@ -174,13 +174,13 @@ public class ClientEvents
 		event.register(PLibDatabase.rl("runtime_loader"), RuntimeLoader.TYPE);
 	}
 	
-	/*private static void registerRenderers(final EntityRenderersEvent.RegisterRenderers event)
+	private static void registerRenderers(final EntityRenderersEvent.RegisterRenderers event)
 	{
-		event.registerEntityRenderer(PLibRegistration.EntityTypeReg.TEST_ENTITY.get(), TestEntityRender :: new);
+	//	event.registerEntityRenderer(PLibRegistration.EntityTypeReg.TEST_ENTITY.get(), TestEntityRender :: new);
 		event.registerBlockEntityRenderer(PLibRegistration.BETypeReg.TEST_BLOCK_ENTITY.get(), TestBlockEntityRenderer :: new);
-	}*/
+	}
 
-	/*private static void registerTextures(final PulseLibEvents.RegisterTextureEvent event)
+	private static void registerTextures(final PulseLibEvents.RegisterTextureEvent event)
 	{
 		event.addTextureLocation(TestEntityRender.SPHERE).
 				addTextureLocation(TestEntityRender.TUBE).
@@ -192,8 +192,9 @@ public class ClientEvents
 		event.addTextureLocation(TestBlockEntityRenderer.CUBE).
 				addTextureLocation(TestBlockEntityRenderer.TORUS).
 				addTextureLocation(TestBlockEntityRenderer.TUBE).
-				addTextureLocation(TestBlockEntityRenderer.PYRAMID);
-		event.addTextureLocation(TestTailItem.TEXTURE);
-		event.addTextureLocation(TestArmor.TEXTURE);
-	}*/
+				addTextureLocation(TestBlockEntityRenderer.PYRAMID).
+				addTextureLocation(TestBlockEntityRenderer.ZERO);
+		/*event.addTextureLocation(TestTailItem.TEXTURE);
+		event.addTextureLocation(TestArmor.TEXTURE);*/
+	}
 }

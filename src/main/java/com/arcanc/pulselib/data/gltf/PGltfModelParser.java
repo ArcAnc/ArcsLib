@@ -75,7 +75,11 @@ public class PGltfModelParser
 				public PAnimationValue<Quaternionf> decodeValue(ByteBuffer values, int keyframeIndex, PGltfDecodeContext context)
 				{
 					int offset = keyframeIndex * 16;
-					return constantQuaternion(new Quaternionf(values.getFloat(offset), values.getFloat(offset + 4), values.getFloat(offset + 8), values.getFloat(offset + 12)));
+					Quaternionf rotation = new Quaternionf(
+							values.getFloat(offset), values.getFloat(offset + 4),
+							values.getFloat(offset + 8), values.getFloat(offset + 12));
+					rotation.mul(new Quaternionf(context.bone().baseRotation()).invert()).normalize();
+					return constantQuaternion(rotation);
 				}
 			},
 			new PGltfChannelDecoder<Vector3f>()
@@ -132,9 +136,10 @@ public class PGltfModelParser
 		List<NodeModel> joints = nodes.stream().
 				filter(PGltfModelParser :: isBoneNode).
 				toList();
+		Set<String> boneNames = new HashSet<>();
 		
 		for (NodeModel node : joints)
-			parseBone(node, nodeToBone);
+			parseBone(node, nodeToBone, boneNames);
 		
 		for (NodeModel node : joints)
 		{
@@ -147,20 +152,22 @@ public class PGltfModelParser
 			}
 		}
 
-		// Blockbench exports every cube as a mesh node below its group/bone.
-		// Mesh nodes are not joints: bake their local transform into the geometry
-		// and attach the result to the nearest actual bone.
 		for (NodeModel node : nodes)
 		{
-			if (nodeToBone.containsKey(node))
-				continue;
-			PBone bone = nearestBone(node.getParent(), nodeToBone);
-			if (bone == null)
-				continue;
 			List<MeshModel> meshes = node.getMeshModels();
-			if (meshes != null)
-				for (MeshModel mesh : meshes)
-					bone.meshUUIDS().add(parseMesh(mesh, node, uuidToMesh));
+			if (meshes == null || meshes.isEmpty())
+				continue;
+
+			PBone bone = nearestBone(node.getParent(), nodeToBone);
+			for (MeshModel mesh : meshes)
+			{
+				if (bone == null)
+				{
+					bone = createLocalMeshBone(node, boneNames);
+					uuidToBone.put(bone.uuid(), bone);
+				}
+				bone.meshUUIDS().add(parseMesh(mesh, node, uuidToMesh));
+			}
 		}
 		
 		nodeToBone.forEach((nodeModel, pBone) ->
@@ -169,7 +176,7 @@ public class PGltfModelParser
 		return nodeToBone;
 	}
 	
-	private static void parseBone(NodeModel node, Map<NodeModel, PBone> nodeToBone)
+	private static void parseBone(NodeModel node, Map<NodeModel, PBone> nodeToBone, Set<String> boneNames)
 	{
 		float[] rawTranslation = node.getTranslation();
 		Vector3f pivot = new Vector3f();
@@ -181,9 +188,7 @@ public class PGltfModelParser
 			baseRotation.set(rawRotation[0], rawRotation[1], rawRotation[2], rawRotation[3]);
 		
 		UUID boneUUID = UUID.randomUUID();
-		String name = node.getName();
-		if (name == null)
-			name = boneUUID.toString();
+		String name = uniqueBoneName(node.getName(), boneUUID, boneNames);
 		
 		PBone bone = new PBone(
 				boneUUID,
@@ -194,13 +199,31 @@ public class PGltfModelParser
 		nodeToBone.put(node, bone);
 	}
 
+	private static PBone createLocalMeshBone(NodeModel node, Set<String> boneNames)
+	{
+		UUID boneUUID = UUID.randomUUID();
+		return new PBone(
+				boneUUID,
+				uniqueBoneName(node.getName(), boneUUID, boneNames),
+				new Vector3f(),
+				new Quaternionf());
+	}
+
+	private static String uniqueBoneName(String requestedName, UUID fallback, Set<String> boneNames)
+	{
+		String baseName = requestedName == null || requestedName.isBlank() ? fallback.toString() : requestedName;
+		String name = baseName;
+		for (int suffix = 1; !boneNames.add(name); suffix++)
+			name = baseName + "_" + suffix;
+		return name;
+	}
+
 	private static boolean isBoneNode(NodeModel node)
 	{
 		if (isBlockbenchLocatorMarker(node))
 			return false;
 		List<MeshModel> meshes = node.getMeshModels();
-		// A root mesh has no bone that could own it, so it remains a render bone.
-		return meshes == null || meshes.isEmpty() || node.getParent() == null;
+		return meshes == null || meshes.isEmpty();
 	}
 
 	private static PBone nearestBone(NodeModel node, Map<NodeModel, PBone> nodeToBone)

@@ -23,7 +23,7 @@ public class TestBlockEntity extends BlockEntity implements PAnimatable<TestBloc
 {
 	private final PAnimationManager<TestBlockEntity> animationManager = PLibHelper.createManager(this);
 	private final PRawAnimation ANIMATION = PRawAnimation.begin().
-			thenLoop("animation").
+			thenLoop("idle").
 			build();
 	private boolean playAnimation = true;
 	

@@ -10,6 +10,7 @@
 package com.arcanc.pulselib.content.registration.block.block_entity.ber;
 
 
+import com.arcanc.pulselib.PLib;
 import com.arcanc.pulselib.content.model.baked.PBakedBone;
 import com.arcanc.pulselib.content.model.baked.PBakedMesh;
 import com.arcanc.pulselib.content.model.baked.PMeshRenderContext;
@@ -28,6 +29,7 @@ public class TestBlockEntityRenderer extends PBlockRenderer<TestBlockEntity>
 	public static final ResourceLocation TORUS = PLibDatabase.rl("block/test_block/torus_texture");
 	public static final ResourceLocation PYRAMID = PLibDatabase.rl("block/test_block/pyramid_texture");
 	public static final ResourceLocation CUBE = PLibDatabase.rl("block/test_block/cube_texture");
+	public static final ResourceLocation ZERO = PLibDatabase.rl("block/test_block/0");
 	
 	public TestBlockEntityRenderer(final BlockEntityRendererProvider.Context ctx)
 	{
