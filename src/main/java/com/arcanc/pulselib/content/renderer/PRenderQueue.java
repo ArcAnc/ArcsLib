@@ -50,14 +50,7 @@ public final class PRenderQueue
 
 	public static void submitItem(ItemDisplayContext context, RenderType renderType, PDynamicGeometry geometry, PInstanceHeader data)
 	{
-		RenderStage stage = switch (context)
-		{
-			case GUI -> RenderStage.GUI;
-			case THIRD_PERSON_LEFT_HAND, THIRD_PERSON_RIGHT_HAND,
-					 FIRST_PERSON_LEFT_HAND, FIRST_PERSON_RIGHT_HAND,
-					 HEAD -> RenderStage.ENTITIES;
-			case GROUND, FIXED, NONE -> RenderStage.TRANSLUCENT_BLOCKS;
-		};
+		RenderStage stage = stage(context);
 		if (stage != RenderStage.GUI)
 			submit(stage, renderType, geometry, data);
 	}
@@ -129,8 +122,7 @@ public final class PRenderQueue
 			case GUI -> RenderStage.GUI;
 			case THIRD_PERSON_LEFT_HAND, THIRD_PERSON_RIGHT_HAND,
 					 FIRST_PERSON_LEFT_HAND, FIRST_PERSON_RIGHT_HAND,
-					 HEAD -> RenderStage.ENTITIES;
-			case GROUND, FIXED, NONE -> RenderStage.TRANSLUCENT_BLOCKS;
+					 HEAD, GROUND, FIXED, NONE -> RenderStage.ENTITIES;
 		};
 	}
 

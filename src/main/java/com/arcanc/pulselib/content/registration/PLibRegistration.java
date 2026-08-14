@@ -17,9 +17,7 @@ import com.arcanc.pulselib.content.model.deformer.*;
 import com.arcanc.pulselib.content.registration.block.TestBlock;
 import com.arcanc.pulselib.content.registration.block.block_entity.TestBlockEntity;
 import com.arcanc.pulselib.content.registration.entity.TestEntity;
-import com.arcanc.pulselib.content.registration.item.TestArmor;
 import com.arcanc.pulselib.content.registration.item.TestBlockItem;
-import com.arcanc.pulselib.content.registration.item.TestTailItem;
 import com.arcanc.pulselib.util.PLibDatabase;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -27,8 +25,6 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobCategory;
-import net.minecraft.world.item.ArmorItem;
-import net.minecraft.world.item.ArmorMaterials;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
@@ -160,7 +156,7 @@ public class PLibRegistration
 				BlockReg.TEST_BLOCK.get(),
 				new Item.Properties()));
 		
-		public static final DeferredItem<TestArmor> TEST_CHESTPLATE = ITEMS.register("test_chest", identifier -> new TestArmor(
+		/*public static final DeferredItem<TestArmor> TEST_CHESTPLATE = ITEMS.register("test_chest", identifier -> new TestArmor(
 				ArmorMaterials.DIAMOND,
 				ArmorItem.Type.CHESTPLATE,
 				new Item.Properties().durability(ArmorItem.Type.CHESTPLATE.getDurability(33))));
@@ -176,7 +172,7 @@ public class PLibRegistration
 				new Item.Properties().durability(ArmorItem.Type.LEGGINGS.getDurability(33))));
 		
 		public static final DeferredItem<TestTailItem> TEST_TAIL = ITEMS.register("test_tail", identifier -> new TestTailItem(
-				new Item.Properties().stacksTo(1)));
+				new Item.Properties().stacksTo(1)));*/
 		
 		private static void init (@NotNull final IEventBus bus)
 		{

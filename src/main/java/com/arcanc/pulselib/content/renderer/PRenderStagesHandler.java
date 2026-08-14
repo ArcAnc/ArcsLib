@@ -28,7 +28,7 @@ public class PRenderStagesHandler
 			PRenderQueue.flush(PRenderQueue.RenderStage.ENTITIES);
 		if (event.getStage() == RenderLevelStageEvent.Stage.AFTER_BLOCK_ENTITIES)
 			PRenderQueue.flush(PRenderQueue.RenderStage.SOLID_BLOCKS);
-		else if (event.getStage() == RenderLevelStageEvent.Stage.AFTER_TRIPWIRE_BLOCKS)
+		else if (event.getStage() == RenderLevelStageEvent.Stage.AFTER_PARTICLES)
 		{
 			PRenderQueue.flush(PRenderQueue.RenderStage.TRANSLUCENT_BLOCKS);
 			PGpuDeformerBuffers.finishFrame();

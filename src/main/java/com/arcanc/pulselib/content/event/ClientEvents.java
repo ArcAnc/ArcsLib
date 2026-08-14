@@ -19,6 +19,10 @@ import com.arcanc.pulselib.content.model.baked.PGpuDeformedMeshBuffers;
 import com.arcanc.pulselib.content.model.deformer.gpu.PGpuDeformerBuffers;
 import com.arcanc.pulselib.content.model.textures.atlas.RuntimeLoader;
 import com.arcanc.pulselib.content.player.animation.PPlayerAnimations;
+import com.arcanc.pulselib.content.registration.PLibRegistration;
+import com.arcanc.pulselib.content.registration.block.block_entity.ber.TestBlockEntityRenderer;
+import com.arcanc.pulselib.content.registration.entity.renderer.TestEntityRender;
+import com.arcanc.pulselib.content.registration.item.renderer.TestBlockItemRenderer;
 import com.arcanc.pulselib.content.renderer.PRenderQueue;
 import com.arcanc.pulselib.content.renderer.PRenderStagesHandler;
 import com.arcanc.pulselib.util.PLibDatabase;
@@ -35,6 +39,7 @@ import net.neoforged.bus.api.EventPriority;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.ModLoader;
 import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
+import net.neoforged.neoforge.client.event.EntityRenderersEvent;
 import net.neoforged.neoforge.client.event.RegisterClientReloadListenersEvent;
 import net.neoforged.neoforge.client.event.RegisterSpriteSourceTypesEvent;
 import net.neoforged.neoforge.client.extensions.common.IClientItemExtensions;
@@ -172,6 +177,7 @@ public class ClientEvents
 	/*private static void registerRenderers(final EntityRenderersEvent.RegisterRenderers event)
 	{
 		event.registerEntityRenderer(PLibRegistration.EntityTypeReg.TEST_ENTITY.get(), TestEntityRender :: new);
+		event.registerBlockEntityRenderer(PLibRegistration.BETypeReg.TEST_BLOCK_ENTITY.get(), TestBlockEntityRenderer :: new);
 	}*/
 
 	/*private static void registerTextures(final PulseLibEvents.RegisterTextureEvent event)
@@ -181,13 +187,12 @@ public class ClientEvents
 				addTextureLocation(TestEntityRender.TORUS).
 				addTextureLocation(TestEntityRender.ZERO).
 				addTextureLocation(TestEntityRender.ARMOR);
-		
+		event.addTextureLocation(TestBlockItemRenderer.PYRAMID).
+				addTextureLocation(TestBlockItemRenderer.CIRCLE);
 		event.addTextureLocation(TestBlockEntityRenderer.CUBE).
 				addTextureLocation(TestBlockEntityRenderer.TORUS).
 				addTextureLocation(TestBlockEntityRenderer.TUBE).
 				addTextureLocation(TestBlockEntityRenderer.PYRAMID);
-		event.addTextureLocation(TestBlockItemRenderer.PYRAMID).
-				addTextureLocation(TestBlockItemRenderer.CIRCLE);
 		event.addTextureLocation(TestTailItem.TEXTURE);
 		event.addTextureLocation(TestArmor.TEXTURE);
 	}*/

@@ -45,9 +45,8 @@ void main()
     gl_Position = ProjMat * ModelViewMat * InstanceMatrix * vec4(deformedPosition, 1.0);
 
     vec3 normalTransformed = normalize(transpose(inverse(mat3(InstanceMatrix))) * deformedNormal);
-    vec4 light = minecraft_mix_light(Light0_Direction, Light1_Direction, normalTransformed, InstanceColor);
-    vertexColorBack = -light;
-    vertexColorFront = light;
+    vertexColorBack = -minecraft_mix_light(Light0_Direction, Light1_Direction, -normalTransformed, InstanceColor);
+    vertexColorFront = minecraft_mix_light(Light0_Direction, Light1_Direction, normalTransformed, InstanceColor);
 
     overlayColor = texelFetch(Sampler1, ivec2(InstanceOverlay), 0);
     lightMapColor = texelFetch(Sampler2, ivec2(InstanceLight), 0);

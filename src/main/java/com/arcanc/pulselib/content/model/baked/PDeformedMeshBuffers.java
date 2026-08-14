@@ -27,6 +27,7 @@ import java.util.Map;
 
 public final class PDeformedMeshBuffers
 {
+	private static final Object STATIC_CACHE_KEY = new Object();
 	private static final Map<PBakedMesh, IdentityHashMap<Object, GlDynamicGeometry>> BUFFERS = new IdentityHashMap<>();
 	private static final Map<PBakedMesh, Map<Integer, PMesh>> SUBDIVIDED_SOURCES = new IdentityHashMap<>();
 
@@ -36,10 +37,16 @@ public final class PDeformedMeshBuffers
 
 	public static GlDynamicGeometry resolve(PBakedMesh mesh, PMeshDeformation deformation)
 	{
+		IdentityHashMap<Object, GlDynamicGeometry> buffers = BUFFERS.computeIfAbsent(mesh, ignored -> new IdentityHashMap<>());
 		if (deformation == null || deformation.stack().isEmpty())
-			throw new IllegalArgumentException("Static meshes must be submitted through their Geometry Arena data");
-		GlDynamicGeometry geometry = BUFFERS.computeIfAbsent(mesh, ignored -> new IdentityHashMap<>()).computeIfAbsent(
-				deformation.cacheKey(), ignored -> new GlDynamicGeometry());
+			return buffers.computeIfAbsent(STATIC_CACHE_KEY, ignored ->
+			{
+				GlDynamicGeometry geometry = new GlDynamicGeometry();
+				upload(geometry.vertexBuffer(), mesh, mesh.source(), null);
+				return geometry;
+			});
+
+		GlDynamicGeometry geometry = buffers.computeIfAbsent(deformation.cacheKey(), ignored -> new GlDynamicGeometry());
 		upload(geometry.vertexBuffer(), mesh, source(mesh, deformation), deformation);
 		return geometry;
 	}
@@ -71,6 +78,7 @@ public final class PDeformedMeshBuffers
 
 	private static void upload(VertexBuffer target, PBakedMesh baked, PMesh mesh, PMeshDeformation deformation)
 	{
+		boolean deformed = deformation != null && !deformation.stack().isEmpty();
 		TextureAtlasSprite sprite = PTextureCache.getTextureAtlas().getSprite(baked.textureLocation());
 		ByteBufferBuilder bytes = new ByteBufferBuilder(mesh.vertexCount() * PRenderTypes.VertexFormatProvider.POSITION_TEX_NORMAL.getVertexSize());
 		BufferBuilder builder = sprite.contents().name().getPath().equals("missingno") ?
@@ -79,9 +87,10 @@ public final class PDeformedMeshBuffers
 		for (int vertex = 0; vertex < mesh.vertexCount(); vertex++)
 		{
 			Vector3f position = new Vector3f(mesh.positions().get(vertex * 3), mesh.positions().get(vertex * 3 + 1), mesh.positions().get(vertex * 3 + 2));
-			Vector3f normal = deformation.stack().deformNormal(position,
-					new Vector3f(mesh.normals().get(vertex * 3), mesh.normals().get(vertex * 3 + 1), mesh.normals().get(vertex * 3 + 2)), deformation.values());
-			deformation.stack().deformInPlace(position, deformation.values());
+			Vector3f sourceNormal = new Vector3f(mesh.normals().get(vertex * 3), mesh.normals().get(vertex * 3 + 1), mesh.normals().get(vertex * 3 + 2));
+			Vector3f normal = deformed ? deformation.stack().deformNormal(position, sourceNormal, deformation.values()) : sourceNormal;
+			if (deformed)
+				deformation.stack().deformInPlace(position, deformation.values());
 			builder.addVertex(position.x, position.y, position.z).
 							setUv(mesh.uvs().get(vertex * 2), mesh.uvs().get(vertex * 2 + 1)).
 							setNormal(normal.x, normal.y, normal.z);
