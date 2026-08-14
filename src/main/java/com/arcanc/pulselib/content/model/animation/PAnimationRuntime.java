@@ -17,6 +17,7 @@ import com.arcanc.pulselib.data.gecko.MolangParser;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
 
+import java.util.ArrayList;
 import java.util.BitSet;
 import java.util.Collection;
 import java.util.List;
@@ -129,7 +130,7 @@ public final class PAnimationRuntime
 	                                                                                      MolangParser.Context context,
 	                                                                                      BoneFrame accumulatedFrame)
 	{
-		List<GraphFrame> frames = new java.util.ArrayList<>(layers.size());
+		List<GraphFrame> frames = new ArrayList<>(layers.size());
 		for (PAnimationGraphRuntime.Layer layer : layers)
 		{
 			PCompiledAnimation animation = model.compiledAnimation(layer.animation());

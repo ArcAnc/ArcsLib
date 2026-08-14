@@ -9,7 +9,6 @@
 
 package com.arcanc.pulselib.content.model.deformer.gpu;
 
-/** All data streams whose payload lifetime is one rendered frame. */
 public final class PFrameStreams
 {
 	private final PPoseStream poses = new PPoseStream();

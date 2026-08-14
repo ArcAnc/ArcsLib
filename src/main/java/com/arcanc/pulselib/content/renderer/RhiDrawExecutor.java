@@ -44,7 +44,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.OptionalDouble;
 
-/** Executes PulseLib render plans through Minecraft's 26.2 RHI. */
 final class RhiDrawExecutor
 {
 	private static final int INSTANCE_STRIDE = new Std140SizeCalculator().putMat4f().putVec4().putVec2().putVec2().putIVec4().get();

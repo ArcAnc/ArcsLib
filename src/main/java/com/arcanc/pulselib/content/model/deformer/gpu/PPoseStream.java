@@ -12,7 +12,6 @@ package com.arcanc.pulselib.content.model.deformer.gpu;
 import java.util.ArrayList;
 import java.util.List;
 
-/** Per-frame vec4 stream reserved for pose data. */
 public final class PPoseStream
 {
 	private final List<Float> values = new ArrayList<>();

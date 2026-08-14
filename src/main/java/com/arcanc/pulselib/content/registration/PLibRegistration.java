@@ -199,9 +199,9 @@ public class PLibRegistration
 		AnimationChannelReg.init(bus);
 		AnimationEventReg.init(bus);
 		MeshDeformerReg.init(bus);
-		/*
+		
 		EntityTypeReg.init(bus);
-		BlockReg.init(bus);
+		/*BlockReg.init(bus);
 		BETypeReg.init(bus);
 		ItemReg.init(bus);*/
 	}

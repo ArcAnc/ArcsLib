@@ -16,6 +16,8 @@ import com.arcanc.pulselib.content.animatable.instance.InstanceAnimationManager;
 import com.arcanc.pulselib.content.animatable.singleton.SingletonAnimationManager;
 import com.arcanc.pulselib.content.model.textures.atlas.RuntimeLoader;
 import com.arcanc.pulselib.content.player.animation.PPlayerAnimations;
+import com.arcanc.pulselib.content.registration.PLibRegistration;
+import com.arcanc.pulselib.content.registration.entity.renderer.TestEntityRender;
 import com.arcanc.pulselib.content.renderer.PRenderQueue;
 import com.arcanc.pulselib.content.renderer.PRenderStagesHandler;
 import com.arcanc.pulselib.util.PLibDatabase;
@@ -33,6 +35,7 @@ import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.ModLoader;
 import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
 import net.neoforged.neoforge.client.event.AddClientReloadListenersEvent;
+import net.neoforged.neoforge.client.event.EntityRenderersEvent;
 import net.neoforged.neoforge.client.event.RegisterSpriteSourcesEvent;
 import net.neoforged.neoforge.client.extensions.common.IClientItemExtensions;
 import net.neoforged.neoforge.client.extensions.common.RegisterClientExtensionsEvent;
@@ -45,8 +48,8 @@ public class ClientEvents
 	
 	public static void registerClientEvents(final IEventBus modEventBus)
 	{
-		//modEventBus.addListener(ClientEvents :: registerRenderers);
-		//modEventBus.addListener(ClientEvents :: registerCustomTextures);
+		modEventBus.addListener(ClientEvents :: registerRenderers);
+		modEventBus.addListener(ClientEvents :: registerCustomTextures);
 		//modEventBus.addListener(ClientEvents :: registerSpecialModels);
 		
 		PAttachmentAnchorResolvers.init(modEventBus);
@@ -156,25 +159,25 @@ public class ClientEvents
 		event.register(PLibDatabase.rl("test_block"), TestBlockItemRenderer.Unbaked.MAP_CODEC);
 	}*/
 	
-	/*private static void registerRenderers(final EntityRenderersEvent.RegisterRenderers event)
+	private static void registerRenderers(final EntityRenderersEvent.RegisterRenderers event)
 	{
-		event.registerBlockEntityRenderer(PLibRegistration.BETypeReg.TEST_BLOCK_ENTITY.get(), TestBlockEntityRenderer :: new);
+		//event.registerBlockEntityRenderer(PLibRegistration.BETypeReg.TEST_BLOCK_ENTITY.get(), TestBlockEntityRenderer :: new);
 		event.registerEntityRenderer(PLibRegistration.EntityTypeReg.TEST_ENTITY.get(), TestEntityRender :: new);
-	}*/
+	}
 	
-	/*private static void registerCustomTextures(final PulseLibEvents.RegisterTextureEvent event)
+	private static void registerCustomTextures(final PulseLibEvents.RegisterTextureEvent event)
 	{
 		event.addTextureLocation(TestEntityRender.SPHERE).
 				addTextureLocation(TestEntityRender.TUBE).
 				addTextureLocation(TestEntityRender.TORUS).
 				addTextureLocation(TestEntityRender.ZERO).
 				addTextureLocation(TestEntityRender.ARMOR);
-		event.addTextureLocation(TestBlockEntityRenderer.CUBE).
+		/*event.addTextureLocation(TestBlockEntityRenderer.CUBE).
 				addTextureLocation(TestBlockEntityRenderer.TORUS).
 				addTextureLocation(TestBlockEntityRenderer.TUBE).
 				addTextureLocation(TestBlockEntityRenderer.PYRAMID);
 		event.addTextureLocation(TestBlockItemRenderer.PYRAMID).
 				addTextureLocation(TestBlockItemRenderer.CIRCLE);
 		event.addTextureLocation(TestArmorItem.TEXTURE);
-	}*/
+	*/}
 }

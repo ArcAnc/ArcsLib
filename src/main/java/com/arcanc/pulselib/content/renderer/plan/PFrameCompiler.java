@@ -20,11 +20,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-/**
- * Compiles submissions for one render stage into an immutable frame plan.
- * Opaque geometry may be batched freely; transparent geometry retains its
- * back-to-front ordering and is only batched across adjacent equal draws.
- */
 public final class PFrameCompiler<S>
 {
 	private final Map<S, Map<DrawKey, List<PRenderQueue.InstanceData>>> opaque = new Object2ObjectOpenHashMap<>();

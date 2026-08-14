@@ -15,7 +15,6 @@ import net.minecraft.client.renderer.rendertype.RenderType;
 
 import java.util.List;
 
-/** A homogeneous draw submitted to the current render backend. */
 public record PDrawGroup(
 		RenderType pipeline,
 		PBakedMesh mesh,

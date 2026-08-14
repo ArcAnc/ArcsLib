@@ -1,3 +1,12 @@
+/**
+ * @author ArcAnc
+ * Created at: 08.08.2026
+ * Copyright (c) 2026
+ * <p>
+ * This code is licensed under "Arc's License of Common Sense"
+ * Details can be found in the license file in the root folder of this project
+ */
+
 package com.arcanc.pulselib.content.model.deformer;
 
 import com.arcanc.pulselib.util.PLibDatabase;
@@ -6,7 +15,6 @@ import net.minecraft.resources.Identifier;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
 
-/** Built-in linear twist implementation. */
 public final class PTwistDeformer implements PMeshDeformer<PTwistDefinition>
 {
 	public static final PTwistDeformer INSTANCE = new PTwistDeformer();

@@ -11,7 +11,6 @@ package com.arcanc.pulselib.content.renderer.plan;
 
 import java.util.List;
 
-/** Immutable output of {@link PFrameCompiler}. */
 public record PRenderPlan(List<PDrawGroup> groups)
 {
 	public static final PRenderPlan EMPTY = new PRenderPlan(List.of());
