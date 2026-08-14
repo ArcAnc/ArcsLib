@@ -1344,8 +1344,10 @@
 <li><code>trianglesSolid</code> for opaque models.</li>
 <li><code>trianglesCutout</code> for hard alpha cutouts, like holes or masked pixels.</li>
 <li><code>trianglesTranslucent</code> for glass-like transparency.</li>
-<li><code>trianglesGui</code> for GUI item rendering.</li>
+<li><code>trianglesGui</code> for GUI item rendering. It is a compatibility alias for the
+  translucent <code>instant</code> pipeline; there is no separate GUI shader in 26.1.</li>
 </ul>
+<p><code>trianglesSolid</code> forces an opaque output alpha. Cutout and translucent variants discard fragments below their alpha threshold; translucent variants additionally use blending and are sorted by the queue.</p>
 <p>For emissive meshes the built-in renderers select <code>trianglesEmissiveCutout</code> or <code>trianglesEmissiveTranslucent</code> automatically from the base type.</p>
 <p>In a renderer constructor this usually looks like:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="kd">super</span><span class="p">(</span><span class="n">modelData</span><span class="p">,</span><span class="w"> </span><span class="n">PRenderTypes</span><span class="p">.</span><span class="na">RenderTypeProvider</span><span class="p">::</span><span class="n">trianglesSolid</span><span class="p">);</span>
@@ -1353,7 +1355,8 @@
 <p>If a texture is marked as emissive, the default renderers automatically switch the mesh to the matching emissive variant. You normally do not need to select an emissive type yourself.</p>
 <p>Emissive texture metadata is described on <a href="../textures-and-emissive/">Textures and Emissive</a>.</p>
 <h2 id="why-vanilla-rendertype-is-not-enough">Why vanilla RenderType is not enough<a class="headerlink" href="#why-vanilla-rendertype-is-not-enough" title="Permanent link">&para;</a></h2>
-<p>PulseLib's baked meshes use <a href="https://github.com/ArcAnc/PulseLib/blob/26.1/src/main/java/com/arcanc/pulselib/util/PRenderTypes.java"><code>PRenderTypes.VertexFormatProvider.POSITION_TEX_NORMAL</code></a>. The 26.1 pipelines also expect the <code>DynamicTransforms</code>, <code>Lighting</code>, and <code>InstanceData</code> uniform buffers. A vanilla render type may compile and still render incorrectly because its shader and vertex format do not match the data PulseLib sends.</p>
+<p>PulseLib's baked meshes use <a href="https://github.com/ArcAnc/PulseLib/blob/26.1/src/main/java/com/arcanc/pulselib/util/PRenderTypes.java"><code>PRenderTypes.VertexFormatProvider.POSITION_TEX_NORMAL</code></a>. The queued triangle pipeline receives <code>DynamicTransforms</code> and <code>Lighting</code> through the normal 26.1 uniforms, but per-instance transform, colour, light, overlay, and deformer offsets arrive as instanced vertex attributes. The instant pipeline instead receives one mesh's colour, light, overlay, and deformer offsets through <code>ColorOverlay</code>.</p>
+<p>A vanilla render type may compile and still render incorrectly because its shader and vertex format do not match this contract.</p>
 <p>If you create a custom render type, keep these requirements:</p>
 <ul>
 <li><code>VertexFormat.Mode.TRIANGLES</code></li>
@@ -1378,9 +1381,11 @@
 <a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="w">        </span><span class="n">PRenderQueue</span><span class="p">.</span><span class="na">RenderStage</span><span class="p">.</span><span class="na">ENTITIES</span><span class="p">,</span>
 <a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="w">        </span><span class="n">renderType</span><span class="p">,</span>
 <a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="w">        </span><span class="n">bakedMesh</span><span class="p">,</span>
-<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a><span class="w">        </span><span class="k">new</span><span class="w"> </span><span class="n">PRenderQueue</span><span class="p">.</span><span class="na">InstanceData</span><span class="p">(</span><span class="n">matrix</span><span class="p">,</span><span class="w"> </span><span class="mh">0xFFFFFFFF</span><span class="p">,</span><span class="w"> </span><span class="n">packedLight</span><span class="p">,</span><span class="w"> </span><span class="n">packedOverlay</span><span class="p">));</span>
+<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a><span class="w">        </span><span class="kc">null</span><span class="p">,</span><span class="w"> </span><span class="c1">// no mesh deformation</span>
+<a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a><span class="w">        </span><span class="k">new</span><span class="w"> </span><span class="n">PRenderQueue</span><span class="p">.</span><span class="na">InstanceData</span><span class="p">(</span><span class="n">matrix</span><span class="p">,</span><span class="w"> </span><span class="mh">0xFFFFFFFF</span><span class="p">,</span><span class="w"> </span><span class="n">packedLight</span><span class="p">,</span><span class="w"> </span><span class="n">packedOverlay</span><span class="p">));</span>
 </code></pre></div>
 <p><code>PBakedMesh</code> owns the GPU vertex and index buffers. Do not pass a vanilla <code>VertexBuffer</code>: the queue needs PulseLib's mesh data and its triangle vertex format.</p>
+<p>For opaque submissions, identical <code>(RenderType, PBakedMesh)</code> pairs are grouped. Transparent submissions are ordered back-to-front and only adjacent equal pairs are joined, preserving blending order. Static mesh data is packed into OpenGL geometry pages; the queue streams per-instance records and indirect commands through fence-protected ring buffers, using multi-draw indirect where the current OpenGL driver supports it. These are implementation details: callers only submit meshes and must not retain or manipulate the queue's buffers.</p>
 <h2 id="renderer-hooks">Renderer hooks<a class="headerlink" href="#renderer-hooks" title="Permanent link">&para;</a></h2>
 <p>Every PulseLib renderer has the same three-stage flow:</p>
 <ul>

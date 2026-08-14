@@ -789,6 +789,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#per-mesh-texture-and-emissive-overrides" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Per-mesh texture and emissive overrides
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#emissive-textures" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1260,6 +1271,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#per-mesh-texture-and-emissive-overrides" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Per-mesh texture and emissive overrides
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#emissive-textures" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1324,24 +1346,37 @@
 <div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="n">PTextureCache</span><span class="p">.</span><span class="na">ATLAS_LOCATION</span><span class="w"> </span><span class="c1">// pulselib:textures/atlas.png</span>
 </code></pre></div>
 <p>Renderers normally pass <code>PTextureCache.ATLAS_LOCATION</code> to <code>PRenderTypes</code>, so you rarely need to access the atlas manually.</p>
+<h2 id="per-mesh-texture-and-emissive-overrides">Per-mesh texture and emissive overrides<a class="headerlink" href="#per-mesh-texture-and-emissive-overrides" title="Permanent link">&para;</a></h2>
+<p><code>PMeshRenderContext</code> can override a mesh's texture or emissive state at render time. The replacement texture must still be registered in the runtime atlas. The first use of a <code>(base mesh, replacement texture)</code> pair lazily bakes and caches a matching <code>PBakedMesh</code>; later renders reuse it.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="nd">@Override</span>
+<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="kd">public</span><span class="w"> </span><span class="n">PMeshRenderContext</span><span class="w"> </span><span class="nf">resolve</span><span class="p">(</span><span class="n">PBakedBone</span><span class="w"> </span><span class="n">bone</span><span class="p">,</span><span class="w"> </span><span class="n">PBakedMesh</span><span class="w"> </span><span class="n">mesh</span><span class="p">,</span>
+<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="w">                                  </span><span class="n">PMeshRenderContext</span><span class="w"> </span><span class="n">inherited</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a><span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">mesh</span><span class="p">.</span><span class="na">textureName</span><span class="p">().</span><span class="na">equals</span><span class="p">(</span><span class="s">&quot;eyes&quot;</span><span class="p">))</span>
+<a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a><span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">inherited</span><span class="p">;</span>
+<a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a><span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">inherited</span>
+<a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a><span class="w">            </span><span class="p">.</span><span class="na">withTexture</span><span class="p">(</span><span class="n">Identifier</span><span class="p">.</span><span class="na">fromNamespaceAndPath</span><span class="p">(</span><span class="s">&quot;examplemod&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;entity/robot/eyes_active&quot;</span><span class="p">))</span>
+<a id="__codelineno-4-8" name="__codelineno-4-8" href="#__codelineno-4-8"></a><span class="w">            </span><span class="p">.</span><span class="na">withEmissive</span><span class="p">(</span><span class="kc">true</span><span class="p">);</span>
+<a id="__codelineno-4-9" name="__codelineno-4-9" href="#__codelineno-4-9"></a><span class="p">}</span>
+</code></pre></div>
+<p>Pass <code>null</code> to <code>withTexture</code> or <code>withEmissive</code> to return to the mesh's baked texture or metadata-derived emissive value. An explicit <code>false</code> disables emissive even when the selected sprite metadata marks it emissive.</p>
 <h2 id="emissive-textures">Emissive textures<a class="headerlink" href="#emissive-textures" title="Permanent link">&para;</a></h2>
 <p>Emissive textures are useful for eyes, screens, lamps, energy parts, and other pieces that should ignore normal light. PulseLib reads this flag from texture metadata through <a href="https://github.com/ArcAnc/PulseLib/blob/26.1/src/main/java/com/arcanc/pulselib/content/model/textures/atlas/PLibSpriteMetadata.java"><code>PLibSpriteMetadata</code></a>.</p>
 <p>To mark a texture as emissive, add a <code>.png.mcmeta</code> file next to it:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>assets/examplemod/textures/entity/robot/eyes.png
-<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>assets/examplemod/textures/entity/robot/eyes.png.mcmeta
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>assets/examplemod/textures/entity/robot/eyes.png
+<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>assets/examplemod/textures/entity/robot/eyes.png.mcmeta
 </code></pre></div>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="p">{</span>
-<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a><span class="w">  </span><span class="nt">&quot;pulselib&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a><span class="w">    </span><span class="nt">&quot;emissive&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span>
-<a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a><span class="w">  </span><span class="p">}</span>
-<a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a><span class="p">}</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="p">{</span>
+<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a><span class="w">  </span><span class="nt">&quot;pulselib&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a><span class="w">    </span><span class="nt">&quot;emissive&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span>
+<a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a><span class="w">  </span><span class="p">}</span>
+<a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a><span class="p">}</span>
 </code></pre></div>
-<p>When <code>PModelCache</code> bakes the model, each mesh stores whether its sprite is emissive. The default renderers automatically switch to an emissive variant through:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="n">PRenderTypes</span><span class="p">.</span><span class="na">RenderTypeProvider</span><span class="p">.</span><span class="na">emissiveVariant</span><span class="p">(</span><span class="n">baseType</span><span class="p">,</span><span class="w"> </span><span class="n">PTextureCache</span><span class="p">.</span><span class="na">ATLAS_LOCATION</span><span class="p">);</span>
+<p>When <code>PModelCache</code> bakes the model, each mesh stores whether its sprite is emissive. The default renderers also honour a <code>PMeshRenderContext.withEmissive(...)</code> override and automatically switch to an emissive variant through:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="n">PRenderTypes</span><span class="p">.</span><span class="na">RenderTypeProvider</span><span class="p">.</span><span class="na">emissiveVariant</span><span class="p">(</span><span class="n">baseType</span><span class="p">,</span><span class="w"> </span><span class="n">PTextureCache</span><span class="p">.</span><span class="na">ATLAS_LOCATION</span><span class="p">);</span>
 </code></pre></div>
 <p>You can also choose an emissive render type directly in custom rendering code:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="n">PRenderTypes</span><span class="p">.</span><span class="na">RenderTypeProvider</span><span class="p">::</span><span class="n">trianglesEmissiveCutout</span>
-<a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a><span class="n">PRenderTypes</span><span class="p">.</span><span class="na">RenderTypeProvider</span><span class="p">::</span><span class="n">trianglesEmissiveTranslucent</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="n">PRenderTypes</span><span class="p">.</span><span class="na">RenderTypeProvider</span><span class="p">::</span><span class="n">trianglesEmissiveCutout</span>
+<a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a><span class="n">PRenderTypes</span><span class="p">.</span><span class="na">RenderTypeProvider</span><span class="p">::</span><span class="n">trianglesEmissiveTranslucent</span>
 </code></pre></div>
 <p>Choose the cutout or translucent variant according to the desired blend mode. There is no separate solid or GUI emissive render type in 26.1.</p>
 <p>Classes used:</p>
