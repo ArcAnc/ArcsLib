@@ -13,7 +13,7 @@
         <link rel="canonical" href="https://arcanc.github.io/PulseLib/26.1/renderers/">
       
       
-        <link rel="prev" href="../animation-events/">
+        <link rel="prev" href="../molang-animations/">
       
       
         <link rel="next" href="../render-types-and-queue/">
@@ -635,6 +635,34 @@
     
   
     Animation Events
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../molang-animations/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Molang Animations
   
 
     
@@ -1351,7 +1379,7 @@
 <div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="kd">public</span><span class="w"> </span><span class="kd">class</span> <span class="nc">CrusherRenderer</span><span class="w"> </span><span class="kd">extends</span><span class="w"> </span><span class="n">PBlockRenderer</span><span class="o">&lt;</span><span class="n">CrusherBlockEntity</span><span class="p">,</span><span class="w"> </span><span class="n">CrusherRenderState</span><span class="o">&gt;</span><span class="w"> </span><span class="p">{</span>
 <a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="nf">CrusherRenderer</span><span class="p">(</span><span class="n">BlockEntityRendererProvider</span><span class="p">.</span><span class="na">Context</span><span class="w"> </span><span class="n">context</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
 <a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="w">        </span><span class="kd">super</span><span class="p">(</span><span class="k">new</span><span class="w"> </span><span class="n">DefaultBlockModelData</span><span class="p">.</span><span class="na">DefaultBlockModelDataBuilder</span><span class="p">(</span>
-<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="w">                        </span><span class="n">Identifier</span><span class="p">.</span><span class="na">fromNamespaceAndPath</span><span class="p">(</span><span class="s">&quot;examplemod&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;crusher&quot;</span><span class="p">))</span>
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="w">                        </span><span class="n">Identifier</span><span class="p">.</span><span class="na">fromNamespaceAndPath</span><span class="p">(</span><span class="s">"examplemod"</span><span class="p">,</span><span class="w"> </span><span class="s">"crusher"</span><span class="p">))</span>
 <a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="w">                        </span><span class="p">.</span><span class="na">build</span><span class="p">(),</span>
 <a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="w">                </span><span class="n">PRenderTypes</span><span class="p">.</span><span class="na">RenderTypeProvider</span><span class="p">::</span><span class="n">trianglesCutout</span><span class="p">);</span>
 <a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a><span class="w">    </span><span class="p">}</span>
@@ -1375,7 +1403,7 @@
 <div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="kd">public</span><span class="w"> </span><span class="kd">class</span> <span class="nc">WandRenderer</span><span class="w"> </span><span class="kd">extends</span><span class="w"> </span><span class="n">PItemRenderer</span><span class="o">&lt;</span><span class="n">WandItem</span><span class="p">,</span><span class="w"> </span><span class="n">WandRenderState</span><span class="o">&gt;</span><span class="w"> </span><span class="p">{</span>
 <a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="nf">WandRenderer</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
 <a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="w">        </span><span class="kd">super</span><span class="p">(</span><span class="k">new</span><span class="w"> </span><span class="n">DefaultItemModelData</span><span class="p">.</span><span class="na">DefaultItemModelDataBuilder</span><span class="p">(</span>
-<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="w">                        </span><span class="n">Identifier</span><span class="p">.</span><span class="na">fromNamespaceAndPath</span><span class="p">(</span><span class="s">&quot;examplemod&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;wand&quot;</span><span class="p">))</span>
+<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="w">                        </span><span class="n">Identifier</span><span class="p">.</span><span class="na">fromNamespaceAndPath</span><span class="p">(</span><span class="s">"examplemod"</span><span class="p">,</span><span class="w"> </span><span class="s">"wand"</span><span class="p">))</span>
 <a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a><span class="w">                        </span><span class="p">.</span><span class="na">build</span><span class="p">(),</span>
 <a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a><span class="w">                </span><span class="n">PRenderTypes</span><span class="p">.</span><span class="na">RenderTypeProvider</span><span class="p">::</span><span class="n">trianglesSolid</span><span class="p">);</span>
 <a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a><span class="w">    </span><span class="p">}</span>
@@ -1395,7 +1423,7 @@
 <a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="nf">RobotRenderer</span><span class="p">(</span><span class="n">EntityRendererProvider</span><span class="p">.</span><span class="na">Context</span><span class="w"> </span><span class="n">context</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
 <a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="w">        </span><span class="kd">super</span><span class="p">(</span><span class="n">context</span><span class="p">,</span>
 <a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="w">                </span><span class="k">new</span><span class="w"> </span><span class="n">DefaultEntityModelData</span><span class="p">.</span><span class="na">DefaultEntityModelDataBuilder</span><span class="p">(</span>
-<a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a><span class="w">                        </span><span class="n">Identifier</span><span class="p">.</span><span class="na">fromNamespaceAndPath</span><span class="p">(</span><span class="s">&quot;examplemod&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;robot&quot;</span><span class="p">)).</span><span class="na">build</span><span class="p">(),</span>
+<a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a><span class="w">                        </span><span class="n">Identifier</span><span class="p">.</span><span class="na">fromNamespaceAndPath</span><span class="p">(</span><span class="s">"examplemod"</span><span class="p">,</span><span class="w"> </span><span class="s">"robot"</span><span class="p">)).</span><span class="na">build</span><span class="p">(),</span>
 <a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a><span class="w">                </span><span class="n">PRenderTypes</span><span class="p">.</span><span class="na">RenderTypeProvider</span><span class="p">::</span><span class="n">trianglesSolid</span><span class="p">);</span>
 <a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a><span class="w">    </span><span class="p">}</span>
 <a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a>
@@ -1411,9 +1439,8 @@
 <div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="n">PRenderTypes</span><span class="p">.</span><span class="na">RenderTypeProvider</span><span class="p">::</span><span class="n">trianglesSolid</span>
 <a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="n">PRenderTypes</span><span class="p">.</span><span class="na">RenderTypeProvider</span><span class="p">::</span><span class="n">trianglesCutout</span>
 <a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="n">PRenderTypes</span><span class="p">.</span><span class="na">RenderTypeProvider</span><span class="p">::</span><span class="n">trianglesTranslucent</span>
-<a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a><span class="n">PRenderTypes</span><span class="p">.</span><span class="na">RenderTypeProvider</span><span class="p">::</span><span class="n">trianglesGui</span>
 </code></pre></div>
-<p>Do not pass vanilla entity/block <code>RenderType</code> values unless they use a compatible triangle vertex format and shader setup.</p>
+<p>These are the queued variants used by all three renderer classes, including <code>PItemRenderer</code> in GUI display context. <code>trianglesGui</code> is an instant-rendering compatibility alias and is not compatible with the instanced queue. Do not pass vanilla entity/block <code>RenderType</code> values unless they use a compatible triangle vertex format and shader setup.</p>
 <p>The renderer APIs use 26.1 render states and <code>SubmitNodeCollector</code>; the old <code>MultiBufferSource</code>/<code>BlockEntityWithoutLevelRenderer</code> examples do not apply to this branch.</p>
 
 

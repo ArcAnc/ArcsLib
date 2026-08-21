@@ -655,6 +655,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../molang-animations/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Molang Animations
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../renderers/" class="md-nav__link">
         
   
@@ -1343,17 +1371,16 @@
 <ul>
 <li><code>trianglesSolid</code> for opaque models.</li>
 <li><code>trianglesCutout</code> for hard alpha cutouts, like holes or masked pixels.</li>
-<li><code>trianglesTranslucent</code> for glass-like transparency.</li>
-<li><code>trianglesGui</code> for GUI item rendering. It is a compatibility alias for the
-  translucent <code>instant</code> pipeline; there is no separate GUI shader in 26.1.</li>
+<li><code>trianglesTranslucent</code> for glass-like transparency and weighted OIT.</li>
 </ul>
-<p><code>trianglesSolid</code> forces an opaque output alpha. Cutout and translucent variants discard fragments below their alpha threshold; translucent variants additionally use blending and are sorted by the queue.</p>
-<p>For emissive meshes the built-in renderers select <code>trianglesEmissiveCutout</code> or <code>trianglesEmissiveTranslucent</code> automatically from the base type.</p>
+<p>Use those queued variants in <code>PBlockRenderer</code>, <code>PEntityRenderer</code>, and <code>PItemRenderer</code>, including GUI item rendering. <code>trianglesGui</code> is a compatibility alias for the translucent instant pipeline used by direct <code>PBakedBone.instantDraw(...)</code> calls; it is not a queued item-renderer type.</p>
+<p><code>trianglesSolid</code> forces an opaque output alpha. Cutout and translucent variants discard fragments below their alpha threshold. Built-in queued translucent variants use weighted blended order-independent transparency when independent per-target blending is available; otherwise they fall back to the queue's back-to-front alpha blending.</p>
+<p>For emissive meshes the built-in renderers select the matching solid, cutout, or translucent emissive variant automatically from the base type.</p>
 <p>In a renderer constructor this usually looks like:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="kd">super</span><span class="p">(</span><span class="n">modelData</span><span class="p">,</span><span class="w"> </span><span class="n">PRenderTypes</span><span class="p">.</span><span class="na">RenderTypeProvider</span><span class="p">::</span><span class="n">trianglesSolid</span><span class="p">);</span>
 </code></pre></div>
 <p>If a texture is marked as emissive, the default renderers automatically switch the mesh to the matching emissive variant. You normally do not need to select an emissive type yourself.</p>
-<p>Emissive texture metadata is described on <a href="../textures-and-emissive/">Textures and Emissive</a>.</p>
+<p>Alpha-mode and emissive texture metadata is described on <a href="../textures-and-emissive/">Textures and Emissive</a>.</p>
 <h2 id="why-vanilla-rendertype-is-not-enough">Why vanilla RenderType is not enough<a class="headerlink" href="#why-vanilla-rendertype-is-not-enough" title="Permanent link">&para;</a></h2>
 <p>PulseLib's baked meshes use <a href="https://github.com/ArcAnc/PulseLib/blob/26.1/src/main/java/com/arcanc/pulselib/util/PRenderTypes.java"><code>PRenderTypes.VertexFormatProvider.POSITION_TEX_NORMAL</code></a>. The queued triangle pipeline receives <code>DynamicTransforms</code> and <code>Lighting</code> through the normal 26.1 uniforms, but per-instance transform, colour, light, overlay, and deformer offsets arrive as instanced vertex attributes. The instant pipeline instead receives one mesh's colour, light, overlay, and deformer offsets through <code>ColorOverlay</code>.</p>
 <p>A vanilla render type may compile and still render incorrectly because its shader and vertex format do not match this contract.</p>
@@ -1385,7 +1412,7 @@
 <a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a><span class="w">        </span><span class="k">new</span><span class="w"> </span><span class="n">PRenderQueue</span><span class="p">.</span><span class="na">InstanceData</span><span class="p">(</span><span class="n">matrix</span><span class="p">,</span><span class="w"> </span><span class="mh">0xFFFFFFFF</span><span class="p">,</span><span class="w"> </span><span class="n">packedLight</span><span class="p">,</span><span class="w"> </span><span class="n">packedOverlay</span><span class="p">));</span>
 </code></pre></div>
 <p><code>PBakedMesh</code> owns the GPU vertex and index buffers. Do not pass a vanilla <code>VertexBuffer</code>: the queue needs PulseLib's mesh data and its triangle vertex format.</p>
-<p>For opaque submissions, identical <code>(RenderType, PBakedMesh)</code> pairs are grouped. Transparent submissions are ordered back-to-front and only adjacent equal pairs are joined, preserving blending order. Static mesh data is packed into OpenGL geometry pages; the queue streams per-instance records and indirect commands through fence-protected ring buffers, using multi-draw indirect where the current OpenGL driver supports it. These are implementation details: callers only submit meshes and must not retain or manipulate the queue's buffers.</p>
+<p>For opaque submissions, identical <code>(RenderType, PBakedMesh)</code> pairs are grouped. Transparent submissions are ordered back-to-front and only adjacent equal pairs are joined. Built-in translucent types are accumulated into weighted OIT targets across queue flushes and composited once after the <code>ENTITIES</code> and <code>TRANSLUCENT_BLOCKS</code> stages are flushed from <code>RenderLevelStageEvent.AfterTranslucentFeatures</code>. The OIT target also records the nearest fragment depth so Minecraft's transparency post-chain can place the result correctly relative to translucent blocks. This makes PulseLib translucency independent of its own submission order; custom transparent types, unsupported OpenGL contexts, and a target change within the same frame retain sorted alpha blending. Static mesh data is packed into OpenGL geometry pages; the queue streams per-instance records and indirect commands through fence-protected ring buffers, using multi-draw indirect where the current OpenGL driver supports it. These are implementation details: callers only submit meshes and must not retain or manipulate the queue's buffers.</p>
 <h2 id="renderer-hooks">Renderer hooks<a class="headerlink" href="#renderer-hooks" title="Permanent link">&para;</a></h2>
 <p>Every PulseLib renderer has the same three-stage flow:</p>
 <ul>

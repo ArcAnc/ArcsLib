@@ -650,6 +650,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../molang-animations/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Molang Animations
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../renderers/" class="md-nav__link">
         
   
@@ -1318,7 +1346,7 @@
 </code></pre></div>
 <p>Use it in model data:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="n">PModelData</span><span class="w"> </span><span class="n">data</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">DefaultEntityModelData</span><span class="p">.</span><span class="na">DefaultEntityModelDataBuilder</span><span class="p">(</span>
-<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a><span class="w">        </span><span class="n">Identifier</span><span class="p">.</span><span class="na">fromNamespaceAndPath</span><span class="p">(</span><span class="s">&quot;examplemod&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;robot&quot;</span><span class="p">),</span>
+<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a><span class="w">        </span><span class="n">Identifier</span><span class="p">.</span><span class="na">fromNamespaceAndPath</span><span class="p">(</span><span class="s">"examplemod"</span><span class="p">,</span><span class="w"> </span><span class="s">"robot"</span><span class="p">),</span>
 <a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a><span class="w">        </span><span class="n">PGeckoModelLoader</span><span class="p">.</span><span class="na">INSTANCE</span><span class="p">.</span><span class="na">id</span><span class="p">())</span>
 <a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a><span class="w">        </span><span class="p">.</span><span class="na">build</span><span class="p">();</span>
 </code></pre></div>
@@ -1328,7 +1356,7 @@
 <div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="kd">public</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="kd">class</span> <span class="nc">MyModelLoader</span><span class="w"> </span><span class="kd">implements</span><span class="w"> </span><span class="n">PModelLoader</span><span class="w"> </span><span class="p">{</span>
 <a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a><span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">MyModelLoader</span><span class="w"> </span><span class="n">INSTANCE</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">MyModelLoader</span><span class="p">();</span>
 <a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a><span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">Identifier</span><span class="w"> </span><span class="n">ID</span><span class="w"> </span><span class="o">=</span>
-<a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a><span class="w">            </span><span class="n">Identifier</span><span class="p">.</span><span class="na">fromNamespaceAndPath</span><span class="p">(</span><span class="s">&quot;examplemod&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;my_format&quot;</span><span class="p">);</span>
+<a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a><span class="w">            </span><span class="n">Identifier</span><span class="p">.</span><span class="na">fromNamespaceAndPath</span><span class="p">(</span><span class="s">"examplemod"</span><span class="p">,</span><span class="w"> </span><span class="s">"my_format"</span><span class="p">);</span>
 <a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a>
 <a id="__codelineno-6-6" name="__codelineno-6-6" href="#__codelineno-6-6"></a><span class="w">    </span><span class="nd">@Override</span>
 <a id="__codelineno-6-7" name="__codelineno-6-7" href="#__codelineno-6-7"></a><span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="n">Identifier</span><span class="w"> </span><span class="nf">id</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
@@ -1337,18 +1365,18 @@
 <a id="__codelineno-6-10" name="__codelineno-6-10" href="#__codelineno-6-10"></a>
 <a id="__codelineno-6-11" name="__codelineno-6-11" href="#__codelineno-6-11"></a><span class="w">    </span><span class="nd">@Override</span>
 <a id="__codelineno-6-12" name="__codelineno-6-12" href="#__codelineno-6-12"></a><span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kt">boolean</span><span class="w"> </span><span class="nf">supports</span><span class="p">(</span><span class="n">Identifier</span><span class="w"> </span><span class="n">modelPath</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
-<a id="__codelineno-6-13" name="__codelineno-6-13" href="#__codelineno-6-13"></a><span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">modelPath</span><span class="p">.</span><span class="na">getPath</span><span class="p">().</span><span class="na">startsWith</span><span class="p">(</span><span class="s">&quot;mymodels/&quot;</span><span class="p">)</span>
-<a id="__codelineno-6-14" name="__codelineno-6-14" href="#__codelineno-6-14"></a><span class="w">                </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">modelPath</span><span class="p">.</span><span class="na">getPath</span><span class="p">().</span><span class="na">endsWith</span><span class="p">(</span><span class="s">&quot;.json&quot;</span><span class="p">);</span>
+<a id="__codelineno-6-13" name="__codelineno-6-13" href="#__codelineno-6-13"></a><span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">modelPath</span><span class="p">.</span><span class="na">getPath</span><span class="p">().</span><span class="na">startsWith</span><span class="p">(</span><span class="s">"mymodels/"</span><span class="p">)</span>
+<a id="__codelineno-6-14" name="__codelineno-6-14" href="#__codelineno-6-14"></a><span class="w">                </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">modelPath</span><span class="p">.</span><span class="na">getPath</span><span class="p">().</span><span class="na">endsWith</span><span class="p">(</span><span class="s">".json"</span><span class="p">);</span>
 <a id="__codelineno-6-15" name="__codelineno-6-15" href="#__codelineno-6-15"></a><span class="w">    </span><span class="p">}</span>
 <a id="__codelineno-6-16" name="__codelineno-6-16" href="#__codelineno-6-16"></a>
 <a id="__codelineno-6-17" name="__codelineno-6-17" href="#__codelineno-6-17"></a><span class="w">    </span><span class="nd">@Override</span>
 <a id="__codelineno-6-18" name="__codelineno-6-18" href="#__codelineno-6-18"></a><span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="n">Identifier</span><span class="w"> </span><span class="nf">defaultModelLocation</span><span class="p">(</span><span class="n">Identifier</span><span class="w"> </span><span class="n">modelLocation</span><span class="p">,</span><span class="w"> </span><span class="n">String</span><span class="w"> </span><span class="n">modelType</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
-<a id="__codelineno-6-19" name="__codelineno-6-19" href="#__codelineno-6-19"></a><span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">modelLocation</span><span class="p">.</span><span class="na">withPrefix</span><span class="p">(</span><span class="s">&quot;mymodels/&quot;</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">modelType</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="s">&quot;/&quot;</span><span class="p">).</span><span class="na">withSuffix</span><span class="p">(</span><span class="s">&quot;.json&quot;</span><span class="p">);</span>
+<a id="__codelineno-6-19" name="__codelineno-6-19" href="#__codelineno-6-19"></a><span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">modelLocation</span><span class="p">.</span><span class="na">withPrefix</span><span class="p">(</span><span class="s">"mymodels/"</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">modelType</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="s">"/"</span><span class="p">).</span><span class="na">withSuffix</span><span class="p">(</span><span class="s">".json"</span><span class="p">);</span>
 <a id="__codelineno-6-20" name="__codelineno-6-20" href="#__codelineno-6-20"></a><span class="w">    </span><span class="p">}</span>
 <a id="__codelineno-6-21" name="__codelineno-6-21" href="#__codelineno-6-21"></a>
 <a id="__codelineno-6-22" name="__codelineno-6-22" href="#__codelineno-6-22"></a><span class="w">    </span><span class="nd">@Override</span>
 <a id="__codelineno-6-23" name="__codelineno-6-23" href="#__codelineno-6-23"></a><span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="n">Identifier</span><span class="w"> </span><span class="nf">textureLocation</span><span class="p">(</span><span class="n">Identifier</span><span class="w"> </span><span class="n">modelPath</span><span class="p">,</span><span class="w"> </span><span class="n">String</span><span class="w"> </span><span class="n">textureName</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
-<a id="__codelineno-6-24" name="__codelineno-6-24" href="#__codelineno-6-24"></a><span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">modelPath</span><span class="p">.</span><span class="na">withPath</span><span class="p">(</span><span class="s">&quot;entity/&quot;</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">textureName</span><span class="p">);</span>
+<a id="__codelineno-6-24" name="__codelineno-6-24" href="#__codelineno-6-24"></a><span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">modelPath</span><span class="p">.</span><span class="na">withPath</span><span class="p">(</span><span class="s">"entity/"</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">textureName</span><span class="p">);</span>
 <a id="__codelineno-6-25" name="__codelineno-6-25" href="#__codelineno-6-25"></a><span class="w">    </span><span class="p">}</span>
 <a id="__codelineno-6-26" name="__codelineno-6-26" href="#__codelineno-6-26"></a>
 <a id="__codelineno-6-27" name="__codelineno-6-27" href="#__codelineno-6-27"></a><span class="w">    </span><span class="nd">@Override</span>
