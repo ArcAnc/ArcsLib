@@ -66,6 +66,7 @@ nav:
       - Animation Events: animation-events.md
       - Renderers: renderers.md
       - Render Types and Queue: render-types-and-queue.md
+      - Shaders: shaders.md
       - Textures and Emissive: textures-and-emissive.md
 
   - Guides:

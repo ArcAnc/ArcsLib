@@ -122,6 +122,16 @@ public abstract class PBlockRenderer<T extends BlockEntity & PAnimatable<T>>
 	
 	protected void perBoneSubmit(T animatable, PoseStack poseStack, PBakedBone bone, PPose pose, Collection<PAnimationController<T>> controllers, Map<PAnimationController<T>, MolangParser.Context> molangContexts, Function<ResourceLocation, RenderType> renderType, int packedColor, int packedLight, int packedOverlay, float partialTick)
 	{
+		PMeshRenderContext inherited = new PMeshRenderContext(
+				renderType,
+				packedColor,
+				packedLight,
+				packedOverlay);
+		perBoneSubmit(animatable, poseStack, bone, pose, controllers, molangContexts, inherited, partialTick);
+	}
+
+	protected void perBoneSubmit(T animatable, PoseStack poseStack, PBakedBone bone, PPose pose, Collection<PAnimationController<T>> controllers, Map<PAnimationController<T>, MolangParser.Context> molangContexts, PMeshRenderContext inherited, float partialTick)
+	{
 		PModelData data = this.getModelData(animatable);
 		int boneIndex = data.getModel().boneIndex(bone);
 		poseStack.pushPose();
@@ -129,10 +139,11 @@ public abstract class PBlockRenderer<T extends BlockEntity & PAnimatable<T>>
 		poseStack.mulPose(pose.rotation(boneIndex));
 		poseStack.scale(pose.scale(boneIndex).x(), pose.scale(boneIndex).y(), pose.scale(boneIndex).z());
 		
-		this.submitBone(animatable, bone, poseStack, data, controllers, renderType, packedColor, packedLight, packedOverlay, partialTick);
+		PMeshRenderContext boneContext = resolveBoneRender(animatable, bone, inherited, partialTick);
+		this.submitBone(animatable, bone, poseStack, data, controllers, boneContext, partialTick);
 		
 		if (!bone.children().isEmpty())
-			bone.children().forEach(child -> perBoneSubmit(animatable, poseStack, child, pose, controllers, molangContexts, renderType, packedColor, packedLight, packedOverlay, partialTick));
+			bone.children().forEach(child -> perBoneSubmit(animatable, poseStack, child, pose, controllers, molangContexts, boneContext, partialTick));
 
 		poseStack.popPose();
 	}
@@ -196,6 +207,18 @@ public abstract class PBlockRenderer<T extends BlockEntity & PAnimatable<T>>
 	                          int packedOverlay,
 	                          float partialTick)
 	{
+		submitBone(animatable, bone, poseStack, modelData, controllers,
+				new PMeshRenderContext(renderType, color, packedLight, packedOverlay), partialTick);
+	}
+
+	protected void submitBone(T animatable,
+	                          PBakedBone bone,
+	                          PoseStack poseStack,
+	                          PModelData modelData,
+	                          Collection<PAnimationController<T>> controllers,
+	                          PMeshRenderContext inherited,
+	                          float partialTick)
+	{
 		Matrix4f matrix4fstack = new Matrix4f(poseStack.last().pose());
 
 		bone.meshes().forEach(mesh ->
@@ -203,16 +226,10 @@ public abstract class PBlockRenderer<T extends BlockEntity & PAnimatable<T>>
 			if (mesh.textureName().isEmpty())
 				return;
 			
-			PMeshRenderContext inherited = new PMeshRenderContext(
-					renderType,
-					color,
-					packedLight,
-					packedOverlay);
 			PMeshRenderContext meshContext = resolveMeshRender(animatable, bone, mesh, inherited, partialTick);
 			PMeshRenderMaterial material = PMeshRenderMaterial.resolve(mesh, meshContext);
 			
-			RenderType baseType = meshContext.renderType().apply(PTextureCache.ATLAS_LOCATION);
-			RenderType type = material.emissive() ? PRenderTypes.RenderTypeProvider.emissiveVariant(baseType, PTextureCache.ATLAS_LOCATION) : baseType;
+			RenderType type = material.resolveRenderType(meshContext, PTextureCache.ATLAS_LOCATION);
 			
 			PGpuDeformerBuffers.Submission deformation = PGpuDeformerBuffers.submit(meshContext.deformation());
 			PRenderTypes.getTransparencyState(type).ifPresent(transparency ->
@@ -246,6 +263,14 @@ public abstract class PBlockRenderer<T extends BlockEntity & PAnimatable<T>>
 				}
 			});
 		});
+	}
+
+	protected PMeshRenderContext resolveBoneRender(T animatable,
+	                                               PBakedBone bone,
+	                                               PMeshRenderContext inherited,
+	                                               float partialTick)
+	{
+		return inherited;
 	}
 	
 	protected PMeshRenderContext resolveMeshRender(T animatable,

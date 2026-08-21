@@ -105,6 +105,14 @@ public abstract class PEntityRenderLayer<T extends Entity & PAnimatable<T>>
 	{
 		return packedOverlay;
 	}
+
+	public PMeshRenderContext resolveBoneRender(T animatable,
+	                                            PBakedBone bone,
+	                                            PMeshRenderContext inherited,
+	                                            float partialTick)
+	{
+		return inherited;
+	}
 	
 	public PMeshRenderContext resolveMeshRender(T animatable,
 	                                            PBakedBone bone,
@@ -112,11 +120,10 @@ public abstract class PEntityRenderLayer<T extends Entity & PAnimatable<T>>
 	                                            PMeshRenderContext inherited,
 	                                            float partialTick)
 	{
-		return new PMeshRenderContext(
-				inherited.renderType(),
-				getColor(animatable, bone, mesh, inherited.color()),
-				getPackedLight(animatable, inherited.packedLight()),
-				getPackedOverlay(animatable, inherited.packedOverlay()));
+		return inherited.
+				withColor(getColor(animatable, bone, mesh, inherited.color())).
+				withPackedLight(getPackedLight(animatable, inherited.packedLight())).
+				withPackedOverlay(getPackedOverlay(animatable, inherited.packedOverlay()));
 	}
 	
 	public void submit(PEntityRenderer<T> renderer,

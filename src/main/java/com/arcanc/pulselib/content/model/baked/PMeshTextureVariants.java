@@ -10,6 +10,7 @@
 package com.arcanc.pulselib.content.model.baked;
 
 import com.arcanc.pulselib.content.model.PMesh;
+import com.arcanc.pulselib.content.model.textures.PTextureAlphaClassifier;
 import com.arcanc.pulselib.content.renderer.legacy.GlGeometryDataFactory;
 import com.arcanc.pulselib.content.renderer.plan.PGeometryData;
 import com.arcanc.pulselib.content.model.textures.atlas.PLibMetadata;
@@ -76,6 +77,7 @@ public final class PMeshTextureVariants
 			geometry = GlGeometryDataFactory.capture(data, source,
 					PRenderTypes.VertexFormatProvider.POSITION_TEX_NORMAL.getVertexSize());
 		}
-		return new PBakedMesh(base.uuid(), geometry, base.textureName(), emissive, source, texture);
+		return new PBakedMesh(base.uuid(), geometry, base.textureName(), emissive,
+				PTextureAlphaClassifier.resolve(sprite.contents()), source, texture);
 	}
 }

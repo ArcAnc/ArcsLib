@@ -1,6 +1,7 @@
 #version 330
 
 #moj_import <pulselib:deformers.glsl>
+#moj_import <pulselib:instanced_transform.glsl>
 
 in vec3 Position;
 in vec2 UV0;
@@ -25,14 +26,11 @@ out vec2 texCoord0;
 
 void main()
 {
-    mat4 InstanceMatrix = mat4(
-    vec4(InstanceRow0.x, InstanceRow1.x, InstanceRow2.x, 0.0),
-    vec4(InstanceRow0.y, InstanceRow1.y, InstanceRow2.y, 0.0),
-    vec4(InstanceRow0.z, InstanceRow1.z, InstanceRow2.z, 0.0),
-    vec4(InstanceRow0.w, InstanceRow1.w, InstanceRow2.w, 1.0)
+    gl_Position = pulselib_transform_position(
+        Position, InstanceDeformer,
+        InstanceRow0, InstanceRow1, InstanceRow2,
+        ModelViewMat, ProjMat
     );
-    vec3 deformedPosition = pulselib_apply_deformers(Position, InstanceDeformer);
-    gl_Position = ProjMat * ModelViewMat * InstanceMatrix * vec4(deformedPosition, 1.0);
 
     overlayColor = texelFetch(Sampler1, ivec2(InstanceOverlay), 0);
 

@@ -11,6 +11,7 @@ package com.arcanc.pulselib.content.model.baked;
 
 
 import com.arcanc.pulselib.content.model.PMesh;
+import com.arcanc.pulselib.content.model.textures.PAlphaMode;
 import com.arcanc.pulselib.content.renderer.plan.PGeometryData;
 import net.minecraft.resources.ResourceLocation;
 
@@ -21,6 +22,7 @@ public record PBakedMesh(
 		PGeometryData geometry,
 		String textureName,
 		boolean isEmissive,
+		PAlphaMode alphaMode,
 		PMesh source,
 		ResourceLocation textureLocation)
 {

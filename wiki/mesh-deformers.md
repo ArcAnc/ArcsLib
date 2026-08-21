@@ -4,7 +4,7 @@ Mesh deformers modify vertices after a mesh has been baked. A stack may contain 
 
 ## GPU execution
 
-For world-rendered PulseLib models, the built-in `bend`, `hinge`, `twist`, `stretch`, `squash`, `taper`, and `wave` operations run in the custom vertex shaders. Mesh geometry remains in the static geometry arena; the backend uploads a compact operation table once per compiled stack and uploads the current channel values for each frame. The shader source is shared by render types through `assets/pulselib/shaders/include/deformers.glsl`.
+For world-rendered PulseLib models, the built-in `bend`, `hinge`, `twist`, `stretch`, `squash`, `taper`, and `wave` operations run in the custom vertex shaders. Mesh geometry remains in the static geometry arena; the backend uploads a compact operation table once per compiled stack and uploads the current channel values for each frame. The shader source is shared by render types through `assets/pulselib/shaders/include/deformers.glsl`; its attributes and buffer samplers are described on [Shaders](shaders.md).
 
 GPU execution is automatic when every operation in a stack is built in and the stack has at most eight operations. A custom `PMeshDeformer` remains CPU-rendered; a future GPU extension point can add a shader descriptor for custom operations. CPU fallback uploads a dynamic mesh buffer for the current deformation. GUI's immediate rendering also remains on the CPU path.
 

@@ -67,11 +67,7 @@ public class TestEntityRender extends PEntityRenderer<TestEntity>
 	                                               PMeshRenderContext inherited,
 	                                               float partialTick)
 	{
-		PMeshRenderContext context = new PMeshRenderContext(
-				inherited.renderType(),
-				inherited.color(),
-				inherited.packedLight(),
-				inherited.packedOverlay());
+		PMeshRenderContext context = inherited;
 		if (bone.name().equals("head"))
 		{
 			boolean alternateMaterial = (animatable.tickCount / 40 & 1) == 0;

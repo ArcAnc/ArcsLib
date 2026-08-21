@@ -8,10 +8,11 @@ Use the simplest type that matches the visual result:
 
 * `trianglesSolid` for opaque models.
 * `trianglesCutout` for hard alpha cutouts, like holes or masked pixels.
-* `trianglesTranslucent` for glass-like transparency.
+* `trianglesTranslucent` for glass-like transparency and weighted OIT.
 * `trianglesGui` for direct GUI drawing.
+* `trianglesImmediate` for advanced direct drawing outside the queued world path.
 
-`trianglesLit` no longer has its own shader. It remains as a compatibility render type backed by the GUI shader, so do not select it for new world rendering; use `trianglesSolid`, `trianglesCutout`, or `trianglesTranslucent` according to the material instead.
+The first three types use the queued instanced shaders. `trianglesGui` and `trianglesImmediate` share the direct `triangles_immediate_lit` shader and differ in transparency state. There is no `trianglesLit` compatibility method in the current API. The full program mapping and shader data contract are documented on [Shaders](shaders.md).
 
 In a renderer constructor this usually looks like:
 
@@ -21,24 +22,24 @@ super(modelData, PRenderTypes.RenderTypeProvider::trianglesSolid);
 
 If a texture is marked as emissive, the default renderers automatically switch the mesh to the matching emissive variant. You normally do not need to choose `trianglesSolidEmissive` yourself unless you are writing custom draw code.
 
-Emissive texture metadata is described on [Textures and Emissive](Textures-and-Emissive).
+Emissive and alpha-mode texture metadata is described on [Textures and Emissive](textures-and-emissive.md).
 
 ## Why vanilla RenderType is not enough
 
-PulseLib's baked meshes use [`PRenderTypes.VertexFormatProvider.POSITION_TEX_NORMAL`](https://github.com/ArcAnc/PulseLib/blob/1.21.1/src/main/java/com/arcanc/pulselib/util/PRenderTypes.java). The shaders also expect per-instance data: transform matrix, color, light, and overlay. A vanilla render type may compile and still render incorrectly because its shader and vertex format do not match the data PulseLib sends.
+PulseLib's baked meshes use [`PRenderTypes.VertexFormatProvider.POSITION_TEX_NORMAL`](https://github.com/ArcAnc/PulseLib/blob/1.21.1/src/main/java/com/arcanc/pulselib/util/PRenderTypes.java). Queued shaders also expect per-instance data: transform rows, color, light, overlay, and deformer stream offsets. A vanilla render type may compile and still render incorrectly because its shader and vertex format do not match the data PulseLib sends.
 
 If you create a custom render type, keep these requirements:
 
 * `VertexFormat.Mode.TRIANGLES`
 * `PRenderTypes.VertexFormatProvider.POSITION_TEX_NORMAL`
-* a shader that understands PulseLib's uniforms and instance attributes
+* a shader that implements PulseLib's queued attribute and sampler contract
 * a transparency state that matches how the queue should sort the mesh
 
 For most mods, it is safer to start from PulseLib's existing render types and only add a new one when you need a genuinely different shader state.
 
 ## What the queue does
 
-[`PRenderQueue`](https://github.com/ArcAnc/PulseLib/blob/1.21.1/src/main/java/com/arcanc/pulselib/content/renderer/PRenderQueue.java) compiles submissions into a frame plan. Opaque submissions with the same render type and geometry are batched as instances; transparent submissions are kept in back-to-front order. The OpenGL driver uploads the instance stream once per flush and uses multi-draw indirect where the current context supports it. It falls back to direct instanced draws when that capability is unavailable.
+[`PRenderQueue`](https://github.com/ArcAnc/PulseLib/blob/1.21.1/src/main/java/com/arcanc/pulselib/content/renderer/PRenderQueue.java) compiles submissions into a frame plan. Opaque submissions with the same render type and geometry are batched as instances; transparent submissions are kept in back-to-front order. Built-in translucent types use weighted blended order-independent transparency when the context supports independent blending, with sorted alpha blending as the fallback. The OpenGL driver uploads the instance stream once per flush and uses multi-draw indirect where the current context supports it. It falls back to direct instanced draws when that capability is unavailable.
 
 Static [`PGeometryData`](https://github.com/ArcAnc/PulseLib/blob/1.21.1/src/main/java/com/arcanc/pulselib/content/renderer/plan/PGeometryData.java) is placed in the backend's geometry arena and reused across frames. This is the normal path for baked meshes. Dynamic geometry is reserved for CPU-deformed meshes and is more expensive because its vertex data is uploaded again.
 

@@ -17,7 +17,6 @@ import com.arcanc.pulselib.content.model.animation.PAnimationPoseResolver;
 import com.arcanc.pulselib.content.model.animation.PPose;
 import com.arcanc.pulselib.data.gecko.MolangParser;
 import com.arcanc.pulselib.content.renderer.modelData.PModelData;
-import com.arcanc.pulselib.util.PRenderTypes;
 import com.arcanc.pulselib.util.PTextureCache;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
@@ -155,9 +154,7 @@ public record PBakedBone(String name,
 			PMeshRenderContext meshContext = resolver.resolve(this, mesh, boneContext);
 			PMeshRenderMaterial material = PMeshRenderMaterial.resolve(mesh, meshContext);
 			
-			RenderType type = meshContext.renderType().apply(PTextureCache.ATLAS_LOCATION);
-			if (material.emissive())
-				type = PRenderTypes.RenderTypeProvider.emissiveVariant(type, PTextureCache.ATLAS_LOCATION);
+			RenderType type = material.resolveRenderType(meshContext, PTextureCache.ATLAS_LOCATION);
 			
 			int u = meshContext.packedOverlay() & 0xFFFF;
 			int v = (meshContext.packedOverlay() >> 16) & 0xFFFF;
@@ -254,9 +251,7 @@ public record PBakedBone(String name,
 			return;
 		PMeshRenderContext meshContext = resolver.resolve(bone, mesh, inherited);
 		PMeshRenderMaterial material = PMeshRenderMaterial.resolve(mesh, meshContext);
-		RenderType type = meshContext.renderType().apply(PTextureCache.ATLAS_LOCATION);
-		if (material.emissive())
-			type = PRenderTypes.RenderTypeProvider.emissiveVariant(type, PTextureCache.ATLAS_LOCATION);
+		RenderType type = material.resolveRenderType(meshContext, PTextureCache.ATLAS_LOCATION);
 		int u = meshContext.packedOverlay() & 0xFFFF;
 		int v = (meshContext.packedOverlay() >> 16) & 0xFFFF;
 		int color = meshContext.color();

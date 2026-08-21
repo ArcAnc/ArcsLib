@@ -85,4 +85,4 @@ PRenderTypes.RenderTypeProvider::trianglesGui
 
 Do not pass vanilla entity/block `RenderType` values unless they use a compatible triangle vertex format and shader setup.
 
-`trianglesLit` is retained for source compatibility, but it no longer has a separate shader and should not be chosen for new renderers.
+World renderers use the queued instanced shader path. `trianglesGui` uses the immediate path instead, and `trianglesImmediate` is available for advanced direct rendering. See [Shaders](shaders.md) for the exact program, attribute, and sampler mapping.

@@ -45,7 +45,9 @@ import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Matrix4f;
 
+import java.util.ArrayDeque;
 import java.util.Collection;
+import java.util.Deque;
 import java.util.Map;
 import java.util.function.Function;
 
@@ -124,7 +126,7 @@ public abstract class PItemRenderer<T extends Item & PAnimatable<T>> extends Blo
 					getModelData(animatable),
 					controllers,
 					molangContexts,
-					(bone, mesh, inheritedContext) -> resolveMeshRender(animatable, stack, ItemDisplayContext.GUI, bone, mesh, inheritedContext, partialTick),
+					(bone, mesh, inheritedContext) -> resolveGuiMeshRender(animatable, stack, bone, mesh, inheritedContext, partialTick),
 					inherited,
 					partialTick);
 			return;
@@ -141,6 +143,16 @@ public abstract class PItemRenderer<T extends Item & PAnimatable<T>> extends Blo
 	
 	protected void perBoneSubmit(T animatable, ItemStack stack, PoseStack poseStack, PBakedBone bone, PPose pose, Collection<PAnimationController<T>> controllers, Map<PAnimationController<T>, MolangParser.Context> molangContexts, Function<ResourceLocation, RenderType> renderType, int packedColor, int packedLight, int packedOverlay, float partialTick, ItemDisplayContext context)
 	{
+		PMeshRenderContext inherited = new PMeshRenderContext(
+				renderType,
+				packedColor,
+				packedLight,
+				packedOverlay);
+		perBoneSubmit(animatable, stack, poseStack, bone, pose, controllers, molangContexts, inherited, partialTick, context);
+	}
+
+	protected void perBoneSubmit(T animatable, ItemStack stack, PoseStack poseStack, PBakedBone bone, PPose pose, Collection<PAnimationController<T>> controllers, Map<PAnimationController<T>, MolangParser.Context> molangContexts, PMeshRenderContext inherited, float partialTick, ItemDisplayContext context)
+	{
 		PModelData data = this.getModelData(animatable);
 		int boneIndex = data.getModel().boneIndex(bone);
 		poseStack.pushPose();
@@ -148,10 +160,11 @@ public abstract class PItemRenderer<T extends Item & PAnimatable<T>> extends Blo
 		poseStack.mulPose(pose.rotation(boneIndex));
 		poseStack.scale(pose.scale(boneIndex).x(), pose.scale(boneIndex).y(), pose.scale(boneIndex).z());
 		
-		this.submitBone(animatable, stack, bone, poseStack, data, controllers, renderType, packedColor, packedLight, packedOverlay, partialTick, context);
+		PMeshRenderContext boneContext = resolveBoneRender(animatable, stack, context, bone, inherited, partialTick);
+		this.submitBone(animatable, stack, bone, poseStack, data, controllers, boneContext, partialTick, context);
 		
 		if (!bone.children().isEmpty())
-		bone.children().forEach(child -> perBoneSubmit(animatable, stack, poseStack, child, pose, controllers, molangContexts, renderType, packedColor, packedLight, packedOverlay, partialTick, context));
+			bone.children().forEach(child -> perBoneSubmit(animatable, stack, poseStack, child, pose, controllers, molangContexts, boneContext, partialTick, context));
 		
 		poseStack.popPose();
 	}
@@ -193,6 +206,20 @@ public abstract class PItemRenderer<T extends Item & PAnimatable<T>> extends Blo
 	                          float partialTick,
 	                          ItemDisplayContext context)
 	{
+		submitBone(animatable, stack, bone, poseStack, modelData, controllers,
+				new PMeshRenderContext(renderType, color, packedLight, packedOverlay), partialTick, context);
+	}
+
+	protected void submitBone(T animatable,
+	                          ItemStack stack,
+	                          PBakedBone bone,
+	                          PoseStack poseStack,
+	                          PModelData modelData,
+	                          Collection<PAnimationController<T>> controllers,
+	                          PMeshRenderContext inherited,
+	                          float partialTick,
+	                          ItemDisplayContext context)
+	{
 		Matrix4f matrix4fstack = new Matrix4f(poseStack.last().pose());
 		
 		bone.meshes().forEach(mesh ->
@@ -200,17 +227,10 @@ public abstract class PItemRenderer<T extends Item & PAnimatable<T>> extends Blo
 			if (mesh.textureName().isEmpty())
 				return;
 			
-			PMeshRenderContext inherited = new PMeshRenderContext(
-					renderType,
-					color,
-					packedLight,
-					packedOverlay);
 			PMeshRenderContext meshContext = resolveMeshRender(animatable, stack, context, bone, mesh, inherited, partialTick);
 			PMeshRenderMaterial material = PMeshRenderMaterial.resolve(mesh, meshContext);
 			
-			RenderType type = meshContext.renderType().apply(PTextureCache.ATLAS_LOCATION);
-			if (material.emissive())
-				type = PRenderTypes.RenderTypeProvider.emissiveVariant(type, PTextureCache.ATLAS_LOCATION);
+			RenderType type = material.resolveRenderType(meshContext, PTextureCache.ATLAS_LOCATION);
 			
 			PGpuDeformerBuffers.Submission deformation = PGpuDeformerBuffers.submit(meshContext.deformation());
 			PInstanceHeader instance = new PInstanceHeader(matrix4fstack, meshContext.color(), material.packedLight(), meshContext.packedOverlay(),
@@ -223,6 +243,32 @@ public abstract class PItemRenderer<T extends Item & PAnimatable<T>> extends Blo
 			else
 				PRenderQueue.submitItem(context, type, PDeformedMeshBuffers.resolve(material.mesh(), meshContext.deformation()), instance);
 		});
+	}
+
+	private PMeshRenderContext resolveGuiMeshRender(T animatable,
+	                                                ItemStack stack,
+	                                                PBakedBone bone,
+	                                                PBakedMesh mesh,
+	                                                PMeshRenderContext inherited,
+	                                                float partialTick)
+	{
+		Deque<PBakedBone> hierarchy = new ArrayDeque<>();
+		for (PBakedBone current = bone; current != null; current = current.parent())
+			hierarchy.push(current);
+		PMeshRenderContext boneContext = inherited;
+		while (!hierarchy.isEmpty())
+			boneContext = resolveBoneRender(animatable, stack, ItemDisplayContext.GUI, hierarchy.pop(), boneContext, partialTick);
+		return resolveMeshRender(animatable, stack, ItemDisplayContext.GUI, bone, mesh, boneContext, partialTick);
+	}
+
+	protected PMeshRenderContext resolveBoneRender(T animatable,
+	                                               ItemStack stack,
+	                                               ItemDisplayContext context,
+	                                               PBakedBone bone,
+	                                               PMeshRenderContext inherited,
+	                                               float partialTick)
+	{
+		return inherited;
 	}
 	
 	protected PMeshRenderContext resolveMeshRender(T animatable,

@@ -18,6 +18,7 @@ import com.arcanc.pulselib.content.model.PModel;
 import com.arcanc.pulselib.content.model.baked.*;
 import com.arcanc.pulselib.content.model.deformer.gpu.PGpuDeformerBuffers;
 import com.arcanc.pulselib.content.model.textures.atlas.PLibMetadata;
+import com.arcanc.pulselib.content.model.textures.PTextureAlphaClassifier;
 import com.arcanc.pulselib.content.renderer.PRenderQueue;
 import com.arcanc.pulselib.data.PModelLoader;
 import com.arcanc.pulselib.data.gltf.PGltfModelLoader;
@@ -109,6 +110,7 @@ public class PModelCache
 	{
 		PRenderQueue.cleanup();
 		PMeshTextureVariants.clear();
+		PTextureAlphaClassifier.clear();
 		if (MODELS != null)
 		{
 			MODELS.forEach(($, model) ->
@@ -209,6 +211,7 @@ public class PModelCache
 								geometry,
 								mesh.texture(),
 								isEmissive,
+								PTextureAlphaClassifier.resolve(sprite.contents()),
 								mesh,
 								loc));
 					}

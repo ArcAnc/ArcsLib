@@ -1,6 +1,6 @@
 {
-  "vertex": "pulselib:triangles_translucent",
-  "fragment": "pulselib:triangles_translucent",
+  "vertex": "pulselib:triangles_instanced_lit",
+  "fragment": "pulselib:triangles_instanced_lit",
   "attributes": [
     "Position",
     "UV0",

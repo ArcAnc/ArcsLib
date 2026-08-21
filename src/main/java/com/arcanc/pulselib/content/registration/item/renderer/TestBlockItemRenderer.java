@@ -51,10 +51,6 @@ public class TestBlockItemRenderer extends PItemRenderer<TestBlockItem>
 		if (mc.level == null)
 			return inherited;
 		
-		return new PMeshRenderContext(
-				inherited.renderType(),
-				TestDayTimeColor.color(mc.level, partialTick),
-				inherited.packedLight(),
-				inherited.packedOverlay());
+		return inherited.withColor(TestDayTimeColor.color(mc.level, partialTick));
 	}
 }

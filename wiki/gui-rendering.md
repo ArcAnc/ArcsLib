@@ -29,6 +29,8 @@ Parameters:
 
 For item rendering in GUI, [`PItemRenderer`](https://github.com/ArcAnc/PulseLib/blob/1.21.1/src/main/java/com/arcanc/pulselib/content/renderer/PItemRenderer.java) already switches to immediate GUI drawing internally.
 
+`trianglesGui` uses the `triangles_immediate_lit` program. It receives color, light, overlay, normal matrix, model-view matrix, and projection matrix as uniforms rather than instance attributes. Consequently, GUI rendering does not use the queued instance buffer, multi-draw indirect, weighted OIT, or shader-side deformer streams; deformable GUI meshes use the CPU vertex-buffer path. See [Shaders](shaders.md) for the complete immediate shader contract.
+
 Classes used:
 
 * [`PLibHelper`](https://github.com/ArcAnc/PulseLib/blob/1.21.1/src/main/java/com/arcanc/pulselib/util/helpers/PLibHelper.java)

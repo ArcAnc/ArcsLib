@@ -48,6 +48,45 @@ PTextureCache.ATLAS_LOCATION // pulselib:textures/atlas.png
 
 Renderers normally pass `PTextureCache.ATLAS_LOCATION` to `PRenderTypes`, so you rarely need to access the atlas manually.
 
+## Alpha modes
+
+PulseLib can classify an atlas sprite and select a matching queued render type. The available modes are:
+
+* `opaque` - always use `trianglesSolid`;
+* `cutout` - use `trianglesCutout` and discard fragments below the shader's `0.1` alpha threshold;
+* `translucent` - use `trianglesTranslucent`, including weighted OIT when supported;
+* `auto` - inspect the sprite pixels when the model is baked.
+
+The automatic classifier chooses `opaque` when every pixel has alpha 255, `cutout` when alpha contains only 0 and 255, and `translucent` when any pixel has an alpha value from 1 through 254. Results are cached for the lifetime of the loaded atlas.
+
+You can set the mode next to the texture's emissive metadata:
+
+```json
+{
+  "pulselib": {
+    "alpha_mode": "auto",
+    "emissive": false
+  }
+}
+```
+
+The render type supplied to a renderer constructor remains authoritative unless a render resolver opts into alpha-mode selection. Use `PAlphaMode.AUTO` to apply the baked sprite classification:
+
+```java
+@Override
+protected PMeshRenderContext resolveMeshRender(RobotEntity entity,
+                                               PBakedBone bone,
+                                               PBakedMesh mesh,
+                                               PMeshRenderContext inherited,
+                                               float partialTick) {
+    return inherited.withAlphaMode(PAlphaMode.AUTO);
+}
+```
+
+Pass `OPAQUE`, `CUTOUT`, or `TRANSLUCENT` instead to force that mode. Calling `withAlphaMode(null)` returns control to the renderer's original `Function<ResourceLocation, RenderType>`.
+
+Alpha-mode overrides select queued world render types. Do not set one in `resolveGuiMeshRender(...)` or another immediate-rendering context; use `trianglesGui` or `trianglesImmediate` there.
+
 ## Emissive textures
 
 Emissive textures are useful for eyes, screens, lamps, energy parts, and other pieces that should ignore normal light. PulseLib reads this flag from texture metadata through [`PLibMetadata`](https://github.com/ArcAnc/PulseLib/blob/1.21.1/src/main/java/com/arcanc/pulselib/content/model/textures/atlas/PLibMetadata.java).
@@ -80,9 +119,10 @@ PRenderTypes.RenderTypeProvider::trianglesSolidEmissive
 PRenderTypes.RenderTypeProvider::trianglesCutoutEmissive
 PRenderTypes.RenderTypeProvider::trianglesTranslucentEmissive
 PRenderTypes.RenderTypeProvider::trianglesGuiEmissive
+PRenderTypes.RenderTypeProvider::trianglesImmediateEmissive
 ```
 
-`trianglesLitEmissive` remains only as the compatibility counterpart of `trianglesLit`; it is not a distinct shader variant for new rendering code.
+The queued emissive variants use the instanced emissive shader; GUI and immediate variants use the direct emissive shader. Emissive rendering applies texture color, tint, any configured alpha cutoff, and overlay but intentionally skips directional lighting and the lightmap. See [Shaders](shaders.md) for the full mapping.
 
 ## Per-mesh runtime material overrides
 
@@ -100,17 +140,19 @@ protected PMeshRenderContext resolveMeshRender(RobotEntity entity,
 
     return inherited
             .withTexture(entity.activeScreenTexture())
-            .withEmissive(entity.screenIsLit());
+            .withEmissive(entity.screenIsLit())
+            .withAlphaMode(PAlphaMode.AUTO);
 }
 ```
 
-`withTexture(...)` accepts a texture location registered in the PulseLib runtime atlas. On its first use for a given `(mesh, texture)` pair, PulseLib bakes an alternate vertex buffer with UVs mapped to that atlas sprite; later draws reuse that buffer. The variant buffers and their deformation caches are released on the next resource reload.
+`withTexture(...)` accepts a texture location registered in the PulseLib runtime atlas. On its first use for a given `(mesh, texture)` pair, PulseLib bakes an alternate geometry variant with UVs mapped to that atlas sprite and classifies its alpha; later draws reuse that variant. Its GPU geometry and deformation caches are released on the next resource reload.
 
-`withEmissive(true)` forces full-bright emissive rendering, `withEmissive(false)` disables it, and `withEmissive(null)` returns to the selected texture's `.mcmeta` setting.
+`withEmissive(true)` forces full-bright emissive rendering, `withEmissive(false)` disables it, and `withEmissive(null)` returns to the selected texture's `.mcmeta` setting. Alpha mode and emissive selection are independent: PulseLib first chooses the solid, cutout, or translucent base type, then switches it to the matching emissive variant when required.
 
 Classes used:
 
 * [`PTextureCache`](https://github.com/ArcAnc/PulseLib/blob/1.21.1/src/main/java/com/arcanc/pulselib/util/PTextureCache.java)
 * [`RuntimeLoader`](https://github.com/ArcAnc/PulseLib/blob/1.21.1/src/main/java/com/arcanc/pulselib/content/model/textures/atlas/RuntimeLoader.java)
 * [`PLibMetadata`](https://github.com/ArcAnc/PulseLib/blob/1.21.1/src/main/java/com/arcanc/pulselib/content/model/textures/atlas/PLibMetadata.java)
+* [`PAlphaMode`](https://github.com/ArcAnc/PulseLib/blob/1.21.1/src/main/java/com/arcanc/pulselib/content/model/textures/PAlphaMode.java)
 * [`PRenderTypes`](https://github.com/ArcAnc/PulseLib/blob/1.21.1/src/main/java/com/arcanc/pulselib/util/PRenderTypes.java)

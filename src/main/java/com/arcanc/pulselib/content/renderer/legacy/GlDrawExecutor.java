@@ -12,6 +12,7 @@ package com.arcanc.pulselib.content.renderer.legacy;
 import com.arcanc.pulselib.content.mixin.VertexBufferAccessor;
 import com.arcanc.pulselib.content.model.deformer.gpu.PGpuDeformerBuffers;
 import com.arcanc.pulselib.content.renderer.plan.*;
+import com.arcanc.pulselib.util.PRenderTypes;
 import com.arcanc.pulselib.util.helpers.PLibRenderHelper;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.VertexBuffer;
@@ -44,6 +45,7 @@ public final class GlDrawExecutor implements PRenderExecutor
 	private final GlFrameArena frameArena = new GlFrameArena(RING_SLOTS);
 	private final InstanceBuffer instanceBuffer = new InstanceBuffer();
 	private final IndirectBuffer indirectBuffer = new IndirectBuffer();
+	private final GlWeightedBlendedOit weightedBlendedOit = new GlWeightedBlendedOit();
 	private boolean capabilitiesResolved;
 	private PRenderCapabilityMatrix capabilityMatrix = PRenderCapabilityMatrix.NONE;
 	private boolean persistentMapping;
@@ -84,21 +86,28 @@ public final class GlDrawExecutor implements PRenderExecutor
 			this.indirectBuffer.prepare(plan.groups().size(), this.persistentIndirectMapping, this.frameArena);
 		try
 		{
-			for (int groupIndex = 0; groupIndex < plan.groups().size();)
+			List<PDrawGroup> standardGroups = new ArrayList<>();
+			List<PDrawGroup> oitGroups = new ArrayList<>();
+			for (PDrawGroup group : plan.groups())
 			{
-				if (this.multiDrawIndirect && plan.groups().get(groupIndex).writeDepth())
-				{
-					int nextPipeline = findOpaquePipelineEnd(plan.groups(), groupIndex);
-					drawOpaquePipeline(plan.groups().subList(groupIndex, nextPipeline), frame.modelView(), frame.projection(), frameSlot);
-					groupIndex = nextPipeline;
-					continue;
-				}
-				int nextGroup = this.multiDrawIndirect ? this.findMultiDrawEnd(plan.groups(), groupIndex) : groupIndex + 1;
-				if (nextGroup - groupIndex > 1)
-					drawMulti(plan.groups().subList(groupIndex, nextGroup), frame.modelView(), frame.projection(), frameSlot);
+				RenderType type = this.resources.pipeline(group.pipeline());
+				if (!group.writeDepth() && PRenderTypes.RenderTypeProvider.usesOit(type) &&
+						PRenderTypes.ShadersProvider.trianglesOit(PRenderTypes.RenderTypeProvider.usesEmissiveOit(type)) != null)
+					oitGroups.add(group);
 				else
-					draw(plan.groups().get(groupIndex), frame.modelView(), frame.projection(), frameSlot);
-				groupIndex = nextGroup;
+					standardGroups.add(group);
+			}
+
+			drawGroups(standardGroups, frame.modelView(), frame.projection(), frameSlot, false);
+			if (!oitGroups.isEmpty())
+			{
+				if (this.weightedBlendedOit.begin())
+				{
+					drawGroups(oitGroups, frame.modelView(), frame.projection(), frameSlot, true);
+					this.weightedBlendedOit.composite();
+				}
+				else
+					drawGroups(oitGroups, frame.modelView(), frame.projection(), frameSlot, false);
 			}
 		}
 		finally
@@ -113,6 +122,7 @@ public final class GlDrawExecutor implements PRenderExecutor
 		this.frameArena.awaitAll();
 		this.instanceBuffer.close();
 		this.indirectBuffer.close();
+		this.weightedBlendedOit.close();
 		GlStreamStorage.cleanup();
 		this.frameArena.reset();
 		this.capabilitiesResolved = false;
@@ -122,7 +132,27 @@ public final class GlDrawExecutor implements PRenderExecutor
 		this.multiDrawIndirect = false;
 	}
 
-	private void draw(PDrawGroup group, Matrix4f modelView, Matrix4f projection, int frameSlot)
+	private void drawGroups(List<PDrawGroup> groups, Matrix4f modelView, Matrix4f projection, int frameSlot, boolean oit)
+	{
+		for (int groupIndex = 0; groupIndex < groups.size();)
+		{
+			if (this.multiDrawIndirect && groups.get(groupIndex).writeDepth())
+			{
+				int nextPipeline = findOpaquePipelineEnd(groups, groupIndex);
+				drawOpaquePipeline(groups.subList(groupIndex, nextPipeline), modelView, projection, frameSlot);
+				groupIndex = nextPipeline;
+				continue;
+			}
+			int nextGroup = this.multiDrawIndirect ? this.findMultiDrawEnd(groups, groupIndex) : groupIndex + 1;
+			if (nextGroup - groupIndex > 1)
+				drawMulti(groups.subList(groupIndex, nextGroup), modelView, projection, frameSlot, oit);
+			else
+				draw(groups.get(groupIndex), modelView, projection, frameSlot, oit);
+			groupIndex = nextGroup;
+		}
+	}
+
+	private void draw(PDrawGroup group, Matrix4f modelView, Matrix4f projection, int frameSlot, boolean oit)
 	{
 		if (group.command().instanceCount() == 0)
 			return;
@@ -130,11 +160,13 @@ public final class GlDrawExecutor implements PRenderExecutor
 		boolean geometryArena = this.resources.isGeometry(group.mesh());
 		VertexBuffer vertexBuffer = geometryArena ? null : this.resources.mesh(group.mesh());
 		type.setupRenderState();
+		if (oit)
+			this.weightedBlendedOit.configureBlend();
 		if (!group.writeDepth())
 			RenderSystem.depthMask(false);
 		try
 		{
-			ShaderInstance shader = RenderSystem.getShader();
+			ShaderInstance shader = shader(type, oit);
 			if (shader == null)
 				return;
 			GlGeometryArena.Slice geometry = geometryArena ? this.resources.geometry(group.mesh()) : null;
@@ -171,17 +203,19 @@ public final class GlDrawExecutor implements PRenderExecutor
 		}
 	}
 
-	private void drawMulti(List<PDrawGroup> groups, Matrix4f modelView, Matrix4f projection, int frameSlot)
+	private void drawMulti(List<PDrawGroup> groups, Matrix4f modelView, Matrix4f projection, int frameSlot, boolean oit)
 	{
 		PDrawGroup first = groups.getFirst();
 		RenderType type = this.resources.pipeline(first.pipeline());
 		GlGeometryArena.Slice geometry = this.resources.geometry(first.mesh());
 		type.setupRenderState();
+		if (oit)
+			this.weightedBlendedOit.configureBlend();
 		if (!first.writeDepth())
 			RenderSystem.depthMask(false);
 		try
 		{
-			ShaderInstance shader = RenderSystem.getShader();
+			ShaderInstance shader = shader(type, oit);
 			if (shader == null)
 				return;
 			geometry.bind();
@@ -227,12 +261,17 @@ public final class GlDrawExecutor implements PRenderExecutor
 		for (List<PDrawGroup> batch : batches.values())
 		{
 			if (batch.size() > 1)
-				drawMulti(batch, modelView, projection, frameSlot);
+				drawMulti(batch, modelView, projection, frameSlot, false);
 			else
-				draw(batch.getFirst(), modelView, projection, frameSlot);
+				draw(batch.getFirst(), modelView, projection, frameSlot, false);
 		}
 		for (PDrawGroup group : directGroups)
-			draw(group, modelView, projection, frameSlot);
+			draw(group, modelView, projection, frameSlot, false);
+	}
+
+	private static @Nullable ShaderInstance shader(RenderType type, boolean oit)
+	{
+		return oit ? PRenderTypes.ShadersProvider.trianglesOit(PRenderTypes.RenderTypeProvider.usesEmissiveOit(type)) : RenderSystem.getShader();
 	}
 
 	private int findMultiDrawEnd(List<PDrawGroup> groups, int start)

@@ -160,7 +160,7 @@ public class PLivingAttachmentLayer<T extends LivingEntity, M extends EntityMode
 	                                      float partialTick)
 	{
 		PMeshRenderContext context = new PMeshRenderContext(
-				PRenderTypes.RenderTypeProvider :: trianglesLit,
+				PRenderTypes.RenderTypeProvider :: trianglesImmediate,
 				-1,
 				light,
 				OverlayTexture.NO_OVERLAY);

@@ -11,6 +11,8 @@ package com.arcanc.pulselib.util;
 
 
 import com.arcanc.pulselib.content.mixin.RenderTypeAccessor;
+import com.arcanc.pulselib.content.model.textures.PAlphaMode;
+import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.VertexFormat;
 import com.mojang.blaze3d.vertex.VertexFormatElement;
 import net.minecraft.Util;
@@ -24,220 +26,132 @@ import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
+import java.util.Collections;
+import java.util.IdentityHashMap;
 import java.util.Optional;
+import java.util.Set;
+import java.util.function.Consumer;
 import java.util.function.Function;
 
-public class PRenderTypes
+public final class PRenderTypes
 {
-	public static class RenderTypeProvider
+	private PRenderTypes()
 	{
+	}
+
+	public static final class RenderTypeProvider
+	{
+		private RenderTypeProvider()
+		{
+		}
+
+		private static final Set<RenderType> OIT_TRANSLUCENT_TYPES = Collections.newSetFromMap(new IdentityHashMap<>());
+		private static final Set<RenderType> OIT_TRANSLUCENT_EMISSIVE_TYPES = Collections.newSetFromMap(new IdentityHashMap<>());
 		private static final Function<ResourceLocation, RenderType> TRIANGLES_SOLID = Util.memoize(RenderTypeProvider :: createTrianglesSolid);
 		private static final Function<ResourceLocation, RenderType> TRIANGLES_CUTOUT = Util.memoize(RenderTypeProvider :: createTrianglesCutout);
 		private static final Function<ResourceLocation, RenderType> TRIANGLES_TRANSLUCENT = Util.memoize(RenderTypeProvider :: createTrianglesTranslucent);
 		private static final Function<ResourceLocation, RenderType> TRIANGLES_GUI = Util.memoize(RenderTypeProvider :: createTrianglesGui);
-		private static final Function<ResourceLocation, RenderType> TRIANGLES_LIT = Util.memoize(RenderTypeProvider :: createTrianglesLit);
+		private static final Function<ResourceLocation, RenderType> TRIANGLES_IMMEDIATE = Util.memoize(RenderTypeProvider :: createTrianglesImmediate);
 		private static final Function<ResourceLocation, RenderType> TRIANGLES_SOLID_EMISSIVE = Util.memoize(RenderTypeProvider :: createTrianglesSolidEmissive);
 		private static final Function<ResourceLocation, RenderType> TRIANGLES_CUTOUT_EMISSIVE = Util.memoize(RenderTypeProvider :: createTrianglesCutoutEmissive);
 		private static final Function<ResourceLocation, RenderType> TRIANGLES_TRANSLUCENT_EMISSIVE = Util.memoize(RenderTypeProvider :: createTrianglesTranslucentEmissive);
 		private static final Function<ResourceLocation, RenderType> TRIANGLES_GUI_EMISSIVE = Util.memoize(RenderTypeProvider :: createTrianglesGuiEmissive);
-		private static final Function<ResourceLocation, RenderType> TRIANGLES_LIT_EMISSIVE = Util.memoize(RenderTypeProvider :: createTrianglesLitEmissive);
+		private static final Function<ResourceLocation, RenderType> TRIANGLES_IMMEDIATE_EMISSIVE = Util.memoize(RenderTypeProvider :: createTrianglesImmediateEmissive);
 		
 		private static RenderType createTrianglesSolid(ResourceLocation location)
 		{
-			RenderType.CompositeState rendertype$compositestate = RenderType.CompositeState.builder().
-							setShaderState(ShadersProvider.StateShard.TRIANGLES_SOLID_STATE_SHARD).
-							setTextureState(new RenderStateShard.TextureStateShard(location, false, false)).
-							setTransparencyState(RenderStateShard.NO_TRANSPARENCY).
-							setCullState(RenderStateShard.NO_CULL).
-							setLightmapState(RenderStateShard.LIGHTMAP).
-							setOverlayState(RenderStateShard.OVERLAY).
-							createCompositeState(true);
-			return RenderType.create(
-					PLibDatabase.rl("triangles_solid").toString(),
-					VertexFormatProvider.POSITION_TEX_NORMAL,
-					VertexFormat.Mode.TRIANGLES,
-					1536,
-					true,
-					false,
-					rendertype$compositestate);
+			return createTriangles("triangles_solid", location,
+					ShadersProvider.StateShard.TRIANGLES_SOLID_STATE_SHARD,
+					RenderStateShard.NO_TRANSPARENCY);
 		}
 		
 		private static RenderType createTrianglesCutout(ResourceLocation location)
 		{
-			RenderType.CompositeState rendertype$compositestate = RenderType.CompositeState.builder().
-					setShaderState(ShadersProvider.StateShard.TRIANGLES_CUTOUT_STATE_SHARD).
-					setTextureState(new RenderStateShard.TextureStateShard(location, false, false)).
-					setTransparencyState(RenderStateShard.NO_TRANSPARENCY).
-					setCullState(RenderStateShard.NO_CULL).
-					setLightmapState(RenderStateShard.LIGHTMAP).
-					setOverlayState(RenderStateShard.OVERLAY).
-					createCompositeState(true);
-			return RenderType.create(
-					PLibDatabase.rl("triangles_cutout").toString(),
-					VertexFormatProvider.POSITION_TEX_NORMAL,
-					VertexFormat.Mode.TRIANGLES,
-					1536,
-					true,
-					false,
-					rendertype$compositestate);
+			return createTriangles("triangles_cutout", location,
+					ShadersProvider.StateShard.TRIANGLES_CUTOUT_STATE_SHARD,
+					RenderStateShard.NO_TRANSPARENCY);
 		}
 		
-		public static RenderType createTrianglesTranslucent(ResourceLocation location)
+		private static RenderType createTrianglesTranslucent(ResourceLocation location)
 		{
-			RenderType.CompositeState rendertype$compositestate = RenderType.CompositeState.builder().
-					setShaderState(ShadersProvider.StateShard.TRIANGLES_TRANSLUCENT_STATE_SHARD).
-					setTextureState(new RenderStateShard.TextureStateShard(location, false, false)).
-					setTransparencyState(RenderStateShard.TRANSLUCENT_TRANSPARENCY).
-					setCullState(RenderStateShard.NO_CULL).
-					setLightmapState(RenderStateShard.LIGHTMAP).
-					setOverlayState(RenderStateShard.OVERLAY).
-					createCompositeState(true);
-			return RenderType.create(
-					PLibDatabase.rl("triangles_translucent").toString(),
-					VertexFormatProvider.POSITION_TEX_NORMAL,
-					VertexFormat.Mode.TRIANGLES,
-					1536,
-					true,
-					false,
-					rendertype$compositestate);
+			RenderType type = createTriangles("triangles_translucent", location,
+					ShadersProvider.StateShard.TRIANGLES_TRANSLUCENT_STATE_SHARD,
+					RenderStateShard.TRANSLUCENT_TRANSPARENCY);
+			OIT_TRANSLUCENT_TYPES.add(type);
+			return type;
 		}
 		
-		public static RenderType createTrianglesGui(ResourceLocation location)
+		private static RenderType createTrianglesGui(ResourceLocation location)
 		{
-			RenderType.CompositeState rendertype$compositestate = RenderType.CompositeState.builder().
-					setShaderState(ShadersProvider.StateShard.TRIANGLES_GUI_STATE_SHARD).
-					setTextureState(new RenderStateShard.TextureStateShard(location, false, false)).
-					setTransparencyState(RenderStateShard.TRANSLUCENT_TRANSPARENCY).
-					setLightmapState(RenderStateShard.LIGHTMAP).
-					setOverlayState(RenderStateShard.OVERLAY).
-					createCompositeState(true);
-			return RenderType.create(
-					PLibDatabase.rl("triangles_gui").toString(),
-					VertexFormatProvider.POSITION_TEX_NORMAL,
-					VertexFormat.Mode.TRIANGLES,
-					1536,
-					true,
-					false,
-					rendertype$compositestate);
+			return createTriangles("triangles_gui", location,
+					ShadersProvider.StateShard.TRIANGLES_IMMEDIATE_LIT_STATE_SHARD,
+					RenderStateShard.TRANSLUCENT_TRANSPARENCY);
 		}
 		
-		public static RenderType createTrianglesLit(ResourceLocation location)
+		private static RenderType createTrianglesImmediate(ResourceLocation location)
 		{
-			RenderType.CompositeState rendertype$compositestate = RenderType.CompositeState.builder().
-					setShaderState(ShadersProvider.StateShard.TRIANGLES_LIT_STATE_SHARD).
-					setTextureState(new RenderStateShard.TextureStateShard(location, false, false)).
-					setTransparencyState(RenderStateShard.NO_TRANSPARENCY).
-					setCullState(RenderStateShard.NO_CULL).
-					setLightmapState(RenderStateShard.LIGHTMAP).
-					setOverlayState(RenderStateShard.OVERLAY).
-					createCompositeState(true);
-			return RenderType.create(
-					PLibDatabase.rl("triangles_lit").toString(),
-					VertexFormatProvider.POSITION_TEX_NORMAL,
-					VertexFormat.Mode.TRIANGLES,
-					1536,
-					true,
-					false,
-					rendertype$compositestate);
+			return createTriangles("triangles_immediate", location,
+					ShadersProvider.StateShard.TRIANGLES_IMMEDIATE_LIT_STATE_SHARD,
+					RenderStateShard.NO_TRANSPARENCY);
 		}
 		
 		private static RenderType createTrianglesSolidEmissive(ResourceLocation location)
 		{
-			RenderType.CompositeState rendertype$compositestate = RenderType.CompositeState.builder().
-					setShaderState(ShadersProvider.StateShard.TRIANGLES_EMISSIVE_STATE_SHARD).
-					setTextureState(new RenderStateShard.TextureStateShard(location, false, false)).
-					setTransparencyState(RenderStateShard.NO_TRANSPARENCY).
-					setCullState(RenderStateShard.NO_CULL).
-					setLightmapState(RenderStateShard.LIGHTMAP).
-					setOverlayState(RenderStateShard.OVERLAY).
-					createCompositeState(true);
-			return RenderType.create(
-					PLibDatabase.rl("triangles_solid_emissive").toString(),
-					VertexFormatProvider.POSITION_TEX_NORMAL,
-					VertexFormat.Mode.TRIANGLES,
-					1536,
-					true,
-					false,
-					rendertype$compositestate);
+			return createTriangles("triangles_solid_emissive", location,
+					ShadersProvider.StateShard.TRIANGLES_SOLID_EMISSIVE_STATE_SHARD,
+					RenderStateShard.NO_TRANSPARENCY);
 		}
 		
 		private static RenderType createTrianglesCutoutEmissive(ResourceLocation location)
 		{
-			RenderType.CompositeState rendertype$compositestate = RenderType.CompositeState.builder().
-					setShaderState(ShadersProvider.StateShard.TRIANGLES_CUTOUT_EMISSIVE_STATE_SHARD).
-					setTextureState(new RenderStateShard.TextureStateShard(location, false, false)).
-					setTransparencyState(RenderStateShard.NO_TRANSPARENCY).
-					setCullState(RenderStateShard.NO_CULL).
-					setLightmapState(RenderStateShard.LIGHTMAP).
-					setOverlayState(RenderStateShard.OVERLAY).
-					createCompositeState(true);
-			return RenderType.create(
-					PLibDatabase.rl("triangles_cutout_emissive").toString(),
-					VertexFormatProvider.POSITION_TEX_NORMAL,
-					VertexFormat.Mode.TRIANGLES,
-					1536,
-					true,
-					false,
-					rendertype$compositestate);
+			return createTriangles("triangles_cutout_emissive", location,
+					ShadersProvider.StateShard.TRIANGLES_CUTOUT_EMISSIVE_STATE_SHARD,
+					RenderStateShard.NO_TRANSPARENCY);
 		}
 		
-		public static RenderType createTrianglesTranslucentEmissive(ResourceLocation location)
+		private static RenderType createTrianglesTranslucentEmissive(ResourceLocation location)
 		{
-			RenderType.CompositeState rendertype$compositestate = RenderType.CompositeState.builder().
-					setShaderState(ShadersProvider.StateShard.TRIANGLES_TRANSLUCENT_EMISSIVE_STATE_SHARD).
-					setTextureState(new RenderStateShard.TextureStateShard(location, false, false)).
-					setTransparencyState(RenderStateShard.TRANSLUCENT_TRANSPARENCY).
-					setCullState(RenderStateShard.NO_CULL).
-					setLightmapState(RenderStateShard.LIGHTMAP).
-					setOverlayState(RenderStateShard.OVERLAY).
-					createCompositeState(true);
-			return RenderType.create(
-					PLibDatabase.rl("triangles_translucent_emissive").toString(),
-					VertexFormatProvider.POSITION_TEX_NORMAL,
-					VertexFormat.Mode.TRIANGLES,
-					1536,
-					true,
-					false,
-					rendertype$compositestate);
+			RenderType type = createTriangles("triangles_translucent_emissive", location,
+					ShadersProvider.StateShard.TRIANGLES_TRANSLUCENT_EMISSIVE_STATE_SHARD,
+					RenderStateShard.TRANSLUCENT_TRANSPARENCY);
+			OIT_TRANSLUCENT_EMISSIVE_TYPES.add(type);
+			return type;
 		}
 		
-		public static RenderType createTrianglesGuiEmissive(ResourceLocation location)
+		private static RenderType createTrianglesGuiEmissive(ResourceLocation location)
 		{
-			RenderType.CompositeState rendertype$compositestate = RenderType.CompositeState.builder().
-					setShaderState(ShadersProvider.StateShard.TRIANGLES_GUI_EMISSIVE_STATE_SHARD).
-					setTextureState(new RenderStateShard.TextureStateShard(location, false, false)).
-					setTransparencyState(RenderStateShard.TRANSLUCENT_TRANSPARENCY).
-					setLightmapState(RenderStateShard.LIGHTMAP).
-					setOverlayState(RenderStateShard.OVERLAY).
-					createCompositeState(true);
-			return RenderType.create(
-					PLibDatabase.rl("triangles_gui_emissive").toString(),
-					VertexFormatProvider.POSITION_TEX_NORMAL,
-					VertexFormat.Mode.TRIANGLES,
-					1536,
-					true,
-					false,
-					rendertype$compositestate);
+			return createTriangles("triangles_gui_emissive", location,
+					ShadersProvider.StateShard.TRIANGLES_IMMEDIATE_EMISSIVE_STATE_SHARD,
+					RenderStateShard.TRANSLUCENT_TRANSPARENCY);
 		}
 		
-		public static RenderType createTrianglesLitEmissive(ResourceLocation location)
+		private static RenderType createTrianglesImmediateEmissive(ResourceLocation location)
 		{
-			RenderType.CompositeState rendertype$compositestate = RenderType.CompositeState.builder().
-					setShaderState(ShadersProvider.StateShard.TRIANGLES_LIT_EMISSIVE_STATE_SHARD).
+			return createTriangles("triangles_immediate_emissive", location,
+					ShadersProvider.StateShard.TRIANGLES_IMMEDIATE_EMISSIVE_STATE_SHARD,
+					RenderStateShard.NO_TRANSPARENCY);
+		}
+
+		private static RenderType createTriangles(String name,
+		                                          ResourceLocation location,
+		                                          RenderStateShard.ShaderStateShard shader,
+		                                          RenderStateShard.TransparencyStateShard transparency)
+		{
+			RenderType.CompositeState.CompositeStateBuilder state = RenderType.CompositeState.builder().
+					setShaderState(shader).
 					setTextureState(new RenderStateShard.TextureStateShard(location, false, false)).
-					setTransparencyState(RenderStateShard.NO_TRANSPARENCY).
+					setTransparencyState(transparency).
 					setCullState(RenderStateShard.NO_CULL).
 					setLightmapState(RenderStateShard.LIGHTMAP).
-					setOverlayState(RenderStateShard.OVERLAY).
-					createCompositeState(true);
+					setOverlayState(RenderStateShard.OVERLAY);
 			return RenderType.create(
-					PLibDatabase.rl("triangles_lit_emissive").toString(),
+					PLibDatabase.rl(name).toString(),
 					VertexFormatProvider.POSITION_TEX_NORMAL,
 					VertexFormat.Mode.TRIANGLES,
 					1536,
 					true,
 					false,
-					rendertype$compositestate);
+					state.createCompositeState(true));
 		}
 		
 		public static RenderType trianglesSolid(ResourceLocation location)
@@ -260,9 +174,9 @@ public class PRenderTypes
 			return TRIANGLES_GUI.apply(location);
 		}
 		
-		public static RenderType trianglesLit(ResourceLocation location)
+		public static RenderType trianglesImmediate(ResourceLocation location)
 		{
-			return TRIANGLES_LIT.apply(location);
+			return TRIANGLES_IMMEDIATE.apply(location);
 		}
 		
 		public static RenderType trianglesSolidEmissive(ResourceLocation location)
@@ -285,9 +199,20 @@ public class PRenderTypes
 			return TRIANGLES_GUI_EMISSIVE.apply(location);
 		}
 		
-		public static RenderType trianglesLitEmissive(ResourceLocation location)
+		public static RenderType trianglesImmediateEmissive(ResourceLocation location)
 		{
-			return TRIANGLES_LIT_EMISSIVE.apply(location);
+			return TRIANGLES_IMMEDIATE_EMISSIVE.apply(location);
+		}
+
+		public static RenderType forAlphaMode(PAlphaMode alphaMode, ResourceLocation location)
+		{
+			return switch (alphaMode)
+			{
+				case OPAQUE -> trianglesSolid(location);
+				case CUTOUT -> trianglesCutout(location);
+				case TRANSLUCENT -> trianglesTranslucent(location);
+				case AUTO -> throw new IllegalArgumentException("AUTO alpha mode must be resolved before selecting a render type");
+			};
 		}
 		
 		public static RenderType emissiveVariant(RenderType renderType, ResourceLocation location)
@@ -300,14 +225,28 @@ public class PRenderTypes
 				return trianglesTranslucentEmissive(location);
 			if (renderType == trianglesGui(location))
 				return trianglesGuiEmissive(location);
-			if (renderType == trianglesLit(location))
-				return trianglesLitEmissive(location);
+			if (renderType == trianglesImmediate(location))
+				return trianglesImmediateEmissive(location);
 			return renderType;
+		}
+
+		public static boolean usesOit(RenderType renderType)
+		{
+			return OIT_TRANSLUCENT_TYPES.contains(renderType) || OIT_TRANSLUCENT_EMISSIVE_TYPES.contains(renderType);
+		}
+
+		public static boolean usesEmissiveOit(RenderType renderType)
+		{
+			return OIT_TRANSLUCENT_EMISSIVE_TYPES.contains(renderType);
 		}
 	}
 	
-	public static class VertexFormatProvider
+	public static final class VertexFormatProvider
 	{
+		private VertexFormatProvider()
+		{
+		}
+
 		public static final VertexFormat POSITION_TEX_NORMAL = VertexFormat.builder().
 				add("Position", VertexFormatElement.POSITION).
 				add("UV0", VertexFormatElement.UV0).
@@ -316,38 +255,46 @@ public class PRenderTypes
 				build();
 	}
 	
-	public static class ShadersProvider
+	public static final class ShadersProvider
 	{
-		public static class StateShard
+		private ShadersProvider()
+		{
+		}
+
+		private static final class StateShard
 		{
 			private static final RenderStateShard.ShaderStateShard TRIANGLES_SOLID_STATE_SHARD = new RenderStateShard.ShaderStateShard(() -> ShadersProvider.TRIANGLES_SOLID_SHADER);
 			private static final RenderStateShard.ShaderStateShard TRIANGLES_CUTOUT_STATE_SHARD = new RenderStateShard.ShaderStateShard(() -> ShadersProvider.TRIANGLES_CUTOUT_SHADER);
 			private static final RenderStateShard.ShaderStateShard TRIANGLES_TRANSLUCENT_STATE_SHARD = new RenderStateShard.ShaderStateShard(() -> ShadersProvider.TRIANGLES_TRANSLUCENT_SHADER);
-			private static final RenderStateShard.ShaderStateShard TRIANGLES_GUI_STATE_SHARD = new RenderStateShard.ShaderStateShard(() -> ShadersProvider.TRIANGLES_GUI_SHADER);
-			private static final RenderStateShard.ShaderStateShard TRIANGLES_LIT_STATE_SHARD = new RenderStateShard.ShaderStateShard(() -> ShadersProvider.TRIANGLES_GUI_SHADER);
-			private static final RenderStateShard.ShaderStateShard TRIANGLES_EMISSIVE_STATE_SHARD = new RenderStateShard.ShaderStateShard(() -> ShadersProvider.TRIANGLES_EMISSIVE_SHADER);
+			private static final RenderStateShard.ShaderStateShard TRIANGLES_IMMEDIATE_LIT_STATE_SHARD = new RenderStateShard.ShaderStateShard(() -> ShadersProvider.TRIANGLES_IMMEDIATE_LIT_SHADER);
+			private static final RenderStateShard.ShaderStateShard TRIANGLES_SOLID_EMISSIVE_STATE_SHARD = new RenderStateShard.ShaderStateShard(() -> ShadersProvider.TRIANGLES_SOLID_EMISSIVE_SHADER);
 			private static final RenderStateShard.ShaderStateShard TRIANGLES_CUTOUT_EMISSIVE_STATE_SHARD = new RenderStateShard.ShaderStateShard(() -> ShadersProvider.TRIANGLES_CUTOUT_EMISSIVE_SHADER);
 			private static final RenderStateShard.ShaderStateShard TRIANGLES_TRANSLUCENT_EMISSIVE_STATE_SHARD = new RenderStateShard.ShaderStateShard(() -> ShadersProvider.TRIANGLES_TRANSLUCENT_EMISSIVE_SHADER);
-			private static final RenderStateShard.ShaderStateShard TRIANGLES_GUI_EMISSIVE_STATE_SHARD = new RenderStateShard.ShaderStateShard(() -> ShadersProvider.TRIANGLES_GUI_EMISSIVE_SHADER);
-			private static final RenderStateShard.ShaderStateShard TRIANGLES_LIT_EMISSIVE_STATE_SHARD = new RenderStateShard.ShaderStateShard(() -> ShadersProvider.TRIANGLES_GUI_EMISSIVE_SHADER);
+			private static final RenderStateShard.ShaderStateShard TRIANGLES_IMMEDIATE_EMISSIVE_STATE_SHARD = new RenderStateShard.ShaderStateShard(() -> ShadersProvider.TRIANGLES_IMMEDIATE_EMISSIVE_SHADER);
 		}
 		
 		@Nullable
-		public static ShaderInstance TRIANGLES_SOLID_SHADER;
+		private static ShaderInstance TRIANGLES_SOLID_SHADER;
 		@Nullable
-		public static ShaderInstance TRIANGLES_CUTOUT_SHADER;
+		private static ShaderInstance TRIANGLES_CUTOUT_SHADER;
 		@Nullable
-		public static ShaderInstance TRIANGLES_TRANSLUCENT_SHADER;
+		private static ShaderInstance TRIANGLES_TRANSLUCENT_SHADER;
 		@Nullable
-		public static ShaderInstance TRIANGLES_GUI_SHADER;
+		private static ShaderInstance TRIANGLES_IMMEDIATE_LIT_SHADER;
 		@Nullable
-		public static ShaderInstance TRIANGLES_EMISSIVE_SHADER;
+		private static ShaderInstance TRIANGLES_SOLID_EMISSIVE_SHADER;
 		@Nullable
-		public static ShaderInstance TRIANGLES_CUTOUT_EMISSIVE_SHADER;
+		private static ShaderInstance TRIANGLES_CUTOUT_EMISSIVE_SHADER;
 		@Nullable
-		public static ShaderInstance TRIANGLES_TRANSLUCENT_EMISSIVE_SHADER;
+		private static ShaderInstance TRIANGLES_TRANSLUCENT_EMISSIVE_SHADER;
 		@Nullable
-		public static ShaderInstance TRIANGLES_GUI_EMISSIVE_SHADER;
+		private static ShaderInstance TRIANGLES_IMMEDIATE_EMISSIVE_SHADER;
+		@Nullable
+		private static ShaderInstance TRIANGLES_OIT_SHADER;
+		@Nullable
+		private static ShaderInstance TRIANGLES_OIT_EMISSIVE_SHADER;
+		@Nullable
+		private static ShaderInstance OIT_COMPOSITE_SHADER;
 		
 		public static @Nullable ShaderInstance trianglesSolid()
 		{
@@ -361,17 +308,13 @@ public class PRenderTypes
 		{
 			return TRIANGLES_TRANSLUCENT_SHADER;
 		}
-		public static @Nullable ShaderInstance trianglesGui()
+		public static @Nullable ShaderInstance trianglesImmediateLit()
 		{
-			return TRIANGLES_GUI_SHADER;
+			return TRIANGLES_IMMEDIATE_LIT_SHADER;
 		}
-		public static @Nullable ShaderInstance trianglesLit()
+		public static @Nullable ShaderInstance trianglesSolidEmissive()
 		{
-			return TRIANGLES_GUI_SHADER;
-		}
-		public static @Nullable ShaderInstance trianglesEmissive()
-		{
-			return TRIANGLES_EMISSIVE_SHADER;
+			return TRIANGLES_SOLID_EMISSIVE_SHADER;
 		}
 		public static @Nullable ShaderInstance trianglesCutoutEmissive()
 		{
@@ -381,64 +324,65 @@ public class PRenderTypes
 		{
 			return TRIANGLES_TRANSLUCENT_EMISSIVE_SHADER;
 		}
-		public static @Nullable ShaderInstance trianglesGuiEmissive()
+		public static @Nullable ShaderInstance trianglesImmediateEmissive()
 		{
-			return TRIANGLES_GUI_EMISSIVE_SHADER;
+			return TRIANGLES_IMMEDIATE_EMISSIVE_SHADER;
 		}
-		public static @Nullable ShaderInstance trianglesLitEmissive()
+
+		public static @Nullable ShaderInstance trianglesOit(boolean emissive)
 		{
-			return TRIANGLES_GUI_EMISSIVE_SHADER;
+			return emissive ? TRIANGLES_OIT_EMISSIVE_SHADER : TRIANGLES_OIT_SHADER;
+		}
+
+		public static @Nullable ShaderInstance oitComposite()
+		{
+			return OIT_COMPOSITE_SHADER;
 		}
 		
 		private static void registerShaders(final RegisterShadersEvent event)
 		{
 			try
 			{
-				event.registerShader(new ShaderInstance(
-								event.getResourceProvider(),
-								PLibDatabase.rl("triangles_solid"),
-								VertexFormatProvider.POSITION_TEX_NORMAL),
-						shaderInstance -> TRIANGLES_SOLID_SHADER = shaderInstance);
-				event.registerShader(new ShaderInstance(
-								event.getResourceProvider(),
-								PLibDatabase.rl("triangles_cutout"),
-								VertexFormatProvider.POSITION_TEX_NORMAL),
-						shaderInstance -> TRIANGLES_CUTOUT_SHADER = shaderInstance);
-				event.registerShader(new ShaderInstance(
-								event.getResourceProvider(),
-								PLibDatabase.rl("triangles_translucent"),
-								VertexFormatProvider.POSITION_TEX_NORMAL),
-						shaderInstance -> TRIANGLES_TRANSLUCENT_SHADER = shaderInstance);
-				event.registerShader(new ShaderInstance(
-								event.getResourceProvider(),
-								PLibDatabase.rl("triangles_gui"),
-								VertexFormatProvider.POSITION_TEX_NORMAL),
-						shaderInstance -> TRIANGLES_GUI_SHADER = shaderInstance);
-				event.registerShader(new ShaderInstance(
-								event.getResourceProvider(),
-								PLibDatabase.rl("triangles_emissive"),
-								VertexFormatProvider.POSITION_TEX_NORMAL),
-						shaderInstance -> TRIANGLES_EMISSIVE_SHADER = shaderInstance);
-				event.registerShader(new ShaderInstance(
-								event.getResourceProvider(),
-								PLibDatabase.rl("triangles_cutout_emissive"),
-								VertexFormatProvider.POSITION_TEX_NORMAL),
-						shaderInstance -> TRIANGLES_CUTOUT_EMISSIVE_SHADER = shaderInstance);
-				event.registerShader(new ShaderInstance(
-								event.getResourceProvider(),
-								PLibDatabase.rl("triangles_translucent_emissive"),
-								VertexFormatProvider.POSITION_TEX_NORMAL),
-						shaderInstance -> TRIANGLES_TRANSLUCENT_EMISSIVE_SHADER = shaderInstance);
-				event.registerShader(new ShaderInstance(
-								event.getResourceProvider(),
-								PLibDatabase.rl("triangles_gui_emissive"),
-								VertexFormatProvider.POSITION_TEX_NORMAL),
-						shaderInstance -> TRIANGLES_GUI_EMISSIVE_SHADER = shaderInstance);
+				registerShader(event, "triangles_solid", VertexFormatProvider.POSITION_TEX_NORMAL,
+						shader -> TRIANGLES_SOLID_SHADER = shader);
+				registerShader(event, "triangles_cutout", VertexFormatProvider.POSITION_TEX_NORMAL,
+						shader -> TRIANGLES_CUTOUT_SHADER = shader);
+				registerShader(event, "triangles_translucent", VertexFormatProvider.POSITION_TEX_NORMAL,
+						shader -> TRIANGLES_TRANSLUCENT_SHADER = shader);
+
+				registerShader(event, "triangles_solid_emissive", VertexFormatProvider.POSITION_TEX_NORMAL,
+						shader -> TRIANGLES_SOLID_EMISSIVE_SHADER = shader);
+				registerShader(event, "triangles_cutout_emissive", VertexFormatProvider.POSITION_TEX_NORMAL,
+						shader -> TRIANGLES_CUTOUT_EMISSIVE_SHADER = shader);
+				registerShader(event, "triangles_translucent_emissive", VertexFormatProvider.POSITION_TEX_NORMAL,
+						shader -> TRIANGLES_TRANSLUCENT_EMISSIVE_SHADER = shader);
+
+				registerShader(event, "triangles_immediate_lit", VertexFormatProvider.POSITION_TEX_NORMAL,
+						shader -> TRIANGLES_IMMEDIATE_LIT_SHADER = shader);
+				registerShader(event, "triangles_immediate_emissive", VertexFormatProvider.POSITION_TEX_NORMAL,
+						shader -> TRIANGLES_IMMEDIATE_EMISSIVE_SHADER = shader);
+
+				registerShader(event, "triangles_oit", VertexFormatProvider.POSITION_TEX_NORMAL,
+						shader -> TRIANGLES_OIT_SHADER = shader);
+				registerShader(event, "triangles_oit_emissive", VertexFormatProvider.POSITION_TEX_NORMAL,
+						shader -> TRIANGLES_OIT_EMISSIVE_SHADER = shader);
+				registerShader(event, "oit_composite", DefaultVertexFormat.BLIT_SCREEN,
+						shader -> OIT_COMPOSITE_SHADER = shader);
 			}
 			catch (IOException e)
 			{
-				PLibDatabase.LOGGER.warn("Failed to register shaders: {}", String.valueOf(e));
+				PLibDatabase.LOGGER.warn("Failed to register shaders", e);
 			}
+		}
+
+		private static void registerShader(RegisterShadersEvent event,
+		                                   String name,
+		                                   VertexFormat format,
+		                                   Consumer<ShaderInstance> setter) throws IOException
+		{
+			event.registerShader(
+					new ShaderInstance(event.getResourceProvider(), PLibDatabase.rl(name), format),
+					setter);
 		}
 	}
 	

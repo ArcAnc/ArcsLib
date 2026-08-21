@@ -1,6 +1,6 @@
 {
-  "vertex": "pulselib:triangles_gui_emissive",
-  "fragment": "pulselib:triangles_gui_emissive",
+  "vertex": "pulselib:triangles_immediate_emissive",
+  "fragment": "pulselib:triangles_immediate_emissive",
   "samplers": [
     { "name": "Sampler0" },
     { "name": "Sampler1" }

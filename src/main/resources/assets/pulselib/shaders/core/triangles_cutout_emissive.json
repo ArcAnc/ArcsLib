@@ -1,6 +1,6 @@
 {
-  "vertex": "pulselib:triangles_emissive",
-  "fragment": "pulselib:triangles_emissive",
+  "vertex": "pulselib:triangles_instanced_emissive",
+  "fragment": "pulselib:triangles_instanced_emissive",
   "attributes": [
     "Position",
     "UV0",
