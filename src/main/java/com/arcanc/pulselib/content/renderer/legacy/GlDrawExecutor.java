@@ -14,9 +14,11 @@ import com.arcanc.pulselib.content.model.deformer.gpu.PGpuDeformerBuffers;
 import com.arcanc.pulselib.content.renderer.plan.*;
 import com.arcanc.pulselib.util.PRenderTypes;
 import com.arcanc.pulselib.util.helpers.PLibRenderHelper;
+import com.mojang.blaze3d.pipeline.RenderTarget;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.VertexBuffer;
 import com.mojang.blaze3d.vertex.VertexFormat;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.ShaderInstance;
@@ -74,6 +76,11 @@ public final class GlDrawExecutor implements PRenderExecutor
 	@Override
 	public void execute(PRenderPlan plan, PRenderFrame frame)
 	{
+		execute(plan, frame, Minecraft.getInstance().getMainRenderTarget());
+	}
+
+	public void execute(PRenderPlan plan, PRenderFrame frame, RenderTarget depthSource)
+	{
 		if (plan.isEmpty())
 			return;
 		resolveCapabilities();
@@ -98,22 +105,34 @@ public final class GlDrawExecutor implements PRenderExecutor
 					standardGroups.add(group);
 			}
 
-			drawGroups(standardGroups, frame.modelView(), frame.projection(), frameSlot, false);
+			int indirectCommandOffset = drawGroups(standardGroups, frame.modelView(), frame.projection(), frameSlot, false, 0);
 			if (!oitGroups.isEmpty())
 			{
-				if (this.weightedBlendedOit.begin())
+				if (this.weightedBlendedOit.begin(depthSource))
 				{
-					drawGroups(oitGroups, frame.modelView(), frame.projection(), frameSlot, true);
-					this.weightedBlendedOit.composite();
+					try
+					{
+						indirectCommandOffset = drawGroups(oitGroups, frame.modelView(), frame.projection(), frameSlot, true,
+								indirectCommandOffset);
+					}
+					finally
+					{
+						this.weightedBlendedOit.endAccumulation();
+					}
 				}
 				else
-					drawGroups(oitGroups, frame.modelView(), frame.projection(), frameSlot, false);
+					drawGroups(oitGroups, frame.modelView(), frame.projection(), frameSlot, false, indirectCommandOffset);
 			}
 		}
 		finally
 		{
 			this.frameArena.finish(frameSlot, this.persistentMapping);
 		}
+	}
+
+	public void compositeOit(RenderTarget destination)
+	{
+		this.weightedBlendedOit.composite(destination);
 	}
 
 	@Override
@@ -132,24 +151,28 @@ public final class GlDrawExecutor implements PRenderExecutor
 		this.multiDrawIndirect = false;
 	}
 
-	private void drawGroups(List<PDrawGroup> groups, Matrix4f modelView, Matrix4f projection, int frameSlot, boolean oit)
+	private int drawGroups(List<PDrawGroup> groups, Matrix4f modelView, Matrix4f projection, int frameSlot, boolean oit,
+	                       int indirectCommandOffset)
 	{
 		for (int groupIndex = 0; groupIndex < groups.size();)
 		{
 			if (this.multiDrawIndirect && groups.get(groupIndex).writeDepth())
 			{
 				int nextPipeline = findOpaquePipelineEnd(groups, groupIndex);
-				drawOpaquePipeline(groups.subList(groupIndex, nextPipeline), modelView, projection, frameSlot);
+				indirectCommandOffset = drawOpaquePipeline(groups.subList(groupIndex, nextPipeline), modelView, projection,
+						frameSlot, indirectCommandOffset);
 				groupIndex = nextPipeline;
 				continue;
 			}
 			int nextGroup = this.multiDrawIndirect ? this.findMultiDrawEnd(groups, groupIndex) : groupIndex + 1;
 			if (nextGroup - groupIndex > 1)
-				drawMulti(groups.subList(groupIndex, nextGroup), modelView, projection, frameSlot, oit);
+				indirectCommandOffset = drawMulti(groups.subList(groupIndex, nextGroup), modelView, projection, frameSlot, oit,
+						indirectCommandOffset);
 			else
 				draw(groups.get(groupIndex), modelView, projection, frameSlot, oit);
 			groupIndex = nextGroup;
 		}
+		return indirectCommandOffset;
 	}
 
 	private void draw(PDrawGroup group, Matrix4f modelView, Matrix4f projection, int frameSlot, boolean oit)
@@ -203,7 +226,8 @@ public final class GlDrawExecutor implements PRenderExecutor
 		}
 	}
 
-	private void drawMulti(List<PDrawGroup> groups, Matrix4f modelView, Matrix4f projection, int frameSlot, boolean oit)
+	private int drawMulti(List<PDrawGroup> groups, Matrix4f modelView, Matrix4f projection, int frameSlot, boolean oit,
+	                      int indirectCommandOffset)
 	{
 		PDrawGroup first = groups.getFirst();
 		RenderType type = this.resources.pipeline(first.pipeline());
@@ -217,7 +241,7 @@ public final class GlDrawExecutor implements PRenderExecutor
 		{
 			ShaderInstance shader = shader(type, oit);
 			if (shader == null)
-				return;
+				return indirectCommandOffset;
 			geometry.bind();
 			setupInstanceAttributes(this.instanceBuffer.vbo(), this.instanceBuffer.offset(frameSlot));
 			try
@@ -225,11 +249,11 @@ public final class GlDrawExecutor implements PRenderExecutor
 				shader.setDefaultUniforms(VertexFormat.Mode.TRIANGLES, modelView, projection, PLibRenderHelper.mc().getWindow());
 				shader.apply();
 				GlStreamStorage.bind(shader, PGpuDeformerBuffers.streams());
-				this.indirectBuffer.upload(groups, frameSlot, this.persistentIndirectMapping, this.frameArena);
+				this.indirectBuffer.upload(groups, frameSlot, indirectCommandOffset, this.persistentIndirectMapping, this.frameArena);
 				if (this.persistentIndirectMapping)
 					publishPersistentWrites();
 				ARBMultiDrawIndirect.glMultiDrawElementsIndirect(GL11.GL_TRIANGLES, geometry.indexType(),
-						this.indirectBuffer.offset(frameSlot), groups.size(), IndirectBuffer.STRIDE);
+						this.indirectBuffer.offset(frameSlot, indirectCommandOffset), groups.size(), IndirectBuffer.STRIDE);
 			}
 			finally
 			{
@@ -242,9 +266,11 @@ public final class GlDrawExecutor implements PRenderExecutor
 				RenderSystem.depthMask(true);
 			type.clearRenderState();
 		}
+		return Math.addExact(indirectCommandOffset, groups.size());
 	}
 
-	private void drawOpaquePipeline(List<PDrawGroup> groups, Matrix4f modelView, Matrix4f projection, int frameSlot)
+	private int drawOpaquePipeline(List<PDrawGroup> groups, Matrix4f modelView, Matrix4f projection, int frameSlot,
+	                               int indirectCommandOffset)
 	{
 		Map<ArenaBatchKey, List<PDrawGroup>> batches = new LinkedHashMap<>();
 		List<PDrawGroup> directGroups = new ArrayList<>();
@@ -261,12 +287,13 @@ public final class GlDrawExecutor implements PRenderExecutor
 		for (List<PDrawGroup> batch : batches.values())
 		{
 			if (batch.size() > 1)
-				drawMulti(batch, modelView, projection, frameSlot, false);
+				indirectCommandOffset = drawMulti(batch, modelView, projection, frameSlot, false, indirectCommandOffset);
 			else
 				draw(batch.getFirst(), modelView, projection, frameSlot, false);
 		}
 		for (PDrawGroup group : directGroups)
 			draw(group, modelView, projection, frameSlot, false);
+		return indirectCommandOffset;
 	}
 
 	private static @Nullable ShaderInstance shader(RenderType type, boolean oit)
@@ -509,9 +536,11 @@ public final class GlDrawExecutor implements PRenderExecutor
 		private boolean persistent;
 		private @Nullable ByteBuffer[] persistentMappings;
 
-		private long offset(int frameSlot)
+		private long offset(int frameSlot, int commandOffset)
 		{
-			return this.persistent ? (long)frameSlot * this.capacity * STRIDE : 0L;
+			if (commandOffset < 0)
+				throw new IllegalArgumentException("Indirect command offset must not be negative");
+			return this.persistent ? ((long)frameSlot * this.capacity + commandOffset) * STRIDE : 0L;
 		}
 
 		private void prepare(int required, boolean usePersistentMapping, GlFrameArena frameArena)
@@ -520,13 +549,17 @@ public final class GlDrawExecutor implements PRenderExecutor
 				ensurePersistentCapacity(required, frameArena);
 		}
 
-		private void upload(List<PDrawGroup> groups, int frameSlot, boolean usePersistentMapping, GlFrameArena frameArena)
+		private void upload(List<PDrawGroup> groups, int frameSlot, int commandOffset, boolean usePersistentMapping,
+		                    GlFrameArena frameArena)
 		{
 			if (usePersistentMapping)
 			{
-				ensurePersistentCapacity(groups.size(), frameArena);
-				ByteBuffer target = this.persistentMappings[frameSlot];
+				int required = Math.addExact(commandOffset, groups.size());
+				if (!this.persistent || this.persistentMappings == null || required > this.capacity)
+					throw new IllegalStateException("PulseLib indirect buffer was not prepared for all commands in this submission");
+				ByteBuffer target = this.persistentMappings[frameSlot].duplicate().order(ByteOrder.nativeOrder());
 				target.clear();
+				target.position(Math.multiplyExact(commandOffset, STRIDE));
 				write(target, groups);
 				GL15.glBindBuffer(GL40.GL_DRAW_INDIRECT_BUFFER, this.buffer);
 				return;

@@ -14,6 +14,8 @@ import com.arcanc.pulselib.content.renderer.legacy.GlResourceRegistry;
 import com.arcanc.pulselib.content.renderer.legacy.McLegacyGlHostBridge;
 import com.arcanc.pulselib.content.renderer.plan.*;
 import com.arcanc.pulselib.util.PRenderTypes;
+import com.mojang.blaze3d.pipeline.RenderTarget;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.world.item.ItemDisplayContext;
 
@@ -128,8 +130,18 @@ public final class PRenderQueue
 
 	public static void flush(RenderStage stage)
 	{
+		flush(stage, Minecraft.getInstance().getMainRenderTarget());
+	}
+
+	public static void flush(RenderStage stage, RenderTarget depthSource)
+	{
 		PRenderPlan plan = COMPILER.compile(stage);
-		EXECUTOR.execute(plan, HOST.captureFrame());
+		EXECUTOR.execute(plan, HOST.captureFrame(), depthSource);
+	}
+
+	public static void compositeTranslucency(RenderTarget destination)
+	{
+		EXECUTOR.compositeOit(destination);
 	}
 
 	public static void cleanup()

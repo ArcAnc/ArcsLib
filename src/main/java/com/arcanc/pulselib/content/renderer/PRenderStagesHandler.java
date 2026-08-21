@@ -10,6 +10,8 @@
 package com.arcanc.pulselib.content.renderer;
 
 
+import com.mojang.blaze3d.pipeline.RenderTarget;
+import net.minecraft.client.Minecraft;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
 import net.neoforged.neoforge.common.NeoForge;
@@ -32,6 +34,13 @@ public class PRenderStagesHandler
 		{
 			PRenderQueue.flush(PRenderQueue.RenderStage.TRANSLUCENT_BLOCKS);
 			PGpuDeformerBuffers.finishFrame();
+		}
+		else if (event.getStage() == RenderLevelStageEvent.Stage.AFTER_WEATHER)
+		{
+			RenderTarget destination = event.getLevelRenderer().getWeatherTarget();
+			if (destination == null)
+				destination = Minecraft.getInstance().getMainRenderTarget();
+			PRenderQueue.compositeTranslucency(destination);
 		}
 	}
 }

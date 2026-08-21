@@ -88,7 +88,7 @@ For a direct arena draw, the executor calls `glDrawElementsInstancedBaseVertex`.
 
 Before drawing, the executor applies the group's `RenderType`, binds instance attributes, sets Minecraft's default matrices and light directions, and binds the deformer texture buffers. The queued shader contract and its immediate counterpart are documented on [Shaders](shaders.md).
 
-Built-in translucent render types are separated from standard groups. When weighted OIT starts successfully, they render into accumulation and revealage attachments and are composited over the main target. If setup fails, they are drawn through their ordinary translucent shader without losing the compiled fallback ordering.
+Built-in translucent render types are separated from standard groups. When weighted OIT starts successfully, they render into persistent per-frame accumulation and revealage attachments. The attachments are resolved once after weather, into the Fabulous weather target when available or the main target otherwise. If setup fails, the affected groups are drawn through their ordinary translucent shader without losing the compiled fallback ordering.
 
 ## Render stages and cleanup
 
@@ -96,9 +96,9 @@ Built-in translucent render types are separated from standard groups. When weigh
 
 * entity and non-GUI item submissions after entities;
 * opaque block-entity submissions after block entities;
-* translucent block submissions after particles.
+* translucent block submissions after particles;
+* the accumulated OIT target after weather, before Minecraft resolves its Fabulous transparency chain.
 
 The final translucent stage also finishes the per-frame GPU deformer streams. Callers should not flush the standard stages or reset those streams manually.
 
 `PRenderQueue.cleanup()` clears pending compiler state, waits for in-flight buffer slots, deletes executor buffers and OIT targets, and releases every registered geometry page. Model reload and client-level unload invoke this lifecycle for normal library use.
-

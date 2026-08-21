@@ -16,8 +16,8 @@ import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.BufferUploader;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.VertexFormat;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.ShaderInstance;
+import net.neoforged.neoforge.client.GlStateBackup;
 import org.lwjgl.opengl.ARBDrawBuffersBlend;
 import org.lwjgl.opengl.GL;
 import org.lwjgl.opengl.GL11;
@@ -39,40 +39,62 @@ public final class GlWeightedBlendedOit
 	private int width = -1;
 	private int height = -1;
 	private int depthTexture = -1;
+	private boolean frameOpen;
+	private boolean accumulationBound;
+	private boolean hasContent;
+	private int previousDrawFramebuffer;
+	private int previousReadFramebuffer;
+	private final int[] previousViewport = new int[4];
+	private final GlStateBackup previousGlState = new GlStateBackup();
 
 	public boolean isSupported()
 	{
 		return GL.getCapabilities().OpenGL40 || GL.getCapabilities().GL_ARB_draw_buffers_blend;
 	}
 
-	public boolean begin()
+	public boolean begin(RenderTarget depthSource)
 	{
 		if (!isSupported() || PRenderTypes.ShadersProvider.oitComposite() == null)
 			return false;
-
-		RenderTarget target = Minecraft.getInstance().getMainRenderTarget();
-		if (target.width <= 0 || target.height <= 0)
+		if (this.accumulationBound)
+			throw new IllegalStateException("Weighted blended OIT accumulation is already active");
+		if (depthSource.width <= 0 || depthSource.height <= 0 || depthSource.getDepthTextureId() < 0)
 			return false;
 
+		captureFramebufferState();
 		try
 		{
-			ensureBuffers(target);
+			ensureBuffers(depthSource);
 		}
 		catch (RuntimeException ignored)
 		{
 			close();
-			Minecraft.getInstance().getMainRenderTarget().bindWrite(true);
+			restoreFramebufferState();
 			return false;
 		}
 
-		GL30.glBindFramebuffer(GL30.GL_FRAMEBUFFER, this.framebuffer);
+		GL30.glBindFramebuffer(GL30.GL_DRAW_FRAMEBUFFER, this.framebuffer);
 		GL11.glViewport(0, 0, this.width, this.height);
 		GL20.glDrawBuffers(new int[]{GL30.GL_COLOR_ATTACHMENT0, GL30.GL_COLOR_ATTACHMENT1});
-		GL30.glClearBufferfv(GL11.GL_COLOR, 0, CLEAR_ACCUM);
-		GL30.glClearBufferfv(GL11.GL_COLOR, 1, CLEAR_REVEAL);
+		if (!this.frameOpen)
+		{
+			GL30.glClearBufferfv(GL11.GL_COLOR, 0, CLEAR_ACCUM);
+			GL30.glClearBufferfv(GL11.GL_COLOR, 1, CLEAR_REVEAL);
+			this.frameOpen = true;
+		}
 		RenderSystem.enableDepthTest();
 		RenderSystem.depthMask(false);
+		this.accumulationBound = true;
 		return true;
+	}
+
+	public void endAccumulation()
+	{
+		if (!this.accumulationBound)
+			return;
+		this.hasContent = true;
+		this.accumulationBound = false;
+		restoreFramebufferState();
 	}
 
 	public void configureBlend()
@@ -94,14 +116,19 @@ public final class GlWeightedBlendedOit
 		}
 	}
 
-	public void composite()
+	public void composite(RenderTarget destination)
 	{
 		ShaderInstance shader = PRenderTypes.ShadersProvider.oitComposite();
-		if (shader == null || this.framebuffer < 0)
+		if (shader == null || this.framebuffer < 0 || !this.frameOpen || !this.hasContent)
+		{
+			finishFrame();
 			return;
+		}
+		if (this.accumulationBound)
+			throw new IllegalStateException("Cannot composite weighted blended OIT while accumulation is active");
 
-		RenderTarget target = Minecraft.getInstance().getMainRenderTarget();
-		target.bindWrite(true);
+		captureFramebufferState();
+		destination.bindWrite(true);
 		RenderSystem.disableDepthTest();
 		RenderSystem.depthMask(false);
 		RenderSystem.enableBlend();
@@ -124,7 +151,15 @@ public final class GlWeightedBlendedOit
 			RenderSystem.disableBlend();
 			RenderSystem.depthMask(true);
 			RenderSystem.enableDepthTest();
+			restoreFramebufferState();
+			finishFrame();
 		}
+	}
+
+	public void finishFrame()
+	{
+		this.frameOpen = false;
+		this.hasContent = false;
 	}
 
 	public void close()
@@ -141,6 +176,9 @@ public final class GlWeightedBlendedOit
 		this.width = -1;
 		this.height = -1;
 		this.depthTexture = -1;
+		this.frameOpen = false;
+		this.accumulationBound = false;
+		this.hasContent = false;
 	}
 
 	private void ensureBuffers(RenderTarget target)
@@ -156,14 +194,29 @@ public final class GlWeightedBlendedOit
 		this.accumulationTexture = createTexture(GL30.GL_RGBA16F, GL11.GL_RGBA, this.width, this.height);
 		this.revealageTexture = createTexture(GL30.GL_R16F, GL11.GL_RED, this.width, this.height);
 
-		GL30.glBindFramebuffer(GL30.GL_FRAMEBUFFER, this.framebuffer);
-		GL32.glFramebufferTexture(GL30.GL_FRAMEBUFFER, GL30.GL_COLOR_ATTACHMENT0, this.accumulationTexture, 0);
-		GL32.glFramebufferTexture(GL30.GL_FRAMEBUFFER, GL30.GL_COLOR_ATTACHMENT1, this.revealageTexture, 0);
-		GL32.glFramebufferTexture(GL30.GL_FRAMEBUFFER, GL30.GL_DEPTH_ATTACHMENT, this.depthTexture, 0);
+		GL30.glBindFramebuffer(GL30.GL_DRAW_FRAMEBUFFER, this.framebuffer);
+		GL32.glFramebufferTexture(GL30.GL_DRAW_FRAMEBUFFER, GL30.GL_COLOR_ATTACHMENT0, this.accumulationTexture, 0);
+		GL32.glFramebufferTexture(GL30.GL_DRAW_FRAMEBUFFER, GL30.GL_COLOR_ATTACHMENT1, this.revealageTexture, 0);
+		GL32.glFramebufferTexture(GL30.GL_DRAW_FRAMEBUFFER, GL30.GL_DEPTH_ATTACHMENT, this.depthTexture, 0);
 		GL20.glDrawBuffers(new int[]{GL30.GL_COLOR_ATTACHMENT0, GL30.GL_COLOR_ATTACHMENT1});
-		if (GL30.glCheckFramebufferStatus(GL30.GL_FRAMEBUFFER) != GL30.GL_FRAMEBUFFER_COMPLETE)
+		if (GL30.glCheckFramebufferStatus(GL30.GL_DRAW_FRAMEBUFFER) != GL30.GL_FRAMEBUFFER_COMPLETE)
 			throw new IllegalStateException("Unable to create weighted blended OIT framebuffer");
-		Minecraft.getInstance().getMainRenderTarget().bindWrite(true);
+	}
+
+	private void captureFramebufferState()
+	{
+		this.previousDrawFramebuffer = GL11.glGetInteger(GL30.GL_DRAW_FRAMEBUFFER_BINDING);
+		this.previousReadFramebuffer = GL11.glGetInteger(GL30.GL_READ_FRAMEBUFFER_BINDING);
+		GL11.glGetIntegerv(GL11.GL_VIEWPORT, this.previousViewport);
+		RenderSystem.backupGlState(this.previousGlState);
+	}
+
+	private void restoreFramebufferState()
+	{
+		GL30.glBindFramebuffer(GL30.GL_DRAW_FRAMEBUFFER, this.previousDrawFramebuffer);
+		GL30.glBindFramebuffer(GL30.GL_READ_FRAMEBUFFER, this.previousReadFramebuffer);
+		GL11.glViewport(this.previousViewport[0], this.previousViewport[1], this.previousViewport[2], this.previousViewport[3]);
+		RenderSystem.restoreGlState(this.previousGlState);
 	}
 
 	private static int createTexture(int internalFormat, int format, int width, int height)

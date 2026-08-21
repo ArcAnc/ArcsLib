@@ -99,7 +99,7 @@ Alpha-mode selection currently targets the queued world path: it resolves to `tr
 * an `RGBA16F` accumulation texture;
 * an `R16F` revealage texture.
 
-`triangles_oit.fsh` and `triangles_oit_emissive.fsh` write weighted color and revealage. `oit_composite` then combines the two textures over Minecraft's main render target. The OIT framebuffer shares the main target's depth texture, but translucent draws do not write depth.
+`triangles_oit.fsh` and `triangles_oit_emissive.fsh` write weighted color and revealage. The OIT target remains open across the queued world stages and `oit_composite` resolves it once after weather. It composites into Minecraft's weather target under Fabulous graphics so the result participates in the vanilla transparency chain, and into the main target otherwise. The OIT framebuffer shares the main target's depth texture, but translucent draws do not write depth.
 
 If OIT is unsupported, its framebuffer cannot be created, or the OIT shaders are unavailable, PulseLib falls back to the normal translucent program and the queue's back-to-front ordering. OIT shader selection is internal; application code should continue to request `trianglesTranslucent` rather than using `triangles_oit` directly.
 
