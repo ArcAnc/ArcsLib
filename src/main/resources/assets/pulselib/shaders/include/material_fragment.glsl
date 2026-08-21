@@ -1,13 +1,13 @@
 #ifndef PULSELIB_MATERIAL_FRAGMENT_GLSL
 #define PULSELIB_MATERIAL_FRAGMENT_GLSL
 
+uniform float AlphaCutout;
+
 vec4 pulselib_sample_material(sampler2D textureSampler, vec2 textureCoordinate) {
     vec4 color = texture(textureSampler, textureCoordinate);
-#ifdef ALPHA_CUTOUT
-    if (color.a < ALPHA_CUTOUT) {
+    if (color.a < AlphaCutout) {
         discard;
     }
-#endif
     return color;
 }
 

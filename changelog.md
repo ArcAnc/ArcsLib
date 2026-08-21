@@ -4,3 +4,4 @@
 * added weighted blended order-independent transparency for PulseLib translucent meshes
 * fixed GlDrawExecutor
 * fixed alpha sorting
+* fixed lost cutout data in shader

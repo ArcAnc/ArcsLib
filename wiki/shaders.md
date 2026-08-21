@@ -6,7 +6,7 @@ Applications should select a render type through `PRenderTypes.RenderTypeProvide
 
 ## Render types and programs
 
-The public render-type name is not always the GLSL program name. Several render types deliberately share one program and differ only in render state or preprocessor defines.
+The public render-type name is not always the GLSL program name. Several render types deliberately share one program and differ only in render state or uniform defaults.
 
 | Render type | Normal program JSON | Main use |
 | --- | --- | --- |
@@ -16,11 +16,11 @@ The public render-type name is not always the GLSL program name. Several render 
 | `trianglesGui` | `triangles_immediate_lit.json` | Direct GUI drawing with translucent render state |
 | `trianglesImmediate` | `triangles_immediate_lit.json` | Direct drawing with opaque render state |
 
-The three queued lit render types share `triangles_instanced_lit.vsh` and `triangles_instanced_lit.fsh`. The cutout and translucent JSON definitions add `ALPHA_CUTOUT=0.1`; the solid definition does not discard by alpha.
+The three queued lit render types share `triangles_instanced_lit.vsh` and `triangles_instanced_lit.fsh`. The cutout and translucent JSON definitions set `AlphaCutout=0.1`; the solid definition uses `0.0` and does not discard by alpha.
 
 Queued instanced and OIT programs use GLSL 330. Immediate and composite programs use GLSL 150.
 
-`trianglesGui` and `trianglesImmediate` share the same immediate shader. Their difference is the `RenderType` transparency state, not a separate GLSL implementation. The immediate program also uses `ALPHA_CUTOUT=0.1`.
+`trianglesGui` and `trianglesImmediate` share the same immediate shader. Their difference is the `RenderType` transparency state, not a separate GLSL implementation. The immediate program also uses `AlphaCutout=0.1`.
 
 Each public type has an emissive counterpart:
 
