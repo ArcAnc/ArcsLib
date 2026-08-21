@@ -1422,7 +1422,7 @@
 <p>PulseLib has two shader paths. World models normally use the queued, instanced path; GUI rendering and explicit immediate drawing use the immediate path. Both paths consume the same baked <code>POSITION_TEX_NORMAL</code> vertex data, but they receive transforms, material data, and deformers differently.</p>
 <p>Applications should select a render type through <code>PRenderTypes.RenderTypeProvider</code>. Shader instances are registered by PulseLib during NeoForge's <code>RegisterShadersEvent</code>; consumers do not need to register the built-in programs themselves.</p>
 <h2 id="render-types-and-programs">Render types and programs<a class="headerlink" href="#render-types-and-programs" title="Permanent link">&para;</a></h2>
-<p>The public render-type name is not always the GLSL program name. Several render types deliberately share one program and differ only in render state or preprocessor defines.</p>
+<p>The public render-type name is not always the GLSL program name. Several render types deliberately share one program and differ only in render state or uniform defaults.</p>
 <table>
 <thead>
 <tr>
@@ -1459,9 +1459,9 @@
 </tr>
 </tbody>
 </table>
-<p>The three queued lit render types share <code>triangles_instanced_lit.vsh</code> and <code>triangles_instanced_lit.fsh</code>. The cutout and translucent JSON definitions add <code>ALPHA_CUTOUT=0.1</code>; the solid definition does not discard by alpha.</p>
+<p>The three queued lit render types share <code>triangles_instanced_lit.vsh</code> and <code>triangles_instanced_lit.fsh</code>. The cutout and translucent JSON definitions set <code>AlphaCutout=0.1</code>; the solid definition uses <code>0.0</code> and does not discard by alpha.</p>
 <p>Queued instanced and OIT programs use GLSL 330. Immediate and composite programs use GLSL 150.</p>
-<p><code>trianglesGui</code> and <code>trianglesImmediate</code> share the same immediate shader. Their difference is the <code>RenderType</code> transparency state, not a separate GLSL implementation. The immediate program also uses <code>ALPHA_CUTOUT=0.1</code>.</p>
+<p><code>trianglesGui</code> and <code>trianglesImmediate</code> share the same immediate shader. Their difference is the <code>RenderType</code> transparency state, not a separate GLSL implementation. The immediate program also uses <code>AlphaCutout=0.1</code>.</p>
 <p>Each public type has an emissive counterpart:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="n">trianglesSolidEmissive</span>
 <a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="n">trianglesCutoutEmissive</span>
