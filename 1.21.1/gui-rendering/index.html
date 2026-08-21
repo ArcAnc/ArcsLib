@@ -16,7 +16,7 @@
         <link rel="prev" href="../mesh-deformers/">
       
       
-        <link rel="next" href="../model-loaders/">
+        <link rel="next" href="../render-backend/">
       
       
         
@@ -274,7 +274,7 @@
     
     
       <li class="md-tabs__item">
-        <a href="../render-backend.md" class="md-tabs__link">
+        <a href="../render-backend/" class="md-tabs__link">
           
   
   
@@ -701,6 +701,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../shaders/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Shaders
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../textures-and-emissive/" class="md-nav__link">
         
   
@@ -1084,7 +1112,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../render-backend.md" class="md-nav__link">
+      <a href="../render-backend/" class="md-nav__link">
         
   
   
@@ -1233,6 +1261,7 @@
 <li><code>partialTick</code> - interpolation time.</li>
 </ul>
 <p>For item rendering in GUI, <a href="https://github.com/ArcAnc/PulseLib/blob/1.21.1/src/main/java/com/arcanc/pulselib/content/renderer/PItemRenderer.java"><code>PItemRenderer</code></a> already switches to immediate GUI drawing internally.</p>
+<p><code>trianglesGui</code> uses the <code>triangles_immediate_lit</code> program. It receives color, light, overlay, normal matrix, model-view matrix, and projection matrix as uniforms rather than instance attributes. Consequently, GUI rendering does not use the queued instance buffer, multi-draw indirect, weighted OIT, or shader-side deformer streams; deformable GUI meshes use the CPU vertex-buffer path. See <a href="../shaders/">Shaders</a> for the complete immediate shader contract.</p>
 <p>Classes used:</p>
 <ul>
 <li><a href="https://github.com/ArcAnc/PulseLib/blob/1.21.1/src/main/java/com/arcanc/pulselib/util/helpers/PLibHelper.java"><code>PLibHelper</code></a></li>

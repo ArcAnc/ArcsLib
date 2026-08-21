@@ -279,7 +279,7 @@
     
     
       <li class="md-tabs__item">
-        <a href="../render-backend.md" class="md-tabs__link">
+        <a href="../render-backend/" class="md-tabs__link">
           
   
   
@@ -686,6 +686,34 @@
     
   
     Render Types and Queue
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../shaders/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Shaders
   
 
     
@@ -1168,7 +1196,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../render-backend.md" class="md-nav__link">
+      <a href="../render-backend/" class="md-nav__link">
         
   
   
@@ -1349,7 +1377,7 @@
 <a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="nf">RobotChestLayer</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
 <a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="w">        </span><span class="kd">super</span><span class="p">(</span><span class="k">new</span><span class="w"> </span><span class="n">DefaultEntityLayerModelData</span><span class="p">.</span><span class="na">DefaultEntityLayerModelDataBuilder</span><span class="p">(</span>
 <a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="w">                        </span><span class="n">MyEntities</span><span class="p">.</span><span class="na">ROBOT</span><span class="p">.</span><span class="na">getId</span><span class="p">(),</span>
-<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="w">                        </span><span class="n">ResourceLocation</span><span class="p">.</span><span class="na">fromNamespaceAndPath</span><span class="p">(</span><span class="s">&quot;examplemod&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;armor&quot;</span><span class="p">))</span>
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="w">                        </span><span class="n">ResourceLocation</span><span class="p">.</span><span class="na">fromNamespaceAndPath</span><span class="p">(</span><span class="s">"examplemod"</span><span class="p">,</span><span class="w"> </span><span class="s">"armor"</span><span class="p">))</span>
 <a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="w">                        </span><span class="p">.</span><span class="na">build</span><span class="p">(),</span>
 <a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a><span class="w">                </span><span class="n">PRenderTypes</span><span class="p">.</span><span class="na">RenderTypeProvider</span><span class="p">::</span><span class="n">trianglesSolid</span><span class="p">);</span>
 <a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a><span class="w">    </span><span class="p">}</span>
@@ -1365,10 +1393,10 @@
 <a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="nf">RobotRenderer</span><span class="p">(</span><span class="n">EntityRendererProvider</span><span class="p">.</span><span class="na">Context</span><span class="w"> </span><span class="n">context</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
 <a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="w">        </span><span class="kd">super</span><span class="p">(</span><span class="n">context</span><span class="p">,</span><span class="w"> </span><span class="n">ROBOT_MODEL_DATA</span><span class="p">,</span><span class="w"> </span><span class="n">PRenderTypes</span><span class="p">.</span><span class="na">RenderTypeProvider</span><span class="p">::</span><span class="n">trianglesSolid</span><span class="p">);</span>
 <a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>
-<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a><span class="w">        </span><span class="n">addRenderLayer</span><span class="p">(</span><span class="s">&quot;body&quot;</span><span class="p">,</span>
+<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a><span class="w">        </span><span class="n">addRenderLayer</span><span class="p">(</span><span class="s">"body"</span><span class="p">,</span>
 <a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a><span class="w">                </span><span class="k">new</span><span class="w"> </span><span class="n">RobotChestLayer</span><span class="p">()</span>
-<a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a><span class="w">                        </span><span class="p">.</span><span class="na">bindBone</span><span class="p">(</span><span class="s">&quot;armor_body&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;body&quot;</span><span class="p">)</span>
-<a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a><span class="w">                        </span><span class="p">.</span><span class="na">bindBone</span><span class="p">(</span><span class="s">&quot;armor_head&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;head&quot;</span><span class="p">));</span>
+<a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a><span class="w">                        </span><span class="p">.</span><span class="na">bindBone</span><span class="p">(</span><span class="s">"armor_body"</span><span class="p">,</span><span class="w"> </span><span class="s">"body"</span><span class="p">)</span>
+<a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a><span class="w">                        </span><span class="p">.</span><span class="na">bindBone</span><span class="p">(</span><span class="s">"armor_head"</span><span class="p">,</span><span class="w"> </span><span class="s">"head"</span><span class="p">));</span>
 <a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a><span class="w">    </span><span class="p">}</span>
 <a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a><span class="p">}</span>
 </code></pre></div>
@@ -1376,9 +1404,9 @@
 <h2 id="bone-bindings">Bone bindings<a class="headerlink" href="#bone-bindings" title="Permanent link">&para;</a></h2>
 <p>Layer bone bindings copy base entity bone poses into layer bones:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="k">new</span><span class="w"> </span><span class="n">RobotChestLayer</span><span class="p">()</span>
-<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="w">        </span><span class="p">.</span><span class="na">bindBone</span><span class="p">(</span><span class="s">&quot;layer_right_arm&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;right_arm&quot;</span><span class="p">)</span>
-<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="w">        </span><span class="p">.</span><span class="na">bindMatchingBone</span><span class="p">(</span><span class="s">&quot;head&quot;</span><span class="p">)</span>
-<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="w">        </span><span class="p">.</span><span class="na">bindMatchingBones</span><span class="p">(</span><span class="s">&quot;left_leg&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;right_leg&quot;</span><span class="p">);</span>
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="w">        </span><span class="p">.</span><span class="na">bindBone</span><span class="p">(</span><span class="s">"layer_right_arm"</span><span class="p">,</span><span class="w"> </span><span class="s">"right_arm"</span><span class="p">)</span>
+<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="w">        </span><span class="p">.</span><span class="na">bindMatchingBone</span><span class="p">(</span><span class="s">"head"</span><span class="p">)</span>
+<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="w">        </span><span class="p">.</span><span class="na">bindMatchingBones</span><span class="p">(</span><span class="s">"left_leg"</span><span class="p">,</span><span class="w"> </span><span class="s">"right_leg"</span><span class="p">);</span>
 </code></pre></div>
 <p>Use this when the layer model should follow animated limbs from the base model.</p>
 <h2 id="transform-and-appearance-hooks">Transform and appearance hooks<a class="headerlink" href="#transform-and-appearance-hooks" title="Permanent link">&para;</a></h2>

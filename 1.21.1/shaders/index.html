@@ -10,13 +10,13 @@
       
       
       
-        <link rel="canonical" href="https://arcanc.github.io/PulseLib/1.21.1/renderers/">
+        <link rel="canonical" href="https://arcanc.github.io/PulseLib/1.21.1/shaders/">
       
       
-        <link rel="prev" href="../animation-events/">
+        <link rel="prev" href="../render-types-and-queue/">
       
       
-        <link rel="next" href="../render-types-and-queue/">
+        <link rel="next" href="../textures-and-emissive/">
       
       
         
@@ -27,7 +27,7 @@
     
     
       
-        <title>Renderers - PulseLib</title>
+        <title>Shaders - PulseLib</title>
       
     
     
@@ -78,7 +78,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#molang-context" class="md-skip">
+        <a href="#shaders" class="md-skip">
           Skip to content
         </a>
       
@@ -116,7 +116,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Renderers
+              Shaders
             
           </span>
         </div>
@@ -652,35 +652,10 @@
                 
   
   
-    
   
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Renderers
-  
-
-    
-  </span>
-  
-  
-
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../renderers/" class="md-nav__link">
         
   
   
@@ -696,79 +671,6 @@
   
 
       </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#molang-context" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Molang context
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#block-renderer" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Block renderer
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#item-renderer" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Item renderer
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#entity-renderer" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Entity renderer
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#render-type-requirement" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Render type requirement
-      
-    </span>
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
     </li>
   
 
@@ -806,10 +708,37 @@
                 
   
   
+    
   
   
-    <li class="md-nav__item">
-      <a href="../shaders/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Shaders
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         
   
   
@@ -825,6 +754,92 @@
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#render-types-and-programs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Render types and programs
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#queued-instanced-path" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Queued instanced path
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#immediate-path" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Immediate path
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#alpha-modes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Alpha modes
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#weighted-blended-oit" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Weighted blended OIT
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#shared-shader-includes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Shared shader includes
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -1308,6 +1323,8 @@
   
   
   
+    
+  
   
     <label class="md-nav__title" for="__toc">
       <span class="md-nav__icon md-icon"></span>
@@ -1316,10 +1333,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#molang-context" class="md-nav__link">
+  <a href="#render-types-and-programs" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Molang context
+        Render types and programs
       
     </span>
   </a>
@@ -1327,10 +1344,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#block-renderer" class="md-nav__link">
+  <a href="#queued-instanced-path" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Block renderer
+        Queued instanced path
       
     </span>
   </a>
@@ -1338,10 +1355,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#item-renderer" class="md-nav__link">
+  <a href="#immediate-path" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Item renderer
+        Immediate path
       
     </span>
   </a>
@@ -1349,10 +1366,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#entity-renderer" class="md-nav__link">
+  <a href="#alpha-modes" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Entity renderer
+        Alpha modes
       
     </span>
   </a>
@@ -1360,10 +1377,21 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#render-type-requirement" class="md-nav__link">
+  <a href="#weighted-blended-oit" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Render type requirement
+        Weighted blended OIT
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#shared-shader-includes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Shared shader includes
       
     </span>
   </a>
@@ -1390,70 +1418,203 @@
   
 
 
-  <h1>Renderers</h1>
-
-<p>A PulseLib renderer is the bridge between Minecraft's render call and PulseLib's baked animated model. It gets the current animatable, asks for model data, binds the animation manager to the baked model, and submits every posed bone to the render queue. Static baked meshes go through the geometry-arena path; supported deformer stacks add per-instance GPU deformation data, while unsupported stacks use the CPU dynamic-geometry fallback. See <a href="../render-backend/">Render backend</a> for the execution details.</p>
-<p>All built-in renderers implement <a href="https://github.com/ArcAnc/PulseLib/blob/1.21.1/src/main/java/com/arcanc/pulselib/content/renderer/PRenderer.java"><code>PRenderer</code></a> and use the same submit lifecycle:</p>
+<h1 id="shaders">Shaders<a class="headerlink" href="#shaders" title="Permanent link">&para;</a></h1>
+<p>PulseLib has two shader paths. World models normally use the queued, instanced path; GUI rendering and explicit immediate drawing use the immediate path. Both paths consume the same baked <code>POSITION_TEX_NORMAL</code> vertex data, but they receive transforms, material data, and deformers differently.</p>
+<p>Applications should select a render type through <code>PRenderTypes.RenderTypeProvider</code>. Shader instances are registered by PulseLib during NeoForge's <code>RegisterShadersEvent</code>; consumers do not need to register the built-in programs themselves.</p>
+<h2 id="render-types-and-programs">Render types and programs<a class="headerlink" href="#render-types-and-programs" title="Permanent link">&para;</a></h2>
+<p>The public render-type name is not always the GLSL program name. Several render types deliberately share one program and differ only in render state or preprocessor defines.</p>
+<table>
+<thead>
+<tr>
+<th>Render type</th>
+<th>Normal program JSON</th>
+<th>Main use</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>trianglesSolid</code></td>
+<td><code>triangles_solid.json</code></td>
+<td>Opaque queued world geometry</td>
+</tr>
+<tr>
+<td><code>trianglesCutout</code></td>
+<td><code>triangles_cutout.json</code></td>
+<td>Queued world geometry with a hard alpha cutoff</td>
+</tr>
+<tr>
+<td><code>trianglesTranslucent</code></td>
+<td><code>triangles_translucent.json</code></td>
+<td>Queued translucent world geometry; weighted OIT when available</td>
+</tr>
+<tr>
+<td><code>trianglesGui</code></td>
+<td><code>triangles_immediate_lit.json</code></td>
+<td>Direct GUI drawing with translucent render state</td>
+</tr>
+<tr>
+<td><code>trianglesImmediate</code></td>
+<td><code>triangles_immediate_lit.json</code></td>
+<td>Direct drawing with opaque render state</td>
+</tr>
+</tbody>
+</table>
+<p>The three queued lit render types share <code>triangles_instanced_lit.vsh</code> and <code>triangles_instanced_lit.fsh</code>. The cutout and translucent JSON definitions add <code>ALPHA_CUTOUT=0.1</code>; the solid definition does not discard by alpha.</p>
+<p>Queued instanced and OIT programs use GLSL 330. Immediate and composite programs use GLSL 150.</p>
+<p><code>trianglesGui</code> and <code>trianglesImmediate</code> share the same immediate shader. Their difference is the <code>RenderType</code> transparency state, not a separate GLSL implementation. The immediate program also uses <code>ALPHA_CUTOUT=0.1</code>.</p>
+<p>Each public type has an emissive counterpart:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="n">trianglesSolidEmissive</span>
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="n">trianglesCutoutEmissive</span>
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="n">trianglesTranslucentEmissive</span>
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="n">trianglesGuiEmissive</span>
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="n">trianglesImmediateEmissive</span>
+</code></pre></div>
+<p>Queued emissive types use <code>triangles_instanced_emissive</code>; direct types use <code>triangles_immediate_emissive</code>. Emissive fragments still apply texture alpha, any configured alpha cutoff, instance tint, and overlay, but they do not apply directional lighting or the lightmap.</p>
+<h2 id="queued-instanced-path">Queued instanced path<a class="headerlink" href="#queued-instanced-path" title="Permanent link">&para;</a></h2>
+<p>The queued path is used by normal entity, block-entity, and non-GUI item rendering. <code>GlDrawExecutor</code> binds static geometry from the geometry arena or a dynamic vertex buffer, then supplies per-instance attributes at locations 4 through 10.</p>
+<table>
+<thead>
+<tr>
+<th>Location</th>
+<th>Input</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0</td>
+<td><code>Position</code></td>
+<td>Local vertex position</td>
+</tr>
+<tr>
+<td>1</td>
+<td><code>UV0</code></td>
+<td>Runtime-atlas texture coordinates</td>
+</tr>
+<tr>
+<td>2</td>
+<td><code>Normal</code></td>
+<td>Local packed normal</td>
+</tr>
+<tr>
+<td>4-6</td>
+<td><code>InstanceRow0..2</code></td>
+<td>Affine instance transform</td>
+</tr>
+<tr>
+<td>7</td>
+<td><code>InstanceColor</code></td>
+<td>ARGB tint converted to normalized floats</td>
+</tr>
+<tr>
+<td>8</td>
+<td><code>InstanceLight</code></td>
+<td>Block and sky light coordinates</td>
+</tr>
+<tr>
+<td>9</td>
+<td><code>InstanceOverlay</code></td>
+<td>Minecraft overlay coordinates</td>
+</tr>
+<tr>
+<td>10</td>
+<td><code>InstanceDeformer</code></td>
+<td>Operation offset, value offset, and operation count</td>
+</tr>
+</tbody>
+</table>
+<p>Location 3 is intentionally unused. The instance transform is stored as three <code>vec4</code> rows and reconstructed by <code>instanced_transform.glsl</code>. The shader applies GPU deformers in local mesh space before applying the instance, model-view, and projection matrices.</p>
+<p>The instanced programs require these samplers:</p>
+<table>
+<thead>
+<tr>
+<th>Sampler</th>
+<th>Contents</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>Sampler0</code></td>
+<td>PulseLib runtime texture atlas</td>
+</tr>
+<tr>
+<td><code>Sampler1</code></td>
+<td>Minecraft overlay texture</td>
+</tr>
+<tr>
+<td><code>Sampler2</code></td>
+<td>Minecraft lightmap; lit variants only</td>
+</tr>
+<tr>
+<td><code>DeformerOperations</code></td>
+<td>Static <code>samplerBuffer</code> containing compiled deformer operations</td>
+</tr>
+<tr>
+<td><code>DeformerValues</code></td>
+<td>Per-frame <code>samplerBuffer</code> containing current channel values</td>
+</tr>
+</tbody>
+</table>
+<p><code>ModelViewMat</code> and <code>ProjMat</code> are set for each draw. Lit variants also use <code>Light0_Direction</code> and <code>Light1_Direction</code>. Lighting is two-sided: front and back light values are calculated in the vertex shader and selected through <code>gl_FrontFacing</code> in the fragment shader.</p>
+<h2 id="immediate-path">Immediate path<a class="headerlink" href="#immediate-path" title="Permanent link">&para;</a></h2>
+<p>Immediate rendering is used for GUI models and by APIs that call <code>PBakedModel.instantDraw</code>. It does not use the instance buffer, multi-draw commands, or shader-side mesh deformers. Any deformation required by this path is resolved into a CPU-side dynamic vertex buffer first.</p>
+<p>Instead of instance attributes, the immediate lit shader receives:</p>
 <ul>
-<li><code>preSubmit(...)</code> - hook before PulseLib submits model meshes.</li>
-<li><code>trueSubmit(...)</code> - default PulseLib model submission.</li>
-<li><code>postSubmit(...)</code> - hook after model submission.</li>
+<li><code>ModelViewMat</code>, <code>ProjMat</code>, and <code>NormalMat</code>;</li>
+<li><code>Color</code>;</li>
+<li><code>Light</code> and <code>Overlay</code>;</li>
+<li><code>Sampler0</code>, <code>Sampler1</code>, and <code>Sampler2</code>.</li>
 </ul>
-<p>Most custom renderers only need a constructor. Override <code>preSubmit</code> or <code>postSubmit</code> when you need to draw something extra around the PulseLib model.</p>
-<h2 id="molang-context">Molang context<a class="headerlink" href="#molang-context" title="Permanent link">&para;</a></h2>
-<p>The built-in entity, block entity, and item renderers prepare a Molang context once per controller and render pass, then reuse it for all mixed bones. Override <code>populateMolangContext(...)</code> to add renderer-specific <code>query.*</code> values. The full API and the current <code>variable.*</code> lifetime limitation are documented in <a href="../molang-animations/">Molang animations</a>.</p>
-<h2 id="block-renderer">Block renderer<a class="headerlink" href="#block-renderer" title="Permanent link">&para;</a></h2>
-<p>Use <a href="https://github.com/ArcAnc/PulseLib/blob/1.21.1/src/main/java/com/arcanc/pulselib/content/renderer/PBlockRenderer.java"><code>PBlockRenderer</code></a> for block entities. The block itself should hide vanilla rendering; the block entity renderer becomes the visible model.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="kd">public</span><span class="w"> </span><span class="kd">class</span> <span class="nc">CrusherRenderer</span><span class="w"> </span><span class="kd">extends</span><span class="w"> </span><span class="n">PBlockRenderer</span><span class="o">&lt;</span><span class="n">CrusherBlockEntity</span><span class="o">&gt;</span><span class="w"> </span><span class="p">{</span>
-<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="nf">CrusherRenderer</span><span class="p">(</span><span class="n">BlockEntityRendererProvider</span><span class="p">.</span><span class="na">Context</span><span class="w"> </span><span class="n">context</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
-<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="w">        </span><span class="kd">super</span><span class="p">(</span><span class="k">new</span><span class="w"> </span><span class="n">DefaultBlockModelData</span><span class="p">.</span><span class="na">DefaultBlockModelDataBuilder</span><span class="p">(</span>
-<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="w">                        </span><span class="n">ResourceLocation</span><span class="p">.</span><span class="na">fromNamespaceAndPath</span><span class="p">(</span><span class="s">"examplemod"</span><span class="p">,</span><span class="w"> </span><span class="s">"crusher"</span><span class="p">))</span>
-<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="w">                        </span><span class="p">.</span><span class="na">build</span><span class="p">(),</span>
-<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="w">                </span><span class="n">PRenderTypes</span><span class="p">.</span><span class="na">RenderTypeProvider</span><span class="p">::</span><span class="n">trianglesCutout</span><span class="p">);</span>
-<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a><span class="w">    </span><span class="p">}</span>
-<a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a><span class="p">}</span>
+<p>The immediate emissive shader omits <code>NormalMat</code>, <code>Light</code>, <code>Sampler2</code>, and directional-light uniforms because it does not evaluate lighting.</p>
+<h2 id="alpha-modes">Alpha modes<a class="headerlink" href="#alpha-modes" title="Permanent link">&para;</a></h2>
+<p><code>PAlphaMode</code> maps materials to the queued render types:</p>
+<table>
+<thead>
+<tr>
+<th>Alpha mode</th>
+<th>Render type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>OPAQUE</code></td>
+<td><code>trianglesSolid</code></td>
+</tr>
+<tr>
+<td><code>CUTOUT</code></td>
+<td><code>trianglesCutout</code></td>
+</tr>
+<tr>
+<td><code>TRANSLUCENT</code></td>
+<td><code>trianglesTranslucent</code></td>
+</tr>
+</tbody>
+</table>
+<p><code>AUTO</code> is resolved from the atlas sprite before a render type is selected. A texture containing only alpha values 0 and 255 becomes <code>CUTOUT</code>; any alpha value from 1 through 254 makes it <code>TRANSLUCENT</code>; a fully opaque texture becomes <code>OPAQUE</code>.</p>
+<p>The renderer's constructor-provided render type remains authoritative by default. Call <code>withAlphaMode(PAlphaMode.AUTO)</code> from a bone or mesh render resolver to opt into the baked texture classification, or pass a concrete mode to force a specific path. See <a href="../textures-and-emissive/">Textures and Emissive</a> for metadata and examples.</p>
+<p>Alpha-mode selection currently targets the queued world path: it resolves to <code>trianglesSolid</code>, <code>trianglesCutout</code>, or <code>trianglesTranslucent</code>. Do not apply <code>withAlphaMode(...)</code> to a GUI/immediate context, because those render types require the immediate uniform contract rather than queued instance attributes.</p>
+<h2 id="weighted-blended-oit">Weighted blended OIT<a class="headerlink" href="#weighted-blended-oit" title="Permanent link">&para;</a></h2>
+<p><code>trianglesTranslucent</code> and <code>trianglesTranslucentEmissive</code> are marked as OIT-capable render types. When independent blending is available through OpenGL 4.0 or <code>ARB_draw_buffers_blend</code>, <code>GlDrawExecutor</code> renders them into two attachments:</p>
+<ul>
+<li>an <code>RGBA16F</code> accumulation texture;</li>
+<li>an <code>R16F</code> revealage texture.</li>
+</ul>
+<p><code>triangles_oit.fsh</code> and <code>triangles_oit_emissive.fsh</code> write weighted color and revealage. <code>oit_composite</code> then combines the two textures over Minecraft's main render target. The OIT framebuffer shares the main target's depth texture, but translucent draws do not write depth.</p>
+<p>If OIT is unsupported, its framebuffer cannot be created, or the OIT shaders are unavailable, PulseLib falls back to the normal translucent program and the queue's back-to-front ordering. OIT shader selection is internal; application code should continue to request <code>trianglesTranslucent</code> rather than using <code>triangles_oit</code> directly.</p>
+<p>Custom translucent render types are not automatically marked as OIT-capable. They use the sorted fallback unless the backend gains an explicit registration API for them.</p>
+<h2 id="shared-shader-includes">Shared shader includes<a class="headerlink" href="#shared-shader-includes" title="Permanent link">&para;</a></h2>
+<p>The files under <code>assets/pulselib/shaders/include</code> divide reusable shader behavior by responsibility:</p>
+<ul>
+<li><code>deformers.glsl</code> evaluates the built-in deformation stack and its normal Jacobian;</li>
+<li><code>instanced_transform.glsl</code> reconstructs instance transforms and applies deformation;</li>
+<li><code>material_lighting.glsl</code> calculates two-sided directional light;</li>
+<li><code>material_fragment.glsl</code> samples materials, performs alpha cutoff, overlay, lightmap, and emissive composition;</li>
+<li><code>weighted_oit.glsl</code> calculates OIT weights and render-target outputs.</li>
+</ul>
+<p>Use namespaced Mojang imports when reusing them:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="cp">#moj_import &lt;pulselib:material_fragment.glsl&gt;</span>
 </code></pre></div>
-<p>Register it through NeoForge:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="nd">@SubscribeEvent</span>
-<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="kd">public</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">registerRenderers</span><span class="p">(</span><span class="n">EntityRenderersEvent</span><span class="p">.</span><span class="na">RegisterRenderers</span><span class="w"> </span><span class="n">event</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
-<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="w">    </span><span class="n">event</span><span class="p">.</span><span class="na">registerBlockEntityRenderer</span><span class="p">(</span><span class="n">MyBlockEntities</span><span class="p">.</span><span class="na">CRUSHER</span><span class="p">.</span><span class="na">get</span><span class="p">(),</span><span class="w"> </span><span class="n">CrusherRenderer</span><span class="p">::</span><span class="k">new</span><span class="p">);</span>
-<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="p">}</span>
-</code></pre></div>
-<h2 id="item-renderer">Item renderer<a class="headerlink" href="#item-renderer" title="Permanent link">&para;</a></h2>
-<p>Use <a href="https://github.com/ArcAnc/PulseLib/blob/1.21.1/src/main/java/com/arcanc/pulselib/content/renderer/PItemRenderer.java"><code>PItemRenderer</code></a> when the item model needs real animation instead of a static baked item JSON. The item must implement <a href="https://github.com/ArcAnc/PulseLib/blob/1.21.1/src/main/java/com/arcanc/pulselib/content/animatable/PItemAnimatable.java"><code>PItemAnimatable</code></a> and return client extensions.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="kd">public</span><span class="w"> </span><span class="kd">class</span> <span class="nc">WandRenderer</span><span class="w"> </span><span class="kd">extends</span><span class="w"> </span><span class="n">PItemRenderer</span><span class="o">&lt;</span><span class="n">WandItem</span><span class="o">&gt;</span><span class="w"> </span><span class="p">{</span>
-<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="nf">WandRenderer</span><span class="p">(</span><span class="n">BlockEntityRenderDispatcher</span><span class="w"> </span><span class="n">blockEntityRenderDispatcher</span><span class="p">,</span><span class="w"> </span><span class="n">EntityModelSet</span><span class="w"> </span><span class="n">entityModelSet</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
-<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="w">        </span><span class="kd">super</span><span class="p">(</span><span class="k">new</span><span class="w"> </span><span class="n">DefaultItemModelData</span><span class="p">.</span><span class="na">DefaultItemModelDataBuilder</span><span class="p">(</span>
-<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="w">                        </span><span class="n">ResourceLocation</span><span class="p">.</span><span class="na">fromNamespaceAndPath</span><span class="p">(</span><span class="s">"examplemod"</span><span class="p">,</span><span class="w"> </span><span class="s">"wand"</span><span class="p">))</span>
-<a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a><span class="w">                        </span><span class="p">.</span><span class="na">build</span><span class="p">(),</span>
-<a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a><span class="w">                </span><span class="n">PRenderTypes</span><span class="p">.</span><span class="na">RenderTypeProvider</span><span class="p">::</span><span class="n">trianglesSolid</span><span class="p">,</span>
-<a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a><span class="w">                </span><span class="n">blockEntityRenderDispatcher</span><span class="p">,</span>
-<a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a><span class="w">                </span><span class="n">entityModelSet</span><span class="p">);</span>
-<a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a><span class="w">    </span><span class="p">}</span>
-<a id="__codelineno-2-10" name="__codelineno-2-10" href="#__codelineno-2-10"></a><span class="p">}</span>
-</code></pre></div>
-<p>In GUI context, <code>PItemRenderer</code> uses <code>trianglesGui</code> and immediate drawing. It deliberately bypasses the world/entity queue, so GUI poses and CPU deformation do not consume a queued render stage.</p>
-<h2 id="entity-renderer">Entity renderer<a class="headerlink" href="#entity-renderer" title="Permanent link">&para;</a></h2>
-<p>Use <a href="https://github.com/ArcAnc/PulseLib/blob/1.21.1/src/main/java/com/arcanc/pulselib/content/renderer/PEntityRenderer.java"><code>PEntityRenderer</code></a> when the entire entity model is a PulseLib model.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="kd">public</span><span class="w"> </span><span class="kd">class</span> <span class="nc">RobotRenderer</span><span class="w"> </span><span class="kd">extends</span><span class="w"> </span><span class="n">PEntityRenderer</span><span class="o">&lt;</span><span class="n">RobotEntity</span><span class="o">&gt;</span><span class="w"> </span><span class="p">{</span>
-<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="nf">RobotRenderer</span><span class="p">(</span><span class="n">EntityRendererProvider</span><span class="p">.</span><span class="na">Context</span><span class="w"> </span><span class="n">context</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
-<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="w">        </span><span class="kd">super</span><span class="p">(</span><span class="n">context</span><span class="p">,</span>
-<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="w">                </span><span class="k">new</span><span class="w"> </span><span class="n">DefaultEntityModelData</span><span class="p">.</span><span class="na">DefaultEntityModelDataBuilder</span><span class="p">(</span>
-<a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a><span class="w">                        </span><span class="n">ResourceLocation</span><span class="p">.</span><span class="na">fromNamespaceAndPath</span><span class="p">(</span><span class="s">"examplemod"</span><span class="p">,</span><span class="w"> </span><span class="s">"robot"</span><span class="p">)).</span><span class="na">build</span><span class="p">(),</span>
-<a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a><span class="w">                </span><span class="n">PRenderTypes</span><span class="p">.</span><span class="na">RenderTypeProvider</span><span class="p">::</span><span class="n">trianglesSolid</span><span class="p">);</span>
-<a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a><span class="w">    </span><span class="p">}</span>
-<a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a><span class="p">}</span>
-</code></pre></div>
-<p>For <code>LivingEntity</code> subclasses, <code>PEntityRenderer</code> applies vanilla body rotation, sleeping/death/spin transforms, entity scale, and head yaw/pitch for a bone named <code>head</code>.</p>
-<h2 id="render-type-requirement">Render type requirement<a class="headerlink" href="#render-type-requirement" title="Permanent link">&para;</a></h2>
-<p>PulseLib models are triangle meshes. Use <a href="https://github.com/ArcAnc/PulseLib/blob/1.21.1/src/main/java/com/arcanc/pulselib/util/PRenderTypes.java"><code>PRenderTypes.RenderTypeProvider</code></a>:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="n">PRenderTypes</span><span class="p">.</span><span class="na">RenderTypeProvider</span><span class="p">::</span><span class="n">trianglesSolid</span>
-<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="n">PRenderTypes</span><span class="p">.</span><span class="na">RenderTypeProvider</span><span class="p">::</span><span class="n">trianglesCutout</span>
-<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="n">PRenderTypes</span><span class="p">.</span><span class="na">RenderTypeProvider</span><span class="p">::</span><span class="n">trianglesTranslucent</span>
-<a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a><span class="n">PRenderTypes</span><span class="p">.</span><span class="na">RenderTypeProvider</span><span class="p">::</span><span class="n">trianglesGui</span>
-</code></pre></div>
-<p>Do not pass vanilla entity/block <code>RenderType</code> values unless they use a compatible triangle vertex format and shader setup.</p>
-<p>World renderers use the queued instanced shader path. <code>trianglesGui</code> uses the immediate path instead, and <code>trianglesImmediate</code> is available for advanced direct rendering. See <a href="../shaders/">Shaders</a> for the exact program, attribute, and sampler mapping.</p>
+<p>These files describe the current backend contract, not a stable extension API. A custom queued shader must preserve the vertex format, attribute locations, instance encoding, and expected sampler names. A vanilla shader or a shader written only for <code>BufferBuilder</code> data will not receive the instance transform or deformer streams and will render incorrectly through <code>PRenderQueue</code>.</p>
 
 
 

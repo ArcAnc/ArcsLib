@@ -10,13 +10,13 @@
       
       
       
-        <link rel="canonical" href="https://arcanc.github.io/PulseLib/1.21.1/renderers/">
+        <link rel="canonical" href="https://arcanc.github.io/PulseLib/1.21.1/render-backend/">
       
       
-        <link rel="prev" href="../animation-events/">
+        <link rel="prev" href="../gui-rendering/">
       
       
-        <link rel="next" href="../render-types-and-queue/">
+        <link rel="next" href="../model-loaders/">
       
       
         
@@ -27,7 +27,7 @@
     
     
       
-        <title>Renderers - PulseLib</title>
+        <title>Render Backend - PulseLib</title>
       
     
     
@@ -78,7 +78,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#molang-context" class="md-skip">
+        <a href="#render-backend" class="md-skip">
           Skip to content
         </a>
       
@@ -116,7 +116,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Renderers
+              Render Backend
             
           </span>
         </div>
@@ -233,12 +233,10 @@
   
   
   
-    
-  
   
     
     
-      <li class="md-tabs__item md-tabs__item--active">
+      <li class="md-tabs__item">
         <a href="../modeldata/" class="md-tabs__link">
           
   
@@ -275,11 +273,13 @@
   
   
   
+    
+  
   
     
     
-      <li class="md-tabs__item">
-        <a href="../render-backend/" class="md-tabs__link">
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="./" class="md-tabs__link">
           
   
   
@@ -511,31 +511,26 @@
       
   
   
-    
   
   
-  
     
     
     
     
-      
-        
-        
       
       
         
       
     
     
-    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" checked>
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
         
           
-          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="">
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
             
   
   
@@ -553,7 +548,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="true">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
           <label class="md-nav__title" for="__nav_2">
             <span class="md-nav__icon md-icon"></span>
             
@@ -652,35 +647,10 @@
                 
   
   
-    
   
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Renderers
-  
-
-    
-  </span>
-  
-  
-
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../renderers/" class="md-nav__link">
         
   
   
@@ -696,79 +666,6 @@
   
 
       </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#molang-context" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Molang context
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#block-renderer" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Block renderer
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#item-renderer" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Item renderer
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#entity-renderer" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Entity renderer
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#render-type-requirement" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Render type requirement
-      
-    </span>
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
     </li>
   
 
@@ -1152,26 +1049,31 @@
       
   
   
+    
   
   
+  
     
     
     
     
+      
+        
+        
       
       
         
       
     
     
-    <li class="md-nav__item md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" checked>
         
           
-          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="">
             
   
   
@@ -1189,7 +1091,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="true">
           <label class="md-nav__title" for="__nav_4">
             <span class="md-nav__icon md-icon"></span>
             
@@ -1204,10 +1106,37 @@
                 
   
   
+    
   
   
-    <li class="md-nav__item">
-      <a href="../render-backend/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Render Backend
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         
   
   
@@ -1223,6 +1152,114 @@
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#resource-handles" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Resource handles
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#static-geometry-arena" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Static geometry arena
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#dynamic-geometry" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Dynamic geometry
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#frame-compilation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Frame compilation
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#execution-and-capability-fallbacks" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Execution and capability fallbacks
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#draw-batching" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Draw batching
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#shader-execution" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Shader execution
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#render-stages-and-cleanup" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Render stages and cleanup
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -1308,6 +1345,8 @@
   
   
   
+    
+  
   
     <label class="md-nav__title" for="__toc">
       <span class="md-nav__icon md-icon"></span>
@@ -1316,10 +1355,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#molang-context" class="md-nav__link">
+  <a href="#resource-handles" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Molang context
+        Resource handles
       
     </span>
   </a>
@@ -1327,10 +1366,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#block-renderer" class="md-nav__link">
+  <a href="#static-geometry-arena" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Block renderer
+        Static geometry arena
       
     </span>
   </a>
@@ -1338,10 +1377,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#item-renderer" class="md-nav__link">
+  <a href="#dynamic-geometry" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Item renderer
+        Dynamic geometry
       
     </span>
   </a>
@@ -1349,10 +1388,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#entity-renderer" class="md-nav__link">
+  <a href="#frame-compilation" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Entity renderer
+        Frame compilation
       
     </span>
   </a>
@@ -1360,10 +1399,43 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#render-type-requirement" class="md-nav__link">
+  <a href="#execution-and-capability-fallbacks" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Render type requirement
+        Execution and capability fallbacks
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#draw-batching" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Draw batching
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#shader-execution" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Shader execution
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#render-stages-and-cleanup" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Render stages and cleanup
       
     </span>
   </a>
@@ -1390,70 +1462,97 @@
   
 
 
-  <h1>Renderers</h1>
-
-<p>A PulseLib renderer is the bridge between Minecraft's render call and PulseLib's baked animated model. It gets the current animatable, asks for model data, binds the animation manager to the baked model, and submits every posed bone to the render queue. Static baked meshes go through the geometry-arena path; supported deformer stacks add per-instance GPU deformation data, while unsupported stacks use the CPU dynamic-geometry fallback. See <a href="../render-backend/">Render backend</a> for the execution details.</p>
-<p>All built-in renderers implement <a href="https://github.com/ArcAnc/PulseLib/blob/1.21.1/src/main/java/com/arcanc/pulselib/content/renderer/PRenderer.java"><code>PRenderer</code></a> and use the same submit lifecycle:</p>
+<h1 id="render-backend">Render Backend<a class="headerlink" href="#render-backend" title="Permanent link">&para;</a></h1>
+<p>PulseLib separates model traversal from OpenGL execution. Renderers evaluate animation, walk baked bones, and submit mesh instances; the backend later compiles those submissions and draws them at the matching NeoForge render stage.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>renderer
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>  -&gt; PRenderQueue
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>  -&gt; PFrameCompiler
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>  -&gt; PRenderPlan
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>  -&gt; GlDrawExecutor
+<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>  -&gt; geometry arena / dynamic VertexBuffer
+</code></pre></div>
+<p>Most integrations should use the built-in renderers and <code>PRenderTypes</code>. The classes on this page are primarily useful when implementing custom geometry submission or diagnosing backend behavior.</p>
+<h2 id="resource-handles">Resource handles<a class="headerlink" href="#resource-handles" title="Permanent link">&para;</a></h2>
+<p><code>GlResourceRegistry</code> translates backend-neutral handles into legacy OpenGL resources:</p>
 <ul>
-<li><code>preSubmit(...)</code> - hook before PulseLib submits model meshes.</li>
-<li><code>trueSubmit(...)</code> - default PulseLib model submission.</li>
-<li><code>postSubmit(...)</code> - hook after model submission.</li>
+<li><code>PPipelineHandle</code> identifies a Minecraft <code>RenderType</code>;</li>
+<li><code>PMeshHandle</code> identifies static <code>PGeometryData</code> or dynamic <code>GlDynamicGeometry</code>;</li>
+<li><code>PDrawCommand</code> describes index count, instance count, first index, base vertex, and first instance.</li>
 </ul>
-<p>Most custom renderers only need a constructor. Override <code>preSubmit</code> or <code>postSubmit</code> when you need to draw something extra around the PulseLib model.</p>
-<h2 id="molang-context">Molang context<a class="headerlink" href="#molang-context" title="Permanent link">&para;</a></h2>
-<p>The built-in entity, block entity, and item renderers prepare a Molang context once per controller and render pass, then reuse it for all mixed bones. Override <code>populateMolangContext(...)</code> to add renderer-specific <code>query.*</code> values. The full API and the current <code>variable.*</code> lifetime limitation are documented in <a href="../molang-animations/">Molang animations</a>.</p>
-<h2 id="block-renderer">Block renderer<a class="headerlink" href="#block-renderer" title="Permanent link">&para;</a></h2>
-<p>Use <a href="https://github.com/ArcAnc/PulseLib/blob/1.21.1/src/main/java/com/arcanc/pulselib/content/renderer/PBlockRenderer.java"><code>PBlockRenderer</code></a> for block entities. The block itself should hide vanilla rendering; the block entity renderer becomes the visible model.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="kd">public</span><span class="w"> </span><span class="kd">class</span> <span class="nc">CrusherRenderer</span><span class="w"> </span><span class="kd">extends</span><span class="w"> </span><span class="n">PBlockRenderer</span><span class="o">&lt;</span><span class="n">CrusherBlockEntity</span><span class="o">&gt;</span><span class="w"> </span><span class="p">{</span>
-<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="nf">CrusherRenderer</span><span class="p">(</span><span class="n">BlockEntityRendererProvider</span><span class="p">.</span><span class="na">Context</span><span class="w"> </span><span class="n">context</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
-<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="w">        </span><span class="kd">super</span><span class="p">(</span><span class="k">new</span><span class="w"> </span><span class="n">DefaultBlockModelData</span><span class="p">.</span><span class="na">DefaultBlockModelDataBuilder</span><span class="p">(</span>
-<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="w">                        </span><span class="n">ResourceLocation</span><span class="p">.</span><span class="na">fromNamespaceAndPath</span><span class="p">(</span><span class="s">"examplemod"</span><span class="p">,</span><span class="w"> </span><span class="s">"crusher"</span><span class="p">))</span>
-<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="w">                        </span><span class="p">.</span><span class="na">build</span><span class="p">(),</span>
-<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="w">                </span><span class="n">PRenderTypes</span><span class="p">.</span><span class="na">RenderTypeProvider</span><span class="p">::</span><span class="n">trianglesCutout</span><span class="p">);</span>
-<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a><span class="w">    </span><span class="p">}</span>
-<a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a><span class="p">}</span>
-</code></pre></div>
-<p>Register it through NeoForge:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="nd">@SubscribeEvent</span>
-<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="kd">public</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">registerRenderers</span><span class="p">(</span><span class="n">EntityRenderersEvent</span><span class="p">.</span><span class="na">RegisterRenderers</span><span class="w"> </span><span class="n">event</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
-<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="w">    </span><span class="n">event</span><span class="p">.</span><span class="na">registerBlockEntityRenderer</span><span class="p">(</span><span class="n">MyBlockEntities</span><span class="p">.</span><span class="na">CRUSHER</span><span class="p">.</span><span class="na">get</span><span class="p">(),</span><span class="w"> </span><span class="n">CrusherRenderer</span><span class="p">::</span><span class="k">new</span><span class="p">);</span>
-<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="p">}</span>
-</code></pre></div>
-<h2 id="item-renderer">Item renderer<a class="headerlink" href="#item-renderer" title="Permanent link">&para;</a></h2>
-<p>Use <a href="https://github.com/ArcAnc/PulseLib/blob/1.21.1/src/main/java/com/arcanc/pulselib/content/renderer/PItemRenderer.java"><code>PItemRenderer</code></a> when the item model needs real animation instead of a static baked item JSON. The item must implement <a href="https://github.com/ArcAnc/PulseLib/blob/1.21.1/src/main/java/com/arcanc/pulselib/content/animatable/PItemAnimatable.java"><code>PItemAnimatable</code></a> and return client extensions.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="kd">public</span><span class="w"> </span><span class="kd">class</span> <span class="nc">WandRenderer</span><span class="w"> </span><span class="kd">extends</span><span class="w"> </span><span class="n">PItemRenderer</span><span class="o">&lt;</span><span class="n">WandItem</span><span class="o">&gt;</span><span class="w"> </span><span class="p">{</span>
-<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="nf">WandRenderer</span><span class="p">(</span><span class="n">BlockEntityRenderDispatcher</span><span class="w"> </span><span class="n">blockEntityRenderDispatcher</span><span class="p">,</span><span class="w"> </span><span class="n">EntityModelSet</span><span class="w"> </span><span class="n">entityModelSet</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
-<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="w">        </span><span class="kd">super</span><span class="p">(</span><span class="k">new</span><span class="w"> </span><span class="n">DefaultItemModelData</span><span class="p">.</span><span class="na">DefaultItemModelDataBuilder</span><span class="p">(</span>
-<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="w">                        </span><span class="n">ResourceLocation</span><span class="p">.</span><span class="na">fromNamespaceAndPath</span><span class="p">(</span><span class="s">"examplemod"</span><span class="p">,</span><span class="w"> </span><span class="s">"wand"</span><span class="p">))</span>
-<a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a><span class="w">                        </span><span class="p">.</span><span class="na">build</span><span class="p">(),</span>
-<a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a><span class="w">                </span><span class="n">PRenderTypes</span><span class="p">.</span><span class="na">RenderTypeProvider</span><span class="p">::</span><span class="n">trianglesSolid</span><span class="p">,</span>
-<a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a><span class="w">                </span><span class="n">blockEntityRenderDispatcher</span><span class="p">,</span>
-<a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a><span class="w">                </span><span class="n">entityModelSet</span><span class="p">);</span>
-<a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a><span class="w">    </span><span class="p">}</span>
-<a id="__codelineno-2-10" name="__codelineno-2-10" href="#__codelineno-2-10"></a><span class="p">}</span>
-</code></pre></div>
-<p>In GUI context, <code>PItemRenderer</code> uses <code>trianglesGui</code> and immediate drawing. It deliberately bypasses the world/entity queue, so GUI poses and CPU deformation do not consume a queued render stage.</p>
-<h2 id="entity-renderer">Entity renderer<a class="headerlink" href="#entity-renderer" title="Permanent link">&para;</a></h2>
-<p>Use <a href="https://github.com/ArcAnc/PulseLib/blob/1.21.1/src/main/java/com/arcanc/pulselib/content/renderer/PEntityRenderer.java"><code>PEntityRenderer</code></a> when the entire entity model is a PulseLib model.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="kd">public</span><span class="w"> </span><span class="kd">class</span> <span class="nc">RobotRenderer</span><span class="w"> </span><span class="kd">extends</span><span class="w"> </span><span class="n">PEntityRenderer</span><span class="o">&lt;</span><span class="n">RobotEntity</span><span class="o">&gt;</span><span class="w"> </span><span class="p">{</span>
-<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="nf">RobotRenderer</span><span class="p">(</span><span class="n">EntityRendererProvider</span><span class="p">.</span><span class="na">Context</span><span class="w"> </span><span class="n">context</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
-<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="w">        </span><span class="kd">super</span><span class="p">(</span><span class="n">context</span><span class="p">,</span>
-<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="w">                </span><span class="k">new</span><span class="w"> </span><span class="n">DefaultEntityModelData</span><span class="p">.</span><span class="na">DefaultEntityModelDataBuilder</span><span class="p">(</span>
-<a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a><span class="w">                        </span><span class="n">ResourceLocation</span><span class="p">.</span><span class="na">fromNamespaceAndPath</span><span class="p">(</span><span class="s">"examplemod"</span><span class="p">,</span><span class="w"> </span><span class="s">"robot"</span><span class="p">)).</span><span class="na">build</span><span class="p">(),</span>
-<a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a><span class="w">                </span><span class="n">PRenderTypes</span><span class="p">.</span><span class="na">RenderTypeProvider</span><span class="p">::</span><span class="n">trianglesSolid</span><span class="p">);</span>
-<a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a><span class="w">    </span><span class="p">}</span>
-<a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a><span class="p">}</span>
-</code></pre></div>
-<p>For <code>LivingEntity</code> subclasses, <code>PEntityRenderer</code> applies vanilla body rotation, sleeping/death/spin transforms, entity scale, and head yaw/pitch for a bone named <code>head</code>.</p>
-<h2 id="render-type-requirement">Render type requirement<a class="headerlink" href="#render-type-requirement" title="Permanent link">&para;</a></h2>
-<p>PulseLib models are triangle meshes. Use <a href="https://github.com/ArcAnc/PulseLib/blob/1.21.1/src/main/java/com/arcanc/pulselib/util/PRenderTypes.java"><code>PRenderTypes.RenderTypeProvider</code></a>:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="n">PRenderTypes</span><span class="p">.</span><span class="na">RenderTypeProvider</span><span class="p">::</span><span class="n">trianglesSolid</span>
-<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="n">PRenderTypes</span><span class="p">.</span><span class="na">RenderTypeProvider</span><span class="p">::</span><span class="n">trianglesCutout</span>
-<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="n">PRenderTypes</span><span class="p">.</span><span class="na">RenderTypeProvider</span><span class="p">::</span><span class="n">trianglesTranslucent</span>
-<a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a><span class="n">PRenderTypes</span><span class="p">.</span><span class="na">RenderTypeProvider</span><span class="p">::</span><span class="n">trianglesGui</span>
-</code></pre></div>
-<p>Do not pass vanilla entity/block <code>RenderType</code> values unless they use a compatible triangle vertex format and shader setup.</p>
-<p>World renderers use the queued instanced shader path. <code>trianglesGui</code> uses the immediate path instead, and <code>trianglesImmediate</code> is available for advanced direct rendering. See <a href="../shaders/">Shaders</a> for the exact program, attribute, and sampler mapping.</p>
+<p>Handles keep <code>PRenderPlan</code> independent of concrete OpenGL object IDs. They remain valid until <code>PRenderQueue.cleanup()</code> or a model resource reload clears the registry.</p>
+<h2 id="static-geometry-arena">Static geometry arena<a class="headerlink" href="#static-geometry-arena" title="Permanent link">&para;</a></h2>
+<p>Baked meshes normally expose immutable <code>PGeometryData</code>. On first submission, <code>GlGeometryArena</code> appends its vertex and index bytes to a page and returns a slice containing:</p>
+<ul>
+<li>the page VAO;</li>
+<li>byte offset in the shared index buffer;</li>
+<li>OpenGL index type;</li>
+<li>base vertex in the shared vertex buffer.</li>
+</ul>
+<p>A normal page reserves 4 MiB for vertices and 4 MiB for indices. Larger meshes receive a page sized to fit. Index data is aligned to its 2-byte or 4-byte element size, so unsigned-short and unsigned-int slices can share a page.</p>
+<p>The local indices of every mesh remain unchanged. <code>baseVertex</code> relocates them into the shared vertex buffer, while <code>indexOffset</code> or <code>firstIndex</code> locates their range in the shared index buffer. Direct draws use the byte offset; indirect commands use <code>firstIndex</code>, measured in index elements.</p>
+<p>All geometry placed in the current arena must use <code>PRenderTypes.VertexFormatProvider.POSITION_TEX_NORMAL</code> and its stride. A page owns one VAO layout, so mixing arbitrary vertex layouts in the same arena is unsupported.</p>
+<p>The arena is append-only. Individual slices are not removed or compacted; all pages are released together during cleanup or resource reload. This matches baked models, whose geometry is stable between reloads.</p>
+<h2 id="dynamic-geometry">Dynamic geometry<a class="headerlink" href="#dynamic-geometry" title="Permanent link">&para;</a></h2>
+<p>CPU-deformed meshes use <code>PDynamicGeometry</code>, backed by a Minecraft <code>VertexBuffer</code>. They are not copied into the static arena because their vertex contents may change. Dynamic geometry can still be drawn with instancing, but it cannot share a page VAO and index buffer with unrelated meshes, which limits multi-draw batching.</p>
+<p>Built-in GPU-compatible deformers keep the original mesh in the static arena. Their operation definitions and current values are supplied separately to the shader; see <a href="../mesh-deformers/">Mesh Deformers</a> and <a href="../shaders/">Shaders</a>.</p>
+<h2 id="frame-compilation">Frame compilation<a class="headerlink" href="#frame-compilation" title="Permanent link">&para;</a></h2>
+<p><code>PFrameCompiler</code> collects submissions per render stage.</p>
+<p>Opaque submissions are grouped by pipeline, mesh, and draw command. Every compatible occurrence becomes another <code>PInstanceHeader</code> in one draw group, allowing a repeated mesh to be drawn as instances.</p>
+<p>Transparent submissions are initially kept individually and sorted back-to-front using the translation in their instance transform. Adjacent submissions with the same draw key are then combined without changing that ordering. The sorted order is also retained as the fallback when weighted OIT is unavailable.</p>
+<p>Each <code>PInstanceHeader</code> contains:</p>
+<ul>
+<li>a copied affine transform;</li>
+<li>packed color;</li>
+<li>packed block/sky light;</li>
+<li>packed overlay;</li>
+<li>GPU-deformer operation offset, value offset, and operation count.</li>
+</ul>
+<h2 id="execution-and-capability-fallbacks">Execution and capability fallbacks<a class="headerlink" href="#execution-and-capability-fallbacks" title="Permanent link">&para;</a></h2>
+<p><code>GlDrawExecutor</code> probes the active OpenGL context the first time it executes a non-empty plan. Texture-buffer support is required by the current deformer storage path. Other capabilities select optimizations:</p>
+<table>
+<thead>
+<tr>
+<th>Capability</th>
+<th>Selected behavior</th>
+<th>Fallback</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Multi-draw indirect plus base instance</td>
+<td>Multiple arena slices in one indirect call</td>
+<td>Direct instanced draws</td>
+</tr>
+<tr>
+<td>Buffer storage</td>
+<td>Persistently mapped ring buffers</td>
+<td><code>glBufferData</code> uploads</td>
+</tr>
+<tr>
+<td>Independent draw-buffer blending</td>
+<td>Weighted blended OIT</td>
+<td>Sorted alpha blending</td>
+</tr>
+</tbody>
+</table>
+<p>The instance record occupies 96 bytes. It contains three transform rows, color, light, overlay, three deformer integers, and padding. The executor uploads all records for a plan into one instance buffer.</p>
+<p>Persistent uploads use a nine-slot ring: three frames in flight multiplied by three expected stage submissions per frame. <code>GlFrameArena</code> attaches a fence to a completed slot and does not reuse it until the GPU signals completion. Growing or replacing a persistent buffer first waits for outstanding slots.</p>
+<h2 id="draw-batching">Draw batching<a class="headerlink" href="#draw-batching" title="Permanent link">&para;</a></h2>
+<p>Opaque groups are already ordered by pipeline. With multi-draw indirect enabled, the executor further partitions arena geometry by <code>(VAO, indexType)</code>. Every partition can be issued with one <code>glMultiDrawElementsIndirect</code> because its commands share the pipeline, vertex layout, and bound index buffer.</p>
+<p>Transparent groups are only combined when compatible groups are adjacent. This avoids arbitrary regrouping that would invalidate fallback alpha ordering.</p>
+<p>For a direct arena draw, the executor calls <code>glDrawElementsInstancedBaseVertex</code>. For dynamic geometry it binds the mesh's own <code>VertexBuffer</code> and reads its primitive mode and index type through the Minecraft accessor mixin.</p>
+<h2 id="shader-execution">Shader execution<a class="headerlink" href="#shader-execution" title="Permanent link">&para;</a></h2>
+<p>Before drawing, the executor applies the group's <code>RenderType</code>, binds instance attributes, sets Minecraft's default matrices and light directions, and binds the deformer texture buffers. The queued shader contract and its immediate counterpart are documented on <a href="../shaders/">Shaders</a>.</p>
+<p>Built-in translucent render types are separated from standard groups. When weighted OIT starts successfully, they render into accumulation and revealage attachments and are composited over the main target. If setup fails, they are drawn through their ordinary translucent shader without losing the compiled fallback ordering.</p>
+<h2 id="render-stages-and-cleanup">Render stages and cleanup<a class="headerlink" href="#render-stages-and-cleanup" title="Permanent link">&para;</a></h2>
+<p><code>PRenderStagesHandler</code> flushes:</p>
+<ul>
+<li>entity and non-GUI item submissions after entities;</li>
+<li>opaque block-entity submissions after block entities;</li>
+<li>translucent block submissions after particles.</li>
+</ul>
+<p>The final translucent stage also finishes the per-frame GPU deformer streams. Callers should not flush the standard stages or reset those streams manually.</p>
+<p><code>PRenderQueue.cleanup()</code> clears pending compiler state, waits for in-flight buffer slots, deletes executor buffers and OIT targets, and releases every registered geometry page. Model reload and client-level unload invoke this lifecycle for normal library use.</p>
 
 
 

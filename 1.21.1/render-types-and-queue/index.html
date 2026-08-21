@@ -16,7 +16,7 @@
         <link rel="prev" href="../renderers/">
       
       
-        <link rel="next" href="../textures-and-emissive/">
+        <link rel="next" href="../shaders/">
       
       
         
@@ -279,7 +279,7 @@
     
     
       <li class="md-tabs__item">
-        <a href="../render-backend.md" class="md-tabs__link">
+        <a href="../render-backend/" class="md-tabs__link">
           
   
   
@@ -809,6 +809,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../shaders/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Shaders
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../textures-and-emissive/" class="md-nav__link">
         
   
@@ -1179,7 +1207,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../render-backend.md" class="md-nav__link">
+      <a href="../render-backend/" class="md-nav__link">
         
   
   
@@ -1364,34 +1392,35 @@
 
   <h1>Render Types and Queue</h1>
 
-<p>Most mods can use PulseLib's renderers without touching the render queue directly. This page explains why PulseLib does not use vanilla <code>RenderType</code> values and how to add custom geometry to the current render backend. For its internal frame-plan, geometry-arena, and capability paths, see <a href="render-backend.md">Render backend</a>.</p>
+<p>Most mods can use PulseLib's renderers without touching the render queue directly. This page explains why PulseLib does not use vanilla <code>RenderType</code> values and how to add custom geometry to the current render backend. For its internal frame-plan, geometry-arena, and capability paths, see <a href="../render-backend/">Render backend</a>.</p>
 <p>PulseLib models are triangle meshes loaded from glTF/GLB or another model loader. Vanilla baked block models are mostly quad-based, so PulseLib provides its own triangle render types, shaders, vertex format, and instanced queue. That is why examples use <a href="https://github.com/ArcAnc/PulseLib/blob/1.21.1/src/main/java/com/arcanc/pulselib/util/PRenderTypes.java"><code>PRenderTypes</code></a> instead of <code>RenderType.entityCutout</code> or block render types.</p>
 <h2 id="which-render-type-should-i-choose">Which render type should I choose?<a class="headerlink" href="#which-render-type-should-i-choose" title="Permanent link">&para;</a></h2>
 <p>Use the simplest type that matches the visual result:</p>
 <ul>
 <li><code>trianglesSolid</code> for opaque models.</li>
 <li><code>trianglesCutout</code> for hard alpha cutouts, like holes or masked pixels.</li>
-<li><code>trianglesTranslucent</code> for glass-like transparency.</li>
+<li><code>trianglesTranslucent</code> for glass-like transparency and weighted OIT.</li>
 <li><code>trianglesGui</code> for direct GUI drawing.</li>
+<li><code>trianglesImmediate</code> for advanced direct drawing outside the queued world path.</li>
 </ul>
-<p><code>trianglesLit</code> no longer has its own shader. It remains as a compatibility render type backed by the GUI shader, so do not select it for new world rendering; use <code>trianglesSolid</code>, <code>trianglesCutout</code>, or <code>trianglesTranslucent</code> according to the material instead.</p>
+<p>The first three types use the queued instanced shaders. <code>trianglesGui</code> and <code>trianglesImmediate</code> share the direct <code>triangles_immediate_lit</code> shader and differ in transparency state. There is no <code>trianglesLit</code> compatibility method in the current API. The full program mapping and shader data contract are documented on <a href="../shaders/">Shaders</a>.</p>
 <p>In a renderer constructor this usually looks like:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="kd">super</span><span class="p">(</span><span class="n">modelData</span><span class="p">,</span><span class="w"> </span><span class="n">PRenderTypes</span><span class="p">.</span><span class="na">RenderTypeProvider</span><span class="p">::</span><span class="n">trianglesSolid</span><span class="p">);</span>
 </code></pre></div>
 <p>If a texture is marked as emissive, the default renderers automatically switch the mesh to the matching emissive variant. You normally do not need to choose <code>trianglesSolidEmissive</code> yourself unless you are writing custom draw code.</p>
-<p>Emissive texture metadata is described on <a href="Textures-and-Emissive">Textures and Emissive</a>.</p>
+<p>Emissive and alpha-mode texture metadata is described on <a href="../textures-and-emissive/">Textures and Emissive</a>.</p>
 <h2 id="why-vanilla-rendertype-is-not-enough">Why vanilla RenderType is not enough<a class="headerlink" href="#why-vanilla-rendertype-is-not-enough" title="Permanent link">&para;</a></h2>
-<p>PulseLib's baked meshes use <a href="https://github.com/ArcAnc/PulseLib/blob/1.21.1/src/main/java/com/arcanc/pulselib/util/PRenderTypes.java"><code>PRenderTypes.VertexFormatProvider.POSITION_TEX_NORMAL</code></a>. The shaders also expect per-instance data: transform matrix, color, light, and overlay. A vanilla render type may compile and still render incorrectly because its shader and vertex format do not match the data PulseLib sends.</p>
+<p>PulseLib's baked meshes use <a href="https://github.com/ArcAnc/PulseLib/blob/1.21.1/src/main/java/com/arcanc/pulselib/util/PRenderTypes.java"><code>PRenderTypes.VertexFormatProvider.POSITION_TEX_NORMAL</code></a>. Queued shaders also expect per-instance data: transform rows, color, light, overlay, and deformer stream offsets. A vanilla render type may compile and still render incorrectly because its shader and vertex format do not match the data PulseLib sends.</p>
 <p>If you create a custom render type, keep these requirements:</p>
 <ul>
 <li><code>VertexFormat.Mode.TRIANGLES</code></li>
 <li><code>PRenderTypes.VertexFormatProvider.POSITION_TEX_NORMAL</code></li>
-<li>a shader that understands PulseLib's uniforms and instance attributes</li>
+<li>a shader that implements PulseLib's queued attribute and sampler contract</li>
 <li>a transparency state that matches how the queue should sort the mesh</li>
 </ul>
 <p>For most mods, it is safer to start from PulseLib's existing render types and only add a new one when you need a genuinely different shader state.</p>
 <h2 id="what-the-queue-does">What the queue does<a class="headerlink" href="#what-the-queue-does" title="Permanent link">&para;</a></h2>
-<p><a href="https://github.com/ArcAnc/PulseLib/blob/1.21.1/src/main/java/com/arcanc/pulselib/content/renderer/PRenderQueue.java"><code>PRenderQueue</code></a> compiles submissions into a frame plan. Opaque submissions with the same render type and geometry are batched as instances; transparent submissions are kept in back-to-front order. The OpenGL driver uploads the instance stream once per flush and uses multi-draw indirect where the current context supports it. It falls back to direct instanced draws when that capability is unavailable.</p>
+<p><a href="https://github.com/ArcAnc/PulseLib/blob/1.21.1/src/main/java/com/arcanc/pulselib/content/renderer/PRenderQueue.java"><code>PRenderQueue</code></a> compiles submissions into a frame plan. Opaque submissions with the same render type and geometry are batched as instances; transparent submissions are kept in back-to-front order. Built-in translucent types use weighted blended order-independent transparency when the context supports independent blending, with sorted alpha blending as the fallback. The OpenGL driver uploads the instance stream once per flush and uses multi-draw indirect where the current context supports it. It falls back to direct instanced draws when that capability is unavailable.</p>
 <p>Static <a href="https://github.com/ArcAnc/PulseLib/blob/1.21.1/src/main/java/com/arcanc/pulselib/content/renderer/plan/PGeometryData.java"><code>PGeometryData</code></a> is placed in the backend's geometry arena and reused across frames. This is the normal path for baked meshes. Dynamic geometry is reserved for CPU-deformed meshes and is more expensive because its vertex data is uploaded again.</p>
 <p>The queue has a few stages:</p>
 <ul>
