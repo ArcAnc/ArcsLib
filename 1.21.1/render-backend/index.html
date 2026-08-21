@@ -1543,13 +1543,14 @@
 <p>For a direct arena draw, the executor calls <code>glDrawElementsInstancedBaseVertex</code>. For dynamic geometry it binds the mesh's own <code>VertexBuffer</code> and reads its primitive mode and index type through the Minecraft accessor mixin.</p>
 <h2 id="shader-execution">Shader execution<a class="headerlink" href="#shader-execution" title="Permanent link">&para;</a></h2>
 <p>Before drawing, the executor applies the group's <code>RenderType</code>, binds instance attributes, sets Minecraft's default matrices and light directions, and binds the deformer texture buffers. The queued shader contract and its immediate counterpart are documented on <a href="../shaders/">Shaders</a>.</p>
-<p>Built-in translucent render types are separated from standard groups. When weighted OIT starts successfully, they render into accumulation and revealage attachments and are composited over the main target. If setup fails, they are drawn through their ordinary translucent shader without losing the compiled fallback ordering.</p>
+<p>Built-in translucent render types are separated from standard groups. When weighted OIT starts successfully, they render into persistent per-frame accumulation and revealage attachments. The attachments are resolved once after weather, into the Fabulous weather target when available or the main target otherwise. If setup fails, the affected groups are drawn through their ordinary translucent shader without losing the compiled fallback ordering.</p>
 <h2 id="render-stages-and-cleanup">Render stages and cleanup<a class="headerlink" href="#render-stages-and-cleanup" title="Permanent link">&para;</a></h2>
 <p><code>PRenderStagesHandler</code> flushes:</p>
 <ul>
 <li>entity and non-GUI item submissions after entities;</li>
 <li>opaque block-entity submissions after block entities;</li>
-<li>translucent block submissions after particles.</li>
+<li>translucent block submissions after particles;</li>
+<li>the accumulated OIT target after weather, before Minecraft resolves its Fabulous transparency chain.</li>
 </ul>
 <p>The final translucent stage also finishes the per-frame GPU deformer streams. Callers should not flush the standard stages or reset those streams manually.</p>
 <p><code>PRenderQueue.cleanup()</code> clears pending compiler state, waits for in-flight buffer slots, deletes executor buffers and OIT targets, and releases every registered geometry page. Model reload and client-level unload invoke this lifecycle for normal library use.</p>

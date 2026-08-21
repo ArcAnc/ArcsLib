@@ -1599,7 +1599,7 @@
 <li>an <code>RGBA16F</code> accumulation texture;</li>
 <li>an <code>R16F</code> revealage texture.</li>
 </ul>
-<p><code>triangles_oit.fsh</code> and <code>triangles_oit_emissive.fsh</code> write weighted color and revealage. <code>oit_composite</code> then combines the two textures over Minecraft's main render target. The OIT framebuffer shares the main target's depth texture, but translucent draws do not write depth.</p>
+<p><code>triangles_oit.fsh</code> and <code>triangles_oit_emissive.fsh</code> write weighted color and revealage. The OIT target remains open across the queued world stages and <code>oit_composite</code> resolves it once after weather. It composites into Minecraft's weather target under Fabulous graphics so the result participates in the vanilla transparency chain, and into the main target otherwise. The OIT framebuffer shares the main target's depth texture, but translucent draws do not write depth.</p>
 <p>If OIT is unsupported, its framebuffer cannot be created, or the OIT shaders are unavailable, PulseLib falls back to the normal translucent program and the queue's back-to-front ordering. OIT shader selection is internal; application code should continue to request <code>trianglesTranslucent</code> rather than using <code>triangles_oit</code> directly.</p>
 <p>Custom translucent render types are not automatically marked as OIT-capable. They use the sorted fallback unless the backend gains an explicit registration API for them.</p>
 <h2 id="shared-shader-includes">Shared shader includes<a class="headerlink" href="#shared-shader-includes" title="Permanent link">&para;</a></h2>
