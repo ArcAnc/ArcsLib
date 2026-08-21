@@ -75,6 +75,8 @@ public int getPackedLight(PEntityRenderState.LivingImpl<RobotEntity> renderState
 }
 ```
 
+The default layer resolver applies these hooks through `PMeshRenderContext.withColor(...)`, `withPackedLight(...)`, and `withPackedOverlay(...)`, so deformation, texture, emissive, and alpha-mode overrides remain intact. Override `resolveMeshRender(...)` when a layer needs those additional per-mesh controls.
+
 Classes used:
 
 * [`PEntityRenderLayer`](https://github.com/ArcAnc/PulseLib/blob/26.1/src/main/java/com/arcanc/pulselib/content/renderer/PEntityRenderLayer.java)

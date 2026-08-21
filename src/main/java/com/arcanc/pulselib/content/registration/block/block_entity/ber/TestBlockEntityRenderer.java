@@ -45,10 +45,7 @@ public class TestBlockEntityRenderer extends PBlockRenderer<TestBlockEntity, Tes
 	@Override
 	protected PMeshRenderContext resolveMeshRender(TestBlockEntityRenderState renderState, PBakedBone bone, PBakedMesh mesh, PMeshRenderContext inherited)
 	{
-		return new PMeshRenderContext(
-				inherited.renderType(),
-				TestDayTimeColor.color(renderState.getAnimatable().getLevel(), renderState.partialTick()),
-				inherited.packedLight(),
-				inherited.packedOverlay());
+		return inherited.withColor(
+				TestDayTimeColor.color(renderState.getAnimatable().getLevel(), renderState.partialTick()));
 	}
 }

@@ -41,11 +41,7 @@ public class TestArmorItem extends Item
 	                                                    PMeshRenderContext inherited,
 	                                                    float partialTick)
 	{
-		return new PMeshRenderContext(
-				inherited.renderType(),
-				dayTimeColor(entity, partialTick),
-				inherited.packedLight(),
-				inherited.packedOverlay());
+		return inherited.withColor(dayTimeColor(entity, partialTick));
 	}
 	
 	private static int dayTimeColor(LivingEntity entity, float partialTick)

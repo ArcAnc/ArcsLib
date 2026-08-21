@@ -80,7 +80,34 @@ public record Unbaked(PModelData data)
 }
 ```
 
-Register that unbaked codec with NeoForge's special-model renderer registration and reference it from the item's 26.1 model definition. PulseLib does not convert a legacy `builtin/entity` JSON into this renderer automatically.
+Register that codec with NeoForge's special-model renderer event:
+
+```java
+@SubscribeEvent
+public static void registerSpecialModels(RegisterSpecialModelRendererEvent event) {
+    event.register(Identifier.fromNamespaceAndPath("examplemod", "wand"), Unbaked.MAP_CODEC);
+}
+```
+
+Reference it from `assets/examplemod/items/wand.json`:
+
+```json
+{
+  "model": {
+    "type": "minecraft:special",
+    "base": "examplemod:item/wand",
+    "model": {
+      "type": "examplemod:wand",
+      "model_location": "examplemod:glmodels/item/wand.glb",
+      "textures": [
+        "examplemod:item/wand/body"
+      ]
+    }
+  }
+}
+```
+
+The `base` model is the normal `assets/examplemod/models/item/wand.json` file that supplies display transforms. PulseLib does not convert a legacy `builtin/entity` JSON into this renderer automatically.
 
 The item extension returned by `registerClientExtension()` is still registered automatically for `PItemAnimatable` items by PulseLib's client setup.
 

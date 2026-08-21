@@ -8,13 +8,13 @@ Use the simplest type that matches the visual result:
 
 * `trianglesSolid` for opaque models.
 * `trianglesCutout` for hard alpha cutouts, like holes or masked pixels.
-* `trianglesTranslucent` for glass-like transparency.
-* `trianglesGui` for GUI item rendering. It is a compatibility alias for the
-  translucent `instant` pipeline; there is no separate GUI shader in 26.1.
+* `trianglesTranslucent` for glass-like transparency and weighted OIT.
 
-`trianglesSolid` forces an opaque output alpha. Cutout and translucent variants discard fragments below their alpha threshold; translucent variants additionally use blending and are sorted by the queue.
+Use those queued variants in `PBlockRenderer`, `PEntityRenderer`, and `PItemRenderer`, including GUI item rendering. `trianglesGui` is a compatibility alias for the translucent instant pipeline used by direct `PBakedBone.instantDraw(...)` calls; it is not a queued item-renderer type.
 
-For emissive meshes the built-in renderers select `trianglesEmissiveCutout` or `trianglesEmissiveTranslucent` automatically from the base type.
+`trianglesSolid` forces an opaque output alpha. Cutout and translucent variants discard fragments below their alpha threshold. Built-in queued translucent variants use weighted blended order-independent transparency when independent per-target blending is available; otherwise they fall back to the queue's back-to-front alpha blending.
+
+For emissive meshes the built-in renderers select the matching solid, cutout, or translucent emissive variant automatically from the base type.
 
 In a renderer constructor this usually looks like:
 
@@ -24,7 +24,7 @@ super(modelData, PRenderTypes.RenderTypeProvider::trianglesSolid);
 
 If a texture is marked as emissive, the default renderers automatically switch the mesh to the matching emissive variant. You normally do not need to select an emissive type yourself.
 
-Emissive texture metadata is described on [Textures and Emissive](textures-and-emissive.md).
+Alpha-mode and emissive texture metadata is described on [Textures and Emissive](textures-and-emissive.md).
 
 ## Why vanilla RenderType is not enough
 
@@ -69,7 +69,7 @@ PRenderQueue.submit(
 
 `PBakedMesh` owns the GPU vertex and index buffers. Do not pass a vanilla `VertexBuffer`: the queue needs PulseLib's mesh data and its triangle vertex format.
 
-For opaque submissions, identical `(RenderType, PBakedMesh)` pairs are grouped. Transparent submissions are ordered back-to-front and only adjacent equal pairs are joined, preserving blending order. Static mesh data is packed into OpenGL geometry pages; the queue streams per-instance records and indirect commands through fence-protected ring buffers, using multi-draw indirect where the current OpenGL driver supports it. These are implementation details: callers only submit meshes and must not retain or manipulate the queue's buffers.
+For opaque submissions, identical `(RenderType, PBakedMesh)` pairs are grouped. Transparent submissions are ordered back-to-front and only adjacent equal pairs are joined. Built-in translucent types are accumulated into weighted OIT targets across queue flushes and composited once after the `ENTITIES` and `TRANSLUCENT_BLOCKS` stages are flushed from `RenderLevelStageEvent.AfterTranslucentFeatures`. The OIT target also records the nearest fragment depth so Minecraft's transparency post-chain can place the result correctly relative to translucent blocks. This makes PulseLib translucency independent of its own submission order; custom transparent types, unsupported OpenGL contexts, and a target change within the same frame retain sorted alpha blending. Static mesh data is packed into OpenGL geometry pages; the queue streams per-instance records and indirect commands through fence-protected ring buffers, using multi-draw indirect where the current OpenGL driver supports it. These are implementation details: callers only submit meshes and must not retain or manipulate the queue's buffers.
 
 ## Renderer hooks
 

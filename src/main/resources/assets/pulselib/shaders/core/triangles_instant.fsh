@@ -33,5 +33,9 @@ void main()
     color *= lightMapColor;
     #endif
 
+    #ifdef FORCE_OPAQUE
+    color.a = 1.0;
+    #endif
+
     fragColor = color;
 }

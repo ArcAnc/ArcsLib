@@ -103,6 +103,11 @@ public class PRenderQueue
 		EXECUTOR.execute(plan);
 	}
 
+	public static void compositeTranslucency()
+	{
+		EXECUTOR.compositeOit();
+	}
+
 	public static void cleanUp()
 	{
 		COMPILER.clear();

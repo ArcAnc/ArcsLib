@@ -32,7 +32,6 @@ import net.minecraft.client.renderer.rendertype.RenderType;
 import net.minecraft.client.renderer.special.SpecialModelRenderer;
 import net.minecraft.client.renderer.state.level.CameraRenderState;
 import net.minecraft.resources.Identifier;
-import net.minecraft.util.LightCoordsUtil;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
@@ -225,15 +224,12 @@ public abstract class PItemRenderer<T extends Item & PAnimatable<T>, RS extends 
 			PMeshRenderContext inherited = new PMeshRenderContext(
 					renderType,
 					color,
-					mesh.isEmissive() ? LightCoordsUtil.FULL_BRIGHT : packedLight,
+					packedLight,
 					packedOverlay);
 			PMeshRenderContext meshContext = resolveMeshRender(renderState, context, bone, mesh, inherited);
 			PMeshRenderMaterial material = PMeshRenderMaterial.resolve(mesh, meshContext);
 			
-			RenderType baseType = meshContext.renderType().apply(PTextureCache.ATLAS_LOCATION);
-			RenderType type = material.emissive() ?
-					PRenderTypes.RenderTypeProvider.emissiveVariant(baseType, PTextureCache.ATLAS_LOCATION) :
-					baseType;
+			RenderType type = material.resolveRenderType(meshContext, PTextureCache.ATLAS_LOCATION);
 			
 			PRenderQueue.submitItem(context, type, material.mesh(), meshContext.deformation(), new PRenderQueue.InstanceData(matrix4fstack, meshContext.color(), material.packedLight(), meshContext.packedOverlay()));
 		});

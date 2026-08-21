@@ -75,7 +75,11 @@ public class PGltfModelParser
 				public PAnimationValue<Quaternionf> decodeValue(ByteBuffer values, int keyframeIndex, PGltfDecodeContext context)
 				{
 					int offset = keyframeIndex * 16;
-					return constantQuaternion(new Quaternionf(values.getFloat(offset), values.getFloat(offset + 4), values.getFloat(offset + 8), values.getFloat(offset + 12)));
+					Quaternionf rotation = new Quaternionf(
+							values.getFloat(offset), values.getFloat(offset + 4),
+							values.getFloat(offset + 8), values.getFloat(offset + 12));
+					rotation.mul(new Quaternionf(context.bone().baseRotation()).invert()).normalize();
+					return constantQuaternion(rotation);
 				}
 			},
 			new PGltfChannelDecoder<Vector3f>()
@@ -103,7 +107,7 @@ public class PGltfModelParser
 	public static PModel parse(InputStream stream) throws IOException
 	{
 		GltfModel model = new GltfModelReader().readWithoutReferences(stream);
-		
+
 		PModel pModel = new PModel();
 		
 		Map<UUID, PBone> uuidToBone = new HashMap<>();
@@ -132,13 +136,23 @@ public class PGltfModelParser
 		List<NodeModel> joints = nodes.stream().
 				filter(PGltfModelParser :: isBoneNode).
 				toList();
+		Set<String> boneNames = new HashSet<>();
 		
 		for (NodeModel node : joints)
-			parseBone(node, nodeToBone);
+			parseBone(node, nodeToBone, boneNames);
 		
-		for (NodeModel node : joints)
+		for (NodeModel node : nodes)
 		{
-			PBone bone = nodeToBone.get(node);
+			List<MeshModel> meshes = node.getMeshModels();
+			if (meshes == null || meshes.isEmpty() || nearestBone(node.getParent(), nodeToBone) != null)
+				continue;
+			nodeToBone.put(node, createLocalMeshBone(node, boneNames));
+		}
+
+		for (Map.Entry<NodeModel, PBone> entry : nodeToBone.entrySet())
+		{
+			NodeModel node = entry.getKey();
+			PBone bone = entry.getValue();
 			PBone parent = nearestBone(node.getParent(), nodeToBone);
 			if (parent != null)
 			{
@@ -149,24 +163,28 @@ public class PGltfModelParser
 		
 		for (NodeModel node : nodes)
 		{
-			if (nodeToBone.containsKey(node))
+			List<MeshModel> meshes = node.getMeshModels();
+			if (meshes == null || meshes.isEmpty())
 				continue;
-			PBone bone = nearestBone(node.getParent(), nodeToBone);
+
+			PBone bone = nodeToBone.get(node);
+			boolean meshNodeIsBone = bone != null;
+			if (bone == null)
+				bone = nearestBone(node.getParent(), nodeToBone);
 			if (bone == null)
 				continue;
-			List<MeshModel> meshes = node.getMeshModels();
-			if (meshes != null)
-				for (MeshModel mesh : meshes)
-					bone.meshUUIDS().add(parseMesh(mesh, node, uuidToMesh));
+
+			for (MeshModel mesh : meshes)
+				bone.meshUUIDS().add(parseMesh(mesh, node, uuidToMesh, !meshNodeIsBone));
 		}
-		
+
 		nodeToBone.forEach((nodeModel, pBone) ->
 				uuidToBone.put(pBone.uuid(), pBone));
 		
 		return nodeToBone;
 	}
 	
-	private static void parseBone(NodeModel node, Map<NodeModel, PBone> nodeToBone)
+	private static void parseBone(NodeModel node, Map<NodeModel, PBone> nodeToBone, Set<String> boneNames)
 	{
 		float[] rawTranslation = node.getTranslation();
 		Vector3f pivot = new Vector3f();
@@ -176,11 +194,9 @@ public class PGltfModelParser
 		Quaternionf baseRotation = new Quaternionf();
 		if (rawRotation != null && rawRotation.length == 4)
 			baseRotation.set(rawRotation[0], rawRotation[1], rawRotation[2], rawRotation[3]);
-		
+
 		UUID boneUUID = UUID.randomUUID();
-		String name = node.getName();
-		if (name == null)
-			name = boneUUID.toString();
+		String name = uniqueBoneName(node.getName(), boneUUID, boneNames);
 		
 		PBone bone = new PBone(
 				boneUUID,
@@ -191,12 +207,40 @@ public class PGltfModelParser
 		nodeToBone.put(node, bone);
 	}
 
+	private static PBone createLocalMeshBone(NodeModel node, Set<String> boneNames)
+	{
+		float[] rawTranslation = node.getTranslation();
+		Vector3f pivot = new Vector3f();
+		if (rawTranslation != null && rawTranslation.length == 3)
+			pivot.set(rawTranslation[0], rawTranslation[1], rawTranslation[2]);
+		float[] rawRotation = node.getRotation();
+		Quaternionf baseRotation = new Quaternionf();
+		if (rawRotation != null && rawRotation.length == 4)
+			baseRotation.set(rawRotation[0], rawRotation[1], rawRotation[2], rawRotation[3]);
+
+		UUID boneUUID = UUID.randomUUID();
+		return new PBone(
+				boneUUID,
+				uniqueBoneName(node.getName(), boneUUID, boneNames),
+				pivot,
+				baseRotation);
+	}
+
+	private static String uniqueBoneName(String requestedName, UUID fallback, Set<String> boneNames)
+	{
+		String baseName = requestedName == null || requestedName.isBlank() ? fallback.toString() : requestedName;
+		String name = baseName;
+		for (int suffix = 1; !boneNames.add(name); suffix++)
+			name = baseName + "_" + suffix;
+		return name;
+	}
+
 	private static boolean isBoneNode(NodeModel node)
 	{
 		if (isBlockbenchLocatorMarker(node))
 			return false;
 		List<MeshModel> meshes = node.getMeshModels();
-		return meshes == null || meshes.isEmpty() || node.getParent() == null;
+		return meshes == null || meshes.isEmpty();
 	}
 
 	private static PBone nearestBone(NodeModel node, Map<NodeModel, PBone> nodeToBone)
@@ -232,7 +276,10 @@ public class PGltfModelParser
 		return scale != null && scale.length == 3 && scale[0] < 0.1f && scale[1] < 0.1f && scale[2] < 0.1f;
 	}
 	
-	private static UUID parseMesh(MeshModel mesh, NodeModel node, Map<UUID, PMesh> uuidToMesh)
+	private static UUID parseMesh(MeshModel mesh,
+	                              NodeModel node,
+	                              Map<UUID, PMesh> uuidToMesh,
+	                              boolean bakeNodePose)
 	{
 		//Only one primitive per mesh. At least for BBmodel
 		MeshPrimitiveModel primitive = mesh.getMeshPrimitiveModels().getFirst();
@@ -240,8 +287,9 @@ public class PGltfModelParser
 		AccessorModel normalsAccessor = primitive.getAttributes().get("NORMAL");
 		AccessorModel uvsAccessor = primitive.getAttributes().get("TEXCOORD_0");
 		
-		FloatBuffer positions = transformPositions(PLibParserHelper.getFloatBuffer(positionsAccessor), node);
-		FloatBuffer normals = transformNormals(PLibParserHelper.getFloatBuffer(normalsAccessor), node);
+		Matrix4f meshTransform = meshTransform(node, bakeNodePose);
+		FloatBuffer positions = transformPositions(PLibParserHelper.getFloatBuffer(positionsAccessor), meshTransform);
+		FloatBuffer normals = transformNormals(PLibParserHelper.getFloatBuffer(normalsAccessor), meshTransform);
 		FloatBuffer uvs = PLibParserHelper.getFloatBuffer(uvsAccessor);
 		
 		int vertexCount = positionsAccessor.getCount();
@@ -269,9 +317,8 @@ public class PGltfModelParser
 		return pMesh.uuid();
 	}
 
-	private static FloatBuffer transformPositions(FloatBuffer source, NodeModel node)
+	private static FloatBuffer transformPositions(FloatBuffer source, Matrix4f transform)
 	{
-		Matrix4f transform = localTransform(node);
 		FloatBuffer result = FloatBuffer.allocate(source.limit());
 		for (int offset = 0; offset < source.limit(); offset += 3)
 		{
@@ -282,28 +329,31 @@ public class PGltfModelParser
 		return result.flip();
 	}
 
-	private static FloatBuffer transformNormals(FloatBuffer source, NodeModel node)
+	private static FloatBuffer transformNormals(FloatBuffer source, Matrix4f transform)
 	{
-		Matrix3f transform = new Matrix3f().set(localTransform(node)).invert().transpose();
+		Matrix3f normalTransform = new Matrix3f().set(transform).invert().transpose();
 		FloatBuffer result = FloatBuffer.allocate(source.limit());
 		for (int offset = 0; offset < source.limit(); offset += 3)
 		{
 			Vector3f normal = new Vector3f(source.get(offset), source.get(offset + 1), source.get(offset + 2));
-			transform.transform(normal).normalize();
+			normalTransform.transform(normal).normalize();
 			result.put(normal.x).put(normal.y).put(normal.z);
 		}
 		return result.flip();
 	}
 
-	private static Matrix4f localTransform(NodeModel node)
+	private static Matrix4f meshTransform(NodeModel node, boolean bakeNodePose)
 	{
 		Matrix4f transform = new Matrix4f();
-		float[] translation = node.getTranslation();
-		if (translation != null && translation.length == 3)
-			transform.translate(translation[0], translation[1], translation[2]);
-		float[] rotation = node.getRotation();
-		if (rotation != null && rotation.length == 4)
-			transform.rotate(new Quaternionf(rotation[0], rotation[1], rotation[2], rotation[3]));
+		if (bakeNodePose)
+		{
+			float[] translation = node.getTranslation();
+			if (translation != null && translation.length == 3)
+				transform.translate(translation[0], translation[1], translation[2]);
+			float[] rotation = node.getRotation();
+			if (rotation != null && rotation.length == 4)
+				transform.rotate(new Quaternionf(rotation[0], rotation[1], rotation[2], rotation[3]));
+		}
 		float[] scale = node.getScale();
 		if (scale != null && scale.length == 3)
 			transform.scale(scale[0], scale[1], scale[2]);

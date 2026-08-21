@@ -30,7 +30,17 @@ public class PLibParserHelper
 		if (texture == null)
 			return "";
 		ImageModel image = texture.getImageModel();
-		return image == null || image.getUri() == null ? "" : image.getUri();
+		if (image != null)
+		{
+			String uri = image.getUri();
+			if (uri != null && !uri.isBlank())
+				return uri;
+			String imageName = image.getName();
+			if (imageName != null && !imageName.isBlank())
+				return imageName;
+		}
+		String textureName = texture.getName();
+		return textureName == null ? "" : textureName;
 	}
 
 	public static FloatBuffer getFloatBuffer(AccessorModel accessor)

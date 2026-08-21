@@ -10,6 +10,7 @@
 package com.arcanc.pulselib.content.model.baked;
 
 import com.arcanc.pulselib.content.model.PMesh;
+import com.arcanc.pulselib.content.model.textures.PAlphaMode;
 import com.mojang.blaze3d.buffers.GpuBuffer;
 import com.mojang.blaze3d.vertex.VertexFormat;
 import net.minecraft.resources.Identifier;
@@ -24,6 +25,7 @@ public record PBakedMesh(UUID uuid,
                          VertexFormat.IndexType indexType,
                          String textureName,
                          boolean isEmissive,
+                         PAlphaMode alphaMode,
                          PMesh source,
                          Identifier textureLocation)
 {

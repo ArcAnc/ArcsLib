@@ -37,7 +37,6 @@ import net.minecraft.client.renderer.state.level.CameraRenderState;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.core.Direction;
 import net.minecraft.resources.Identifier;
-import net.minecraft.util.LightCoordsUtil;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
@@ -200,15 +199,12 @@ public abstract class PBlockRenderer<T extends BlockEntity & PAnimatable<T>, RS 
 			PMeshRenderContext inherited = new PMeshRenderContext(
 					renderType,
 					color,
-					mesh.isEmissive() ? LightCoordsUtil.FULL_BRIGHT : packedLight,
+					packedLight,
 					packedOverlay);
 			PMeshRenderContext meshContext = resolveMeshRender(renderState, bone, mesh, inherited);
 			PMeshRenderMaterial material = PMeshRenderMaterial.resolve(mesh, meshContext);
 			
-			RenderType baseType = meshContext.renderType().apply(PTextureCache.ATLAS_LOCATION);
-			RenderType type = material.emissive() ?
-					PRenderTypes.RenderTypeProvider.emissiveVariant(baseType, PTextureCache.ATLAS_LOCATION) :
-					baseType;
+			RenderType type = material.resolveRenderType(meshContext, PTextureCache.ATLAS_LOCATION);
 			
 			if (PRenderTypes.isTransparent(type))
 				PRenderQueue.submitBlockEntityTranslucentMesh(type, material.mesh(), meshContext.deformation(), new PRenderQueue.InstanceData(matrix4fstack, meshContext.color(), material.packedLight(), meshContext.packedOverlay()));

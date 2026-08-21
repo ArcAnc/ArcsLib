@@ -137,15 +137,11 @@ Each definition takes a [`PLivingMeshRenderResolver`](https://github.com/ArcAnc/
 ```java
 PLivingMeshRenderResolver resolver = (entity, stack, bone, mesh, inherited, partialTick) -> {
     int color = stack.hasFoil() ? 0xFF80FFFF : inherited.color();
-    return new PMeshRenderContext(
-            inherited.renderType(),
-            color,
-            inherited.packedLight(),
-            inherited.packedOverlay());
+    return inherited.withColor(color);
 };
 ```
 
-Use `PLivingMeshRenderResolvers.defaultLit()` or `inherited()` when you do not need per-mesh overrides.
+Use the context's `with...` methods so texture, emissive, alpha-mode, and deformation overrides from other resolvers are retained. Use `PLivingMeshRenderResolvers.defaultLit()` or `inherited()` when you do not need per-mesh overrides.
 
 ## Animated attachments
 

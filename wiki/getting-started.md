@@ -1,7 +1,5 @@
 ## Getting Started
 
-PulseLib, and by extension this wiki, expects you have pre-existing understandings of the following:
-
 PulseLib, and this wiki, assumes you already have a basic understanding of the following:
 
 * Core Java concepts

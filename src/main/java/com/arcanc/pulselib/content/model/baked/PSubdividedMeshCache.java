@@ -82,7 +82,7 @@ public final class PSubdividedMeshCache
 					GpuBuffer.USAGE_INDEX,
 					indices);
 			return new PBakedMesh(base.uuid(), vertices, source.vertexCount(), indexBuffer, source.indicesCount(),
-					indexType(source), base.textureName(), base.isEmissive(), source, base.textureLocation());
+					indexType(source), base.textureName(), base.isEmissive(), base.alphaMode(), source, base.textureLocation());
 		}
 	}
 
