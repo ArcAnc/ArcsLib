@@ -5,3 +5,4 @@
 * fixed mesh render resolvers losing inherited texture, emissive, alpha-mode, and deformation overrides
 * fixed withEmissive(false) retaining full-bright lighting from emissive texture metadata
 * finally fixed OIT, also added fix to first person renderer
+* fixed huge fps drop with active OIT

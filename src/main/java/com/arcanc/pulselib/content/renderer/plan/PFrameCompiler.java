@@ -11,12 +11,13 @@ package com.arcanc.pulselib.content.renderer.plan;
 
 import com.arcanc.pulselib.content.model.baked.PBakedMesh;
 import com.arcanc.pulselib.content.renderer.PRenderQueue;
+import com.arcanc.pulselib.util.PRenderTypes;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.minecraft.client.renderer.rendertype.RenderType;
 
-import java.util.Comparator;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 
@@ -58,10 +59,23 @@ public final class PFrameCompiler<S>
 
 		if (translucentGroups != null && !translucentGroups.isEmpty())
 		{
-			translucentGroups.sort(Comparator.comparingDouble(TransparentSubmission::distanceSquared).reversed());
+			Map<DrawKey, List<PRenderQueue.InstanceData>> oitGroups = new Object2ObjectOpenHashMap<>();
+			List<TransparentSubmission> sortedGroups = new ObjectArrayList<>();
+			for (TransparentSubmission submission : translucentGroups)
+			{
+				if (canBatchWithOit(submission.key()))
+					oitGroups.computeIfAbsent(submission.key(), ignored -> new ObjectArrayList<>()).add(submission.instance());
+				else
+					sortedGroups.add(submission);
+			}
+
+			for (Map.Entry<DrawKey, List<PRenderQueue.InstanceData>> entry : oitGroups.entrySet())
+				groups.add(group(entry.getKey(), false, entry.getValue()));
+
+			sortedGroups.sort(Comparator.comparingDouble(TransparentSubmission::distanceSquared).reversed());
 			DrawKey activeKey = null;
 			List<PRenderQueue.InstanceData> activeInstances = new ObjectArrayList<>();
-			for (TransparentSubmission submission : translucentGroups)
+			for (TransparentSubmission submission : sortedGroups)
 			{
 				if (activeKey != null && !activeKey.equals(submission.key()))
 				{
@@ -86,6 +100,11 @@ public final class PFrameCompiler<S>
 	private static PDrawGroup group(DrawKey key, boolean writeDepth, List<PRenderQueue.InstanceData> instances)
 	{
 		return new PDrawGroup(key.pipeline(), key.mesh(), writeDepth, instances);
+	}
+	
+	private static boolean canBatchWithOit(DrawKey key)
+	{
+		return PRenderTypes.usesOit(key.pipeline()) && key.pipeline().outputTarget().getRenderTarget().useDepth;
 	}
 
 	private static float distanceSquared(PRenderQueue.InstanceData instance)
