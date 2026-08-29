@@ -817,6 +817,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#alpha-modes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Alpha modes
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#emissive-textures" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1299,6 +1310,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#alpha-modes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Alpha modes
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#emissive-textures" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1351,9 +1373,9 @@
 <a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="w">    </span><span class="nd">@SubscribeEvent</span>
 <a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">registerPulseTextures</span><span class="p">(</span><span class="n">PulseLibEvents</span><span class="p">.</span><span class="na">RegisterTextureEvent</span><span class="w"> </span><span class="n">event</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
 <a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="w">        </span><span class="n">event</span><span class="p">.</span><span class="na">addTextureLocation</span><span class="p">(</span><span class="n">Identifier</span><span class="p">.</span><span class="na">fromNamespaceAndPath</span><span class="p">(</span>
-<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="w">                </span><span class="n">ExampleMod</span><span class="p">.</span><span class="na">MOD_ID</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;entity/robot/body&quot;</span><span class="p">));</span>
+<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="w">                </span><span class="n">ExampleMod</span><span class="p">.</span><span class="na">MOD_ID</span><span class="p">,</span><span class="w"> </span><span class="s">"entity/robot/body"</span><span class="p">));</span>
 <a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a><span class="w">        </span><span class="n">event</span><span class="p">.</span><span class="na">addTextureLocation</span><span class="p">(</span><span class="n">Identifier</span><span class="p">.</span><span class="na">fromNamespaceAndPath</span><span class="p">(</span>
-<a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a><span class="w">                </span><span class="n">ExampleMod</span><span class="p">.</span><span class="na">MOD_ID</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;entity/robot/eyes&quot;</span><span class="p">));</span>
+<a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a><span class="w">                </span><span class="n">ExampleMod</span><span class="p">.</span><span class="na">MOD_ID</span><span class="p">,</span><span class="w"> </span><span class="s">"entity/robot/eyes"</span><span class="p">));</span>
 <a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a><span class="w">    </span><span class="p">}</span>
 <a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a><span class="p">}</span>
 </code></pre></div>
@@ -1361,7 +1383,7 @@
 <div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>assets/examplemod/textures/entity/robot/body.png
 </code></pre></div>
 <p>becomes:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="n">Identifier</span><span class="p">.</span><span class="na">fromNamespaceAndPath</span><span class="p">(</span><span class="s">&quot;examplemod&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;entity/robot/body&quot;</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="n">Identifier</span><span class="p">.</span><span class="na">fromNamespaceAndPath</span><span class="p">(</span><span class="s">"examplemod"</span><span class="p">,</span><span class="w"> </span><span class="s">"entity/robot/body"</span><span class="p">)</span>
 </code></pre></div>
 <h2 id="runtime-atlas">Runtime atlas<a class="headerlink" href="#runtime-atlas" title="Permanent link">&para;</a></h2>
 <p>The atlas is registered by PulseLib itself. Your mod only contributes texture locations.</p>
@@ -1374,49 +1396,71 @@
 <div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="n">PTextureCache</span><span class="p">.</span><span class="na">ATLAS_LOCATION</span><span class="w"> </span><span class="c1">// pulselib:textures/atlas.png</span>
 </code></pre></div>
 <p>Renderers normally pass <code>PTextureCache.ATLAS_LOCATION</code> to <code>PRenderTypes</code>, so you rarely need to access the atlas manually.</p>
+<h2 id="alpha-modes">Alpha modes<a class="headerlink" href="#alpha-modes" title="Permanent link">&para;</a></h2>
+<p>PulseLib classifies every atlas sprite into one of four alpha modes:</p>
+<ul>
+<li><code>opaque</code> selects the solid pipeline.</li>
+<li><code>cutout</code> selects the cutout pipeline for fully transparent holes and hard edges.</li>
+<li><code>translucent</code> selects the queued weighted-OIT pipeline (or sorted alpha blending on fallback paths).</li>
+<li><code>auto</code> inspects the sprite. Fully opaque textures become opaque, textures containing only fully transparent and fully opaque pixels become cutout, and textures with intermediate alpha become translucent.</li>
+</ul>
+<p>The metadata mode defaults to <code>auto</code>. You can override it next to the emissive flag in the texture's <code>.png.mcmeta</code> file:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="p">{</span>
+<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="w">  </span><span class="nt">"pulselib"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="w">    </span><span class="nt">"alpha_mode"</span><span class="p">:</span><span class="w"> </span><span class="s2">"translucent"</span><span class="p">,</span>
+<a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a><span class="w">    </span><span class="nt">"emissive"</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span>
+<a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a><span class="w">  </span><span class="p">}</span>
+<a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a><span class="p">}</span>
+</code></pre></div>
+<p>The render type supplied to a renderer remains authoritative by default. <code>PItemRenderer</code> is the GUI exception: its default GUI material is <code>trianglesInstantTranslucent</code>. Use <code>withAlphaMode(PAlphaMode.AUTO)</code> to select the sprite's classified mode, or pass <code>OPAQUE</code>, <code>CUTOUT</code>, or <code>TRANSLUCENT</code> to force one. Passing <code>null</code> restores the renderer-selected pipeline (or the GUI item's instant-translucent default).</p>
 <h2 id="emissive-textures">Emissive textures<a class="headerlink" href="#emissive-textures" title="Permanent link">&para;</a></h2>
 <p>Emissive textures are useful for eyes, screens, lamps, energy parts, and other pieces that should ignore normal light. PulseLib reads this flag from texture metadata through <a href="https://github.com/ArcAnc/PulseLib/blob/master/src/main/java/com/arcanc/pulselib/content/model/textures/atlas/PLibSpriteMetadata.java"><code>PLibSpriteMetadata</code></a>.</p>
 <p>To mark a texture as emissive, add a <code>.png.mcmeta</code> file next to it:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>assets/examplemod/textures/entity/robot/eyes.png
-<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>assets/examplemod/textures/entity/robot/eyes.png.mcmeta
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>assets/examplemod/textures/entity/robot/eyes.png
+<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>assets/examplemod/textures/entity/robot/eyes.png.mcmeta
 </code></pre></div>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="p">{</span>
-<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a><span class="w">  </span><span class="nt">&quot;pulselib&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a><span class="w">    </span><span class="nt">&quot;emissive&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span>
-<a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a><span class="w">  </span><span class="p">}</span>
-<a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a><span class="p">}</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="p">{</span>
+<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a><span class="w">  </span><span class="nt">"pulselib"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a><span class="w">    </span><span class="nt">"emissive"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span>
+<a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a><span class="w">  </span><span class="p">}</span>
+<a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a><span class="p">}</span>
 </code></pre></div>
 <p>When <code>PModelCache</code> bakes the model, each mesh stores whether its sprite is emissive. The default renderers automatically switch to an emissive variant through:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="n">PRenderTypes</span><span class="p">.</span><span class="na">RenderTypeProvider</span><span class="p">.</span><span class="na">emissiveVariant</span><span class="p">(</span><span class="n">baseType</span><span class="p">,</span><span class="w"> </span><span class="n">PTextureCache</span><span class="p">.</span><span class="na">ATLAS_LOCATION</span><span class="p">);</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="n">PRenderTypes</span><span class="p">.</span><span class="na">RenderTypeProvider</span><span class="p">.</span><span class="na">emissiveVariant</span><span class="p">(</span><span class="n">baseType</span><span class="p">,</span><span class="w"> </span><span class="n">PTextureCache</span><span class="p">.</span><span class="na">ATLAS_LOCATION</span><span class="p">);</span>
 </code></pre></div>
 <p>You can also choose an emissive render type directly in custom rendering code:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="n">PRenderTypes</span><span class="p">.</span><span class="na">RenderTypeProvider</span><span class="p">::</span><span class="n">trianglesEmissiveCutout</span>
-<a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a><span class="n">PRenderTypes</span><span class="p">.</span><span class="na">RenderTypeProvider</span><span class="p">::</span><span class="n">trianglesEmissiveTranslucent</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="n">PRenderTypes</span><span class="p">.</span><span class="na">RenderTypeProvider</span><span class="p">::</span><span class="n">trianglesEmissiveSolid</span>
+<a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a><span class="n">PRenderTypes</span><span class="p">.</span><span class="na">RenderTypeProvider</span><span class="p">::</span><span class="n">trianglesEmissiveCutout</span>
+<a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a><span class="n">PRenderTypes</span><span class="p">.</span><span class="na">RenderTypeProvider</span><span class="p">::</span><span class="n">trianglesEmissiveTranslucent</span>
 </code></pre></div>
-<p>Choose the cutout or translucent variant according to the desired blend mode. There is no separate solid or GUI emissive render type in 26.2.</p>
+<p>Choose the solid, cutout, or translucent variant according to the desired alpha mode. Direct <code>PBakedBone.instantDraw(...)</code> rendering has matching <code>trianglesInstantEmissiveSolid</code>, <code>trianglesInstantEmissiveCutout</code>, and <code>trianglesInstantEmissiveTranslucent</code> variants.</p>
 <h2 id="per-mesh-runtime-material-overrides">Per-mesh runtime material overrides<a class="headerlink" href="#per-mesh-runtime-material-overrides" title="Permanent link">&para;</a></h2>
 <p>Renderers can replace a mesh texture at render time without duplicating the mesh in the source model. Override <code>resolveMeshRender(...)</code>, identify the target mesh by its UUID (or <code>textureName()</code>), and return a modified context:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="nd">@Override</span>
-<a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a><span class="kd">protected</span><span class="w"> </span><span class="n">PMeshRenderContext</span><span class="w"> </span><span class="nf">resolveMeshRender</span><span class="p">(</span><span class="n">RobotEntity</span><span class="w"> </span><span class="n">entity</span><span class="p">,</span>
-<a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a><span class="w">                                               </span><span class="n">PBakedBone</span><span class="w"> </span><span class="n">bone</span><span class="p">,</span>
-<a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a><span class="w">                                               </span><span class="n">PBakedMesh</span><span class="w"> </span><span class="n">mesh</span><span class="p">,</span>
-<a id="__codelineno-8-5" name="__codelineno-8-5" href="#__codelineno-8-5"></a><span class="w">                                               </span><span class="n">PMeshRenderContext</span><span class="w"> </span><span class="n">inherited</span><span class="p">,</span>
-<a id="__codelineno-8-6" name="__codelineno-8-6" href="#__codelineno-8-6"></a><span class="w">                                               </span><span class="kt">float</span><span class="w"> </span><span class="n">partialTick</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
-<a id="__codelineno-8-7" name="__codelineno-8-7" href="#__codelineno-8-7"></a><span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">mesh</span><span class="p">.</span><span class="na">uuid</span><span class="p">().</span><span class="na">equals</span><span class="p">(</span><span class="n">ROBOT_SCREEN_MESH</span><span class="p">))</span>
-<a id="__codelineno-8-8" name="__codelineno-8-8" href="#__codelineno-8-8"></a><span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">inherited</span><span class="p">;</span>
-<a id="__codelineno-8-9" name="__codelineno-8-9" href="#__codelineno-8-9"></a>
-<a id="__codelineno-8-10" name="__codelineno-8-10" href="#__codelineno-8-10"></a><span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">inherited</span>
-<a id="__codelineno-8-11" name="__codelineno-8-11" href="#__codelineno-8-11"></a><span class="w">            </span><span class="p">.</span><span class="na">withTexture</span><span class="p">(</span><span class="n">entity</span><span class="p">.</span><span class="na">activeScreenTexture</span><span class="p">())</span>
-<a id="__codelineno-8-12" name="__codelineno-8-12" href="#__codelineno-8-12"></a><span class="w">            </span><span class="p">.</span><span class="na">withEmissive</span><span class="p">(</span><span class="n">entity</span><span class="p">.</span><span class="na">screenIsLit</span><span class="p">());</span>
-<a id="__codelineno-8-13" name="__codelineno-8-13" href="#__codelineno-8-13"></a><span class="p">}</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="nd">@Override</span>
+<a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a><span class="kd">protected</span><span class="w"> </span><span class="n">PMeshRenderContext</span><span class="w"> </span><span class="nf">resolveMeshRender</span><span class="p">(</span><span class="n">RobotEntity</span><span class="w"> </span><span class="n">entity</span><span class="p">,</span>
+<a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a><span class="w">                                               </span><span class="n">PBakedBone</span><span class="w"> </span><span class="n">bone</span><span class="p">,</span>
+<a id="__codelineno-9-4" name="__codelineno-9-4" href="#__codelineno-9-4"></a><span class="w">                                               </span><span class="n">PBakedMesh</span><span class="w"> </span><span class="n">mesh</span><span class="p">,</span>
+<a id="__codelineno-9-5" name="__codelineno-9-5" href="#__codelineno-9-5"></a><span class="w">                                               </span><span class="n">PMeshRenderContext</span><span class="w"> </span><span class="n">inherited</span><span class="p">,</span>
+<a id="__codelineno-9-6" name="__codelineno-9-6" href="#__codelineno-9-6"></a><span class="w">                                               </span><span class="kt">float</span><span class="w"> </span><span class="n">partialTick</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-9-7" name="__codelineno-9-7" href="#__codelineno-9-7"></a><span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">mesh</span><span class="p">.</span><span class="na">uuid</span><span class="p">().</span><span class="na">equals</span><span class="p">(</span><span class="n">ROBOT_SCREEN_MESH</span><span class="p">))</span>
+<a id="__codelineno-9-8" name="__codelineno-9-8" href="#__codelineno-9-8"></a><span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">inherited</span><span class="p">;</span>
+<a id="__codelineno-9-9" name="__codelineno-9-9" href="#__codelineno-9-9"></a>
+<a id="__codelineno-9-10" name="__codelineno-9-10" href="#__codelineno-9-10"></a><span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">inherited</span>
+<a id="__codelineno-9-11" name="__codelineno-9-11" href="#__codelineno-9-11"></a><span class="w">            </span><span class="p">.</span><span class="na">withTexture</span><span class="p">(</span><span class="n">entity</span><span class="p">.</span><span class="na">activeScreenTexture</span><span class="p">())</span>
+<a id="__codelineno-9-12" name="__codelineno-9-12" href="#__codelineno-9-12"></a><span class="w">            </span><span class="p">.</span><span class="na">withEmissive</span><span class="p">(</span><span class="n">entity</span><span class="p">.</span><span class="na">screenIsLit</span><span class="p">())</span>
+<a id="__codelineno-9-13" name="__codelineno-9-13" href="#__codelineno-9-13"></a><span class="w">            </span><span class="p">.</span><span class="na">withAlphaMode</span><span class="p">(</span><span class="n">PAlphaMode</span><span class="p">.</span><span class="na">AUTO</span><span class="p">);</span>
+<a id="__codelineno-9-14" name="__codelineno-9-14" href="#__codelineno-9-14"></a><span class="p">}</span>
 </code></pre></div>
-<p><code>withTexture(...)</code> accepts a texture location registered in the PulseLib runtime atlas. On its first use for a given <code>(mesh, texture)</code> pair, PulseLib bakes an alternate vertex buffer with UVs mapped to that atlas sprite; later draws reuse that buffer. The variant buffers and their deformation caches are released on the next resource reload.</p>
+<p><code>withTexture(...)</code> accepts a texture location registered in the PulseLib runtime atlas. On its first use for a given <code>(mesh, texture)</code> pair, PulseLib bakes an alternate vertex buffer with UVs and alpha classification mapped to that atlas sprite; later draws reuse that buffer. The variant buffers and their deformation caches are released on the next resource reload.</p>
 <p><code>withEmissive(true)</code> forces full-bright emissive rendering, <code>withEmissive(false)</code> disables it, and <code>withEmissive(null)</code> returns to the selected texture's <code>.mcmeta</code> setting.</p>
+<p>Prefer <code>withColor(...)</code>, <code>withPackedLight(...)</code>, <code>withPackedOverlay(...)</code>, and the other <code>with...</code> methods when changing an inherited context. They preserve every material and deformation override already attached by another resolver.</p>
 <p>Classes used:</p>
 <ul>
 <li><a href="https://github.com/ArcAnc/PulseLib/blob/master/src/main/java/com/arcanc/pulselib/util/PTextureCache.java"><code>PTextureCache</code></a></li>
 <li><a href="https://github.com/ArcAnc/PulseLib/blob/master/src/main/java/com/arcanc/pulselib/content/model/textures/atlas/RuntimeLoader.java"><code>RuntimeLoader</code></a></li>
 <li><a href="https://github.com/ArcAnc/PulseLib/blob/master/src/main/java/com/arcanc/pulselib/content/model/textures/atlas/PLibSpriteMetadata.java"><code>PLibSpriteMetadata</code></a></li>
+<li><a href="https://github.com/ArcAnc/PulseLib/blob/master/src/main/java/com/arcanc/pulselib/content/model/textures/PAlphaMode.java"><code>PAlphaMode</code></a></li>
+<li><a href="https://github.com/ArcAnc/PulseLib/blob/master/src/main/java/com/arcanc/pulselib/content/model/textures/PTextureAlphaClassifier.java"><code>PTextureAlphaClassifier</code></a></li>
 <li><a href="https://github.com/ArcAnc/PulseLib/blob/master/src/main/java/com/arcanc/pulselib/util/PRenderTypes.java"><code>PRenderTypes</code></a></li>
 </ul>
 

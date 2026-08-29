@@ -1371,16 +1371,18 @@
 <ul>
 <li><code>trianglesSolid</code> for opaque models.</li>
 <li><code>trianglesCutout</code> for hard alpha cutouts, like holes or masked pixels.</li>
-<li><code>trianglesTranslucent</code> for glass-like transparency.</li>
-<li><code>trianglesInstantCutout</code> or <code>trianglesInstantTranslucent</code> when rendering an individual mesh immediately.</li>
+<li><code>trianglesTranslucent</code> for glass-like transparency and weighted OIT.</li>
+<li><code>trianglesInstantSolid</code>, <code>trianglesInstantCutout</code>, or <code>trianglesInstantTranslucent</code> when rendering an individual mesh immediately.</li>
 <li><code>trianglesGui</code> is retained as a compatibility alias for <code>trianglesInstantTranslucent</code>; it is not a separate GUI shader or pipeline.</li>
 </ul>
-<p>For emissive meshes the built-in renderers select <code>trianglesEmissiveCutout</code> or <code>trianglesEmissiveTranslucent</code> automatically from the base type.</p>
+<p>For emissive meshes the built-in renderers select the matching solid, cutout, or translucent emissive variant automatically from the base type.</p>
+<p>Queued built-in translucent variants use a two-layer, depth-peeled weighted order-independent transparency path. PulseLib first finds two transparent depth layers, then accumulates weighted colour and revealage only for fragments belonging to each layer. It composites the farther layer before the nearer one after the entity and translucent-block queues have both flushed, so overlaps within those layers do not depend on submission order. This also means that transparent geometry behind the first two visible layers is not accumulated separately.</p>
+<p>The OIT path applies only to PulseLib's queued translucent and emissive-translucent render types when the output target has a depth attachment. Instant/GUI rendering and custom transparent render types retain the queue's back-to-front alpha-blending path. If OIT target allocation or frame setup fails, PulseLib automatically uses that same fallback.</p>
 <p>In a renderer constructor this usually looks like:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="kd">super</span><span class="p">(</span><span class="n">modelData</span><span class="p">,</span><span class="w"> </span><span class="n">PRenderTypes</span><span class="p">.</span><span class="na">RenderTypeProvider</span><span class="p">::</span><span class="n">trianglesSolid</span><span class="p">);</span>
 </code></pre></div>
 <p>If a texture is marked as emissive, the default renderers automatically switch the mesh to the matching emissive variant. You normally do not need to select an emissive type yourself.</p>
-<p>Emissive texture metadata is described on <a href="../textures-and-emissive/">Textures and Emissive</a>.</p>
+<p>Alpha-mode and emissive texture metadata is described on <a href="../textures-and-emissive/">Textures and Emissive</a>.</p>
 <h2 id="why-vanilla-rendertype-is-not-enough">Why vanilla RenderType is not enough<a class="headerlink" href="#why-vanilla-rendertype-is-not-enough" title="Permanent link">&para;</a></h2>
 <p>PulseLib's baked meshes use <a href="https://github.com/ArcAnc/PulseLib/blob/master/src/main/java/com/arcanc/pulselib/util/PRenderTypes.java"><code>PRenderTypes.VertexFormatProvider.POSITION_TEX_NORMAL</code></a>. The 26.2 GPU pipelines use Minecraft's <code>PrimitiveTopology.TRIANGLES</code>. Queued variants expect <code>DynamicTransforms</code>, <code>Lighting</code>, and <code>InstanceData</code>; instant variants use <code>ColorOverlay</code>. Both paths bind the GPU deformer texel buffers. A vanilla render type may compile and still render incorrectly because its shader and vertex format do not match the data PulseLib sends.</p>
 <p>If you create a custom render type, keep these requirements:</p>
@@ -1392,7 +1394,7 @@
 </ul>
 <p>For most mods, it is safer to start from PulseLib's existing render types and only add a new one when you need a genuinely different shader state.</p>
 <h2 id="what-the-queue-does">What the queue does<a class="headerlink" href="#what-the-queue-does" title="Permanent link">&para;</a></h2>
-<p><a href="https://github.com/ArcAnc/PulseLib/blob/master/src/main/java/com/arcanc/pulselib/content/renderer/PRenderQueue.java"><code>PRenderQueue</code></a> batches identical opaque meshes together and renders many instances with one instanced draw call (up to 512 instances per draw). Transparent submissions are kept back-to-front. Every object can have its own transform, animation pose, and GPU deformer values while repeated mesh buffers remain efficiently batched.</p>
+<p><a href="https://github.com/ArcAnc/PulseLib/blob/master/src/main/java/com/arcanc/pulselib/content/renderer/PRenderQueue.java"><code>PRenderQueue</code></a> batches identical opaque meshes together and renders many instances with one instanced draw call (up to 512 instances per draw). Transparent submissions are kept back-to-front so the fallback path remains correct; built-in queued translucent types are redirected to weighted OIT by the executor. Every object can have its own transform, animation pose, and GPU deformer values while repeated mesh buffers remain efficiently batched.</p>
 <p>The queue has a few stages:</p>
 <ul>
 <li><code>SOLID_BLOCKS</code> for solid block entity meshes.</li>
@@ -1401,6 +1403,7 @@
 <li><code>GUI</code> for GUI rendering.</li>
 </ul>
 <p>Normal renderers submit into these stages for you. <a href="https://github.com/ArcAnc/PulseLib/blob/master/src/main/java/com/arcanc/pulselib/content/renderer/PRenderStagesHandler.java"><code>PRenderStagesHandler</code></a> handles flushing them at the right time.</p>
+<p>The <code>ENTITIES</code> and <code>TRANSLUCENT_BLOCKS</code> queues flush at <code>RenderLevelStageEvent.AfterTranslucentFeatures</code>; their shared OIT result is composited immediately afterward. Composition processes the two layers from farther to nearer and writes their depth back to the target, so later translucent block rendering can depth-test against the nearest PulseLib transparent layer.</p>
 <h2 id="when-to-submit-manually">When to submit manually<a class="headerlink" href="#when-to-submit-manually" title="Permanent link">&para;</a></h2>
 <p>Manual queue submission is an advanced escape hatch. Use it when you already have a baked PulseLib mesh and want to draw it in the same pipeline.</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="n">PRenderQueue</span><span class="p">.</span><span class="na">submit</span><span class="p">(</span>
