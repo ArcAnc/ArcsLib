@@ -104,6 +104,7 @@ public class PRenderTypes
 				withLocation(PLibDatabase.rl("pipeline/triangles_oit_no_cull")).
 				withFragmentShader(PLibDatabase.rl("core/triangles_oit")).
 				withSampler("Sampler1").
+				withSampler("LayerDepthSampler").
 				withShaderDefine("ALPHA_CUTOUT", 0.1F).
 				withCull(false).
 				build());
@@ -112,7 +113,25 @@ public class PRenderTypes
 				withLocation(PLibDatabase.rl("pipeline/triangles_oit_emissive_no_cull")).
 				withFragmentShader(PLibDatabase.rl("core/triangles_oit")).
 				withSampler("Sampler1").
+				withSampler("LayerDepthSampler").
 				withShaderDefine("EMISSIVE").
+				withShaderDefine("ALPHA_CUTOUT", 0.1F).
+				withCull(false).
+				build());
+
+		public static final RenderPipeline TRIANGLES_OIT_DEPTH = registerPipeline(RenderPipeline.builder(TRIANGLES_SNIPPET).
+				withLocation(PLibDatabase.rl("pipeline/triangles_oit_depth_no_cull")).
+				withFragmentShader(PLibDatabase.rl("core/triangles_oit_depth")).
+				withSampler("Sampler1").
+				withShaderDefine("ALPHA_CUTOUT", 0.1F).
+				withCull(false).
+				build());
+
+		public static final RenderPipeline TRIANGLES_OIT_DEPTH_PEEL = registerPipeline(RenderPipeline.builder(TRIANGLES_SNIPPET).
+				withLocation(PLibDatabase.rl("pipeline/triangles_oit_depth_peel_no_cull")).
+				withFragmentShader(PLibDatabase.rl("core/triangles_oit_depth_peel")).
+				withSampler("Sampler1").
+				withSampler("LayerDepthSampler").
 				withShaderDefine("ALPHA_CUTOUT", 0.1F).
 				withCull(false).
 				build());

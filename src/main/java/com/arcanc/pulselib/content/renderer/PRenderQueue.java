@@ -15,6 +15,7 @@ import com.arcanc.pulselib.content.model.baked.PSubdividedMeshCache;
 import com.arcanc.pulselib.content.model.deformer.PMeshDeformation;
 import com.arcanc.pulselib.content.model.deformer.gpu.PGpuDeformerBuffers;
 import com.arcanc.pulselib.content.renderer.gl.PGlMultiDrawExecutor;
+import com.arcanc.pulselib.content.renderer.plan.PDrawGroup;
 import com.arcanc.pulselib.content.renderer.plan.PFrameCompiler;
 import com.arcanc.pulselib.content.renderer.plan.PRenderPlan;
 import com.arcanc.pulselib.util.PRenderTypes;
@@ -24,6 +25,8 @@ import org.joml.Matrix4f;
 import org.jspecify.annotations.Nullable;
 
 import java.util.Comparator;
+import java.util.ArrayList;
+import java.util.List;
 
 public class PRenderQueue
 {
@@ -60,9 +63,8 @@ public class PRenderQueue
 		RenderStage stage = switch (context)
 		{
 			case GUI -> RenderStage.GUI;
-			case THIRD_PERSON_LEFT_HAND, THIRD_PERSON_RIGHT_HAND,
-			     FIRST_PERSON_LEFT_HAND, FIRST_PERSON_RIGHT_HAND,
-			     HEAD, ON_SHELF -> RenderStage.ENTITIES;
+			case FIRST_PERSON_LEFT_HAND, FIRST_PERSON_RIGHT_HAND -> RenderStage.FIRST_PERSON;
+			case THIRD_PERSON_LEFT_HAND, THIRD_PERSON_RIGHT_HAND, HEAD, ON_SHELF -> RenderStage.ENTITIES;
 			case GROUND, FIXED, NONE -> RenderStage.TRANSLUCENT_BLOCKS;
 		};
 		submit(stage, renderType, mesh, deformation, data, PRenderTypes.isTransparent(renderType));
@@ -103,6 +105,15 @@ public class PRenderQueue
 		EXECUTOR.execute(plan);
 	}
 
+	public static void flushCombined(RenderStage... stages)
+	{
+		List<PDrawGroup<RenderType, PBakedMesh, InstanceData>> groups = new ArrayList<>();
+		for (RenderStage stage : stages)
+			groups.addAll(COMPILER.compile(stage).groups());
+		if (!groups.isEmpty())
+			EXECUTOR.execute(new PRenderPlan<>(groups));
+	}
+
 	public static void compositeTranslucency()
 	{
 		EXECUTOR.compositeOit();
@@ -120,6 +131,7 @@ public class PRenderQueue
 		public static final RenderStage SOLID_BLOCKS = new RenderStage("solid_blocks");
 		public static final RenderStage TRANSLUCENT_BLOCKS = new RenderStage("translucent_blocks");
 		public static final RenderStage ENTITIES = new RenderStage("entities");
+		public static final RenderStage FIRST_PERSON = new RenderStage("first_person");
 		public static final RenderStage GUI = new RenderStage("gui");
 		
 		private final String name;

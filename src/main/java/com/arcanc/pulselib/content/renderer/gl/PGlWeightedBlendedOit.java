@@ -37,59 +37,59 @@ import java.util.OptionalInt;
 
 final class PGlWeightedBlendedOit
 {
+	static final int LAYER_COUNT = 4;
 	private static final float[] CLEAR_ACCUMULATION = {0.0F, 0.0F, 0.0F, 0.0F};
-	private static final float[] CLEAR_REVEALAGE = {1.0F, 1.0F, 1.0F, 1.0F};
 	private static final float[] CLEAR_DEPTH = {1.0F, 1.0F, 1.0F, 1.0F};
 
 	private int framebuffer = -1;
-	private @Nullable ExternalGlTexture accumulationTexture;
-	private @Nullable ExternalGlTextureView accumulationView;
-	private @Nullable ExternalGlTexture revealageTexture;
-	private @Nullable ExternalGlTextureView revealageView;
-	private @Nullable ExternalGlTexture fragmentDepthTexture;
-	private @Nullable ExternalGlTextureView fragmentDepthView;
+	private final @Nullable ExternalGlTexture[] accumulationTextures = new ExternalGlTexture[LAYER_COUNT];
+	private final @Nullable ExternalGlTextureView[] accumulationViews = new ExternalGlTextureView[LAYER_COUNT];
+	private final @Nullable ExternalGlTexture[] revealageTextures = new ExternalGlTexture[LAYER_COUNT];
+	private final @Nullable ExternalGlTextureView[] revealageViews = new ExternalGlTextureView[LAYER_COUNT];
+	private final @Nullable ExternalGlTexture[] layerDepthTextures = new ExternalGlTexture[LAYER_COUNT];
+	private final @Nullable ExternalGlTextureView[] layerDepthViews = new ExternalGlTextureView[LAYER_COUNT];
 	private int width = -1;
 	private int height = -1;
 	private int depthTexture = -1;
 	private boolean depthStencil;
 	private boolean disabled;
 	private boolean frameOpen;
-	private boolean accumulationBound;
-	private boolean hasContent;
+	private final boolean[] clearNextDepthPass = new boolean[LAYER_COUNT];
+	private final boolean[] clearNextAccumulationPass = new boolean[LAYER_COUNT];
+	private final boolean[] hasContent = new boolean[LAYER_COUNT];
 	private int destinationColorTexture = -1;
 	private @Nullable GpuTextureView destinationColor;
 	private @Nullable GpuTextureView destinationDepth;
-	private @Nullable GlStateSnapshot accumulationState;
+	private @Nullable GlStateSnapshot passState;
+	private Pass pass = Pass.NONE;
+	private int activeLayer = -1;
 
 	public boolean begin(GpuTextureView colorAttachment, @Nullable GpuTextureView depthAttachment)
 	{
 		if (this.disabled || !isSupported())
 			return false;
-		if (this.accumulationBound)
-			throw new IllegalStateException("Weighted blended OIT accumulation is already active");
+		if (this.pass != Pass.NONE)
+			throw new IllegalStateException("Weighted blended OIT pass is already active");
 		if (depthAttachment == null || colorAttachment.getWidth(0) <= 0 || colorAttachment.getHeight(0) <= 0)
 			return false;
 		if (this.frameOpen && !matchesFrame(colorAttachment, depthAttachment))
 			return false;
 
-		GlStateSnapshot state = GlStateSnapshot.capture();
 		try
 		{
 			this.ensureBuffers(colorAttachment, depthAttachment);
-			this.bindForDraw();
 			if (!this.frameOpen)
 			{
 				this.destinationColor = colorAttachment;
 				this.destinationDepth = depthAttachment;
 				this.destinationColorTexture = colorTexture(colorAttachment);
-				GlStateManager._disableScissorTest();
-				GL30.glClearBufferfv(GL11.GL_COLOR, 0, CLEAR_ACCUMULATION);
-				GL30.glClearBufferfv(GL11.GL_COLOR, 1, CLEAR_REVEALAGE);
-				GL30.glClearBufferfv(GL11.GL_COLOR, 2, CLEAR_DEPTH);
 				this.frameOpen = true;
+				for (int layer = 0; layer < LAYER_COUNT; layer++)
+				{
+					this.clearNextDepthPass[layer] = true;
+					this.clearNextAccumulationPass[layer] = true;
+				}
 			}
-			this.accumulationState = state;
-			this.accumulationBound = true;
 			return true;
 		}
 		catch (RuntimeException exception)
@@ -98,69 +98,146 @@ final class PGlWeightedBlendedOit
 			this.disabled = true;
 			this.closeBuffers();
 			this.finishFrame();
-			state.restore();
 			return false;
 		}
 	}
 
-	public void endAccumulation()
+	public void beginDepthPass(int layer)
 	{
-		if (!this.accumulationBound)
-			return;
-		this.hasContent = true;
-		this.accumulationBound = false;
-		GlStateSnapshot state = this.accumulationState;
-		this.accumulationState = null;
-		if (state != null)
-			state.restore();
+		beginPass(Pass.DEPTH, layer);
+	}
+
+	public void beginAccumulationPass(int layer)
+	{
+		beginPass(Pass.ACCUMULATION, layer);
 	}
 
 	public void bindForDraw()
 	{
+		if (this.pass == Pass.NONE)
+			throw new IllegalStateException("No weighted blended OIT pass is active");
+		if (this.pass == Pass.DEPTH)
+			configureDepthPass(false);
+		else
+			configureAccumulationPass(false);
+	}
+
+	public void endPass()
+	{
+		if (this.pass == Pass.NONE)
+			return;
+		GlStateSnapshot state = this.passState;
+		this.passState = null;
+		this.pass = Pass.NONE;
+		this.activeLayer = -1;
+		if (state != null)
+			state.restore();
+	}
+
+	public GpuTextureView layerDepthView(int layer)
+	{
+		ExternalGlTextureView view = this.layerDepthViews[layer];
+		if (view == null)
+			throw new IllegalStateException("Weighted blended OIT has no depth layer " + layer);
+		return view;
+	}
+
+	public GpuTextureView activeLayerDepthView()
+	{
+		if (this.activeLayer < 0)
+			throw new IllegalStateException("No weighted blended OIT layer is active");
+		return layerDepthView(this.activeLayer);
+	}
+
+	public GpuTextureView previousLayerDepthView()
+	{
+		if (this.activeLayer <= 0)
+			throw new IllegalStateException("The first weighted blended OIT layer has no predecessor");
+		return layerDepthView(this.activeLayer - 1);
+	}
+
+	public void markContent(int layer)
+	{
+		this.hasContent[layer] = true;
+	}
+
+	private void beginPass(Pass nextPass, int layer)
+	{
+		if (!this.frameOpen || layer < 0 || layer >= LAYER_COUNT)
+			throw new IllegalStateException("Weighted blended OIT frame is not ready");
+		if (this.pass != Pass.NONE)
+			throw new IllegalStateException("Weighted blended OIT pass is already active");
+		this.passState = GlStateSnapshot.capture();
+		this.pass = nextPass;
+		this.activeLayer = layer;
+		if (nextPass == Pass.DEPTH)
+			configureDepthPass(true);
+		else
+			configureAccumulationPass(true);
+	}
+
+	private void configureDepthPass(boolean clear)
+	{
 		GlStateManager._glBindFramebuffer(GL30.GL_FRAMEBUFFER, this.framebuffer);
 		GlStateManager._viewport(0, 0, this.width, this.height);
-		GL20.glDrawBuffers(new int[]{GL30.GL_COLOR_ATTACHMENT0, GL30.GL_COLOR_ATTACHMENT1, GL30.GL_COLOR_ATTACHMENT2});
+		attachColor(0, layerDepthTexture(this.activeLayer));
+		attachColor(1, null);
+		attachDepth(this.depthTexture, this.depthStencil);
+		GL20.glDrawBuffers(new int[]{GL30.GL_COLOR_ATTACHMENT0});
+		GlStateManager._disableScissorTest();
 		GlStateManager._enableBlend();
-		GlStateManager._blendFuncSeparate(GL11.GL_ONE, GL11.GL_ONE, GL11.GL_ONE, GL11.GL_ONE);
-		GL20.glBlendEquationSeparate(GL14.GL_FUNC_ADD, GL14.GL_FUNC_ADD);
+		configureMinimumBlend(0);
+		GL30.glDisablei(GL11.GL_BLEND, 1);
+		GlStateManager._enableDepthTest();
+		GlStateManager._depthFunc(GL11.GL_LEQUAL);
 		GlStateManager._depthMask(false);
-		if (GL.getCapabilities().OpenGL40)
+		if (clear && this.clearNextDepthPass[this.activeLayer])
 		{
-			GL40.glBlendEquationi(1, GL14.GL_FUNC_ADD);
-			GL40.glBlendFunci(1, GL11.GL_ZERO, GL11.GL_ONE_MINUS_SRC_COLOR);
-			GL40.glBlendEquationi(2, GL14.GL_MIN);
-			GL40.glBlendFunci(2, GL11.GL_ONE, GL11.GL_ONE);
+			GL30.glClearBufferfv(GL11.GL_COLOR, 0, CLEAR_DEPTH);
+			this.clearNextDepthPass[this.activeLayer] = false;
 		}
-		else
+		ensureFramebufferComplete();
+	}
+
+	private void configureAccumulationPass(boolean clear)
+	{
+		GlStateManager._glBindFramebuffer(GL30.GL_FRAMEBUFFER, this.framebuffer);
+		GlStateManager._viewport(0, 0, this.width, this.height);
+		attachColor(0, accumulationTexture(this.activeLayer));
+		attachColor(1, revealageTexture(this.activeLayer));
+		attachDepth(this.depthTexture, this.depthStencil);
+		GL20.glDrawBuffers(new int[]{GL30.GL_COLOR_ATTACHMENT0, GL30.GL_COLOR_ATTACHMENT1});
+		GlStateManager._disableScissorTest();
+		GlStateManager._enableBlend();
+		configureAdditiveBlend(0);
+		configureAdditiveBlend(1);
+		GlStateManager._enableDepthTest();
+		GlStateManager._depthFunc(GL11.GL_LEQUAL);
+		GlStateManager._depthMask(false);
+		if (clear && this.clearNextAccumulationPass[this.activeLayer])
 		{
-			ARBDrawBuffersBlend.glBlendEquationiARB(1, GL14.GL_FUNC_ADD);
-			ARBDrawBuffersBlend.glBlendFunciARB(1, GL11.GL_ZERO, GL11.GL_ONE_MINUS_SRC_COLOR);
-			ARBDrawBuffersBlend.glBlendEquationiARB(2, GL14.GL_MIN);
-			ARBDrawBuffersBlend.glBlendFunciARB(2, GL11.GL_ONE, GL11.GL_ONE);
+			GL30.glClearBufferfv(GL11.GL_COLOR, 0, CLEAR_ACCUMULATION);
+			GL30.glClearBufferfv(GL11.GL_COLOR, 1, CLEAR_ACCUMULATION);
+			this.clearNextAccumulationPass[this.activeLayer] = false;
 		}
+		ensureFramebufferComplete();
 	}
 
 	public void composite()
 	{
-		if (!this.frameOpen || !this.hasContent)
+		if (!this.frameOpen)
 		{
 			this.finishFrame();
 			return;
 		}
-		if (this.accumulationBound)
-			throw new IllegalStateException("Cannot composite weighted blended OIT while accumulation is active");
+		if (this.pass != Pass.NONE)
+			throw new IllegalStateException("Cannot composite weighted blended OIT while a pass is active");
 		GpuTextureView colorAttachment = this.destinationColor;
 		if (colorAttachment == null)
 			throw new IllegalStateException("Weighted blended OIT frame has no destination color attachment");
 		GpuTextureView depthAttachment = this.destinationDepth;
 		if (depthAttachment == null)
 			throw new IllegalStateException("Weighted blended OIT frame has no destination depth attachment");
-		GpuTextureView accumulation = this.accumulationView;
-		GpuTextureView revealage = this.revealageView;
-		GpuTextureView fragmentDepth = this.fragmentDepthView;
-		if (accumulation == null || revealage == null || fragmentDepth == null)
-			throw new IllegalStateException("Weighted blended OIT frame has no accumulation textures");
-
 		GlStateSnapshot state = GlStateSnapshot.capture();
 		try (RenderPass pass = RenderSystem.getDevice().createCommandEncoder().createRenderPass(
 				() -> "PulseLib weighted OIT composite", colorAttachment, OptionalInt.empty(), depthAttachment, OptionalDouble.empty()))
@@ -168,10 +245,15 @@ final class PGlWeightedBlendedOit
 			pass.setPipeline(PRenderTypes.RenderPipelinesProvider.OIT_COMPOSITE);
 			pass.disableScissor();
 			var sampler = RenderSystem.getSamplerCache().getClampToEdge(FilterMode.NEAREST);
-			pass.bindTexture("AccumSampler", accumulation, sampler);
-			pass.bindTexture("RevealSampler", revealage, sampler);
-			pass.bindTexture("DepthSampler", fragmentDepth, sampler);
-			pass.draw(0, 3);
+			for (int layer = LAYER_COUNT - 1; layer >= 0; layer--)
+			{
+				if (!this.hasContent[layer])
+					continue;
+				pass.bindTexture("AccumSampler", accumulationView(layer), sampler);
+				pass.bindTexture("RevealSampler", revealageView(layer), sampler);
+				pass.bindTexture("DepthSampler", layerDepthView(layer), sampler);
+				pass.draw(0, 3);
+			}
 		}
 		finally
 		{
@@ -182,8 +264,7 @@ final class PGlWeightedBlendedOit
 
 	public void close()
 	{
-		if (this.accumulationBound)
-			this.endAccumulation();
+		this.endPass();
 		this.closeBuffers();
 		this.finishFrame();
 		this.disabled = false;
@@ -192,12 +273,18 @@ final class PGlWeightedBlendedOit
 	private void finishFrame()
 	{
 		this.frameOpen = false;
-		this.accumulationBound = false;
-		this.hasContent = false;
+		this.pass = Pass.NONE;
+		this.activeLayer = -1;
+		this.passState = null;
+		for (int layer = 0; layer < LAYER_COUNT; layer++)
+		{
+			this.clearNextDepthPass[layer] = false;
+			this.clearNextAccumulationPass[layer] = false;
+			this.hasContent[layer] = false;
+		}
 		this.destinationColorTexture = -1;
 		this.destinationColor = null;
 		this.destinationDepth = null;
-		this.accumulationState = null;
 	}
 
 	private static boolean isSupported()
@@ -219,27 +306,19 @@ final class PGlWeightedBlendedOit
 		this.height = targetHeight;
 		this.depthTexture = targetDepth;
 		this.depthStencil = targetDepthStencil;
-		this.accumulationTexture = createTexture("PulseLib OIT accumulation", TextureFormat.RGBA8,
-				GL30.GL_RGBA16F, GL11.GL_RGBA, targetWidth, targetHeight);
-		this.accumulationView = new ExternalGlTextureView(this.accumulationTexture);
-		this.revealageTexture = createTexture("PulseLib OIT revealage", TextureFormat.RED8,
-				GL30.GL_R16F, GL11.GL_RED, targetWidth, targetHeight);
-		this.revealageView = new ExternalGlTextureView(this.revealageTexture);
-		this.fragmentDepthTexture = createTexture("PulseLib OIT fragment depth", TextureFormat.RED8,
-				GL30.GL_R32F, GL11.GL_RED, targetWidth, targetHeight);
-		this.fragmentDepthView = new ExternalGlTextureView(this.fragmentDepthTexture);
+		for (int layer = 0; layer < LAYER_COUNT; layer++)
+		{
+			this.accumulationTextures[layer] = createTexture("PulseLib OIT accumulation " + layer, TextureFormat.RGBA8,
+					GL30.GL_RGBA16F, GL11.GL_RGBA, targetWidth, targetHeight);
+			this.accumulationViews[layer] = new ExternalGlTextureView(this.accumulationTextures[layer]);
+			this.revealageTextures[layer] = createTexture("PulseLib OIT revealage " + layer, TextureFormat.RED8,
+					GL30.GL_R16F, GL11.GL_RED, targetWidth, targetHeight);
+			this.revealageViews[layer] = new ExternalGlTextureView(this.revealageTextures[layer]);
+			this.layerDepthTextures[layer] = createTexture("PulseLib OIT depth layer " + layer, TextureFormat.RED8,
+					GL30.GL_R32F, GL11.GL_RED, targetWidth, targetHeight);
+			this.layerDepthViews[layer] = new ExternalGlTextureView(this.layerDepthTextures[layer]);
+		}
 		this.framebuffer = GlStateManager.glGenFramebuffers();
-		GlStateManager._glBindFramebuffer(GL30.GL_FRAMEBUFFER, this.framebuffer);
-		GL32.glFramebufferTexture(GL30.GL_FRAMEBUFFER, GL30.GL_COLOR_ATTACHMENT0, this.accumulationTexture.glId(), 0);
-		GL32.glFramebufferTexture(GL30.GL_FRAMEBUFFER, GL30.GL_COLOR_ATTACHMENT1, this.revealageTexture.glId(), 0);
-		GL32.glFramebufferTexture(GL30.GL_FRAMEBUFFER, GL30.GL_COLOR_ATTACHMENT2, this.fragmentDepthTexture.glId(), 0);
-		if (targetDepth != 0)
-			GL32.glFramebufferTexture(GL30.GL_FRAMEBUFFER,
-					targetDepthStencil ? GL30.GL_DEPTH_STENCIL_ATTACHMENT : GL30.GL_DEPTH_ATTACHMENT, targetDepth, 0);
-		GL20.glDrawBuffers(new int[]{GL30.GL_COLOR_ATTACHMENT0, GL30.GL_COLOR_ATTACHMENT1, GL30.GL_COLOR_ATTACHMENT2});
-		int status = GL30.glCheckFramebufferStatus(GL30.GL_FRAMEBUFFER);
-		if (status != GL30.GL_FRAMEBUFFER_COMPLETE)
-			throw new IllegalStateException("Unable to create weighted OIT framebuffer: 0x" + Integer.toHexString(status));
 	}
 
 	private boolean matchesBuffers(GpuTextureView colorAttachment, @Nullable GpuTextureView depthAttachment)
@@ -272,31 +351,139 @@ final class PGlWeightedBlendedOit
 
 	private void closeBuffers()
 	{
-		if (this.accumulationView != null)
-			this.accumulationView.close();
-		if (this.accumulationTexture != null)
-			this.accumulationTexture.close();
-		if (this.revealageView != null)
-			this.revealageView.close();
-		if (this.revealageTexture != null)
-			this.revealageTexture.close();
-		if (this.fragmentDepthView != null)
-			this.fragmentDepthView.close();
-		if (this.fragmentDepthTexture != null)
-			this.fragmentDepthTexture.close();
+		for (int layer = 0; layer < LAYER_COUNT; layer++)
+		{
+			close(this.accumulationViews[layer]);
+			close(this.accumulationTextures[layer]);
+			close(this.revealageViews[layer]);
+			close(this.revealageTextures[layer]);
+			close(this.layerDepthViews[layer]);
+			close(this.layerDepthTextures[layer]);
+			this.accumulationViews[layer] = null;
+			this.accumulationTextures[layer] = null;
+			this.revealageViews[layer] = null;
+			this.revealageTextures[layer] = null;
+			this.layerDepthViews[layer] = null;
+			this.layerDepthTextures[layer] = null;
+		}
 		if (this.framebuffer >= 0)
 			GlStateManager._glDeleteFramebuffers(this.framebuffer);
 		this.framebuffer = -1;
-		this.accumulationTexture = null;
-		this.accumulationView = null;
-		this.revealageTexture = null;
-		this.revealageView = null;
-		this.fragmentDepthTexture = null;
-		this.fragmentDepthView = null;
 		this.width = -1;
 		this.height = -1;
 		this.depthTexture = -1;
 		this.depthStencil = false;
+	}
+
+	private ExternalGlTexture accumulationTexture(int layer)
+	{
+		return requireTexture(this.accumulationTextures[layer], "accumulation", layer);
+	}
+
+	private ExternalGlTexture revealageTexture(int layer)
+	{
+		return requireTexture(this.revealageTextures[layer], "revealage", layer);
+	}
+
+	private ExternalGlTexture layerDepthTexture(int layer)
+	{
+		return requireTexture(this.layerDepthTextures[layer], "depth", layer);
+	}
+
+	private GpuTextureView accumulationView(int layer)
+	{
+		return requireView(this.accumulationViews[layer], "accumulation", layer);
+	}
+
+	private GpuTextureView revealageView(int layer)
+	{
+		return requireView(this.revealageViews[layer], "revealage", layer);
+	}
+
+	private static ExternalGlTexture requireTexture(@Nullable ExternalGlTexture texture, String name, int layer)
+	{
+		if (texture == null)
+			throw new IllegalStateException("Weighted blended OIT has no " + name + " layer " + layer);
+		return texture;
+	}
+
+	private static GpuTextureView requireView(@Nullable ExternalGlTextureView view, String name, int layer)
+	{
+		if (view == null)
+			throw new IllegalStateException("Weighted blended OIT has no " + name + " view for layer " + layer);
+		return view;
+	}
+
+	private void attachColor(int index, @Nullable ExternalGlTexture texture)
+	{
+		GL32.glFramebufferTexture(GL30.GL_FRAMEBUFFER, GL30.GL_COLOR_ATTACHMENT0 + index, texture == null ? 0 : texture.glId(), 0);
+	}
+
+	private void attachDepth(int texture, boolean stencil)
+	{
+		GL32.glFramebufferTexture(GL30.GL_FRAMEBUFFER, GL30.GL_DEPTH_ATTACHMENT, 0, 0);
+		GL32.glFramebufferTexture(GL30.GL_FRAMEBUFFER, GL30.GL_DEPTH_STENCIL_ATTACHMENT, 0, 0);
+		if (texture != 0)
+			GL32.glFramebufferTexture(GL30.GL_FRAMEBUFFER,
+					stencil ? GL30.GL_DEPTH_STENCIL_ATTACHMENT : GL30.GL_DEPTH_ATTACHMENT, texture, 0);
+	}
+
+	private void ensureFramebufferComplete()
+	{
+		int status = GL30.glCheckFramebufferStatus(GL30.GL_FRAMEBUFFER);
+		if (status != GL30.GL_FRAMEBUFFER_COMPLETE)
+			throw new IllegalStateException("Unable to create weighted OIT framebuffer: 0x" + Integer.toHexString(status));
+	}
+
+	private static void configureAdditiveBlend(int target)
+	{
+		GL30.glEnablei(GL11.GL_BLEND, target);
+		if (GL.getCapabilities().OpenGL40)
+		{
+			GL40.glBlendEquationSeparatei(target, GL14.GL_FUNC_ADD, GL14.GL_FUNC_ADD);
+			GL40.glBlendFuncSeparatei(target, GL11.GL_ONE, GL11.GL_ONE, GL11.GL_ONE, GL11.GL_ONE);
+		}
+		else
+		{
+			ARBDrawBuffersBlend.glBlendEquationSeparateiARB(target, GL14.GL_FUNC_ADD, GL14.GL_FUNC_ADD);
+			ARBDrawBuffersBlend.glBlendFuncSeparateiARB(target, GL11.GL_ONE, GL11.GL_ONE, GL11.GL_ONE, GL11.GL_ONE);
+		}
+	}
+
+	private static void configureMinimumBlend(int target)
+	{
+		GL30.glEnablei(GL11.GL_BLEND, target);
+		if (GL.getCapabilities().OpenGL40)
+		{
+			GL40.glBlendEquationSeparatei(target, GL14.GL_MIN, GL14.GL_MIN);
+			GL40.glBlendFuncSeparatei(target, GL11.GL_ONE, GL11.GL_ONE, GL11.GL_ONE, GL11.GL_ONE);
+		}
+		else
+		{
+			ARBDrawBuffersBlend.glBlendEquationSeparateiARB(target, GL14.GL_MIN, GL14.GL_MIN);
+			ARBDrawBuffersBlend.glBlendFuncSeparateiARB(target, GL11.GL_ONE, GL11.GL_ONE, GL11.GL_ONE, GL11.GL_ONE);
+		}
+	}
+
+	private static void close(@Nullable AutoCloseable resource)
+	{
+		if (resource == null)
+			return;
+		try
+		{
+			resource.close();
+		}
+		catch (Exception exception)
+		{
+			throw new RuntimeException(exception);
+		}
+	}
+
+	private enum Pass
+	{
+		NONE,
+		DEPTH,
+		ACCUMULATION
 	}
 
 	private static ExternalGlTexture createTexture(String label, TextureFormat declaredFormat,

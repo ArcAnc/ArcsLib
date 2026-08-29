@@ -13,7 +13,7 @@ const float PULSELIB_OIT_EPSILON = 0.00001;
 void main()
 {
     vec4 accumulated = texture(AccumSampler, texCoord);
-    float alpha = clamp(1.0 - texture(RevealSampler, texCoord).r, 0.0, 1.0);
+    float alpha = clamp(1.0 - exp(-texture(RevealSampler, texCoord).r), 0.0, 1.0);
     if (alpha <= PULSELIB_OIT_EPSILON || accumulated.a <= PULSELIB_OIT_EPSILON) {
         discard;
     }

@@ -9,8 +9,10 @@
 
 package com.arcanc.pulselib.content.renderer.plan;
 
+import com.arcanc.pulselib.util.PRenderTypes;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
+import net.minecraft.client.renderer.rendertype.RenderType;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -59,10 +61,23 @@ public final class PFrameCompiler<S, P, M, I>
 
 		if (translucentGroups != null && !translucentGroups.isEmpty())
 		{
-			translucentGroups.sort(Comparator.comparingDouble(TransparentSubmission<P, M, I>::distanceSquared).reversed());
+			Map<DrawKey<P, M>, List<I>> oitGroups = new Object2ObjectOpenHashMap<>();
+			List<TransparentSubmission<P, M, I>> sortedGroups = new ObjectArrayList<>();
+			for (TransparentSubmission<P, M, I> submission : translucentGroups)
+			{
+				if (canBatchWithOit(submission.key()))
+					oitGroups.computeIfAbsent(submission.key(), ignored -> new ObjectArrayList<>()).add(submission.instance());
+				else
+					sortedGroups.add(submission);
+			}
+
+			for (Map.Entry<DrawKey<P, M>, List<I>> entry : oitGroups.entrySet())
+				groups.add(group(entry.getKey(), entry.getValue(), false));
+
+			sortedGroups.sort(Comparator.comparingDouble(TransparentSubmission<P, M, I>::distanceSquared).reversed());
 			DrawKey<P, M> activeKey = null;
 			List<I> activeInstances = new ObjectArrayList<>();
-			for (TransparentSubmission<P, M, I> submission : translucentGroups)
+			for (TransparentSubmission<P, M, I> submission : sortedGroups)
 			{
 				if (activeKey != null && !activeKey.equals(submission.key()))
 				{
@@ -88,6 +103,12 @@ public final class PFrameCompiler<S, P, M, I>
 	private static <P, M, I> PDrawGroup<P, M, I> group(DrawKey<P, M> key, List<I> instances, boolean writeDepth)
 	{
 		return new PDrawGroup<>(key.pipeline(), key.mesh(), writeDepth, instances);
+	}
+
+	private static <P, M> boolean canBatchWithOit(DrawKey<P, M> key)
+	{
+		return key.pipeline() instanceof RenderType renderType && PRenderTypes.usesOit(renderType) &&
+				renderType.outputTarget().getRenderTarget().useDepth;
 	}
 
 	private record DrawKey<P, M>(P pipeline, M mesh)

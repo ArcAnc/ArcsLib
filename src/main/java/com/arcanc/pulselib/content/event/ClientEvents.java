@@ -154,15 +154,15 @@ public class ClientEvents
 	/*private static void registerSpecialModels(final RegisterSpecialModelRendererEvent event)
 	{
 		event.register(PLibDatabase.rl("test_block"), TestBlockItemRenderer.Unbaked.MAP_CODEC);
-	}*/
+	}
 	
-	/*private static void registerRenderers(final EntityRenderersEvent.RegisterRenderers event)
+	private static void registerRenderers(final EntityRenderersEvent.RegisterRenderers event)
 	{
 		event.registerBlockEntityRenderer(PLibRegistration.BETypeReg.TEST_BLOCK_ENTITY.get(), TestBlockEntityRenderer :: new);
 		event.registerEntityRenderer(PLibRegistration.EntityTypeReg.TEST_ENTITY.get(), TestEntityRender :: new);
-	}*/
+	}
 	
-	/*private static void registerCustomTextures(final PulseLibEvents.RegisterTextureEvent event)
+	private static void registerCustomTextures(final PulseLibEvents.RegisterTextureEvent event)
 	{
 		event.addTextureLocation(TestEntityRender.SPHERE).
 				addTextureLocation(TestEntityRender.TUBE).

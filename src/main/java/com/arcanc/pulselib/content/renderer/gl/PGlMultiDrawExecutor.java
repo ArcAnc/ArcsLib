@@ -20,6 +20,7 @@ import com.arcanc.pulselib.util.helpers.PLibRenderHelper;
 import com.mojang.blaze3d.buffers.GpuBufferSlice;
 import com.mojang.blaze3d.opengl.GlStateManager;
 import com.mojang.blaze3d.pipeline.RenderTarget;
+import com.mojang.blaze3d.pipeline.RenderPipeline;
 import com.mojang.blaze3d.systems.RenderPass;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.systems.ScissorState;
@@ -32,9 +33,11 @@ import net.minecraft.client.renderer.texture.TextureAtlas;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
 import org.joml.Vector4f;
+import org.jspecify.annotations.Nullable;
 import org.lwjgl.opengl.*;
 
 import java.util.ArrayList;
+import java.util.IdentityHashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -47,7 +50,8 @@ public final class PGlMultiDrawExecutor
 	private final PGlInstanceStream instances = new PGlInstanceStream();
 	private final PGlIndirectStream indirect = new PGlIndirectStream();
 	private final PGlFrameArena frameArena = new PGlFrameArena(9);
-	private final PGlWeightedBlendedOit weightedBlendedOit = new PGlWeightedBlendedOit();
+	private final Map<RenderTarget, PGlWeightedBlendedOit> weightedBlendedOits = new IdentityHashMap<>();
+	private @Nullable PGlWeightedBlendedOit activeWeightedBlendedOit;
 
 	public void execute(PRenderPlan<RenderType, PBakedMesh, PRenderQueue.InstanceData> plan)
 	{
@@ -74,7 +78,6 @@ public final class PGlMultiDrawExecutor
 			return;
 		PGlInstanceStream.Upload instanceStream = this.instances.upload(allInstances, frameSlot, persistent);
 		boolean multiDraw = GL.getCapabilities().GL_ARB_multi_draw_indirect || GL.getCapabilities().OpenGL43;
-		this.indirect.begin(draws.size(), frameSlot, persistent && multiDraw);
 		try
 		{
 			List<Draw> standardDraws = new ArrayList<>();
@@ -86,24 +89,54 @@ public final class PGlMultiDrawExecutor
 				else
 					standardDraws.add(draw);
 			}
+			int maximumIndirectCommands = standardDraws.size() + oitDraws.size() * PGlWeightedBlendedOit.LAYER_COUNT * 2;
+			this.indirect.begin(maximumIndirectCommands, frameSlot, persistent && multiDraw);
 
-			drawGroups(standardDraws, instanceStream, multiDraw, false);
-			if (!oitDraws.isEmpty())
+			drawGroups(standardDraws, instanceStream, multiDraw, OitPass.NONE);
+			Map<RenderTarget, List<Draw>> oitTargetBatches = new LinkedHashMap<>();
+			for (Draw draw : oitDraws)
+				oitTargetBatches.computeIfAbsent(draw.type().outputTarget().getRenderTarget(), ignored -> new ArrayList<>()).add(draw);
+			for (Map.Entry<RenderTarget, List<Draw>> entry : oitTargetBatches.entrySet())
 			{
-				RenderTargetAttachments attachments = attachments(oitDraws.getFirst().type());
-				if (this.weightedBlendedOit.begin(attachments.color(), attachments.depth()))
+				List<Draw> targetDraws = entry.getValue();
+				this.activeWeightedBlendedOit = this.weightedBlendedOits.computeIfAbsent(entry.getKey(), ignored -> new PGlWeightedBlendedOit());
+				try
 				{
-					try
+					RenderTargetAttachments attachments = attachments(targetDraws.getFirst().type());
+					if (activeOit().begin(attachments.color(), attachments.depth()))
 					{
-						drawGroups(oitDraws, instanceStream, multiDraw, true);
+						for (int layer = 0; layer < PGlWeightedBlendedOit.LAYER_COUNT; layer++)
+						{
+							activeOit().beginDepthPass(layer);
+							try
+							{
+								drawGroups(targetDraws, instanceStream, multiDraw,
+										layer == 0 ? OitPass.DEPTH : OitPass.DEPTH_PEEL);
+							}
+							finally
+							{
+								activeOit().endPass();
+							}
+
+							activeOit().beginAccumulationPass(layer);
+							try
+							{
+								drawGroups(targetDraws, instanceStream, multiDraw, OitPass.ACCUMULATION);
+								activeOit().markContent(layer);
+							}
+							finally
+							{
+								activeOit().endPass();
+							}
+						}
 					}
-					finally
-					{
-						this.weightedBlendedOit.endAccumulation();
-					}
+					else
+						drawGroups(targetDraws, instanceStream, multiDraw, OitPass.NONE);
 				}
-				else
-					drawGroups(oitDraws, instanceStream, multiDraw, false);
+				finally
+				{
+					this.activeWeightedBlendedOit = null;
+				}
 			}
 		}
 		finally
@@ -115,7 +148,7 @@ public final class PGlMultiDrawExecutor
 
 	public void compositeOit()
 	{
-		this.weightedBlendedOit.composite();
+		this.weightedBlendedOits.values().forEach(PGlWeightedBlendedOit :: composite);
 	}
 
 	public void cleanup()
@@ -124,10 +157,12 @@ public final class PGlMultiDrawExecutor
 		this.geometry.clear();
 		this.instances.close();
 		this.indirect.close();
-		this.weightedBlendedOit.close();
+		this.weightedBlendedOits.values().forEach(PGlWeightedBlendedOit :: close);
+		this.weightedBlendedOits.clear();
+		this.activeWeightedBlendedOit = null;
 	}
 
-	private void drawGroups(List<Draw> draws, PGlInstanceStream.Upload instanceStream, boolean multiDraw, boolean oit)
+	private void drawGroups(List<Draw> draws, PGlInstanceStream.Upload instanceStream, boolean multiDraw, OitPass oitPass)
 	{
 		for (int start = 0; start < draws.size();)
 		{
@@ -139,7 +174,7 @@ public final class PGlMultiDrawExecutor
 				continue;
 			}
 			int end = findBatchEnd(draws, start);
-			draw(draws.subList(start, end), instanceStream, multiDraw && end - start > 1, oit);
+			draw(draws.subList(start, end), instanceStream, multiDraw && end - start > 1, oitPass);
 			start = end;
 		}
 	}
@@ -174,10 +209,10 @@ public final class PGlMultiDrawExecutor
 		for (Draw draw : draws)
 			batches.computeIfAbsent(new ArenaKey(draw.slice().page(), draw.slice().indexType()), ignored -> new ArrayList<>()).add(draw);
 		for (List<Draw> batch : batches.values())
-			draw(batch, instanceStream, multiDraw && batch.size() > 1, false);
+			draw(batch, instanceStream, multiDraw && batch.size() > 1, OitPass.NONE);
 	}
 
-	private void draw(List<Draw> batch, PGlInstanceStream.Upload instanceStream, boolean multiDraw, boolean oit)
+	private void draw(List<Draw> batch, PGlInstanceStream.Upload instanceStream, boolean multiDraw, OitPass oitPass)
 	{
 		Draw first = batch.getFirst();
 		RenderType type = first.type();
@@ -194,7 +229,7 @@ public final class PGlMultiDrawExecutor
 		try (RenderPass pass = RenderSystem.getDevice().createCommandEncoder().createRenderPass(
 				first.mesh().uuid() :: toString, attachments.color(), OptionalInt.empty(), attachments.depth(), OptionalDouble.empty()))
 		{
-			pass.setPipeline(oit ? PRenderTypes.oitPipeline(type) : type.pipeline());
+			pass.setPipeline(resolvePipeline(type, oitPass));
 			RenderSystem.bindDefaultUniforms(pass);
 			pass.setUniform("DynamicTransforms", dynamicTransforms);
 			pass.setUniform("DeformerOperations", deformerBuffers.operations());
@@ -203,13 +238,17 @@ public final class PGlMultiDrawExecutor
 			pass.bindTexture("Sampler0", atlas.getTextureView(), atlas.getSampler());
 			pass.bindTexture("Sampler1", overlayTexture.getTextureView(), RenderSystem.getSamplerCache().getClampToEdge(FilterMode.LINEAR));
 			pass.bindTexture("Sampler2", lightTexture, RenderSystem.getSamplerCache().getClampToEdge(FilterMode.LINEAR));
+			if (oitPass.usesLayerDepth())
+				pass.bindTexture("LayerDepthSampler", oitPass == OitPass.DEPTH_PEEL ?
+						activeOit().previousLayerDepthView() : activeOit().activeLayerDepthView(),
+						RenderSystem.getSamplerCache().getClampToEdge(FilterMode.NEAREST));
 			pass.setVertexBuffer(0, first.mesh().vbo());
 			pass.setIndexBuffer(first.mesh().indices(), first.mesh().indexType());
 			pass.drawIndexed(0, 0, 0, 1);
-			if (oit)
-				this.weightedBlendedOit.bindForDraw();
+			if (oitPass != OitPass.NONE)
+				activeOit().bindForDraw();
 
-			if (!first.writeDepth())
+			if (!first.writeDepth() && oitPass == OitPass.NONE)
 				GlStateManager._depthMask(false);
 			try
 			{
@@ -232,13 +271,31 @@ public final class PGlMultiDrawExecutor
 			}
 			finally
 			{
-				if (!first.writeDepth() && !oit)
+				if (!first.writeDepth() && oitPass == OitPass.NONE)
 					GlStateManager._depthMask(true);
 				GL30.glBindVertexArray(0);
 				GL15.glBindBuffer(GL40.GL_DRAW_INDIRECT_BUFFER, 0);
 				GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, 0);
 			}
 		}
+	}
+
+	private PGlWeightedBlendedOit activeOit()
+	{
+		if (this.activeWeightedBlendedOit == null)
+			throw new IllegalStateException("No weighted blended OIT target is active");
+		return this.activeWeightedBlendedOit;
+	}
+
+	private RenderPipeline resolvePipeline(RenderType type, OitPass oitPass)
+	{
+		return switch (oitPass)
+		{
+			case NONE -> type.pipeline();
+			case DEPTH -> PRenderTypes.RenderPipelinesProvider.TRIANGLES_OIT_DEPTH;
+			case DEPTH_PEEL -> PRenderTypes.RenderPipelinesProvider.TRIANGLES_OIT_DEPTH_PEEL;
+			case ACCUMULATION -> PRenderTypes.oitPipeline(type);
+		};
 	}
 
 	private static RenderTargetAttachments attachments(RenderType type)
@@ -277,6 +334,19 @@ public final class PGlMultiDrawExecutor
 
 	private record ArenaKey(PGlGeometryArena.Page page, int indexType)
 	{
+	}
+
+	private enum OitPass
+	{
+		NONE,
+		DEPTH,
+		DEPTH_PEEL,
+		ACCUMULATION;
+
+		private boolean usesLayerDepth()
+		{
+			return this == DEPTH_PEEL || this == ACCUMULATION;
+		}
 	}
 
 	private record RenderTargetAttachments(GpuTextureView color, GpuTextureView depth)

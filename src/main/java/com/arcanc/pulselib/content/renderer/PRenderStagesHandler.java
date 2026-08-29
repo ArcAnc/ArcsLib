@@ -31,9 +31,7 @@ public class PRenderStagesHandler
 	
 	private static void renderTranslucent(final RenderLevelStageEvent.AfterTranslucentFeatures event)
 	{
-		PRenderQueue.flush(PRenderQueue.RenderStage.ENTITIES);
-		
-		PRenderQueue.flush(PRenderQueue.RenderStage.TRANSLUCENT_BLOCKS);
+		PRenderQueue.flushCombined(PRenderQueue.RenderStage.ENTITIES, PRenderQueue.RenderStage.TRANSLUCENT_BLOCKS);
 		PRenderQueue.compositeTranslucency();
 		PGpuDeformerBuffers.finishFrame();
 	}
