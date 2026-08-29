@@ -167,10 +167,7 @@ public class PBakedBone
 			
 			PMeshRenderContext meshContext = resolver.resolve(this, mesh, boneContext);
 			PMeshRenderMaterial material = PMeshRenderMaterial.resolve(mesh, meshContext);
-			RenderType baseType = meshContext.renderType().apply(PTextureCache.ATLAS_LOCATION);
-			RenderType type = material.emissive() ?
-					PRenderTypes.RenderTypeProvider.instantEmissiveVariant(baseType, PTextureCache.ATLAS_LOCATION) :
-					PRenderTypes.RenderTypeProvider.instantVariant(baseType, PTextureCache.ATLAS_LOCATION);
+			RenderType type = material.resolveInstantRenderType(meshContext, PTextureCache.ATLAS_LOCATION);
 
 			RenderTarget renderTarget = type.outputTarget().getRenderTarget();
 

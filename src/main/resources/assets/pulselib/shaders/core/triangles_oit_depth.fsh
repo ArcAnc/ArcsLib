@@ -6,15 +6,11 @@ uniform sampler2D Sampler0;
 
 in vec4 vertexColorBack;
 in vec4 vertexColorFront;
-
-#ifndef EMISSIVE
-in vec4 lightMapColor;
-#endif
-
-in vec4 overlayColor;
 in vec2 texCoord0;
 
-out vec4 fragColor;
+layout(location = 0) out float ignoredColor;
+
+const float PULSELIB_OIT_EPSILON = 0.00001;
 
 void main()
 {
@@ -27,15 +23,9 @@ void main()
 
     vec4 faceVertexColor = gl_FrontFacing ? vertexColorFront : vertexColorBack;
     color *= faceVertexColor * ColorModulator;
-    color.rgb = mix(overlayColor.rgb, color.rgb, overlayColor.a);
+    if (color.a <= PULSELIB_OIT_EPSILON) {
+        discard;
+    }
 
-    #ifndef EMISSIVE
-    color *= lightMapColor;
-    #endif
-
-    #ifdef OPAQUE
-    color.a = 1.0;
-    #endif
-
-    fragColor = color;
+    ignoredColor = 0.0;
 }

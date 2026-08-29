@@ -159,7 +159,7 @@ public class PLibRegistration
 				new Item.Properties().setId(
 						ResourceKey.create(Registries.ITEM, PLibDatabase.rl("test_block")))));
 		
-		public static final DeferredItem<TestArmorItem> TEST_HAT = ITEMS.registerItem("test_hat",
+		/*public static final DeferredItem<TestArmorItem> TEST_HAT = ITEMS.registerItem("test_hat",
 				TestArmorItem :: new,
 				() -> new Item.Properties().humanoidArmor(ArmorMaterials.DIAMOND, ArmorType.HELMET));
 		
@@ -170,7 +170,7 @@ public class PLibRegistration
 		public static final DeferredItem<TestArmorItem> TEST_LEGGINGS = ITEMS.registerItem("test_leggings",
 				TestArmorItem :: new,
 				() -> new Item.Properties().humanoidArmor(ArmorMaterials.DIAMOND, ArmorType.LEGGINGS));
-		
+		*/
 		private static void init (@NotNull final IEventBus bus)
 		{
 			ITEMS.register(bus);

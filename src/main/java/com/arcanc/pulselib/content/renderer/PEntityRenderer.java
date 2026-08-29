@@ -42,7 +42,6 @@ import net.minecraft.core.Direction;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
-import net.minecraft.util.LightCoordsUtil;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
@@ -408,17 +407,14 @@ public abstract class PEntityRenderer<T extends Entity & PAnimatable<T>, RS exte
 			PMeshRenderContext inherited = new PMeshRenderContext(
 					renderType,
 					color,
-					mesh.isEmissive() ? LightCoordsUtil.FULL_BRIGHT : packedLight,
+					packedLight,
 					packedOverlay);
 			PMeshRenderContext meshContext = renderLayer == null ?
 					resolveMeshRender(renderState, bone, mesh, inherited) :
 					renderLayer.resolveMeshRender(renderState, bone, mesh, inherited);
 			
 			PMeshRenderMaterial material = PMeshRenderMaterial.resolve(mesh, meshContext);
-			RenderType baseType = meshContext.renderType().apply(PTextureCache.ATLAS_LOCATION);
-			RenderType type = material.emissive() ?
-					PRenderTypes.RenderTypeProvider.emissiveVariant(baseType, PTextureCache.ATLAS_LOCATION) :
-					baseType;
+			RenderType type = material.resolveRenderType(meshContext, PTextureCache.ATLAS_LOCATION);
 			
 			PRenderQueue.submitEntityMesh(type, material.mesh(), meshContext.deformation(), new PRenderQueue.InstanceData(matrix4fstack, meshContext.color(), material.packedLight(), meshContext.packedOverlay()));
 		}

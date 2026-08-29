@@ -47,18 +47,13 @@ public final class PDeformedMeshBuffers
 		return buffer.slice();
 	}
 
-	/**
-	 * Returns the static mesh metadata with its vertex buffer replaced by a CPU
-	 * deformed stream. The index stream is retained from the already subdivided
-	 * source mesh.
-	 */
 	public static PBakedMesh resolveMesh(PBakedMesh mesh, PMeshDeformation deformation)
 	{
 		if (deformation == null || deformation.stack().isEmpty())
 			return mesh;
 		return new PBakedMesh(mesh.uuid(), resolve(mesh, deformation).buffer(), mesh.vertexesAmount(),
 				mesh.indices(), mesh.indicesCount(), mesh.indexType(), mesh.textureName(), mesh.isEmissive(),
-				mesh.source(), mesh.textureLocation());
+				mesh.alphaMode(), mesh.source(), mesh.textureLocation());
 	}
 
 	public static void close(PBakedMesh mesh)

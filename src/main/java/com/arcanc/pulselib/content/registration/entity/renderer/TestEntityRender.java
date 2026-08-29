@@ -75,12 +75,8 @@ public class TestEntityRender extends PEntityRenderer<TestEntity, PEntityRenderS
 	                                               PBakedMesh mesh,
 	                                               PMeshRenderContext inherited)
 	{
-		PMeshRenderContext context = new PMeshRenderContext(
-				inherited.renderType(),
-				TestDayTimeColor.color(renderState.getAnimatable().level(), renderState.partialTick()),
-				inherited.packedLight(),
-				inherited.packedOverlay()
-		);
+		PMeshRenderContext context = inherited.withColor(
+				TestDayTimeColor.color(renderState.getAnimatable().level(), renderState.partialTick()));
 		TestEntity animatable = renderState.getAnimatable();
 		if (bone.name().equals("head"))
 		{

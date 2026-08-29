@@ -65,6 +65,11 @@ public final class PRenderQueue
 		EXECUTOR.execute(COMPILER.compile(stage));
 	}
 
+	public static void compositeTranslucency()
+	{
+		EXECUTOR.compositeOit();
+	}
+
 	public static void cleanUp()
 	{
 		COMPILER.clear();
@@ -77,9 +82,8 @@ public final class PRenderQueue
 		return switch (context)
 		{
 			case GUI -> RenderStage.GUI;
-			case THIRD_PERSON_LEFT_HAND, THIRD_PERSON_RIGHT_HAND,
-					 FIRST_PERSON_LEFT_HAND, FIRST_PERSON_RIGHT_HAND,
-					 HEAD, ON_SHELF -> RenderStage.ENTITIES;
+			case FIRST_PERSON_LEFT_HAND, FIRST_PERSON_RIGHT_HAND -> RenderStage.FIRST_PERSON;
+			case THIRD_PERSON_LEFT_HAND, THIRD_PERSON_RIGHT_HAND, HEAD, ON_SHELF -> RenderStage.ENTITIES;
 			case GROUND, FIXED, NONE -> RenderStage.TRANSLUCENT_BLOCKS;
 		};
 	}
@@ -89,6 +93,7 @@ public final class PRenderQueue
 		public static final RenderStage SOLID_BLOCKS = new RenderStage("solid_blocks");
 		public static final RenderStage TRANSLUCENT_BLOCKS = new RenderStage("translucent_blocks");
 		public static final RenderStage ENTITIES = new RenderStage("entities");
+		public static final RenderStage FIRST_PERSON = new RenderStage("first_person");
 		public static final RenderStage GUI = new RenderStage("gui");
 
 		private final String name;

@@ -65,7 +65,7 @@ public class WandRenderer extends PItemRenderer<WandItem, WandRenderState> {
 public class WandRenderState extends PItemRenderState.Impl<WandItem> {}
 ```
 
-In GUI context, `PItemRenderer` schedules an immediate draw through the collector. It converts the selected base type to an instant cutout or translucent variant, including the matching emissive variant. The instant shader also supports GPU deformers.
+In GUI context, `PItemRenderer` schedules an immediate draw through the collector. Its default GUI material is always `trianglesInstantTranslucent`; the render type passed to the constructor does not select the GUI pipeline. Override `resolveMeshRender(...)` and use `withAlphaMode(...)` when an individual mesh needs the instant solid, cutout, or translucent pipeline. Emissive meshes use the matching instant emissive variant, and the instant shader supports GPU deformers.
 
 ## Entity renderer
 

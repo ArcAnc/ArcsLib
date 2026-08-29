@@ -48,6 +48,28 @@ PTextureCache.ATLAS_LOCATION // pulselib:textures/atlas.png
 
 Renderers normally pass `PTextureCache.ATLAS_LOCATION` to `PRenderTypes`, so you rarely need to access the atlas manually.
 
+## Alpha modes
+
+PulseLib classifies every atlas sprite into one of four alpha modes:
+
+* `opaque` selects the solid pipeline.
+* `cutout` selects the cutout pipeline for fully transparent holes and hard edges.
+* `translucent` selects the queued weighted-OIT pipeline (or sorted alpha blending on fallback paths).
+* `auto` inspects the sprite. Fully opaque textures become opaque, textures containing only fully transparent and fully opaque pixels become cutout, and textures with intermediate alpha become translucent.
+
+The metadata mode defaults to `auto`. You can override it next to the emissive flag in the texture's `.png.mcmeta` file:
+
+```json
+{
+  "pulselib": {
+    "alpha_mode": "translucent",
+    "emissive": false
+  }
+}
+```
+
+The render type supplied to a renderer remains authoritative by default. `PItemRenderer` is the GUI exception: its default GUI material is `trianglesInstantTranslucent`. Use `withAlphaMode(PAlphaMode.AUTO)` to select the sprite's classified mode, or pass `OPAQUE`, `CUTOUT`, or `TRANSLUCENT` to force one. Passing `null` restores the renderer-selected pipeline (or the GUI item's instant-translucent default).
+
 ## Emissive textures
 
 Emissive textures are useful for eyes, screens, lamps, energy parts, and other pieces that should ignore normal light. PulseLib reads this flag from texture metadata through [`PLibSpriteMetadata`](https://github.com/ArcAnc/PulseLib/blob/master/src/main/java/com/arcanc/pulselib/content/model/textures/atlas/PLibSpriteMetadata.java).
@@ -76,11 +98,12 @@ PRenderTypes.RenderTypeProvider.emissiveVariant(baseType, PTextureCache.ATLAS_LO
 You can also choose an emissive render type directly in custom rendering code:
 
 ```java
+PRenderTypes.RenderTypeProvider::trianglesEmissiveSolid
 PRenderTypes.RenderTypeProvider::trianglesEmissiveCutout
 PRenderTypes.RenderTypeProvider::trianglesEmissiveTranslucent
 ```
 
-Choose the cutout or translucent variant according to the desired blend mode. There is no separate solid or GUI emissive render type in 26.2.
+Choose the solid, cutout, or translucent variant according to the desired alpha mode. Direct `PBakedBone.instantDraw(...)` rendering has matching `trianglesInstantEmissiveSolid`, `trianglesInstantEmissiveCutout`, and `trianglesInstantEmissiveTranslucent` variants.
 
 ## Per-mesh runtime material overrides
 
@@ -98,17 +121,22 @@ protected PMeshRenderContext resolveMeshRender(RobotEntity entity,
 
     return inherited
             .withTexture(entity.activeScreenTexture())
-            .withEmissive(entity.screenIsLit());
+            .withEmissive(entity.screenIsLit())
+            .withAlphaMode(PAlphaMode.AUTO);
 }
 ```
 
-`withTexture(...)` accepts a texture location registered in the PulseLib runtime atlas. On its first use for a given `(mesh, texture)` pair, PulseLib bakes an alternate vertex buffer with UVs mapped to that atlas sprite; later draws reuse that buffer. The variant buffers and their deformation caches are released on the next resource reload.
+`withTexture(...)` accepts a texture location registered in the PulseLib runtime atlas. On its first use for a given `(mesh, texture)` pair, PulseLib bakes an alternate vertex buffer with UVs and alpha classification mapped to that atlas sprite; later draws reuse that buffer. The variant buffers and their deformation caches are released on the next resource reload.
 
 `withEmissive(true)` forces full-bright emissive rendering, `withEmissive(false)` disables it, and `withEmissive(null)` returns to the selected texture's `.mcmeta` setting.
+
+Prefer `withColor(...)`, `withPackedLight(...)`, `withPackedOverlay(...)`, and the other `with...` methods when changing an inherited context. They preserve every material and deformation override already attached by another resolver.
 
 Classes used:
 
 * [`PTextureCache`](https://github.com/ArcAnc/PulseLib/blob/master/src/main/java/com/arcanc/pulselib/util/PTextureCache.java)
 * [`RuntimeLoader`](https://github.com/ArcAnc/PulseLib/blob/master/src/main/java/com/arcanc/pulselib/content/model/textures/atlas/RuntimeLoader.java)
 * [`PLibSpriteMetadata`](https://github.com/ArcAnc/PulseLib/blob/master/src/main/java/com/arcanc/pulselib/content/model/textures/atlas/PLibSpriteMetadata.java)
+* [`PAlphaMode`](https://github.com/ArcAnc/PulseLib/blob/master/src/main/java/com/arcanc/pulselib/content/model/textures/PAlphaMode.java)
+* [`PTextureAlphaClassifier`](https://github.com/ArcAnc/PulseLib/blob/master/src/main/java/com/arcanc/pulselib/content/model/textures/PTextureAlphaClassifier.java)
 * [`PRenderTypes`](https://github.com/ArcAnc/PulseLib/blob/master/src/main/java/com/arcanc/pulselib/util/PRenderTypes.java)

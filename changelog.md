@@ -1,15 +1,7 @@
-* finally have own maven repository! Details in wiki
-* removed useless triangles_lit rendertype. Fixed triangles_gui shader
-* PAnimationChannel now is typed registry
-* introduced universal PPose
-* reworked animation blending
-* added animation graph on top of controllers
-* added root motion as data
-* added typed animation-event registry: sound, particle, camera shake, locator callbacks and animation parameters
-* animation events now handle reverse playback, multi-wrap deltas, seeks and cycle re-synchronization deterministically
-* added deformers for player and custom models
-* moved deformers into gui. CPU path left as fallback
-* added possibility to dynamic enable/disable emissive and change texture on fly
-* fixed alpha layering
-* fully rewrited whole backend
-* updated gradle
+* fixed glTF meshes without a parent bone being discarded by creating a local render bone for them
+* fixed glTF animation rotations being applied outside their local bone space
+* added automatic opaque, cutout, and translucent texture classification
+* added weighted blended order-independent transparency for queued translucent meshes
+* fixed mesh render resolvers losing inherited texture, emissive, alpha-mode, and deformation overrides
+* fixed withEmissive(false) retaining full-bright lighting from emissive texture metadata
+* finally fixed OIT, also added fix to first person renderer

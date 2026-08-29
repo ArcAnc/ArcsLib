@@ -20,6 +20,7 @@ import com.arcanc.pulselib.content.model.baked.PMeshTextureVariants;
 import com.arcanc.pulselib.content.model.baked.PBakedMesh;
 import com.arcanc.pulselib.content.model.baked.PSubdividedMeshCache;
 import com.arcanc.pulselib.content.model.baked.PBakedModel;
+import com.arcanc.pulselib.content.model.textures.PTextureAlphaClassifier;
 import com.arcanc.pulselib.content.model.textures.atlas.PLibSpriteMetadata;
 import com.arcanc.pulselib.content.renderer.PRenderQueue;
 import com.arcanc.pulselib.data.gltf.PGltfModelLoader;
@@ -232,6 +233,7 @@ public class PModelCache
 								type,
 								mesh.texture(),
 								emissive,
+								PTextureAlphaClassifier.resolve(sprite.contents()),
 								mesh,
 								loc));
 					}

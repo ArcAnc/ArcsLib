@@ -5,7 +5,7 @@ There is no public `PLibHelper.renderModelInGui(...)` helper in this branch. For
 ```java
 public final class WandRenderer extends PItemRenderer<WandItem, WandRenderState> {
     public WandRenderer(PModelData data) {
-        super(data, PRenderTypes.RenderTypeProvider::trianglesGui);
+        super(data, PRenderTypes.RenderTypeProvider::trianglesSolid);
     }
 
     @Override
@@ -20,7 +20,7 @@ public final class WandRenderState extends PItemRenderState.Impl<WandItem> {
 
 For custom GUI-only geometry, use [`PBakedModel.instantDraw(...)`](https://github.com/ArcAnc/PulseLib/blob/master/src/main/java/com/arcanc/pulselib/content/model/baked/PBakedModel.java) or [`PBakedBone.instantDraw(...)`](https://github.com/ArcAnc/PulseLib/blob/master/src/main/java/com/arcanc/pulselib/content/model/baked/PBakedBone.java) from a `SubmitNodeCollector` custom-geometry callback. Keep that code inside a renderer or special-model renderer: it needs the callback's saved pose plus the packed light/overlay values supplied by Minecraft.
 
-`PItemRenderer` converts the chosen base type to the matching instant variant in GUI context. Use `trianglesSolid`, `trianglesCutout`, or `trianglesTranslucent` as the renderer's base type; choose a different one in `resolveMeshRender(...)` when an individual mesh needs different blending. `trianglesGui` remains a compatibility alias for instant translucent rendering, but there is no separate GUI shader.
+`PItemRenderer` uses `trianglesInstantTranslucent` as its default GUI material; the renderer's base type applies only outside GUI context. Choose the instant pipeline for an individual mesh in `resolveMeshRender(...)` with `withAlphaMode(...)`. `trianglesGui` remains a compatibility alias for instant translucent rendering, but there is no separate GUI shader.
 
 Classes used:
 

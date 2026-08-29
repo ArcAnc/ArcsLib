@@ -61,6 +61,8 @@ public class WandRenderer extends PItemRenderer<WandItem, WandRenderState> {
 public class WandRenderState extends PItemRenderState.Impl<WandItem> {}
 ```
 
+When rendered in a GUI, `PItemRenderer` draws through the collector's immediate path with `trianglesInstantTranslucent` as its default material; the constructor's render type applies to non-GUI item contexts. To choose the GUI pipeline for a specific mesh, override `resolveMeshRender(...)` and return `inherited.withAlphaMode(...)`. This selects the matching instant solid, cutout, or translucent variant; emissive meshes automatically use their instant emissive counterpart.
+
 Provide an `Unbaked` special-model wrapper that bakes this renderer:
 
 ```java

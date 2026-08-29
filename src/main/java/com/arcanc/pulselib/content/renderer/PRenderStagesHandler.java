@@ -30,11 +30,12 @@ public class PRenderStagesHandler
 		PRenderQueue.flush(PRenderQueue.RenderStage.SOLID_BLOCKS);
 	}
 	
-	private static void renderTranslucent(final RenderLevelStageEvent.AfterTranslucentBlocks event)
+	private static void renderTranslucent(final RenderLevelStageEvent.AfterTranslucentFeatures event)
 	{
 		PRenderQueue.flush(PRenderQueue.RenderStage.ENTITIES);
 		
 		PRenderQueue.flush(PRenderQueue.RenderStage.TRANSLUCENT_BLOCKS);
+		PRenderQueue.compositeTranslucency();
 		PGpuDeformerBuffers.finishFrame();
 	}
 }

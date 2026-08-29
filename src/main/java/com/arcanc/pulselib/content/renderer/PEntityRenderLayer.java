@@ -114,11 +114,10 @@ public abstract class PEntityRenderLayer<T extends Entity & PAnimatable<T>, RS e
 	                                            PBakedMesh mesh,
 	                                            PMeshRenderContext inherited)
 	{
-		return new PMeshRenderContext(
-				inherited.renderType(),
-				getColor(renderState, bone, mesh, inherited.color()),
-				getPackedLight(renderState, inherited.packedLight()),
-				getPackedOverlay(renderState, inherited.packedOverlay()));
+		return inherited.
+				withColor(getColor(renderState, bone, mesh, inherited.color())).
+				withPackedLight(getPackedLight(renderState, inherited.packedLight())).
+				withPackedOverlay(getPackedOverlay(renderState, inherited.packedOverlay()));
 	}
 	
 	public void submit(PEntityRenderer<T, RS> renderer,

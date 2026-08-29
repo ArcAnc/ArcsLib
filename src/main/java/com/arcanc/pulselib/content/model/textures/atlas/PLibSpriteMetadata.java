@@ -10,16 +10,18 @@
 package com.arcanc.pulselib.content.model.textures.atlas;
 
 
+import com.arcanc.pulselib.content.model.textures.PAlphaMode;
 import com.arcanc.pulselib.util.PLibDatabase;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.server.packs.metadata.MetadataSectionType;
 
-public record PLibSpriteMetadata (boolean emissive)
+public record PLibSpriteMetadata (boolean emissive, PAlphaMode alphaMode)
 {
 	public static final Codec<PLibSpriteMetadata> CODEC = RecordCodecBuilder.create(instance -> instance.
 			group(
-					Codec.BOOL.optionalFieldOf("emissive", false).forGetter(PLibSpriteMetadata :: emissive)
+					Codec.BOOL.optionalFieldOf("emissive", false).forGetter(PLibSpriteMetadata :: emissive),
+					PAlphaMode.CODEC.optionalFieldOf("alpha_mode", PAlphaMode.AUTO).forGetter(PLibSpriteMetadata :: alphaMode)
 	).apply(instance, PLibSpriteMetadata :: new));
 	
 	public static final MetadataSectionType<PLibSpriteMetadata> TYPE =

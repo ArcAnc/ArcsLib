@@ -10,6 +10,7 @@
 package com.arcanc.pulselib.content.model.baked;
 
 import com.arcanc.pulselib.content.model.PMesh;
+import com.arcanc.pulselib.content.model.textures.PTextureAlphaClassifier;
 import com.arcanc.pulselib.content.model.textures.atlas.PLibSpriteMetadata;
 import com.arcanc.pulselib.util.PRenderTypes;
 import com.arcanc.pulselib.util.PTextureCache;
@@ -80,7 +81,7 @@ public final class PMeshTextureVariants
 			GpuBuffer indexBuffer = RenderSystem.getDevice().createBuffer(
 					() -> base.uuid() + "_" + texture + "_indices", GpuBuffer.USAGE_INDEX, indices);
 			return new PBakedMesh(base.uuid(), vertices, source.vertexCount(), indexBuffer, source.indicesCount(),
-					base.indexType(), base.textureName(), emissive, source, texture);
+					base.indexType(), base.textureName(), emissive, PTextureAlphaClassifier.resolve(sprite.contents()), source, texture);
 		}
 	}
 }

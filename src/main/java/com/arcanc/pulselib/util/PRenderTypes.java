@@ -10,6 +10,7 @@
 package com.arcanc.pulselib.util;
 
 
+import com.arcanc.pulselib.content.model.textures.PAlphaMode;
 import com.mojang.blaze3d.GpuFormat;
 import com.mojang.blaze3d.PrimitiveTopology;
 import com.mojang.blaze3d.pipeline.BindGroupLayout;
@@ -17,10 +18,14 @@ import com.mojang.blaze3d.pipeline.BlendFunction;
 import com.mojang.blaze3d.pipeline.ColorTargetState;
 import com.mojang.blaze3d.pipeline.DepthStencilState;
 import com.mojang.blaze3d.pipeline.RenderPipeline;
+import com.mojang.blaze3d.platform.BlendFactor;
+import com.mojang.blaze3d.platform.BlendOp;
+import com.mojang.blaze3d.platform.CompareOp;
 import com.mojang.blaze3d.shaders.UniformType;
 import com.mojang.blaze3d.vertex.VertexFormat;
 import net.minecraft.client.renderer.BindGroupLayouts;
 import net.minecraft.client.renderer.RenderPipelines;
+import net.minecraft.client.renderer.rendertype.OutputTarget;
 import net.minecraft.client.renderer.rendertype.RenderSetup;
 import net.minecraft.client.renderer.rendertype.RenderType;
 import net.minecraft.resources.Identifier;
@@ -30,6 +35,7 @@ import net.neoforged.neoforge.client.event.RegisterRenderPipelinesEvent;
 import org.jetbrains.annotations.ApiStatus;
 
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
 
@@ -57,6 +63,16 @@ public class PRenderTypes
 				withUniform("DeformerOperations", UniformType.TEXEL_BUFFER, GpuFormat.RGBA32_FLOAT).
 				withUniform("DeformerValues", UniformType.TEXEL_BUFFER, GpuFormat.RGBA32_FLOAT).
 				build();
+		private static final BindGroupLayout OIT_COMPOSITE_LAYOUT = BindGroupLayout.builder().
+				withSampler("AccumSampler").
+				withSampler("RevealSampler").
+				withSampler("DepthSampler").
+				build();
+		private static final BindGroupLayout OIT_LAYER_LAYOUT = BindGroupLayout.builder().
+				withSampler("LayerDepthSampler").
+				build();
+		private static final BlendFunction OIT_ACCUMULATION_BLEND =
+				new BlendFunction(BlendFactor.ONE, BlendFactor.ONE, BlendOp.ADD);
 
 		private static final RenderPipeline.Snippet TRIANGLES_SNIPPET = RenderPipeline.builder(RenderPipelines.GLOBALS_SNIPPET).
 				withBindGroupLayout(BindGroupLayouts.MATRICES_PROJECTION).
@@ -91,6 +107,14 @@ public class PRenderTypes
 				withDepthStencilState(DEPTH_TEST_NO_WRITE).
 				build());
 
+		public static final RenderPipeline TRIANGLES_EMISSIVE_SOLID = registerPipeline(RenderPipeline.builder(TRIANGLES_SNIPPET).
+				withLocation(PLibDatabase.rl("pipeline/triangles_emissive_solid_no_cull")).
+				withBindGroupLayout(BindGroupLayouts.SAMPLER1).
+				withShaderDefine("EMISSIVE").
+				withShaderDefine("OPAQUE").
+				withCull(false).
+				build());
+
 		public static final RenderPipeline TRIANGLES_EMISSIVE_CUTOUT = registerPipeline(RenderPipeline.builder(TRIANGLES_SNIPPET).
 				withLocation(PLibDatabase.rl("pipeline/triangles_emissive_cutout_no_cull")).
 				withBindGroupLayout(BindGroupLayouts.SAMPLER1).
@@ -109,6 +133,63 @@ public class PRenderTypes
 				withDepthStencilState(DEPTH_TEST_NO_WRITE).
 				build());
 		
+		public static final RenderPipeline TRIANGLES_OIT = registerPipeline(RenderPipeline.builder(TRIANGLES_SNIPPET).
+				withLocation(PLibDatabase.rl("pipeline/triangles_oit_no_cull")).
+				withFragmentShader(PLibDatabase.rl("core/triangles_oit")).
+				withBindGroupLayout(BindGroupLayouts.SAMPLER1).
+				withBindGroupLayout(OIT_LAYER_LAYOUT).
+				withShaderDefine("ALPHA_CUTOUT", 0.1F).
+				withCull(false).
+				withColorTargetState(0, oitTarget(OIT_ACCUMULATION_BLEND, GpuFormat.RGBA16_FLOAT, ColorTargetState.WRITE_ALL)).
+				withColorTargetState(1, oitTarget(OIT_ACCUMULATION_BLEND, GpuFormat.R16_FLOAT, ColorTargetState.WRITE_RED)).
+				withDepthStencilState(DEPTH_TEST_NO_WRITE).
+				build());
+
+		public static final RenderPipeline TRIANGLES_OIT_EMISSIVE = registerPipeline(RenderPipeline.builder(TRIANGLES_SNIPPET).
+				withLocation(PLibDatabase.rl("pipeline/triangles_oit_emissive_no_cull")).
+				withFragmentShader(PLibDatabase.rl("core/triangles_oit")).
+				withBindGroupLayout(BindGroupLayouts.SAMPLER1).
+				withBindGroupLayout(OIT_LAYER_LAYOUT).
+				withShaderDefine("EMISSIVE").
+				withShaderDefine("ALPHA_CUTOUT", 0.1F).
+				withCull(false).
+				withColorTargetState(0, oitTarget(OIT_ACCUMULATION_BLEND, GpuFormat.RGBA16_FLOAT, ColorTargetState.WRITE_ALL)).
+				withColorTargetState(1, oitTarget(OIT_ACCUMULATION_BLEND, GpuFormat.R16_FLOAT, ColorTargetState.WRITE_RED)).
+				withDepthStencilState(DEPTH_TEST_NO_WRITE).
+				build());
+
+		public static final RenderPipeline TRIANGLES_OIT_DEPTH = registerPipeline(RenderPipeline.builder(TRIANGLES_SNIPPET).
+				withLocation(PLibDatabase.rl("pipeline/triangles_oit_depth_no_cull")).
+				withFragmentShader(PLibDatabase.rl("core/triangles_oit_depth")).
+				withBindGroupLayout(BindGroupLayouts.SAMPLER1).
+				withShaderDefine("ALPHA_CUTOUT", 0.1F).
+				withCull(false).
+				withColorTargetState(new ColorTargetState(Optional.empty(), GpuFormat.R8_UNORM, ColorTargetState.WRITE_NONE)).
+				withDepthStencilState(DepthStencilState.DEFAULT).
+				build());
+
+		public static final RenderPipeline TRIANGLES_OIT_DEPTH_PEEL = registerPipeline(RenderPipeline.builder(TRIANGLES_SNIPPET).
+				withLocation(PLibDatabase.rl("pipeline/triangles_oit_depth_peel_no_cull")).
+				withFragmentShader(PLibDatabase.rl("core/triangles_oit_depth_peel")).
+				withBindGroupLayout(BindGroupLayouts.SAMPLER1).
+				withBindGroupLayout(OIT_LAYER_LAYOUT).
+				withShaderDefine("ALPHA_CUTOUT", 0.1F).
+				withCull(false).
+				withColorTargetState(new ColorTargetState(Optional.empty(), GpuFormat.R8_UNORM, ColorTargetState.WRITE_NONE)).
+				withDepthStencilState(DepthStencilState.DEFAULT).
+				build());
+
+		public static final RenderPipeline OIT_COMPOSITE = registerPipeline(RenderPipeline.builder().
+				withLocation(PLibDatabase.rl("pipeline/oit_composite")).
+				withVertexShader(PLibDatabase.rl("core/oit_composite")).
+				withFragmentShader(PLibDatabase.rl("core/oit_composite")).
+				withBindGroupLayout(OIT_COMPOSITE_LAYOUT).
+				withPrimitiveTopology(PrimitiveTopology.TRIANGLES).
+				withColorTargetState(new ColorTargetState(BlendFunction.TRANSLUCENT)).
+				withDepthStencilState(new DepthStencilState(CompareOp.ALWAYS_PASS, true)).
+				withCull(false).
+				build());
+
 		private static final RenderPipeline.Snippet TRIANGLES_INSTANT_SNIPPET = RenderPipeline.builder(RenderPipelines.GLOBALS_SNIPPET).
 				withBindGroupLayout(BindGroupLayouts.MATRICES_PROJECTION).
 				withVertexShader(PLibDatabase.rl("core/triangles_instant")).
@@ -120,6 +201,11 @@ public class PRenderTypes
 				withPrimitiveTopology(PrimitiveTopology.TRIANGLES).
 				buildSnippet();
 
+		public static final RenderPipeline TRIANGLES_INSTANT_SOLID = registerPipeline(RenderPipeline.builder(TRIANGLES_INSTANT_SNIPPET).
+				withLocation(PLibDatabase.rl("pipeline/triangles_instant_solid")).
+				withShaderDefine("OPAQUE").
+				build());
+
 		public static final RenderPipeline TRIANGLES_INSTANT_CUTOUT = registerPipeline(RenderPipeline.builder(TRIANGLES_INSTANT_SNIPPET).
 				withLocation(PLibDatabase.rl("pipeline/triangles_instant_cutout")).
 				withShaderDefine("ALPHA_CUTOUT", 0.1F).
@@ -130,6 +216,12 @@ public class PRenderTypes
 				withShaderDefine("ALPHA_CUTOUT", 0.1F).
 				withColorTargetState(new ColorTargetState(BlendFunction.TRANSLUCENT)).
 				withDepthStencilState(DEPTH_TEST_NO_WRITE).
+				build());
+
+		public static final RenderPipeline TRIANGLES_INSTANT_EMISSIVE_SOLID = registerPipeline(RenderPipeline.builder(TRIANGLES_INSTANT_SNIPPET).
+				withLocation(PLibDatabase.rl("pipeline/triangles_instant_emissive_solid")).
+				withShaderDefine("EMISSIVE").
+				withShaderDefine("OPAQUE").
 				build());
 
 		public static final RenderPipeline TRIANGLES_INSTANT_EMISSIVE_CUTOUT = registerPipeline(RenderPipeline.builder(TRIANGLES_INSTANT_SNIPPET).
@@ -150,6 +242,11 @@ public class PRenderTypes
 		{
 			PIPELINES.add(pipeline);
 			return pipeline;
+		}
+
+		private static ColorTargetState oitTarget(BlendFunction blend, GpuFormat format, int writeMask)
+		{
+			return new ColorTargetState(Optional.of(blend), format, writeMask);
 		}
 		
 		private static void registerCustomPipelines(final RegisterRenderPipelinesEvent event)
@@ -173,10 +270,13 @@ public class PRenderTypes
 		private static final Function<Identifier, RenderType> TRIANGLES_SOLID = Util.memoize(RenderTypeProvider :: createTrianglesSolid);
 		private static final Function<Identifier, RenderType> TRIANGLES_CUTOUT = Util.memoize(RenderTypeProvider :: createTrianglesCutout);
 		private static final Function<Identifier, RenderType> TRIANGLES_TRANSLUCENT = Util.memoize(RenderTypeProvider :: createTrianglesTranslucent);
+		private static final Function<Identifier, RenderType> TRIANGLES_EMISSIVE_SOLID = Util.memoize(RenderTypeProvider :: createTrianglesEmissiveSolid);
 		private static final Function<Identifier, RenderType> TRIANGLES_EMISSIVE_CUTOUT = Util.memoize(RenderTypeProvider :: createTrianglesEmissiveCutout);
 		private static final Function<Identifier, RenderType> TRIANGLES_EMISSIVE_TRANSLUCENT = Util.memoize(RenderTypeProvider :: createTrianglesEmissiveTranslucent);
+		private static final Function<Identifier, RenderType> TRIANGLES_INSTANT_SOLID = Util.memoize(RenderTypeProvider :: createTrianglesInstantSolid);
 		private static final Function<Identifier, RenderType> TRIANGLES_INSTANT_CUTOUT = Util.memoize(RenderTypeProvider :: createTrianglesInstantCutout);
 		private static final Function<Identifier, RenderType> TRIANGLES_INSTANT_TRANSLUCENT = Util.memoize(RenderTypeProvider :: createTrianglesInstantTranslucent);
+		private static final Function<Identifier, RenderType> TRIANGLES_INSTANT_EMISSIVE_SOLID = Util.memoize(RenderTypeProvider :: createTrianglesInstantEmissiveSolid);
 		private static final Function<Identifier, RenderType> TRIANGLES_INSTANT_EMISSIVE_CUTOUT = Util.memoize(RenderTypeProvider :: createTrianglesInstantEmissiveCutout);
 		private static final Function<Identifier, RenderType> TRIANGLES_INSTANT_EMISSIVE_TRANSLUCENT = Util.memoize(RenderTypeProvider :: createTrianglesInstantEmissiveTranslucent);
 		
@@ -210,6 +310,7 @@ public class PRenderTypes
 		{
 			RenderSetup setup = RenderSetup.builder(RenderPipelinesProvider.TRIANGLES_TRANSLUCENT).
 					withTexture("Sampler0", texture).
+					setOutputTarget(OutputTarget.ITEM_ENTITY_TARGET).
 					useLightmap().
 					useOverlay().
 					affectsCrumbling().
@@ -217,6 +318,18 @@ public class PRenderTypes
 					createRenderSetup();
 			
 			return RenderType.create(PLibDatabase.rl("triangles_translucent").toString(), setup);
+		}
+
+		private static RenderType createTrianglesEmissiveSolid(Identifier texture)
+		{
+			RenderSetup setup = RenderSetup.builder(RenderPipelinesProvider.TRIANGLES_EMISSIVE_SOLID).
+					withTexture("Sampler0", texture).
+					useOverlay().
+					affectsCrumbling().
+					setOutline(RenderSetup.OutlineProperty.AFFECTS_OUTLINE).
+					createRenderSetup();
+
+			return RenderType.create(PLibDatabase.rl("triangles_emissive_solid").toString(), setup);
 		}
 
 		private static RenderType createTrianglesEmissiveCutout(Identifier texture)
@@ -235,12 +348,25 @@ public class PRenderTypes
 		{
 			RenderSetup setup = RenderSetup.builder(RenderPipelinesProvider.TRIANGLES_EMISSIVE_TRANSLUCENT).
 					withTexture("Sampler0", texture).
+					setOutputTarget(OutputTarget.ITEM_ENTITY_TARGET).
 					useOverlay().
 					affectsCrumbling().
 					setOutline(RenderSetup.OutlineProperty.AFFECTS_OUTLINE).
 					createRenderSetup();
 
 			return RenderType.create(PLibDatabase.rl("triangles_emissive_translucent").toString(), setup);
+		}
+
+		private static RenderType createTrianglesInstantSolid(Identifier texture)
+		{
+			RenderSetup setup = RenderSetup.builder(RenderPipelinesProvider.TRIANGLES_INSTANT_SOLID).
+					withTexture("Sampler0", texture).
+					useLightmap().
+					useOverlay().
+					setOutline(RenderSetup.OutlineProperty.AFFECTS_OUTLINE).
+					createRenderSetup();
+
+			return RenderType.create(PLibDatabase.rl("triangles_instant_solid").toString(), setup);
 		}
 		
 		private static RenderType createTrianglesInstantCutout(Identifier texture)
@@ -265,6 +391,17 @@ public class PRenderTypes
 					createRenderSetup();
 
 			return RenderType.create(PLibDatabase.rl("triangles_instant_translucent").toString(), setup);
+		}
+
+		private static RenderType createTrianglesInstantEmissiveSolid(Identifier texture)
+		{
+			RenderSetup setup = RenderSetup.builder(RenderPipelinesProvider.TRIANGLES_INSTANT_EMISSIVE_SOLID).
+					withTexture("Sampler0", texture).
+					useOverlay().
+					setOutline(RenderSetup.OutlineProperty.AFFECTS_OUTLINE).
+					createRenderSetup();
+
+			return RenderType.create(PLibDatabase.rl("triangles_instant_emissive_solid").toString(), setup);
 		}
 
 		private static RenderType createTrianglesInstantEmissiveCutout(Identifier texture)
@@ -304,6 +441,11 @@ public class PRenderTypes
 			return TRIANGLES_TRANSLUCENT.apply(texture);
 		}
 
+		public static RenderType trianglesEmissiveSolid(Identifier texture)
+		{
+			return TRIANGLES_EMISSIVE_SOLID.apply(texture);
+		}
+
 		public static RenderType trianglesEmissiveCutout(Identifier texture)
 		{
 			return TRIANGLES_EMISSIVE_CUTOUT.apply(texture);
@@ -317,6 +459,11 @@ public class PRenderTypes
 		public static RenderType trianglesGui(Identifier texture)
 		{
 			return trianglesInstantTranslucent(texture);
+		}
+
+		public static RenderType trianglesInstantSolid(Identifier texture)
+		{
+			return TRIANGLES_INSTANT_SOLID.apply(texture);
 		}
 
 		public static RenderType trianglesInstantCutout(Identifier texture)
@@ -334,6 +481,11 @@ public class PRenderTypes
 			return TRIANGLES_INSTANT_EMISSIVE_CUTOUT.apply(texture);
 		}
 
+		public static RenderType trianglesInstantEmissiveSolid(Identifier texture)
+		{
+			return TRIANGLES_INSTANT_EMISSIVE_SOLID.apply(texture);
+		}
+
 		public static RenderType trianglesInstantEmissiveTranslucent(Identifier texture)
 		{
 			return TRIANGLES_INSTANT_EMISSIVE_TRANSLUCENT.apply(texture);
@@ -341,17 +493,47 @@ public class PRenderTypes
 
 		public static RenderType emissiveVariant(RenderType baseType, Identifier texture)
 		{
+			if (baseType.pipeline() == RenderPipelinesProvider.TRIANGLES_SOLID)
+				return trianglesEmissiveSolid(texture);
 			return isTransparent(baseType) ? trianglesEmissiveTranslucent(texture) : trianglesEmissiveCutout(texture);
 		}
 
 		public static RenderType instantVariant(RenderType baseType, Identifier texture)
 		{
+			if (baseType.pipeline() == RenderPipelinesProvider.TRIANGLES_SOLID ||
+					baseType.pipeline() == RenderPipelinesProvider.TRIANGLES_INSTANT_SOLID)
+				return trianglesInstantSolid(texture);
 			return isTransparent(baseType) ? trianglesInstantTranslucent(texture) : trianglesInstantCutout(texture);
 		}
 
 		public static RenderType instantEmissiveVariant(RenderType baseType, Identifier texture)
 		{
+			if (baseType.pipeline() == RenderPipelinesProvider.TRIANGLES_SOLID ||
+					baseType.pipeline() == RenderPipelinesProvider.TRIANGLES_INSTANT_SOLID)
+				return trianglesInstantEmissiveSolid(texture);
 			return isTransparent(baseType) ? trianglesInstantEmissiveTranslucent(texture) : trianglesInstantEmissiveCutout(texture);
+		}
+
+		public static RenderType forAlphaMode(PAlphaMode alphaMode, Identifier texture)
+		{
+			return switch (alphaMode)
+			{
+				case OPAQUE -> trianglesSolid(texture);
+				case CUTOUT -> trianglesCutout(texture);
+				case TRANSLUCENT -> trianglesTranslucent(texture);
+				case AUTO -> throw new IllegalArgumentException("AUTO alpha mode must be resolved before selecting a render type");
+			};
+		}
+
+		public static RenderType forInstantAlphaMode(PAlphaMode alphaMode, Identifier texture)
+		{
+			return switch (alphaMode)
+			{
+				case OPAQUE -> trianglesInstantSolid(texture);
+				case CUTOUT -> trianglesInstantCutout(texture);
+				case TRANSLUCENT -> trianglesInstantTranslucent(texture);
+				case AUTO -> throw new IllegalArgumentException("AUTO alpha mode must be resolved before selecting a render type");
+			};
 		}
 	}
 	
@@ -364,6 +546,21 @@ public class PRenderTypes
 	public static boolean isTransparent(RenderType renderType)
 	{
 		return renderType.pipeline().getColorTargetState().blendFunction().isPresent();
+	}
+
+	@ApiStatus.Internal
+	public static boolean usesOit(RenderType renderType)
+	{
+		RenderPipeline pipeline = renderType.pipeline();
+		return pipeline == RenderPipelinesProvider.TRIANGLES_TRANSLUCENT ||
+				pipeline == RenderPipelinesProvider.TRIANGLES_EMISSIVE_TRANSLUCENT;
+	}
+
+	@ApiStatus.Internal
+	public static RenderPipeline oitPipeline(RenderType renderType)
+	{
+		return renderType.pipeline() == RenderPipelinesProvider.TRIANGLES_EMISSIVE_TRANSLUCENT ?
+				RenderPipelinesProvider.TRIANGLES_OIT_EMISSIVE : RenderPipelinesProvider.TRIANGLES_OIT;
 	}
 	
 }
