@@ -43,7 +43,7 @@ For most mods, it is safer to start from PulseLib's existing render types and on
 
 ## What the queue does
 
-[`PRenderQueue`](https://github.com/ArcAnc/PulseLib/blob/master/src/main/java/com/arcanc/pulselib/content/renderer/PRenderQueue.java) batches identical opaque meshes together and renders many instances with one instanced draw call (up to 512 instances per draw). Transparent submissions are kept back-to-front so the fallback path remains correct; built-in queued translucent types are redirected to weighted OIT by the executor. Every object can have its own transform, animation pose, and GPU deformer values while repeated mesh buffers remain efficiently batched.
+[`PRenderQueue`](https://github.com/ArcAnc/PulseLib/blob/master/src/main/java/com/arcanc/pulselib/content/renderer/PRenderQueue.java) batches identical opaque meshes together and renders many instances with one instanced draw call (up to 512 instances per draw). Built-in queued translucent types using OIT are also grouped by mesh and pipeline regardless of submission order, because OIT resolves their overlap independently of that order. Other transparent submissions retain back-to-front ordering for the fallback path and can only batch adjacent equal draws. Every object can have its own transform, animation pose, and GPU deformer values while repeated mesh buffers remain efficiently batched.
 
 The queue has a few stages:
 
