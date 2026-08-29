@@ -8,11 +8,11 @@ Use the simplest type that matches the visual result:
 
 * `trianglesSolid` for opaque models.
 * `trianglesCutout` for hard alpha cutouts, like holes or masked pixels.
-* `trianglesTranslucent` for glass-like transparency and weighted OIT.
+* `trianglesTranslucent` for glass-like transparency and weighted blended order-independent transparency (OIT).
 
 Use those queued variants in `PBlockRenderer`, `PEntityRenderer`, and `PItemRenderer`, including GUI item rendering. `trianglesGui` is a compatibility alias for the translucent instant pipeline used by direct `PBakedBone.instantDraw(...)` calls; it is not a queued item-renderer type.
 
-`trianglesSolid` forces an opaque output alpha. Cutout and translucent variants discard fragments below their alpha threshold. Built-in queued translucent variants use weighted blended order-independent transparency when independent per-target blending is available; otherwise they fall back to the queue's back-to-front alpha blending.
+`trianglesSolid` forces an opaque output alpha. Cutout and translucent variants discard fragments below their alpha threshold. Built-in queued translucent variants use weighted blended order-independent transparency when the target has a depth attachment and the OpenGL driver supports independent per-target blending. The OIT pass keeps several depth layers, so overlapping transparent PulseLib meshes are resolved correctly without relying on submission order. If that path is unavailable, PulseLib falls back to the queue's back-to-front alpha blending.
 
 For emissive meshes the built-in renderers select the matching solid, cutout, or translucent emissive variant automatically from the base type.
 
@@ -50,9 +50,10 @@ The queue has a few stages:
 * `SOLID_BLOCKS` for solid block entity meshes.
 * `TRANSLUCENT_BLOCKS` for transparent block/entity-adjacent meshes.
 * `ENTITIES` for entity and hand-held item rendering.
+* `FIRST_PERSON` for items rendered in either first-person hand.
 * `GUI` for GUI rendering.
 
-Normal renderers submit into these stages for you. [`PRenderStagesHandler`](https://github.com/ArcAnc/PulseLib/blob/26.1/src/main/java/com/arcanc/pulselib/content/renderer/PRenderStagesHandler.java) handles flushing them at the right time.
+Normal renderers submit into these stages for you. [`PRenderStagesHandler`](https://github.com/ArcAnc/PulseLib/blob/26.1/src/main/java/com/arcanc/pulselib/content/renderer/PRenderStagesHandler.java) flushes the level stages, while PulseLib flushes `FIRST_PERSON` immediately after Minecraft renders hands and held items. `PItemRenderer` selects `FIRST_PERSON` automatically for `FIRST_PERSON_LEFT_HAND` and `FIRST_PERSON_RIGHT_HAND`; no special renderer code is needed.
 
 ## When to submit manually
 
@@ -69,7 +70,7 @@ PRenderQueue.submit(
 
 `PBakedMesh` owns the GPU vertex and index buffers. Do not pass a vanilla `VertexBuffer`: the queue needs PulseLib's mesh data and its triangle vertex format.
 
-For opaque submissions, identical `(RenderType, PBakedMesh)` pairs are grouped. Transparent submissions are ordered back-to-front and only adjacent equal pairs are joined. Built-in translucent types are accumulated into weighted OIT targets across queue flushes and composited once after the `ENTITIES` and `TRANSLUCENT_BLOCKS` stages are flushed from `RenderLevelStageEvent.AfterTranslucentFeatures`. The OIT target also records the nearest fragment depth so Minecraft's transparency post-chain can place the result correctly relative to translucent blocks. This makes PulseLib translucency independent of its own submission order; custom transparent types, unsupported OpenGL contexts, and a target change within the same frame retain sorted alpha blending. Static mesh data is packed into OpenGL geometry pages; the queue streams per-instance records and indirect commands through fence-protected ring buffers, using multi-draw indirect where the current OpenGL driver supports it. These are implementation details: callers only submit meshes and must not retain or manipulate the queue's buffers.
+For opaque submissions, identical `(RenderType, PBakedMesh)` pairs are grouped. Transparent submissions that cannot use OIT are ordered back-to-front and only adjacent equal pairs are joined. Built-in translucent types are accumulated into OIT targets per Minecraft output target, then composited after `ENTITIES` and `TRANSLUCENT_BLOCKS` are flushed together from `RenderLevelStageEvent.AfterTranslucentFeatures`. First-person OIT is instead composited immediately after the hand pass. Each OIT target records transparent depth layers, allowing Minecraft's transparency post-chain to place the result correctly relative to translucent blocks. This makes supported PulseLib translucency independent of its own submission order; custom transparent types, targets without depth, and unsupported OpenGL contexts retain sorted alpha blending. Static mesh data is packed into OpenGL geometry pages; the queue streams per-instance records and indirect commands through fence-protected ring buffers, using multi-draw indirect where the current OpenGL driver supports it. These are implementation details: callers only submit meshes and must not retain or manipulate the queue's buffers.
 
 ## Renderer hooks
 

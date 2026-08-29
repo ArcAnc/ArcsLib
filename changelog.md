@@ -4,3 +4,5 @@
 * added weighted blended order-independent transparency for queued translucent meshes
 * fixed mesh render resolvers losing inherited texture, emissive, alpha-mode, and deformation overrides
 * fixed `withEmissive(false)` retaining full-bright lighting from emissive texture metadata
+* fixed weighted OIT across Minecraft render targets and overlapping transparent depth layers
+* moved first-person item meshes to a dedicated queue stage that flushes after the hand pass

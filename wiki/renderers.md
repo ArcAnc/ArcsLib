@@ -65,7 +65,7 @@ public class WandRenderer extends PItemRenderer<WandItem, WandRenderState> {
 public class WandRenderState extends PItemRenderState.Impl<WandItem> {}
 ```
 
-In GUI context, `PItemRenderer` submits to the `GUI` queue and immediately flushes that stage through the collector. It preserves the render type supplied to its constructor; use a render type compatible with the contexts in which the item is displayed.
+In GUI context, `PItemRenderer` submits to the `GUI` queue and immediately flushes that stage through the collector. In `FIRST_PERSON_LEFT_HAND` and `FIRST_PERSON_RIGHT_HAND` contexts, it submits to the dedicated `FIRST_PERSON` stage, which PulseLib flushes and composites immediately after Minecraft's hand pass. It preserves the render type supplied to its constructor; use a render type compatible with the contexts in which the item is displayed.
 
 ## Entity renderer
 
