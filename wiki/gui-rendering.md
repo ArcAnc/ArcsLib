@@ -1,3 +1,5 @@
+# GUI Rendering
+
 PulseLib 26.1 renders animated item models in a GUI through [`PItemRenderer`](https://github.com/ArcAnc/PulseLib/blob/26.1/src/main/java/com/arcanc/pulselib/content/renderer/PItemRenderer.java). The renderer detects `ItemDisplayContext.GUI`, submits the mesh to `PRenderQueue.RenderStage.GUI`, and registers custom geometry that flushes that stage in the current GUI render pass.
 
 There is no public `PLibHelper.renderModelInGui(...)` helper in this branch. For an item, implement a `PItemRenderer` and let Minecraft invoke its special-model renderer:

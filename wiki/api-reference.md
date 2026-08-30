@@ -1,3 +1,5 @@
+# API Reference
+
 This page is a compact map of the current PulseLib public API. Classes marked internal in source are omitted unless they explain a public workflow.
 
 ## Animatables and controllers

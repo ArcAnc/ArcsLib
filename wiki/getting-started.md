@@ -1,4 +1,4 @@
-## Getting Started
+# Getting Started
 
 PulseLib, and this wiki, assumes you already have a basic understanding of the following:
 
