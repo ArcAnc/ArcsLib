@@ -1,17 +1,23 @@
+---
+title: PulseLib
+hide_title: true
+slug: /
+---
+
 <p align="center">
 <img width="256" height="256" alt="logo" src="https://github.com/user-attachments/assets/9946d4dc-16b5-4440-a235-8db6d48c3118" />
-<br>
+<br />
 <a href="https://discord.gg/cwydhvYb2M">
-<img alt="Discord" src="https://img.shields.io/discord/483238590214701057?style=for-the-badge&logo=discord">
+<img alt="Discord" src="https://img.shields.io/discord/483238590214701057?style=for-the-badge&logo=discord" />
 </a>
 <a href="https://patreon.com/ArcAnc?utm_medium=unknown&utm_source=join_link&utm_campaign=creatorshare_creator&utm_content=copyLink">
-<img alt="Static Badge" src="https://img.shields.io/badge/Patreon-_?style=for-the-badge&logo=patreon&color=21252B">
+<img alt="Static Badge" src="https://img.shields.io/badge/Patreon-_?style=for-the-badge&logo=patreon&color=21252B" />
 </a>
 <a href="https://ko-fi.com/arcanc">
-<img alt="Static Badge" src="https://img.shields.io/badge/support_me_on_ko--fi-_?style=for-the-badge&logo=ko-fi&logoColor=white&color=F16061">
+<img alt="Static Badge" src="https://img.shields.io/badge/support_me_on_ko--fi-_?style=for-the-badge&logo=ko-fi&logoColor=white&color=F16061" />
 </a>
 <a href="https://buymeacoffee.com/arcanc">
-<img alt="Static Badge" src="https://img.shields.io/badge/buymeacoffee-_?style=for-the-badge&logo=buymeacoffee&logoColor=white&color=F16061">
+<img alt="Static Badge" src="https://img.shields.io/badge/buymeacoffee-_?style=for-the-badge&logo=buymeacoffee&logoColor=white&color=F16061" />
 </a>
 </p>
 

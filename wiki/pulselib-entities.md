@@ -73,7 +73,7 @@ For `LivingEntity`, `PEntityRenderer` follows several vanilla transforms so cust
 
 ## Layers
 
-Use [`PEntityRenderLayer`](https://github.com/ArcAnc/PulseLib/blob/1.21.1/src/main/java/com/arcanc/pulselib/content/renderer/PEntityRenderLayer.java) for extra model parts attached to entity bones: armor plates, backpacks, equipment, or conditional body parts. See [Entity Render Layers](Entity-Render-Layers).
+Use [`PEntityRenderLayer`](https://github.com/ArcAnc/PulseLib/blob/1.21.1/src/main/java/com/arcanc/pulselib/content/renderer/PEntityRenderLayer.java) for extra model parts attached to entity bones: armor plates, backpacks, equipment, or conditional body parts. See [Entity Render Layers](entity-render-layers.md).
 
 Classes used:
 

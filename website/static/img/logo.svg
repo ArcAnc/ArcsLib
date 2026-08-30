@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-labelledby="title">
+  <title id="title">PulseLib</title>
+  <defs>
+    <linearGradient id="pulse" x1="0" x2="1" y1="0" y2="1">
+      <stop stop-color="#b48cff"/>
+      <stop offset="1" stop-color="#623bac"/>
+    </linearGradient>
+  </defs>
+  <rect width="128" height="128" rx="28" fill="#1b1228"/>
+  <path d="M18 69h23l10-29 20 54 10-25h29" fill="none" stroke="url(#pulse)" stroke-linecap="round" stroke-linejoin="round" stroke-width="11"/>
+</svg>
