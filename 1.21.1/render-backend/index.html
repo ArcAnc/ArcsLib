@@ -1498,7 +1498,8 @@
 <h2 id="frame-compilation">Frame compilation<a class="headerlink" href="#frame-compilation" title="Permanent link">&para;</a></h2>
 <p><code>PFrameCompiler</code> collects submissions per render stage.</p>
 <p>Opaque submissions are grouped by pipeline, mesh, and draw command. Every compatible occurrence becomes another <code>PInstanceHeader</code> in one draw group, allowing a repeated mesh to be drawn as instances.</p>
-<p>Transparent submissions are initially kept individually and sorted back-to-front using the translation in their instance transform. Adjacent submissions with the same draw key are then combined without changing that ordering. The sorted order is also retained as the fallback when weighted OIT is unavailable.</p>
+<p>Transparent submissions for ordinary render types are kept individually and sorted back-to-front using the translation in their instance transform. Adjacent submissions with the same draw key are then combined without changing that ordering.</p>
+<p>Built-in OIT-capable types are instead grouped by draw key before execution. Their order does not affect the OIT result, so this allows the executor to batch matching translucent meshes from the same stage. If weighted OIT is unavailable, the backend still renders those submissions through the ordinary translucent shader; the sorted path remains the fallback for types that are not OIT-capable.</p>
 <p>Each <code>PInstanceHeader</code> contains:</p>
 <ul>
 <li>a copied affine transform;</li>
@@ -1539,19 +1540,19 @@
 <p>Persistent uploads use a nine-slot ring: three frames in flight multiplied by three expected stage submissions per frame. <code>GlFrameArena</code> attaches a fence to a completed slot and does not reuse it until the GPU signals completion. Growing or replacing a persistent buffer first waits for outstanding slots.</p>
 <h2 id="draw-batching">Draw batching<a class="headerlink" href="#draw-batching" title="Permanent link">&para;</a></h2>
 <p>Opaque groups are already ordered by pipeline. With multi-draw indirect enabled, the executor further partitions arena geometry by <code>(VAO, indexType)</code>. Every partition can be issued with one <code>glMultiDrawElementsIndirect</code> because its commands share the pipeline, vertex layout, and bound index buffer.</p>
-<p>Transparent groups are only combined when compatible groups are adjacent. This avoids arbitrary regrouping that would invalidate fallback alpha ordering.</p>
+<p>Sorted transparent groups are only combined when compatible groups are adjacent. This avoids arbitrary regrouping that would invalidate alpha ordering. OIT groups are an exception: they may be grouped by draw key because the OIT passes are order independent.</p>
 <p>For a direct arena draw, the executor calls <code>glDrawElementsInstancedBaseVertex</code>. For dynamic geometry it binds the mesh's own <code>VertexBuffer</code> and reads its primitive mode and index type through the Minecraft accessor mixin.</p>
 <h2 id="shader-execution">Shader execution<a class="headerlink" href="#shader-execution" title="Permanent link">&para;</a></h2>
 <p>Before drawing, the executor applies the group's <code>RenderType</code>, binds instance attributes, sets Minecraft's default matrices and light directions, and binds the deformer texture buffers. The queued shader contract and its immediate counterpart are documented on <a href="../shaders/">Shaders</a>.</p>
-<p>Built-in translucent render types are separated from standard groups. When weighted OIT starts successfully, they render into persistent per-frame accumulation and revealage attachments. The attachments are resolved once after weather, into the Fabulous weather target when available or the main target otherwise. If setup fails, the affected groups are drawn through their ordinary translucent shader without losing the compiled fallback ordering.</p>
+<p>Built-in translucent render types are separated from standard groups. When weighted OIT starts successfully, the executor first finds up to four visible transparent depth layers, then accumulates each layer into its own persistent accumulation and revealage attachments. The layers are composited back-to-front after weather, into the Fabulous weather target when available or the main target otherwise. If setup fails, the affected groups are drawn through their ordinary translucent shader.</p>
 <h2 id="render-stages-and-cleanup">Render stages and cleanup<a class="headerlink" href="#render-stages-and-cleanup" title="Permanent link">&para;</a></h2>
 <p><code>PRenderStagesHandler</code> flushes:</p>
 <ul>
-<li>entity and non-GUI item submissions after entities;</li>
 <li>opaque block-entity submissions after block entities;</li>
-<li>translucent block submissions after particles;</li>
+<li>entity, third-person item, and translucent block submissions together after particles;</li>
 <li>the accumulated OIT target after weather, before Minecraft resolves its Fabulous transparency chain.</li>
 </ul>
+<p>First-person items use <code>FIRST_PERSON</code>. <code>GameRendererMixin</code> flushes this stage and composites its OIT data immediately after Minecraft renders the hands, so those meshes use the hand depth buffer instead of waiting for the world-stage resolve.</p>
 <p>The final translucent stage also finishes the per-frame GPU deformer streams. Callers should not flush the standard stages or reset those streams manually.</p>
 <p><code>PRenderQueue.cleanup()</code> clears pending compiler state, waits for in-flight buffer slots, deletes executor buffers and OIT targets, and releases every registered geometry page. Model reload and client-level unload invoke this lifecycle for normal library use.</p>
 

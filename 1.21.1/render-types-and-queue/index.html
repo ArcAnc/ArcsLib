@@ -1420,16 +1420,17 @@
 </ul>
 <p>For most mods, it is safer to start from PulseLib's existing render types and only add a new one when you need a genuinely different shader state.</p>
 <h2 id="what-the-queue-does">What the queue does<a class="headerlink" href="#what-the-queue-does" title="Permanent link">&para;</a></h2>
-<p><a href="https://github.com/ArcAnc/PulseLib/blob/1.21.1/src/main/java/com/arcanc/pulselib/content/renderer/PRenderQueue.java"><code>PRenderQueue</code></a> compiles submissions into a frame plan. Opaque submissions with the same render type and geometry are batched as instances; transparent submissions are kept in back-to-front order. Built-in translucent types use weighted blended order-independent transparency when the context supports independent blending, with sorted alpha blending as the fallback. The OpenGL driver uploads the instance stream once per flush and uses multi-draw indirect where the current context supports it. It falls back to direct instanced draws when that capability is unavailable.</p>
+<p><a href="https://github.com/ArcAnc/PulseLib/blob/1.21.1/src/main/java/com/arcanc/pulselib/content/renderer/PRenderQueue.java"><code>PRenderQueue</code></a> compiles submissions into a frame plan. Opaque submissions with the same render type and geometry are batched as instances. Transparent submissions use back-to-front ordering unless they use a built-in OIT render type; OIT submissions are batched by compatible render type and geometry, then resolved through four depth-peeled transparent layers. The OpenGL driver uploads the instance stream once per flush and uses multi-draw indirect where the current context supports it. It falls back to direct instanced draws when that capability is unavailable.</p>
 <p>Static <a href="https://github.com/ArcAnc/PulseLib/blob/1.21.1/src/main/java/com/arcanc/pulselib/content/renderer/plan/PGeometryData.java"><code>PGeometryData</code></a> is placed in the backend's geometry arena and reused across frames. This is the normal path for baked meshes. Dynamic geometry is reserved for CPU-deformed meshes and is more expensive because its vertex data is uploaded again.</p>
 <p>The queue has a few stages:</p>
 <ul>
 <li><code>SOLID_BLOCKS</code> for solid block entity meshes.</li>
 <li><code>TRANSLUCENT_BLOCKS</code> for transparent block/entity-adjacent meshes.</li>
-<li><code>ENTITIES</code> for entity and hand-held item rendering.</li>
+<li><code>ENTITIES</code> for entity and third-person item rendering.</li>
+<li><code>FIRST_PERSON</code> for first-person item rendering.</li>
 <li><code>GUI</code> for GUI rendering.</li>
 </ul>
-<p>Normal renderers submit into these stages for you. <a href="https://github.com/ArcAnc/PulseLib/blob/1.21.1/src/main/java/com/arcanc/pulselib/content/renderer/PRenderStagesHandler.java"><code>PRenderStagesHandler</code></a> handles flushing them at the right time.</p>
+<p>Normal renderers submit into these stages for you. <a href="https://github.com/ArcAnc/PulseLib/blob/1.21.1/src/main/java/com/arcanc/pulselib/content/renderer/PRenderStagesHandler.java"><code>PRenderStagesHandler</code></a> flushes <code>ENTITIES</code> and <code>TRANSLUCENT_BLOCKS</code> together; <code>GameRendererMixin</code> flushes <code>FIRST_PERSON</code> directly after the vanilla hand pass.</p>
 <h2 id="when-to-submit-manually">When to submit manually<a class="headerlink" href="#when-to-submit-manually" title="Permanent link">&para;</a></h2>
 <p>Manual queue submission is an advanced escape hatch. Use it for static triangle data that you have packed in PulseLib's compatible vertex format. Do not submit a vanilla <code>VertexBuffer</code>: the queue now accepts <code>PGeometryData</code> for static meshes, plus a <code>PInstanceHeader</code> for each instance.</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="n">PGeometryData</span><span class="w"> </span><span class="n">geometry</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">createCompatibleTriangleGeometry</span><span class="p">();</span>
