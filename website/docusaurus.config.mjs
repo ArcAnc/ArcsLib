@@ -10,6 +10,15 @@ const config = {
   organizationName: 'ArcAnc',
   projectName: 'PulseLib',
   trailingSlash: true,
+  headTags: [
+    {
+      tagName: 'meta',
+      attributes: {
+        name: 'algolia-site-verification',
+        content: 'FDB67755A669D6DD',
+      },
+    },
+  ],
   onBrokenLinks: 'throw',
   markdown: {hooks: {onBrokenMarkdownLinks: 'warn'}},
   i18n: {defaultLocale: 'en', locales: ['en']},
