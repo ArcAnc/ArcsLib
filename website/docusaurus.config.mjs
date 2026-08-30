@@ -40,6 +40,7 @@ const config = {
       theme: {customCss: './src/css/custom.css'},
     },
   ]],
+  plugins: ['./plugins/algolia-experiences.mjs'],
   themeConfig: {
     image: 'img/logo.svg',
     colorMode: {
