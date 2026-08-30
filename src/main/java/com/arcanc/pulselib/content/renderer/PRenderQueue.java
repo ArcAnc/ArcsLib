@@ -19,6 +19,9 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.world.item.ItemDisplayContext;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public final class PRenderQueue
 {
 	private static final GlResourceRegistry RESOURCES = new GlResourceRegistry();
@@ -122,9 +125,9 @@ public final class PRenderQueue
 		return switch (context)
 		{
 			case GUI -> RenderStage.GUI;
-			case THIRD_PERSON_LEFT_HAND, THIRD_PERSON_RIGHT_HAND,
-					 FIRST_PERSON_LEFT_HAND, FIRST_PERSON_RIGHT_HAND,
-					 HEAD, GROUND, FIXED, NONE -> RenderStage.ENTITIES;
+			case FIRST_PERSON_LEFT_HAND, FIRST_PERSON_RIGHT_HAND -> RenderStage.FIRST_PERSON;
+			case THIRD_PERSON_LEFT_HAND, THIRD_PERSON_RIGHT_HAND, HEAD -> RenderStage.ENTITIES;
+			case GROUND, FIXED, NONE -> RenderStage.TRANSLUCENT_BLOCKS;
 		};
 	}
 
@@ -135,8 +138,17 @@ public final class PRenderQueue
 
 	public static void flush(RenderStage stage, RenderTarget depthSource)
 	{
-		PRenderPlan plan = COMPILER.compile(stage);
+		PRenderPlan plan = COMPILER.compile(stage, PRenderQueue :: canBatchWithOit);
 		EXECUTOR.execute(plan, HOST.captureFrame(), depthSource);
+	}
+
+	public static void flushCombined(RenderStage... stages)
+	{
+		List<PDrawGroup> groups = new ArrayList<>();
+		for (RenderStage stage : stages)
+			groups.addAll(COMPILER.compile(stage, PRenderQueue :: canBatchWithOit).groups());
+		if (!groups.isEmpty())
+			EXECUTOR.execute(new PRenderPlan(groups), HOST.captureFrame());
 	}
 
 	public static void compositeTranslucency(RenderTarget destination)
@@ -151,11 +163,17 @@ public final class PRenderQueue
 		RESOURCES.clear();
 	}
 
+	private static boolean canBatchWithOit(PPipelineHandle pipeline)
+	{
+		return PRenderTypes.RenderTypeProvider.usesOit(RESOURCES.pipeline(pipeline));
+	}
+
 	public static final class RenderStage
 	{
 		public static final RenderStage SOLID_BLOCKS = new RenderStage("solid_blocks");
 		public static final RenderStage TRANSLUCENT_BLOCKS = new RenderStage("translucent_blocks");
 		public static final RenderStage ENTITIES = new RenderStage("entities");
+		public static final RenderStage FIRST_PERSON = new RenderStage("first_person");
 		public static final RenderStage GUI = new RenderStage("gui");
 
 		private final String name;

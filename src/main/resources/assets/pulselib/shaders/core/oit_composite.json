@@ -3,7 +3,8 @@
   "fragment": "pulselib:oit_composite",
   "samplers": [
     { "name": "AccumSampler" },
-    { "name": "RevealSampler" }
+    { "name": "RevealSampler" },
+    { "name": "DepthSampler" }
   ],
   "uniforms": []
 }

@@ -17,6 +17,7 @@
     { "name": "Sampler0" },
     { "name": "Sampler1" },
     { "name": "Sampler2" },
+    { "name": "LayerDepthSampler" },
     { "name": "DeformerOperations" },
     { "name": "DeformerValues" }
   ],

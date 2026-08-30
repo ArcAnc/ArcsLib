@@ -105,23 +105,38 @@ public final class GlDrawExecutor implements PRenderExecutor
 					standardGroups.add(group);
 			}
 
-			int indirectCommandOffset = drawGroups(standardGroups, frame.modelView(), frame.projection(), frameSlot, false, 0);
+			drawGroups(standardGroups, frame.modelView(), frame.projection(), frameSlot, OitPass.NONE, 0);
 			if (!oitGroups.isEmpty())
 			{
 				if (this.weightedBlendedOit.begin(depthSource))
 				{
-					try
+					for (int layer = 0; layer < GlWeightedBlendedOit.LAYER_COUNT; layer++)
 					{
-						indirectCommandOffset = drawGroups(oitGroups, frame.modelView(), frame.projection(), frameSlot, true,
-								indirectCommandOffset);
-					}
-					finally
-					{
-						this.weightedBlendedOit.endAccumulation();
+						this.weightedBlendedOit.beginDepthPass(layer);
+						try
+						{
+							drawGroups(oitGroups, frame.modelView(), frame.projection(), frameSlot,
+									layer == 0 ? OitPass.DEPTH : OitPass.DEPTH_PEEL, 0);
+						}
+						finally
+						{
+							this.weightedBlendedOit.endPass();
+						}
+
+						this.weightedBlendedOit.beginAccumulationPass(layer);
+						try
+						{
+							drawGroups(oitGroups, frame.modelView(), frame.projection(), frameSlot, OitPass.ACCUMULATION, 0);
+							this.weightedBlendedOit.markContent(layer);
+						}
+						finally
+						{
+							this.weightedBlendedOit.endPass();
+						}
 					}
 				}
 				else
-					drawGroups(oitGroups, frame.modelView(), frame.projection(), frameSlot, false, indirectCommandOffset);
+					drawGroups(oitGroups, frame.modelView(), frame.projection(), frameSlot, OitPass.NONE, 0);
 			}
 		}
 		finally
@@ -151,7 +166,7 @@ public final class GlDrawExecutor implements PRenderExecutor
 		this.multiDrawIndirect = false;
 	}
 
-	private int drawGroups(List<PDrawGroup> groups, Matrix4f modelView, Matrix4f projection, int frameSlot, boolean oit,
+	private int drawGroups(List<PDrawGroup> groups, Matrix4f modelView, Matrix4f projection, int frameSlot, OitPass oitPass,
 	                       int indirectCommandOffset)
 	{
 		for (int groupIndex = 0; groupIndex < groups.size();)
@@ -166,16 +181,16 @@ public final class GlDrawExecutor implements PRenderExecutor
 			}
 			int nextGroup = this.multiDrawIndirect ? this.findMultiDrawEnd(groups, groupIndex) : groupIndex + 1;
 			if (nextGroup - groupIndex > 1)
-				indirectCommandOffset = drawMulti(groups.subList(groupIndex, nextGroup), modelView, projection, frameSlot, oit,
+				indirectCommandOffset = drawMulti(groups.subList(groupIndex, nextGroup), modelView, projection, frameSlot, oitPass,
 						indirectCommandOffset);
 			else
-				draw(groups.get(groupIndex), modelView, projection, frameSlot, oit);
+				draw(groups.get(groupIndex), modelView, projection, frameSlot, oitPass);
 			groupIndex = nextGroup;
 		}
 		return indirectCommandOffset;
 	}
 
-	private void draw(PDrawGroup group, Matrix4f modelView, Matrix4f projection, int frameSlot, boolean oit)
+	private void draw(PDrawGroup group, Matrix4f modelView, Matrix4f projection, int frameSlot, OitPass oitPass)
 	{
 		if (group.command().instanceCount() == 0)
 			return;
@@ -183,13 +198,13 @@ public final class GlDrawExecutor implements PRenderExecutor
 		boolean geometryArena = this.resources.isGeometry(group.mesh());
 		VertexBuffer vertexBuffer = geometryArena ? null : this.resources.mesh(group.mesh());
 		type.setupRenderState();
-		if (oit)
-			this.weightedBlendedOit.configureBlend();
+		if (oitPass != OitPass.NONE)
+			this.weightedBlendedOit.bindForDraw();
 		if (!group.writeDepth())
 			RenderSystem.depthMask(false);
 		try
 		{
-			ShaderInstance shader = shader(type, oit);
+			ShaderInstance shader = shader(type, oitPass);
 			if (shader == null)
 				return;
 			GlGeometryArena.Slice geometry = geometryArena ? this.resources.geometry(group.mesh()) : null;
@@ -204,6 +219,7 @@ public final class GlDrawExecutor implements PRenderExecutor
 				VertexBufferAccessor accessor = geometryArena ? null : (VertexBufferAccessor)vertexBuffer;
 				shader.setDefaultUniforms(geometryArena ? VertexFormat.Mode.TRIANGLES : accessor.pulselib$getMode(),
 						modelView, projection, PLibRenderHelper.mc().getWindow());
+				bindLayerDepth(shader, oitPass);
 				shader.apply();
 				GlStreamStorage.bind(shader, PGpuDeformerBuffers.streams());
 				if (geometryArena)
@@ -226,20 +242,20 @@ public final class GlDrawExecutor implements PRenderExecutor
 		}
 	}
 
-	private int drawMulti(List<PDrawGroup> groups, Matrix4f modelView, Matrix4f projection, int frameSlot, boolean oit,
+	private int drawMulti(List<PDrawGroup> groups, Matrix4f modelView, Matrix4f projection, int frameSlot, OitPass oitPass,
 	                      int indirectCommandOffset)
 	{
 		PDrawGroup first = groups.getFirst();
 		RenderType type = this.resources.pipeline(first.pipeline());
 		GlGeometryArena.Slice geometry = this.resources.geometry(first.mesh());
 		type.setupRenderState();
-		if (oit)
-			this.weightedBlendedOit.configureBlend();
+		if (oitPass != OitPass.NONE)
+			this.weightedBlendedOit.bindForDraw();
 		if (!first.writeDepth())
 			RenderSystem.depthMask(false);
 		try
 		{
-			ShaderInstance shader = shader(type, oit);
+			ShaderInstance shader = shader(type, oitPass);
 			if (shader == null)
 				return indirectCommandOffset;
 			geometry.bind();
@@ -247,6 +263,7 @@ public final class GlDrawExecutor implements PRenderExecutor
 			try
 			{
 				shader.setDefaultUniforms(VertexFormat.Mode.TRIANGLES, modelView, projection, PLibRenderHelper.mc().getWindow());
+				bindLayerDepth(shader, oitPass);
 				shader.apply();
 				GlStreamStorage.bind(shader, PGpuDeformerBuffers.streams());
 				this.indirectBuffer.upload(groups, frameSlot, indirectCommandOffset, this.persistentIndirectMapping, this.frameArena);
@@ -287,18 +304,33 @@ public final class GlDrawExecutor implements PRenderExecutor
 		for (List<PDrawGroup> batch : batches.values())
 		{
 			if (batch.size() > 1)
-				indirectCommandOffset = drawMulti(batch, modelView, projection, frameSlot, false, indirectCommandOffset);
+				indirectCommandOffset = drawMulti(batch, modelView, projection, frameSlot, OitPass.NONE, indirectCommandOffset);
 			else
-				draw(batch.getFirst(), modelView, projection, frameSlot, false);
+				draw(batch.getFirst(), modelView, projection, frameSlot, OitPass.NONE);
 		}
 		for (PDrawGroup group : directGroups)
-			draw(group, modelView, projection, frameSlot, false);
+			draw(group, modelView, projection, frameSlot, OitPass.NONE);
 		return indirectCommandOffset;
 	}
 
-	private static @Nullable ShaderInstance shader(RenderType type, boolean oit)
+	private @Nullable ShaderInstance shader(RenderType type, OitPass oitPass)
 	{
-		return oit ? PRenderTypes.ShadersProvider.trianglesOit(PRenderTypes.RenderTypeProvider.usesEmissiveOit(type)) : RenderSystem.getShader();
+		boolean emissive = PRenderTypes.RenderTypeProvider.usesEmissiveOit(type);
+		return switch (oitPass)
+		{
+			case NONE -> RenderSystem.getShader();
+			case DEPTH -> PRenderTypes.ShadersProvider.trianglesOitDepth(emissive);
+			case DEPTH_PEEL -> PRenderTypes.ShadersProvider.trianglesOitDepthPeel(emissive);
+			case ACCUMULATION -> PRenderTypes.ShadersProvider.trianglesOit(emissive);
+		};
+	}
+
+	private void bindLayerDepth(ShaderInstance shader, OitPass oitPass)
+	{
+		if (oitPass == OitPass.DEPTH_PEEL)
+			shader.setSampler("LayerDepthSampler", this.weightedBlendedOit.previousLayerDepthTexture());
+		else if (oitPass == OitPass.ACCUMULATION)
+			shader.setSampler("LayerDepthSampler", this.weightedBlendedOit.activeLayerDepthTexture());
 	}
 
 	private int findMultiDrawEnd(List<PDrawGroup> groups, int start)
@@ -389,6 +421,14 @@ public final class GlDrawExecutor implements PRenderExecutor
 
 	private record ArenaBatchKey(int vertexArray, int indexType)
 	{
+	}
+
+	private enum OitPass
+	{
+		NONE,
+		DEPTH,
+		DEPTH_PEEL,
+		ACCUMULATION
 	}
 
 	private static final class InstanceBuffer

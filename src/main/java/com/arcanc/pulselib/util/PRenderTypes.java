@@ -294,6 +294,14 @@ public final class PRenderTypes
 		@Nullable
 		private static ShaderInstance TRIANGLES_OIT_EMISSIVE_SHADER;
 		@Nullable
+		private static ShaderInstance TRIANGLES_OIT_DEPTH_SHADER;
+		@Nullable
+		private static ShaderInstance TRIANGLES_OIT_DEPTH_EMISSIVE_SHADER;
+		@Nullable
+		private static ShaderInstance TRIANGLES_OIT_DEPTH_PEEL_SHADER;
+		@Nullable
+		private static ShaderInstance TRIANGLES_OIT_DEPTH_PEEL_EMISSIVE_SHADER;
+		@Nullable
 		private static ShaderInstance OIT_COMPOSITE_SHADER;
 		
 		public static @Nullable ShaderInstance trianglesSolid()
@@ -334,6 +342,16 @@ public final class PRenderTypes
 			return emissive ? TRIANGLES_OIT_EMISSIVE_SHADER : TRIANGLES_OIT_SHADER;
 		}
 
+		public static @Nullable ShaderInstance trianglesOitDepth(boolean emissive)
+		{
+			return emissive ? TRIANGLES_OIT_DEPTH_EMISSIVE_SHADER : TRIANGLES_OIT_DEPTH_SHADER;
+		}
+
+		public static @Nullable ShaderInstance trianglesOitDepthPeel(boolean emissive)
+		{
+			return emissive ? TRIANGLES_OIT_DEPTH_PEEL_EMISSIVE_SHADER : TRIANGLES_OIT_DEPTH_PEEL_SHADER;
+		}
+
 		public static @Nullable ShaderInstance oitComposite()
 		{
 			return OIT_COMPOSITE_SHADER;
@@ -366,6 +384,14 @@ public final class PRenderTypes
 						shader -> TRIANGLES_OIT_SHADER = shader);
 				registerShader(event, "triangles_oit_emissive", VertexFormatProvider.POSITION_TEX_NORMAL,
 						shader -> TRIANGLES_OIT_EMISSIVE_SHADER = shader);
+				registerShader(event, "triangles_oit_depth", VertexFormatProvider.POSITION_TEX_NORMAL,
+						shader -> TRIANGLES_OIT_DEPTH_SHADER = shader);
+				registerShader(event, "triangles_oit_depth_emissive", VertexFormatProvider.POSITION_TEX_NORMAL,
+						shader -> TRIANGLES_OIT_DEPTH_EMISSIVE_SHADER = shader);
+				registerShader(event, "triangles_oit_depth_peel", VertexFormatProvider.POSITION_TEX_NORMAL,
+						shader -> TRIANGLES_OIT_DEPTH_PEEL_SHADER = shader);
+				registerShader(event, "triangles_oit_depth_peel_emissive", VertexFormatProvider.POSITION_TEX_NORMAL,
+						shader -> TRIANGLES_OIT_DEPTH_PEEL_EMISSIVE_SHADER = shader);
 				registerShader(event, "oit_composite", DefaultVertexFormat.BLIT_SCREEN,
 						shader -> OIT_COMPOSITE_SHADER = shader);
 			}

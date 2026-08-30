@@ -94,14 +94,17 @@ Alpha-mode selection currently targets the queued world path: it resolves to `tr
 
 ## Weighted blended OIT
 
-`trianglesTranslucent` and `trianglesTranslucentEmissive` are marked as OIT-capable render types. When independent blending is available through OpenGL 4.0 or `ARB_draw_buffers_blend`, `GlDrawExecutor` renders them into two attachments:
+`trianglesTranslucent` and `trianglesTranslucentEmissive` are marked as OIT-capable render types. When independent blending is available through OpenGL 4.0 or `ARB_draw_buffers_blend`, `GlDrawExecutor` uses four depth-peeled layers. For every layer it first renders the nearest visible transparent fragment depth, then accumulates only fragments matching that depth. Each layer owns:
 
 * an `RGBA16F` accumulation texture;
 * an `R16F` revealage texture.
+* an `R32F` transparent depth texture.
 
-`triangles_oit.fsh` and `triangles_oit_emissive.fsh` write weighted color and revealage. The OIT target remains open across the queued world stages and `oit_composite` resolves it once after weather. It composites into Minecraft's weather target under Fabulous graphics so the result participates in the vanilla transparency chain, and into the main target otherwise. The OIT framebuffer shares the main target's depth texture, but translucent draws do not write depth.
+`triangles_oit_depth*.fsh` produce each layer's depth. `triangles_oit*.fsh` and their emissive variants sample `LayerDepthSampler` and write weighted color and revealage only for the matching layer. `oit_composite` resolves non-empty layers from farthest to nearest after weather. It composites into Minecraft's weather target under Fabulous graphics so the result participates in the vanilla transparency chain, and into the main target otherwise. The OIT framebuffer shares the active target's depth texture, but translucent draws do not write depth.
 
-If OIT is unsupported, its framebuffer cannot be created, or the OIT shaders are unavailable, PulseLib falls back to the normal translucent program and the queue's back-to-front ordering. OIT shader selection is internal; application code should continue to request `trianglesTranslucent` rather than using `triangles_oit` directly.
+The same OIT programs are used for first-person PulseLib items. Their stage is resolved immediately after Minecraft renders the hands, rather than being retained until the world transparency pass.
+
+If OIT is unsupported, its framebuffer cannot be created, or the OIT shaders are unavailable, PulseLib falls back to the normal translucent program. OIT shader selection is internal; application code should continue to request `trianglesTranslucent` rather than using `triangles_oit` directly.
 
 Custom translucent render types are not automatically marked as OIT-capable. They use the sorted fallback unless the backend gains an explicit registration API for them.
 

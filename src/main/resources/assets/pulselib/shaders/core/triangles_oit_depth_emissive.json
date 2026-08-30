@@ -1,0 +1,11 @@
+{
+  "vertex": "pulselib:triangles_instanced_emissive",
+  "fragment": "pulselib:triangles_oit_depth_emissive",
+  "attributes": ["Position", "UV0", "Normal", "InstanceRow0", "InstanceRow1", "InstanceRow2", "InstanceColor", "InstanceLight", "InstanceOverlay", "InstanceDeformer"],
+  "samplers": [{ "name": "Sampler0" }, { "name": "Sampler1" }, { "name": "DeformerOperations" }, { "name": "DeformerValues" }],
+  "uniforms": [
+    { "name": "AlphaCutout", "type": "float", "count": 1, "values": [0.1] },
+    { "name": "ModelViewMat", "type": "matrix4x4", "count": 16, "values": [1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0] },
+    { "name": "ProjMat", "type": "matrix4x4", "count": 16, "values": [1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0] }
+  ]
+}

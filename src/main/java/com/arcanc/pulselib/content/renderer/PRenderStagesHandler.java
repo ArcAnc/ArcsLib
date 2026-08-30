@@ -26,13 +26,11 @@ public class PRenderStagesHandler
 	
 	private static void renderLevelStages(final RenderLevelStageEvent event)
 	{
-		if (event.getStage() == RenderLevelStageEvent.Stage.AFTER_ENTITIES)
-			PRenderQueue.flush(PRenderQueue.RenderStage.ENTITIES);
 		if (event.getStage() == RenderLevelStageEvent.Stage.AFTER_BLOCK_ENTITIES)
 			PRenderQueue.flush(PRenderQueue.RenderStage.SOLID_BLOCKS);
 		else if (event.getStage() == RenderLevelStageEvent.Stage.AFTER_PARTICLES)
 		{
-			PRenderQueue.flush(PRenderQueue.RenderStage.TRANSLUCENT_BLOCKS);
+			PRenderQueue.flushCombined(PRenderQueue.RenderStage.ENTITIES, PRenderQueue.RenderStage.TRANSLUCENT_BLOCKS);
 			PGpuDeformerBuffers.finishFrame();
 		}
 		else if (event.getStage() == RenderLevelStageEvent.Stage.AFTER_WEATHER)

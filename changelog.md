@@ -1,7 +1,5 @@
-* fixed gui rendering and shaders
-* fixed glTF meshes without a parent bone being discarded by creating a local render bone for them
-* fixed glTF animation rotations being applied outside their local bone space
-* added weighted blended order-independent transparency for PulseLib translucent meshes
-* fixed GlDrawExecutor
-* fixed alpha sorting
-* fixed lost cutout data in shader
+* upgraded translucent PulseLib meshes to four-layer depth-peeled weighted OIT, improving overlapping transparent surfaces
+* render entity and translucent block submissions through one shared transparency pass so OIT sees both sets of meshes together
+* render first-person PulseLib items in a dedicated stage and composite their transparency immediately after hand rendering
+* added dedicated OIT depth and depth-peel shader programs for lit and emissive materials
+* rewrote shader fractional constants in ordinary decimal notation instead of scientific notation

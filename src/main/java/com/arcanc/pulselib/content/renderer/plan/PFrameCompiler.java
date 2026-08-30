@@ -16,6 +16,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Predicate;
 
 public final class PFrameCompiler<S>
 {
@@ -52,6 +53,11 @@ public final class PFrameCompiler<S>
 
 	public PRenderPlan compile(S stage)
 	{
+		return compile(stage, ignored -> false);
+	}
+
+	public PRenderPlan compile(S stage, Predicate<PPipelineHandle> canBatchWithOit)
+	{
 		Map<DrawKey, List<PInstanceHeader>> opaqueGroups = this.opaque.remove(stage);
 		List<TransparentSubmission> translucentGroups = this.translucent.remove(stage);
 		if (opaqueGroups == null && translucentGroups == null)
@@ -65,10 +71,23 @@ public final class PFrameCompiler<S>
 
 		if (translucentGroups != null && !translucentGroups.isEmpty())
 		{
-			translucentGroups.sort(Comparator.comparingDouble(TransparentSubmission :: distanceSquared).reversed());
+			Map<DrawKey, List<PInstanceHeader>> oitGroups = new Object2ObjectOpenHashMap<>();
+			List<TransparentSubmission> sortedGroups = new ObjectArrayList<>();
+			for (TransparentSubmission submission : translucentGroups)
+			{
+				if (canBatchWithOit.test(submission.key().pipeline()))
+					oitGroups.computeIfAbsent(submission.key(), ignored -> new ObjectArrayList<>()).add(submission.instance());
+				else
+					sortedGroups.add(submission);
+			}
+
+			for (Map.Entry<DrawKey, List<PInstanceHeader>> entry : oitGroups.entrySet())
+				groups.add(group(entry.getKey(), entry.getValue(), false));
+
+			sortedGroups.sort(Comparator.comparingDouble(TransparentSubmission :: distanceSquared).reversed());
 			DrawKey activeKey = null;
 			List<PInstanceHeader> activeInstances = new ObjectArrayList<>();
-			for (TransparentSubmission submission : translucentGroups)
+			for (TransparentSubmission submission : sortedGroups)
 			{
 				if (activeKey != null && !activeKey.equals(submission.key()))
 				{

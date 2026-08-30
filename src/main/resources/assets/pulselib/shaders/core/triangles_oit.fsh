@@ -4,6 +4,7 @@
 #moj_import <pulselib:weighted_oit.glsl>
 
 uniform sampler2D Sampler0;
+uniform sampler2D LayerDepthSampler;
 
 in vec4 instanceColorOut;
 in vec4 vertexColorBack;
@@ -18,6 +19,10 @@ layout(location = 1) out float revealage;
 
 void main()
 {
+	float layerDepth = texelFetch(LayerDepthSampler, ivec2(gl_FragCoord.xy), 0).r;
+	float tolerance = max(0.000001, layerDepth * 0.00001);
+	if (layerDepth <= 0.0 || abs(gl_FragCoord.z - layerDepth) > tolerance)
+		discard;
     vec4 color = pulselib_lit_material(
         Sampler0,
         texCoord0,

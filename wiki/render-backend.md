@@ -52,7 +52,9 @@ Built-in GPU-compatible deformers keep the original mesh in the static arena. Th
 
 Opaque submissions are grouped by pipeline, mesh, and draw command. Every compatible occurrence becomes another `PInstanceHeader` in one draw group, allowing a repeated mesh to be drawn as instances.
 
-Transparent submissions are initially kept individually and sorted back-to-front using the translation in their instance transform. Adjacent submissions with the same draw key are then combined without changing that ordering. The sorted order is also retained as the fallback when weighted OIT is unavailable.
+Transparent submissions for ordinary render types are kept individually and sorted back-to-front using the translation in their instance transform. Adjacent submissions with the same draw key are then combined without changing that ordering.
+
+Built-in OIT-capable types are instead grouped by draw key before execution. Their order does not affect the OIT result, so this allows the executor to batch matching translucent meshes from the same stage. If weighted OIT is unavailable, the backend still renders those submissions through the ordinary translucent shader; the sorted path remains the fallback for types that are not OIT-capable.
 
 Each `PInstanceHeader` contains:
 
@@ -80,7 +82,7 @@ Persistent uploads use a nine-slot ring: three frames in flight multiplied by th
 
 Opaque groups are already ordered by pipeline. With multi-draw indirect enabled, the executor further partitions arena geometry by `(VAO, indexType)`. Every partition can be issued with one `glMultiDrawElementsIndirect` because its commands share the pipeline, vertex layout, and bound index buffer.
 
-Transparent groups are only combined when compatible groups are adjacent. This avoids arbitrary regrouping that would invalidate fallback alpha ordering.
+Sorted transparent groups are only combined when compatible groups are adjacent. This avoids arbitrary regrouping that would invalidate alpha ordering. OIT groups are an exception: they may be grouped by draw key because the OIT passes are order independent.
 
 For a direct arena draw, the executor calls `glDrawElementsInstancedBaseVertex`. For dynamic geometry it binds the mesh's own `VertexBuffer` and reads its primitive mode and index type through the Minecraft accessor mixin.
 
@@ -88,16 +90,17 @@ For a direct arena draw, the executor calls `glDrawElementsInstancedBaseVertex`.
 
 Before drawing, the executor applies the group's `RenderType`, binds instance attributes, sets Minecraft's default matrices and light directions, and binds the deformer texture buffers. The queued shader contract and its immediate counterpart are documented on [Shaders](shaders.md).
 
-Built-in translucent render types are separated from standard groups. When weighted OIT starts successfully, they render into persistent per-frame accumulation and revealage attachments. The attachments are resolved once after weather, into the Fabulous weather target when available or the main target otherwise. If setup fails, the affected groups are drawn through their ordinary translucent shader without losing the compiled fallback ordering.
+Built-in translucent render types are separated from standard groups. When weighted OIT starts successfully, the executor first finds up to four visible transparent depth layers, then accumulates each layer into its own persistent accumulation and revealage attachments. The layers are composited back-to-front after weather, into the Fabulous weather target when available or the main target otherwise. If setup fails, the affected groups are drawn through their ordinary translucent shader.
 
 ## Render stages and cleanup
 
 `PRenderStagesHandler` flushes:
 
-* entity and non-GUI item submissions after entities;
 * opaque block-entity submissions after block entities;
-* translucent block submissions after particles;
+* entity, third-person item, and translucent block submissions together after particles;
 * the accumulated OIT target after weather, before Minecraft resolves its Fabulous transparency chain.
+
+First-person items use `FIRST_PERSON`. `GameRendererMixin` flushes this stage and composites its OIT data immediately after Minecraft renders the hands, so those meshes use the hand depth buffer instead of waiting for the world-stage resolve.
 
 The final translucent stage also finishes the per-frame GPU deformer streams. Callers should not flush the standard stages or reset those streams manually.
 
