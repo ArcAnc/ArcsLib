@@ -47,7 +47,7 @@ public class TestEntityRender extends PEntityRenderer<TestEntity>
 	{
 		super(context, new DefaultEntityModelData.DefaultEntityModelDataBuilder(PLibDatabase.rl("test_entity")).
 				build(),
-				PRenderTypes.RenderTypeProvider :: trianglesSolid);
+				PRenderTypes.RenderTypeProvider :: trianglesTranslucent);
 		
 		addRenderLayer("body", new PTestArmor().
 				bindBone("armor_chest", "body").

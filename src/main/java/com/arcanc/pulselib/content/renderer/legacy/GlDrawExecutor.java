@@ -42,6 +42,8 @@ public final class GlDrawExecutor implements PRenderExecutor
 	private static final int FRAMES_IN_FLIGHT = 3;
 	private static final int STAGE_SUBMISSIONS_PER_FRAME = 3;
 	private static final int RING_SLOTS = FRAMES_IN_FLIGHT * STAGE_SUBMISSIONS_PER_FRAME;
+	private static final int MAX_INDIRECT_DRAWS_PER_EXECUTION = 1 + GlWeightedBlendedOit.LAYER_COUNT * 2;
+	private static final boolean MULTI_DRAW_INDIRECT_ENABLED = true;
 
 	private final GlResourceRegistry resources;
 	private final GlFrameArena frameArena = new GlFrameArena(RING_SLOTS);
@@ -90,7 +92,8 @@ public final class GlDrawExecutor implements PRenderExecutor
 		this.instanceBuffer.upload(plan.instances(), frameSlot, this.persistentMapping, this.frameArena);
 		publishPersistentWrites();
 		if (this.multiDrawIndirect)
-			this.indirectBuffer.prepare(plan.groups().size(), this.persistentIndirectMapping, this.frameArena);
+			this.indirectBuffer.prepare(Math.multiplyExact(plan.groups().size(), MAX_INDIRECT_DRAWS_PER_EXECUTION),
+					this.persistentIndirectMapping, this.frameArena);
 		try
 		{
 			List<PDrawGroup> standardGroups = new ArrayList<>();
@@ -105,7 +108,8 @@ public final class GlDrawExecutor implements PRenderExecutor
 					standardGroups.add(group);
 			}
 
-			drawGroups(standardGroups, frame.modelView(), frame.projection(), frameSlot, OitPass.NONE, 0);
+			int indirectCommandOffset = drawGroups(standardGroups, frame.modelView(), frame.projection(), frameSlot,
+					OitPass.NONE, 0);
 			if (!oitGroups.isEmpty())
 			{
 				if (this.weightedBlendedOit.begin(depthSource))
@@ -115,8 +119,8 @@ public final class GlDrawExecutor implements PRenderExecutor
 						this.weightedBlendedOit.beginDepthPass(layer);
 						try
 						{
-							drawGroups(oitGroups, frame.modelView(), frame.projection(), frameSlot,
-									layer == 0 ? OitPass.DEPTH : OitPass.DEPTH_PEEL, 0);
+							indirectCommandOffset = drawGroups(oitGroups, frame.modelView(), frame.projection(), frameSlot,
+										layer == 0 ? OitPass.DEPTH : OitPass.DEPTH_PEEL, indirectCommandOffset);
 						}
 						finally
 						{
@@ -126,7 +130,8 @@ public final class GlDrawExecutor implements PRenderExecutor
 						this.weightedBlendedOit.beginAccumulationPass(layer);
 						try
 						{
-							drawGroups(oitGroups, frame.modelView(), frame.projection(), frameSlot, OitPass.ACCUMULATION, 0);
+							indirectCommandOffset = drawGroups(oitGroups, frame.modelView(), frame.projection(), frameSlot,
+									OitPass.ACCUMULATION, indirectCommandOffset);
 							this.weightedBlendedOit.markContent(layer);
 						}
 						finally
@@ -136,7 +141,7 @@ public final class GlDrawExecutor implements PRenderExecutor
 					}
 				}
 				else
-					drawGroups(oitGroups, frame.modelView(), frame.projection(), frameSlot, OitPass.NONE, 0);
+					drawGroups(oitGroups, frame.modelView(), frame.projection(), frameSlot, OitPass.NONE, indirectCommandOffset);
 			}
 		}
 		finally
@@ -162,7 +167,7 @@ public final class GlDrawExecutor implements PRenderExecutor
 		this.capabilitiesResolved = false;
 		this.capabilityMatrix = PRenderCapabilityMatrix.NONE;
 		this.persistentMapping = false;
-		this.persistentIndirectMapping = false;
+		this.persistentIndirectMapping = this.persistentMapping;
 		this.multiDrawIndirect = false;
 	}
 
@@ -373,7 +378,7 @@ public final class GlDrawExecutor implements PRenderExecutor
 			throw new IllegalStateException("PulseLib's current OpenGL deformer driver requires texture-buffer support");
 		this.persistentMapping = this.capabilityMatrix.persistentMapping();
 		this.persistentIndirectMapping = this.persistentMapping;
-		this.multiDrawIndirect = this.capabilityMatrix.supportsMultiDrawIndirect();
+		this.multiDrawIndirect = MULTI_DRAW_INDIRECT_ENABLED && this.capabilityMatrix.supportsMultiDrawIndirect();
 	}
 
 	private void publishPersistentWrites()

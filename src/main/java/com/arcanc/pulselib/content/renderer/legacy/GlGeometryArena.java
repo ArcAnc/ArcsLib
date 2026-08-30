@@ -116,10 +116,14 @@ public final class GlGeometryArena
 		{
 			int indexOffset = align(this.indices, geometry.indexType().bytes());
 			int baseVertex = this.vertices / geometry.vertexStride();
-			upload(this.vertexBuffer, this.vertices, geometry.vertices());
-			upload(this.indexBuffer, indexOffset, geometry.indices());
-			this.vertices += geometry.vertices().remaining();
-			this.indices = indexOffset + geometry.indices().remaining();
+			ByteBuffer vertexData = geometry.vertices();
+			ByteBuffer indexData = geometry.indices();
+			int vertexBytes = vertexData.remaining();
+			int indexBytes = indexData.remaining();
+			upload(this.vertexBuffer, this.vertices, vertexData);
+			upload(this.indexBuffer, indexOffset, indexData);
+			this.vertices += vertexBytes;
+			this.indices = indexOffset + indexBytes;
 			return new Slice(this.vertexArray, indexOffset, switch (geometry.indexType())
 			{
 				case UNSIGNED_SHORT -> GL11.GL_UNSIGNED_SHORT;
@@ -144,7 +148,7 @@ public final class GlGeometryArena
 			ByteBuffer packed = MemoryUtil.memAlloc(source.remaining());
 			try
 			{
-				packed.put(source).flip();
+				packed.put(source.duplicate()).flip();
 				GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, buffer);
 				GL15.glBufferSubData(GL15.GL_ARRAY_BUFFER, offset, packed);
 			}
