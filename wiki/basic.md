@@ -1,4 +1,6 @@
-# Table of Content
+# Basic
+
+## Table of Content
 * [Full Video Tutorial](https://github.com/ArcAnc/PulseLib/wiki/Basic#full-video-tutorial)
 * [Rigging](https://github.com/ArcAnc/PulseLib/wiki/Basic#rigging)
     - [Grouping](https://github.com/ArcAnc/PulseLib/wiki/Basic#rigging)

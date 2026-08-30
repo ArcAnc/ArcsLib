@@ -1,3 +1,5 @@
+# Render Types and Queue
+
 Most mods can use PulseLib's renderers without touching the render queue directly. This page explains why PulseLib does not use vanilla `RenderType` values and how to add custom geometry to the current render backend. For its internal frame-plan, geometry-arena, and capability paths, see [Render backend](render-backend.md).
 
 PulseLib models are triangle meshes loaded from glTF/GLB or another model loader. Vanilla baked block models are mostly quad-based, so PulseLib provides its own triangle render types, shaders, vertex format, and instanced queue. That is why examples use [`PRenderTypes`](https://github.com/ArcAnc/PulseLib/blob/1.21.1/src/main/java/com/arcanc/pulselib/util/PRenderTypes.java) instead of `RenderType.entityCutout` or block render types.

@@ -1,3 +1,5 @@
+# GUI Rendering
+
 PulseLib can draw a baked model directly in a GUI through [`PLibHelper.renderModelInGui`](https://github.com/ArcAnc/PulseLib/blob/1.21.1/src/main/java/com/arcanc/pulselib/util/helpers/PLibHelper.java).
 
 ```java
