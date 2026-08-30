@@ -24,7 +24,7 @@ Welcome to our [Wiki][wiki]
 
 ### Maven
 
-You can find Maven setup details in the [installation guide](https://arcanc.github.io/ArcsLib/1.21.1/installation/).
+You can find Maven setup details in the [installation guide](https://arcanc.github.io/PulseLib/1.21.1/installation/).
 
 ### Contributing
 
@@ -35,4 +35,4 @@ If you need help feel free to [join our Discord][discord]
 
 [download]: https://www.curseforge.com/minecraft/mc-mods/pulselib
 [discord]: https://discord.gg/cwydhvYb2M
-[wiki]: https://arcanc.github.io/ArcsLib/1.21.1/
+[wiki]: https://arcanc.github.io/PulseLib/1.21.1/

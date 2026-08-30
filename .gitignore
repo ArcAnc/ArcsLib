@@ -24,10 +24,3 @@ runs
 run-data
 
 repo
-
-# Docusaurus
-website/node_modules
-website/.docusaurus
-website/docs
-website/versioned_docs
-website/versioned_sidebars
