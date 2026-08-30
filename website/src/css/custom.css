@@ -18,3 +18,11 @@
   --ifm-color-primary-lighter: #d8c4ff;
   --ifm-color-primary-lightest: #f0e8ff;
 }
+
+/* Prism's Dracula theme marks several code tokens as italic. */
+code,
+pre,
+.prism-code,
+.token {
+  font-style: normal !important;
+}

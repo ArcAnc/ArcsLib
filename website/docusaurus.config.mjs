@@ -33,6 +33,9 @@ const config = {
   ]],
   themeConfig: {
     image: 'img/logo.svg',
+    colorMode: {
+      respectPrefersColorScheme: true,
+    },
     navbar: {
       title: 'PulseLib',
       logo: {alt: 'PulseLib logo', src: 'img/logo.svg', href: '/26.2/'},
