@@ -52,6 +52,7 @@ const config = {
       items: [
         {type: 'docSidebar', sidebarId: 'docs', position: 'left', label: 'Documentation'},
         {type: 'docsVersionDropdown', position: 'left'},
+        {type: 'html', position: 'right', value: '<div id="autocomplete"></div>'},
         {href: 'https://github.com/ArcAnc/PulseLib', label: 'GitHub', position: 'right'},
       ],
     },

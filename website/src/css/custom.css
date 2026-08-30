@@ -26,3 +26,13 @@ pre,
 .token {
   font-style: normal !important;
 }
+
+#autocomplete {
+  min-width: 16rem;
+}
+
+@media (max-width: 996px) {
+  #autocomplete {
+    min-width: 0;
+  }
+}
