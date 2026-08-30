@@ -1,3 +1,5 @@
+# PulseLib Entities
+
 Entities are the most natural fit for PulseLib: each entity already has its own lifetime, position, rotation, and tick state. The entity implements [`PAnimatable`](https://github.com/ArcAnc/PulseLib/blob/master/src/main/java/com/arcanc/pulselib/content/animatable/PAnimatable.java), and [`PEntityRenderer`](https://github.com/ArcAnc/PulseLib/blob/master/src/main/java/com/arcanc/pulselib/content/renderer/PEntityRenderer.java) renders the animated model.
 
 Use entity controllers to translate gameplay state into animation state. Do not put rendering decisions into the AI goals or renderer when a controller can express the same rule cleanly.

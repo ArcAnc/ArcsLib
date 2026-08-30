@@ -1,3 +1,5 @@
+# Model Data
+
 [`PModelData`](https://github.com/ArcAnc/PulseLib/blob/master/src/main/java/com/arcanc/pulselib/content/renderer/modelData/PModelData.java) is the small object that tells a renderer, "this is the model file, and these are the textures the model should use."
 
 It is deliberately separate from the renderer. That lets the same renderer logic stay simple while different blocks, items, entities, or layers point at different files. If a PulseLib model is invisible or has missing textures, `PModelData` is one of the first things to inspect.

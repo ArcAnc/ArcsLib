@@ -1,4 +1,6 @@
-# Table of Content
+# Basic
+
+## Table of contents
 * [Full Video Tutorial](#full-video-tutorial)
 * [Rigging](#rigging)
     - [Grouping](#grouping)

@@ -1,3 +1,5 @@
+# Armor and Attachments
+
 The attachment system is for cases where you do not want to replace the whole entity renderer. A player, zombie, cow, or custom living entity can keep its normal vanilla renderer, while PulseLib draws extra animated model parts on selected `ModelPart` anchors.
 
 This is useful for custom armor, tails, backpacks, masks, equipment on arms, or other accessories. Definitions can be tied to an item stack, registered globally for living entities, hide vanilla armor for a slot, and render first-person arm attachments.

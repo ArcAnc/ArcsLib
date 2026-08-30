@@ -1,3 +1,5 @@
+# PulseLib Blocks
+
 Animated blocks in Minecraft are really animated block entities. The block still handles placement, collision, interaction, redstone behavior, and blockstate data. The visible animated model is rendered by the block entity renderer.
 
 That split is important: implement [`PAnimatable`](https://github.com/ArcAnc/PulseLib/blob/master/src/main/java/com/arcanc/pulselib/content/animatable/PAnimatable.java) on the `BlockEntity`, not on the `Block`.

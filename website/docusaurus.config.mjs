@@ -21,7 +21,11 @@ const config = {
         routeBasePath: '/',
         sidebarPath: './sidebars.js',
         lastVersion: 'current',
-        versions: {current: {label: '26.2', path: '26.2'}},
+        versions: {
+          current: {label: '26.2', path: '26.2'},
+          '26.1': {banner: 'none'},
+          '1.21.1': {banner: 'none'},
+        },
       },
       blog: false,
       theme: {customCss: './src/css/custom.css'},

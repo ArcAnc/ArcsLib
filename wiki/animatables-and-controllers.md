@@ -1,3 +1,5 @@
+# Animatables and Controllers
+
 An animatable is any object that can provide animation state to a PulseLib renderer. The renderer does not decide whether an entity is walking, whether a block is open, or whether an item should be idling. That decision belongs to controllers registered by the animatable.
 
 Animation state is built around:

@@ -1,3 +1,5 @@
+# Entity Render Layers
+
 [`PEntityRenderLayer`](https://github.com/ArcAnc/PulseLib/blob/master/src/main/java/com/arcanc/pulselib/content/renderer/PEntityRenderLayer.java) renders an additional PulseLib model on top of a [`PEntityRenderer`](https://github.com/ArcAnc/PulseLib/blob/master/src/main/java/com/arcanc/pulselib/content/renderer/PEntityRenderer.java).
 
 Layers are useful for armor pieces, equipment, accessories, conditional attachments, or model variants.
