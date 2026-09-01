@@ -6,3 +6,8 @@
 * fixed `withEmissive(false)` retaining full-bright lighting from emissive texture metadata
 * fixed weighted OIT across Minecraft render targets and overlapping transparent depth layers
 * moved first-person item meshes to a dedicated queue stage that flushes after the hand pass
+* fixed Gecko item models using a GeckoLib-compatible item transform instead of the glTF transform
+* changed access type for direction setup methods in block renderer
+* removed the obsolete `PItemAnimatable` interface; animated items now implement `PAnimatable` directly
+* moved animation channel, animation event, and mesh deformer types to PulseLib's internal registries
+* added a type-registration event for external animation channels, animation events, and mesh deformers

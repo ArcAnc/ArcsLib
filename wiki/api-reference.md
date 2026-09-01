@@ -4,7 +4,7 @@ This page is a compact map of the current PulseLib public API. Classes marked in
 
 ## Animatables and controllers
 
-* [`PAnimatable<T>`](https://github.com/ArcAnc/PulseLib/blob/26.1/src/main/java/com/arcanc/pulselib/content/animatable/PAnimatable.java) and [`PItemAnimatable<T>`](https://github.com/ArcAnc/PulseLib/blob/26.1/src/main/java/com/arcanc/pulselib/content/animatable/PItemAnimatable.java) define animatable objects.
+* [`PAnimatable<T>`](https://github.com/ArcAnc/PulseLib/blob/26.1/src/main/java/com/arcanc/pulselib/content/animatable/PAnimatable.java) defines animatable objects.
 * [`PAnimationManager<T>`](https://github.com/ArcAnc/PulseLib/blob/26.1/src/main/java/com/arcanc/pulselib/content/animatable/PAnimationManager.java) owns regular and graph controller factories, live controllers, and the bound model.
 * [`PAnimationController<T>`](https://github.com/ArcAnc/PulseLib/blob/26.1/src/main/java/com/arcanc/pulselib/content/animatable/PAnimationController.java) plays a `PRawAnimation` or `PAnimationGraph`, exposes graph parameters, controls timing, and owns persistent Molang state.
 * [`InstanceAnimationManager<T>`](https://github.com/ArcAnc/PulseLib/blob/26.1/src/main/java/com/arcanc/pulselib/content/animatable/instance/InstanceAnimationManager.java), [`SingletonAnimationManager<T>`](https://github.com/ArcAnc/PulseLib/blob/26.1/src/main/java/com/arcanc/pulselib/content/animatable/singleton/SingletonAnimationManager.java), and [`AnimManagerKey`](https://github.com/ArcAnc/PulseLib/blob/26.1/src/main/java/com/arcanc/pulselib/content/animatable/AnimManagerKey.java) provide per-instance and keyed state.
@@ -53,5 +53,5 @@ This page is a compact map of the current PulseLib public API. Classes marked in
 
 ## Events and helpers
 
-* [`PulseLibEvents`](https://github.com/ArcAnc/PulseLib/blob/26.1/src/main/java/com/arcanc/pulselib/content/event/PulseLibEvents.java) exposes texture, attachment, and player-animation registration events.
+* [`PulseLibEvents`](https://github.com/ArcAnc/PulseLib/blob/26.1/src/main/java/com/arcanc/pulselib/content/event/PulseLibEvents.java) exposes type, texture, attachment, and player-animation registration events.
 * [`PLibHelper`](https://github.com/ArcAnc/PulseLib/blob/26.1/src/main/java/com/arcanc/pulselib/util/helpers/PLibHelper.java), [`PLibCodecs`](https://github.com/ArcAnc/PulseLib/blob/26.1/src/main/java/com/arcanc/pulselib/util/helpers/PLibCodecs.java), and [`PLibDatabase`](https://github.com/ArcAnc/PulseLib/blob/26.1/src/main/java/com/arcanc/pulselib/util/PLibDatabase.java) are common integration helpers.

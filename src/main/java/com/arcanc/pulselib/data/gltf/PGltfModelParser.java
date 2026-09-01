@@ -46,7 +46,7 @@ public class PGltfModelParser
 				@Override
 				public PAnimationChannelType<Vector3f> channel()
 				{
-					return PLibRegistration.AnimationChannelReg.POSITION.get();
+					return PLibRegistration.AnimationChannelReg.POSITION;
 				}
 
 				@Override
@@ -68,7 +68,7 @@ public class PGltfModelParser
 				@Override
 				public PAnimationChannelType<Quaternionf> channel()
 				{
-					return PLibRegistration.AnimationChannelReg.ROTATION.get();
+					return PLibRegistration.AnimationChannelReg.ROTATION;
 				}
 
 				@Override
@@ -93,7 +93,7 @@ public class PGltfModelParser
 				@Override
 				public PAnimationChannelType<Vector3f> channel()
 				{
-					return PLibRegistration.AnimationChannelReg.SCALE.get();
+					return PLibRegistration.AnimationChannelReg.SCALE;
 				}
 
 				@Override

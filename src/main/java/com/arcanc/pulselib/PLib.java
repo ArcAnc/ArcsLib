@@ -21,8 +21,8 @@ import net.neoforged.fml.loading.FMLLoader;
 @Mod(PLibDatabase.MOD_ID)
 public class PLib
 {
-    public PLib(IEventBus modEventBus, ModContainer modContainer)
-    {
+	public PLib(IEventBus modEventBus, ModContainer modContainer)
+	{
 	    PLibRegistration.init(modEventBus);
 	    
 	    setupEvents(modEventBus);

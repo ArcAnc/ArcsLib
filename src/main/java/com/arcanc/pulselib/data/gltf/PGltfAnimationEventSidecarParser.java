@@ -20,7 +20,6 @@ import com.google.gson.JsonNull;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.mojang.serialization.JsonOps;
-import net.minecraft.core.Holder;
 import net.minecraft.resources.Identifier;
 import org.jetbrains.annotations.Nullable;
 
@@ -107,12 +106,12 @@ public class PGltfAnimationEventSidecarParser
 		if (rawType.isBlank())
 			return null;
 		var id = rawType.indexOf(':') >= 0 ? Identifier.tryParse(rawType) : PLibDatabase.rl(rawType);
-		if (id == null || PLibRegistration.AnimationEventReg.EVENT_TYPE_REGISTRY == null)
+		if (id == null)
 		{
 			PLibDatabase.LOGGER.warn("Unknown GLTF animation event type: {}", rawType);
 			return null;
 		}
-		PAnimationEventType<?> type = PLibRegistration.AnimationEventReg.EVENT_TYPE_REGISTRY.get(id).map(Holder.Reference::value).orElse(null);
+		PAnimationEventType<?> type = PLibRegistration.AnimationEventReg.EVENT_TYPES.get(id).orElse(null);
 		if (type == null)
 		{
 			PLibDatabase.LOGGER.warn("Unregistered GLTF animation event type: {}", id);

@@ -14,6 +14,7 @@ import com.arcanc.pulselib.content.model.PModel;
 import com.arcanc.pulselib.data.PModelLoader;
 import com.arcanc.pulselib.util.PLibDatabase;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
+import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.resources.ResourceManager;
 
@@ -46,6 +47,12 @@ public class PGeckoModelLoader implements PModelLoader
 	public Identifier id()
 	{
 		return ID;
+	}
+
+	@Override
+	public void applyItemTransform(PoseStack poseStack)
+	{
+		poseStack.translate(0.5f, 0.51f, 0.5f);
 	}
 	
 	@Override

@@ -2,7 +2,7 @@
 
 Items need a slightly different setup from entities and block entities. Minecraft creates one `Item` object for the item type, but the player can hold many `ItemStack`s of that type. If animation state lived directly on the item object, every stack would share the same animation.
 
-PulseLib handles this by using [`AnimManagerKey`](https://github.com/ArcAnc/PulseLib/blob/26.1/src/main/java/com/arcanc/pulselib/content/animatable/AnimManagerKey.java) and [`SingletonAnimationManager`](https://github.com/ArcAnc/PulseLib/blob/26.1/src/main/java/com/arcanc/pulselib/content/animatable/singleton/SingletonAnimationManager.java). The item still implements [`PItemAnimatable`](https://github.com/ArcAnc/PulseLib/blob/26.1/src/main/java/com/arcanc/pulselib/content/animatable/PItemAnimatable.java), but the actual manager is resolved per key.
+PulseLib handles this by using [`AnimManagerKey`](https://github.com/ArcAnc/PulseLib/blob/26.1/src/main/java/com/arcanc/pulselib/content/animatable/AnimManagerKey.java) and [`SingletonAnimationManager`](https://github.com/ArcAnc/PulseLib/blob/26.1/src/main/java/com/arcanc/pulselib/content/animatable/singleton/SingletonAnimationManager.java). The item implements [`PAnimatable`](https://github.com/ArcAnc/PulseLib/blob/26.1/src/main/java/com/arcanc/pulselib/content/animatable/PAnimatable.java), while its manager is resolved per key.
 
 ## Item model definition
 
@@ -13,7 +13,7 @@ The old `models/item/<item>.json` file with `"parent": "builtin/entity"` does no
 The important part here is `getAnimationManager`. Use the key passed into the method, not a single field shared by every stack.
 
 ```java
-public class WandItem extends Item implements PItemAnimatable<WandItem> {
+public class WandItem extends Item implements PAnimatable<WandItem> {
     private static final PRawAnimation IDLE = PRawAnimation.begin()
             .thenLoop("idle")
             .build();
@@ -35,12 +35,6 @@ public class WandItem extends Item implements PItemAnimatable<WandItem> {
         });
     }
 
-    @Override
-    public IClientItemExtensions registerClientExtension() {
-        // Add custom item-extension behaviour here if it is needed.
-        // Animated rendering itself is provided by the 26.1 special-model renderer below.
-        return IClientItemExtensions.DEFAULT;
-    }
 }
 ```
 
@@ -111,15 +105,12 @@ Reference it from `assets/examplemod/items/wand.json`:
 
 The `base` model is the normal `assets/examplemod/models/item/wand.json` file that supplies display transforms. PulseLib does not convert a legacy `builtin/entity` JSON into this renderer automatically.
 
-The item extension returned by `registerClientExtension()` is still registered automatically for `PItemAnimatable` items by PulseLib's client setup.
-
 ## Stack-specific state
 
 `AnimManagerKey.of(ItemStack)` uses item id, stack count, and component data. If your item animation should differ by custom data, store it in item components so the key changes. If two stacks have identical key data, they can reuse the same cached manager.
 
 Classes used:
 
-* [`PItemAnimatable`](https://github.com/ArcAnc/PulseLib/blob/26.1/src/main/java/com/arcanc/pulselib/content/animatable/PItemAnimatable.java)
 * [`PItemRenderer`](https://github.com/ArcAnc/PulseLib/blob/26.1/src/main/java/com/arcanc/pulselib/content/renderer/PItemRenderer.java)
 * [`SingletonAnimationManager`](https://github.com/ArcAnc/PulseLib/blob/26.1/src/main/java/com/arcanc/pulselib/content/animatable/singleton/SingletonAnimationManager.java)
 * [`DefaultItemModelData`](https://github.com/ArcAnc/PulseLib/blob/26.1/src/main/java/com/arcanc/pulselib/content/renderer/modelData/DefaultItemModelData.java)

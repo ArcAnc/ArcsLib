@@ -221,7 +221,7 @@ public abstract class PBlockRenderer<T extends BlockEntity & PAnimatable<T>, RS 
 		return inherited;
 	}
 	
-	private void tryRotateToRealRotation(PoseStack poseStack, Direction facing)
+	protected void tryRotateToRealRotation(PoseStack poseStack, Direction facing)
 	{
 		if (facing.getAxis().isHorizontal())
 			poseStack.mulPose(Axis.YP.rotationDegrees(facing.toYRot()));
@@ -229,7 +229,7 @@ public abstract class PBlockRenderer<T extends BlockEntity & PAnimatable<T>, RS 
 			poseStack.mulPose(Axis.XP.rotationDegrees(90 * facing.getUnitVec3i().getY()));
 	}
 	
-	private Direction getAnimatableFacing(RS renderState)
+	protected Direction getAnimatableFacing(RS renderState)
 	{
 		BlockState blockState = ((BlockEntityRenderStateAccessor)renderState).pulselib$getBlockState();
 		Direction dir = Direction.NORTH;
