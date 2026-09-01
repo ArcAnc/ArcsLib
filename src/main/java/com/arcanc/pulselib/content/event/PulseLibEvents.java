@@ -12,8 +12,12 @@ package com.arcanc.pulselib.content.event;
 
 import com.arcanc.pulselib.util.attachments.PLivingAttachmentDefinition;
 import com.arcanc.pulselib.util.attachments.PLivingAttachments;
+import com.arcanc.pulselib.content.model.animation.PAnimationChannelType;
+import com.arcanc.pulselib.content.model.animation.PAnimationEventType;
+import com.arcanc.pulselib.content.model.deformer.PMeshDeformer;
 import com.arcanc.pulselib.content.player.animation.PPlayerAnimationDefinition;
 import com.arcanc.pulselib.content.player.animation.PPlayerAnimations;
+import com.arcanc.pulselib.content.registration.PLibRegistration;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.ItemLike;
 import net.neoforged.bus.api.Event;
@@ -25,6 +29,24 @@ import java.util.Set;
 
 public class PulseLibEvents
 {
+	public static class TypeRegistrationEvent extends Event implements IModBusEvent
+	{
+		public <T> PAnimationChannelType<T> registerAnimationChannel(PAnimationChannelType<T> type)
+		{
+			return PLibRegistration.AnimationChannelReg.CHANNEL_TYPES.register(type.id(), type);
+		}
+
+		public <T> PAnimationEventType<T> registerAnimationEvent(PAnimationEventType<T> type)
+		{
+			return PLibRegistration.AnimationEventReg.EVENT_TYPES.register(type.id(), type);
+		}
+
+		public <T> PMeshDeformer<T> registerMeshDeformer(PMeshDeformer<T> type)
+		{
+			return PLibRegistration.MeshDeformerReg.DEFORMERS.register(type.id(), type);
+		}
+	}
+
 	public static class RegisterTextureEvent extends Event implements IModBusEvent
 	{
 		private final Set<ResourceLocation> registeredTextures;

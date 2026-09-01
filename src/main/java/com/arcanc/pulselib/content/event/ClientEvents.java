@@ -49,6 +49,8 @@ public class ClientEvents
 	
 	public static void registerClientEvents(final IEventBus modEventBus)
 	{
+		ModLoader.postEvent(new PulseLibEvents.TypeRegistrationEvent());
+
 		//modEventBus.addListener(ClientEvents :: registerRenderers);
 		//modEventBus.addListener(ClientEvents :: registerTextures);
 		PAttachmentAnchorResolvers.init(modEventBus);

@@ -106,12 +106,12 @@ public class PGltfAnimationEventSidecarParser
 		if (rawType.isBlank())
 			return null;
 		var id = rawType.indexOf(':') >= 0 ? ResourceLocation.tryParse(rawType) : PLibDatabase.rl(rawType);
-		if (id == null || PLibRegistration.AnimationEventReg.EVENT_TYPE_REGISTRY == null)
+		if (id == null)
 		{
 			PLibDatabase.LOGGER.warn("Unknown GLTF animation event type: {}", rawType);
 			return null;
 		}
-		PAnimationEventType<?> type = PLibRegistration.AnimationEventReg.EVENT_TYPE_REGISTRY.get(id);
+		PAnimationEventType<?> type = PLibRegistration.AnimationEventReg.EVENT_TYPES.get(id).orElse(null);
 		if (type == null)
 		{
 			PLibDatabase.LOGGER.warn("Unregistered GLTF animation event type: {}", id);

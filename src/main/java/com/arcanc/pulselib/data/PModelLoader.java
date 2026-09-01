@@ -11,6 +11,8 @@ package com.arcanc.pulselib.data;
 
 
 import com.arcanc.pulselib.content.model.PModel;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.math.Axis;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
 
@@ -21,6 +23,12 @@ import java.util.function.BiConsumer;
 public interface PModelLoader
 {
 	ResourceLocation id();
+
+	default void applyItemTransform(PoseStack poseStack)
+	{
+		poseStack.translate(0.5f, 0, 0.5f);
+		poseStack.mulPose(Axis.YP.rotationDegrees(180));
+	}
 	
 	boolean supports(ResourceLocation modelPath);
 	

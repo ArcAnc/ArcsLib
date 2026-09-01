@@ -19,10 +19,8 @@ import com.arcanc.pulselib.content.registration.block.block_entity.TestBlockEnti
 import com.arcanc.pulselib.content.registration.entity.TestEntity;
 import com.arcanc.pulselib.content.registration.item.TestBlockItem;
 import com.arcanc.pulselib.util.PLibDatabase;
-import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.item.Item;
@@ -43,80 +41,54 @@ public class PLibRegistration
 {
 	public static class AnimationChannelReg
 	{
-		public static final ResourceKey<Registry<PAnimationChannelType<?>>> REGISTRY_KEY =
-				ResourceKey.createRegistryKey(PLibDatabase.rl("animation_channel_type"));
-		public static final DeferredRegister<PAnimationChannelType<?>> CHANNEL_TYPES =
-				DeferredRegister.create(REGISTRY_KEY, PLibDatabase.MOD_ID);
-		public static Registry<PAnimationChannelType<?>> CHANNEL_TYPE_REGISTRY;
+		public static final PRegistry<PAnimationChannelType<?>> CHANNEL_TYPES = new PRegistry<>();
 
-		public static final DeferredHolder<PAnimationChannelType<?>, PAnimationChannelType<Vector3f>> POSITION =
-				CHANNEL_TYPES.register("position", id -> new PAnimationChannel.Vector3fChannelType(id, new Vector3f(), false));
-		public static final DeferredHolder<PAnimationChannelType<?>, PAnimationChannelType<Quaternionf>> ROTATION =
-				CHANNEL_TYPES.register("rotation", PAnimationChannel.QuaternionChannelType :: new);
-		public static final DeferredHolder<PAnimationChannelType<?>, PAnimationChannelType<Vector3f>> SCALE =
-				CHANNEL_TYPES.register("scale", id -> new PAnimationChannel.Vector3fChannelType(id, new Vector3f(1f), true));
+		public static final PAnimationChannelType<Vector3f> POSITION = CHANNEL_TYPES.register(
+				PLibDatabase.rl("position"), new PAnimationChannel.Vector3fChannelType(PLibDatabase.rl("position"), new Vector3f(), false));
+		public static final PAnimationChannelType<Quaternionf> ROTATION = CHANNEL_TYPES.register(
+				PLibDatabase.rl("rotation"), new PAnimationChannel.QuaternionChannelType(PLibDatabase.rl("rotation")));
+		public static final PAnimationChannelType<Vector3f> SCALE = CHANNEL_TYPES.register(
+				PLibDatabase.rl("scale"), new PAnimationChannel.Vector3fChannelType(PLibDatabase.rl("scale"), new Vector3f(1f), true));
 
-		private static void init(@NotNull final IEventBus bus)
+		private static void init()
 		{
-			CHANNEL_TYPE_REGISTRY = CHANNEL_TYPES.makeRegistry(builder ->
-					builder.maxId(Integer.MAX_VALUE - 1).sync(false));
-			CHANNEL_TYPES.register(bus);
 		}
 	}
 
 	public static class AnimationEventReg
 	{
-		public static final ResourceKey<Registry<PAnimationEventType<?>>> REGISTRY_KEY =
-				ResourceKey.createRegistryKey(PLibDatabase.rl("animation_event_type"));
-		public static final DeferredRegister<PAnimationEventType<?>> EVENT_TYPES =
-				DeferredRegister.create(REGISTRY_KEY, PLibDatabase.MOD_ID);
-		public static Registry<PAnimationEventType<?>> EVENT_TYPE_REGISTRY;
+		public static final PRegistry<PAnimationEventType<?>> EVENT_TYPES = new PRegistry<>();
 
-		public static final DeferredHolder<PAnimationEventType<?>, PAnimationEventType<PAnimationEventTypes.SoundData>> SOUND =
-				EVENT_TYPES.register("sound", () -> PAnimationEventTypes.SOUND);
-		public static final DeferredHolder<PAnimationEventType<?>, PAnimationEventType<PAnimationEventTypes.ParticleData>> PARTICLE =
-				EVENT_TYPES.register("particle", () -> PAnimationEventTypes.PARTICLE);
-		public static final DeferredHolder<PAnimationEventType<?>, PAnimationEventType<PAnimationEventTypes.CameraShakeData>> CAMERA_SHAKE =
-				EVENT_TYPES.register("camera_shake", () -> PAnimationEventTypes.CAMERA_SHAKE);
-		public static final DeferredHolder<PAnimationEventType<?>, PAnimationEventType<PAnimationEventTypes.LocatorCallbackData>> LOCATOR_CALLBACK =
-				EVENT_TYPES.register("locator_callback", () -> PAnimationEventTypes.LOCATOR_CALLBACK);
-		public static final DeferredHolder<PAnimationEventType<?>, PAnimationEventType<PAnimationEventTypes.AnimationParameterData>> ANIMATION_PARAMETER =
-				EVENT_TYPES.register("animation_parameter", () -> PAnimationEventTypes.ANIMATION_PARAMETER);
+		public static final PAnimationEventType<PAnimationEventTypes.SoundData> SOUND =
+				EVENT_TYPES.register(PAnimationEventTypes.SOUND.id(), PAnimationEventTypes.SOUND);
+		public static final PAnimationEventType<PAnimationEventTypes.ParticleData> PARTICLE =
+				EVENT_TYPES.register(PAnimationEventTypes.PARTICLE.id(), PAnimationEventTypes.PARTICLE);
+		public static final PAnimationEventType<PAnimationEventTypes.CameraShakeData> CAMERA_SHAKE =
+				EVENT_TYPES.register(PAnimationEventTypes.CAMERA_SHAKE.id(), PAnimationEventTypes.CAMERA_SHAKE);
+		public static final PAnimationEventType<PAnimationEventTypes.LocatorCallbackData> LOCATOR_CALLBACK =
+				EVENT_TYPES.register(PAnimationEventTypes.LOCATOR_CALLBACK.id(), PAnimationEventTypes.LOCATOR_CALLBACK);
+		public static final PAnimationEventType<PAnimationEventTypes.AnimationParameterData> ANIMATION_PARAMETER =
+				EVENT_TYPES.register(PAnimationEventTypes.ANIMATION_PARAMETER.id(), PAnimationEventTypes.ANIMATION_PARAMETER);
 
-		private static void init(@NotNull final IEventBus bus)
+		private static void init()
 		{
-			EVENT_TYPE_REGISTRY = EVENT_TYPES.makeRegistry(builder -> builder.maxId(Integer.MAX_VALUE - 1).sync(false));
-			EVENT_TYPES.register(bus);
 		}
 	}
 	
 	public static class MeshDeformerReg
 	{
-		public static final ResourceKey<Registry<PMeshDeformer<?>>> REGISTRY_KEY =
-				ResourceKey.createRegistryKey(PLibDatabase.rl("mesh_deformer"));
-		public static final DeferredRegister<PMeshDeformer<?>> DEFORMERS =
-				DeferredRegister.create(REGISTRY_KEY, PLibDatabase.MOD_ID);
-		public static Registry<PMeshDeformer<?>> REGISTRY;
+		public static final PRegistry<PMeshDeformer<?>> DEFORMERS = new PRegistry<>();
 
-		public static final DeferredHolder<PMeshDeformer<?>, PMeshDeformer<PBendDefinition>> BEND =
-				DEFORMERS.register("bend", () -> PBendDeformer.INSTANCE);
-		public static final DeferredHolder<PMeshDeformer<?>, PMeshDeformer<PHingeDefinition>> HINGE =
-				DEFORMERS.register("hinge", () -> PHingeDeformer.INSTANCE);
-		public static final DeferredHolder<PMeshDeformer<?>, PMeshDeformer<PTwistDefinition>> TWIST =
-				DEFORMERS.register("twist", () -> PTwistDeformer.INSTANCE);
-		public static final DeferredHolder<PMeshDeformer<?>, PMeshDeformer<PStretchDefinition>> STRETCH =
-				DEFORMERS.register("stretch", () -> PStretchDeformer.INSTANCE);
-		public static final DeferredHolder<PMeshDeformer<?>, PMeshDeformer<PSquashDefinition>> SQUASH =
-				DEFORMERS.register("squash", () -> PSquashDeformer.INSTANCE);
-		public static final DeferredHolder<PMeshDeformer<?>, PMeshDeformer<PTaperDefinition>> TAPER =
-				DEFORMERS.register("taper", () -> PTaperDeformer.INSTANCE);
-		public static final DeferredHolder<PMeshDeformer<?>, PMeshDeformer<PWaveDefinition>> WAVE =
-				DEFORMERS.register("wave", () -> PWaveDeformer.INSTANCE);
+		public static final PMeshDeformer<PBendDefinition> BEND = DEFORMERS.register(PBendDeformer.INSTANCE.id(), PBendDeformer.INSTANCE);
+		public static final PMeshDeformer<PHingeDefinition> HINGE = DEFORMERS.register(PHingeDeformer.INSTANCE.id(), PHingeDeformer.INSTANCE);
+		public static final PMeshDeformer<PTwistDefinition> TWIST = DEFORMERS.register(PTwistDeformer.INSTANCE.id(), PTwistDeformer.INSTANCE);
+		public static final PMeshDeformer<PStretchDefinition> STRETCH = DEFORMERS.register(PStretchDeformer.INSTANCE.id(), PStretchDeformer.INSTANCE);
+		public static final PMeshDeformer<PSquashDefinition> SQUASH = DEFORMERS.register(PSquashDeformer.INSTANCE.id(), PSquashDeformer.INSTANCE);
+		public static final PMeshDeformer<PTaperDefinition> TAPER = DEFORMERS.register(PTaperDeformer.INSTANCE.id(), PTaperDeformer.INSTANCE);
+		public static final PMeshDeformer<PWaveDefinition> WAVE = DEFORMERS.register(PWaveDeformer.INSTANCE.id(), PWaveDeformer.INSTANCE);
 
-		private static void init(@NotNull final IEventBus bus)
+		private static void init()
 		{
-			REGISTRY = DEFORMERS.makeRegistry(builder -> builder.maxId(Integer.MAX_VALUE - 1).sync(false));
-			DEFORMERS.register(bus);
 		}
 	}
 
@@ -197,9 +169,9 @@ public class PLibRegistration
 	
 	public static void init(@NotNull final IEventBus bus)
 	{
-		AnimationChannelReg.init(bus);
-		AnimationEventReg.init(bus);
-		MeshDeformerReg.init(bus);
+		AnimationChannelReg.init();
+		AnimationEventReg.init();
+		MeshDeformerReg.init();
 		
 		/*EntityTypeReg.init(bus);
 		BlockReg.init(bus);

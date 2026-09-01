@@ -16,24 +16,17 @@ import com.arcanc.pulselib.content.animatable.PAnimationController;
 import com.arcanc.pulselib.content.animatable.PAnimationManager;
 import com.arcanc.pulselib.content.animatable.instance.InstanceAnimationManager;
 import com.arcanc.pulselib.content.model.animation.PPose;
-import com.arcanc.pulselib.content.model.baked.PBakedBone;
-import com.arcanc.pulselib.content.model.baked.PBakedMesh;
-import com.arcanc.pulselib.content.model.baked.PBakedModel;
-import com.arcanc.pulselib.content.model.baked.PMeshRenderContext;
-import com.arcanc.pulselib.content.model.baked.PMeshRenderMaterial;
-import com.arcanc.pulselib.content.model.baked.PDeformedMeshBuffers;
-import com.arcanc.pulselib.content.model.baked.PGpuDeformedMeshBuffers;
+import com.arcanc.pulselib.content.model.baked.*;
 import com.arcanc.pulselib.content.model.deformer.gpu.PGpuDeformerBuffers;
+import com.arcanc.pulselib.content.renderer.modelData.PModelData;
 import com.arcanc.pulselib.content.renderer.plan.PDynamicGeometry;
 import com.arcanc.pulselib.content.renderer.plan.PInstanceHeader;
-import com.arcanc.pulselib.content.renderer.modelData.PModelData;
 import com.arcanc.pulselib.data.gecko.MolangParser;
 import com.arcanc.pulselib.util.PRenderTypes;
 import com.arcanc.pulselib.util.PTextureCache;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
-import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderStateShard;
 import net.minecraft.client.renderer.RenderType;
@@ -172,7 +165,7 @@ public abstract class PBlockRenderer<T extends BlockEntity & PAnimatable<T>>
 	{
 	}
 	
-	private void tryRotateToRealRotation(PoseStack poseStack, Direction facing)
+	protected void tryRotateToRealRotation(PoseStack poseStack, Direction facing)
 	{
 		if (facing.getAxis().isHorizontal())
 			poseStack.mulPose(Axis.YP.rotationDegrees(facing.toYRot()));
@@ -180,7 +173,7 @@ public abstract class PBlockRenderer<T extends BlockEntity & PAnimatable<T>>
 			poseStack.mulPose(Axis.XP.rotationDegrees(90 * facing.getNormal().getY()));
 	}
 	
-	private Direction getAnimatableFacing(T animatable)
+	protected Direction getAnimatableFacing(T animatable)
 	{
 		BlockState blockState = animatable.getBlockState();
 		Direction dir = Direction.NORTH;
