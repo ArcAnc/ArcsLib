@@ -80,9 +80,9 @@ public record PAnimation(String name,
 		Vector3f accumulatedRotation = accumulatedFrame == null ? new Vector3f() :
 				accumulatedFrame.rotation().getEulerAnglesXYZ(new Vector3f()).mul((float) (180d / Math.PI));
 
-		Vector3f translation = sample(boneAnimation, PLibRegistration.AnimationChannelReg.POSITION.get(), time, context, accumulatedTranslation);
-		Vector3f scale = sample(boneAnimation, PLibRegistration.AnimationChannelReg.SCALE.get(), time, context, accumulatedScale);
-		Quaternionf rotation = sample(boneAnimation, PLibRegistration.AnimationChannelReg.ROTATION.get(), time, context, accumulatedRotation);
+		Vector3f translation = sample(boneAnimation, PLibRegistration.AnimationChannelReg.POSITION, time, context, accumulatedTranslation);
+		Vector3f scale = sample(boneAnimation, PLibRegistration.AnimationChannelReg.SCALE, time, context, accumulatedScale);
+		Quaternionf rotation = sample(boneAnimation, PLibRegistration.AnimationChannelReg.ROTATION, time, context, accumulatedRotation);
 		if (translation == null && scale == null && rotation == null)
 			return null;
 		return new BoneFrame(

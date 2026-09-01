@@ -152,19 +152,19 @@ public final class PAnimationPoseResolver<T extends PAnimatable<T>>
 			if (frame == null)
 				continue;
 
-			if (boneAnimation.hasChannel(PLibRegistration.AnimationChannelReg.POSITION.get()))
+			if (boneAnimation.hasChannel(PLibRegistration.AnimationChannelReg.POSITION))
 			{
 				translation.add(frame.translation());
 				animationTranslation.add(frame.translation());
 				hasTranslation = true;
 			}
-			if (boneAnimation.hasChannel(PLibRegistration.AnimationChannelReg.ROTATION.get()))
+			if (boneAnimation.hasChannel(PLibRegistration.AnimationChannelReg.ROTATION))
 			{
 				rotation.premul(frame.rotation());
 				animationRotation.premul(frame.rotation());
 				hasRotation = true;
 			}
-			if (boneAnimation.hasChannel(PLibRegistration.AnimationChannelReg.SCALE.get()))
+			if (boneAnimation.hasChannel(PLibRegistration.AnimationChannelReg.SCALE))
 			{
 				scale.mul(frame.scale());
 				animationScale.mul(frame.scale());

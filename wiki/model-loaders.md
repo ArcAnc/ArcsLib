@@ -57,6 +57,20 @@ The parser is [`PGeckoModelParser`](https://github.com/ArcAnc/PulseLib/blob/mast
 
 Gecko animation vector components may be Molang expressions. See [Molang animations](molang-animations.md) for the supported language, context values, renderer hooks, and persistence rules.
 
+## Item transforms
+
+`PItemRenderer` obtains the item's model loader from `PModelData` and calls `PModelLoader.applyItemTransform(...)` before drawing. The default transform is the glTF convention: translate by `(0.5, 0, 0.5)` and rotate 180 degrees around Y. The Gecko loader instead translates by `(0.5, 0.51, 0.5)` without that rotation, matching GeckoLib item coordinates.
+
+Override this hook for a custom format when its item coordinate system differs:
+
+```java
+@Override
+public void applyItemTransform(PoseStack poseStack) {
+    poseStack.translate(0.5f, 0.0f, 0.5f);
+    // Apply this format's item-space rotation and offsets here.
+}
+```
+
 ## Custom loader
 
 ```java

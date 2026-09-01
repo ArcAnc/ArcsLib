@@ -53,7 +53,7 @@ public class PGeckoModelParser
 				@Override
 				public PAnimationChannelType<Vector3f> channel()
 				{
-					return PLibRegistration.AnimationChannelReg.POSITION.get();
+					return PLibRegistration.AnimationChannelReg.POSITION;
 				}
 
 				@Override
@@ -73,7 +73,7 @@ public class PGeckoModelParser
 				@Override
 				public PAnimationChannelType<Quaternionf> channel()
 				{
-					return PLibRegistration.AnimationChannelReg.ROTATION.get();
+					return PLibRegistration.AnimationChannelReg.ROTATION;
 				}
 
 				@Override
@@ -93,7 +93,7 @@ public class PGeckoModelParser
 				@Override
 				public PAnimationChannelType<Vector3f> channel()
 				{
-					return PLibRegistration.AnimationChannelReg.SCALE.get();
+					return PLibRegistration.AnimationChannelReg.SCALE;
 				}
 
 				@Override
@@ -193,9 +193,9 @@ public class PGeckoModelParser
 					JsonElement positionNode = member(boneEntry.getValue(), "position");
 					if (isMissing(positionNode))
 						positionNode = member(boneEntry.getValue(), "translation");
-					maxTime = Math.max(maxTime, parseAnimationChannel(positionNode, "position", PLibRegistration.AnimationChannelReg.POSITION.get(), tracks));
-					maxTime = Math.max(maxTime, parseAnimationChannel(member(boneEntry.getValue(), "rotation"), "rotation", PLibRegistration.AnimationChannelReg.ROTATION.get(), tracks));
-					maxTime = Math.max(maxTime, parseAnimationChannel(member(boneEntry.getValue(), "scale"), "scale", PLibRegistration.AnimationChannelReg.SCALE.get(), tracks));
+					maxTime = Math.max(maxTime, parseAnimationChannel(positionNode, "position", PLibRegistration.AnimationChannelReg.POSITION, tracks));
+					maxTime = Math.max(maxTime, parseAnimationChannel(member(boneEntry.getValue(), "rotation"), "rotation", PLibRegistration.AnimationChannelReg.ROTATION, tracks));
+					maxTime = Math.max(maxTime, parseAnimationChannel(member(boneEntry.getValue(), "scale"), "scale", PLibRegistration.AnimationChannelReg.SCALE, tracks));
 					
 					if (! tracks.isEmpty())
 						boneAnimations.put(bone.name(), new PBoneAnimation(bone.uuid(), tracks));
@@ -441,10 +441,10 @@ public class PGeckoModelParser
 	
 	private static Object channelValue(JsonElement node, PAnimationChannelType<?> channel)
 	{
-		Vector3f vector = vector3f(node, channel == PLibRegistration.AnimationChannelReg.SCALE.get() ? new Vector3f(1f, 1f, 1f) : new Vector3f());
-		if (channel == PLibRegistration.AnimationChannelReg.ROTATION.get())
+		Vector3f vector = vector3f(node, channel == PLibRegistration.AnimationChannelReg.SCALE ? new Vector3f(1f, 1f, 1f) : new Vector3f());
+		if (channel == PLibRegistration.AnimationChannelReg.ROTATION)
 			return eulerDegreesToQuaternion(vector);
-		if (channel == PLibRegistration.AnimationChannelReg.POSITION.get())
+		if (channel == PLibRegistration.AnimationChannelReg.POSITION)
 			return scale(vector);
 		return vector;
 	}

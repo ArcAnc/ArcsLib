@@ -23,11 +23,13 @@ import com.arcanc.pulselib.content.model.baked.PMeshRenderMaterial;
 import com.arcanc.pulselib.content.model.baked.PMeshRenderResolver;
 import com.arcanc.pulselib.content.renderer.base.PItemRenderState;
 import com.arcanc.pulselib.content.renderer.modelData.PModelData;
+import com.arcanc.pulselib.data.PModelLoader;
 import com.arcanc.pulselib.data.gecko.MolangParser;
+import com.arcanc.pulselib.data.gltf.PGltfModelLoader;
+import com.arcanc.pulselib.util.PModelCache;
 import com.arcanc.pulselib.util.PRenderTypes;
 import com.arcanc.pulselib.util.PTextureCache;
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.math.Axis;
 import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.rendertype.RenderType;
 import net.minecraft.client.renderer.special.SpecialModelRenderer;
@@ -73,8 +75,9 @@ public abstract class PItemRenderer<T extends Item & PAnimatable<T>, RS extends 
 			return;
 		renderState.extractAdditionalData(lightCoords,  overlayCoords, hasFoil, outlineColor);
 		poseStack.pushPose();
-		poseStack.translate(0.5f, 0, 0.5f);
-		poseStack.mulPose(Axis.YP.rotationDegrees(180));
+		PModelData modelData = getModelData(renderState);
+		PModelLoader modelLoader = PModelCache.getModelLoader(modelData.getModelFormat()).orElse(PGltfModelLoader.INSTANCE);
+		modelLoader.applyItemTransform(poseStack);
 		
 		CameraRenderState cameraRenderState = new CameraRenderState();
 		preSubmit(poseStack, renderState, cameraRenderState, submitNodeCollector);

@@ -10,7 +10,6 @@
 package com.arcanc.pulselib.content.event;
 
 
-import com.arcanc.pulselib.content.animatable.PItemAnimatable;
 import com.arcanc.pulselib.content.animatable.PLibAnimationTicker;
 import com.arcanc.pulselib.content.animatable.instance.InstanceAnimationManager;
 import com.arcanc.pulselib.content.animatable.singleton.SingletonAnimationManager;
@@ -45,6 +44,8 @@ public class ClientEvents
 	
 	public static void registerClientEvents(final IEventBus modEventBus)
 	{
+		ModLoader.postEvent(new PulseLibEvents.TypeRegistrationEvent());
+
 		//modEventBus.addListener(ClientEvents :: registerRenderers);
 		//modEventBus.addListener(ClientEvents :: registerCustomTextures);
 		//modEventBus.addListener(ClientEvents :: registerSpecialModels);
@@ -118,7 +119,7 @@ public class ClientEvents
 		ensurePulseClientContentRegistered();
 		
 		BuiltInRegistries.ITEM.stream().
-				filter(item -> item instanceof PItemAnimatable<?> || PLivingAttachments.contains(item)).
+				filter(PLivingAttachments :: contains).
 				forEach(item -> registerClientExtensionWithItem(event, item));
 	}
 	
@@ -127,10 +128,7 @@ public class ClientEvents
 		if (event.isItemRegistered(item))
 			return;
 		
-		IClientItemExtensions base = item instanceof PItemAnimatable<?> animatable ?
-				animatable.registerClientExtension() :
-				IClientItemExtensions.DEFAULT;
-		IClientItemExtensions extension = PArmorClientExtensions.buildFor(item, base);
+		IClientItemExtensions extension = PArmorClientExtensions.buildFor(item);
 		
 		if (extension != IClientItemExtensions.DEFAULT)
 			event.registerItem(extension, item);

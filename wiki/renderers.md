@@ -45,9 +45,11 @@ public static void registerRenderers(EntityRenderersEvent.RegisterRenderers even
 }
 ```
 
+Subclasses can override the protected `getAnimatableFacing(...)` and `tryRotateToRealRotation(...)` hooks when the block's facing property or model-space orientation differs from PulseLib's default.
+
 ## Item renderer
 
-Use [`PItemRenderer`](https://github.com/ArcAnc/PulseLib/blob/master/src/main/java/com/arcanc/pulselib/content/renderer/PItemRenderer.java) when the item model needs real animation instead of a static baked item JSON. The item must implement [`PAnimatable`](https://github.com/ArcAnc/PulseLib/blob/master/src/main/java/com/arcanc/pulselib/content/animatable/PAnimatable.java). Implement [`PItemAnimatable`](https://github.com/ArcAnc/PulseLib/blob/master/src/main/java/com/arcanc/pulselib/content/animatable/PItemAnimatable.java) as well when it supplies an `IClientItemExtensions` instance that PulseLib should register automatically.
+Use [`PItemRenderer`](https://github.com/ArcAnc/PulseLib/blob/master/src/main/java/com/arcanc/pulselib/content/renderer/PItemRenderer.java) when the item model needs real animation instead of a static baked item JSON. The item must implement [`PAnimatable`](https://github.com/ArcAnc/PulseLib/blob/master/src/main/java/com/arcanc/pulselib/content/animatable/PAnimatable.java). `PItemAnimatable` and its automatic client-extension registration are obsolete.
 
 ```java
 public class WandRenderer extends PItemRenderer<WandItem, WandRenderState> {

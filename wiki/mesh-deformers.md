@@ -82,7 +82,7 @@ PPlayerAnimationDefinition.builder(model)
 
 ## Custom deformer types
 
-Implement `PMeshDeformer<D>` for a new operation. `codec()` describes a serializable definition and `prepare(...)` creates one or more efficient `PPreparedDeformer` operations. Register the type in the `pulselib:mesh_deformer` registry from your mod.
+Implement `PMeshDeformer<D>` for a new operation. `codec()` describes a serializable definition and `prepare(...)` creates one or more efficient `PPreparedDeformer` operations. Register the type through `PulseLibEvents.TypeRegistrationEvent` on the client mod event bus; PulseLib owns the internal registry.
 
 ```java
 public final class MyDeformer implements PMeshDeformer<MyDefinition> {
@@ -97,5 +97,19 @@ public final class MyDeformer implements PMeshDeformer<MyDefinition> {
     }
 }
 ```
+
+```java
+@Mod.EventBusSubscriber(modid = ExampleMod.MOD_ID,
+        bus = Mod.EventBusSubscriber.Bus.MOD,
+        value = Dist.CLIENT)
+public final class ExampleClientEvents {
+    @SubscribeEvent
+    public static void registerTypes(PulseLibEvents.TypeRegistrationEvent event) {
+        event.registerMeshDeformer(MyDeformers.INSTANCE);
+    }
+}
+```
+
+Use the same event's `registerAnimationChannel(...)` and `registerAnimationEvent(...)` methods for custom animation channel and event types. Registration rejects duplicate identifiers.
 
 Do not retain mutable render state inside a prepared operation. Read changing values through `PDeformerValueSource` instead.
