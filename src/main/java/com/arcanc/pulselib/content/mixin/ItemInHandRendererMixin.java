@@ -51,17 +51,24 @@ public abstract class ItemInHandRendererMixin
 		PPlayerPart playerPart = arm == HumanoidArm.RIGHT ? PPlayerPart.RIGHT_ARM : PPlayerPart.LEFT_ARM;
 		if (!PPlayerAnimations.isPartAnimating(player, playerPart, partialTick))
 			return;
-
-		((ItemInHandRendererAccessor)this).pulselib$renderPlayerArm(
-				poseStack,
-				submitNodeCollector,
-				packedLight,
-				equippedProgress,
-				swingProgress,
-				arm);
+		poseStack.pushPose();
+		try
+		{
+			((ItemInHandRendererAccessor)this).pulselib$renderPlayerArm(
+					poseStack,
+					submitNodeCollector,
+					packedLight,
+					equippedProgress,
+					swingProgress,
+					arm);
+		}
+		finally
+		{
+			poseStack.popPose();
+		}
 	}
 
-	@ModifyVariable(method = "renderArmWithItem", at = @At(value = "STORE"), ordinal = 0)
+	@ModifyVariable (method = "renderArmWithItem", at = @At (value = "STORE"), name = "isMainHand")
 	private boolean pulselib$renderAnimatedOffHand(boolean renderMainHand,
 	                                               AbstractClientPlayer player,
 	                                               float partialTick,
@@ -77,7 +84,7 @@ public abstract class ItemInHandRendererMixin
 		return PPlayerAnimations.isPartAnimating(player, offHandPart, partialTick);
 	}
 
-	@ModifyVariable(method = "renderArmWithItem", at = @At(value = "STORE"), ordinal = 0)
+	@ModifyVariable (method = "renderArmWithItem", at = @At (value = "STORE"), name = "arm")
 	private HumanoidArm pulselib$keepPhysicalArm(HumanoidArm arm,
 	                                             AbstractClientPlayer player,
 	                                             float partialTick,
